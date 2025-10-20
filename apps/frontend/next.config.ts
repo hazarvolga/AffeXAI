@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:9005/api/:path*',
+        destination: 'http://localhost:9006/api/:path*',
       },
     ];
   },
@@ -110,19 +110,19 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: '**.localhost',
-        port: '9005',
+        port: '9006',
         pathname: '/**',
       },
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '9005',
+        port: '9006',
         pathname: '/**',
       },
       {
         protocol: 'http',
         hostname: '127.0.0.1',
-        port: '9005',
+        port: '9006',
         pathname: '/**',
       }
     ],

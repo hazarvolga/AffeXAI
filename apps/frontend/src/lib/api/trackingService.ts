@@ -94,7 +94,7 @@ class TrackingService {
    * Generate tracking pixel URL
    */
   generatePixelUrl(trackingId: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
     return `${baseUrl}/api/email-marketing/track/open/${trackingId}`;
   }
 
@@ -102,7 +102,7 @@ class TrackingService {
    * Generate click tracking URL
    */
   generateClickUrl(trackingId: string, originalUrl: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
     const encodedUrl = encodeURIComponent(originalUrl);
     return `${baseUrl}/api/email-marketing/track/click/${trackingId}?url=${encodedUrl}`;
   }

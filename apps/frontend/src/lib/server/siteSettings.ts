@@ -16,7 +16,7 @@ export async function getEmailLogoUrl(isDarkMode: boolean = false): Promise<stri
       // Try to get the media URL from the media service
       try {
         const media = await mediaService.getMediaById(logoId);
-        return `http://localhost:9005${media.url}`;
+        return `http://localhost:9006${media.url}`;
       } catch (mediaError) {
         console.error('Error fetching media:', mediaError);
         // Fall through to direct URL fallback

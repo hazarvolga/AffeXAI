@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body;
 
     // Call backend API
-    const response = await fetch('http://localhost:9005/api/auth/login', {
+    const response = await fetch('http://localhost:9006/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

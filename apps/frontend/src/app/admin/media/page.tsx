@@ -396,7 +396,7 @@ export default function MediaManagementPage() {
                       {media.type === 'image' ? (
                         <div className="relative h-16 w-16 rounded-md overflow-hidden">
                           <Image
-                            src={`http://localhost:9005${media.url}`}
+                            src={`http://localhost:9006${media.url}`}
                             alt={media.altText || media.originalName}
                             fill
                             className="object-cover"
@@ -462,7 +462,7 @@ export default function MediaManagementPage() {
                 {selectedMedia.type === 'image' ? (
                   <div className="relative h-32 w-32 rounded-md overflow-hidden">
                     <Image
-                      src={`http://localhost:9005${selectedMedia.url}`}
+                      src={`http://localhost:9006${selectedMedia.url}`}
                       alt={selectedMedia.altText || selectedMedia.originalName}
                       fill
                       className="object-cover"

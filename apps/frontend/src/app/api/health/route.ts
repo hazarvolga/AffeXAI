@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     // Try to connect to the backend API
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005/api';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
     
     // Return health status
     return NextResponse.json({

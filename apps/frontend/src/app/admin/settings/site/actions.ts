@@ -27,7 +27,7 @@ export type SaveSettingsState = {
 async function updateBackendSettings(settings: any) {
   try {
     console.log('Sending settings to backend:', JSON.stringify(settings, null, 2));
-    const response = await fetch('http://localhost:9005/api/settings/site', {
+    const response = await fetch('http://localhost:9006/api/settings/site', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

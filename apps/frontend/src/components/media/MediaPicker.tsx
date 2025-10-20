@@ -180,7 +180,7 @@ export default function MediaPicker({ value, onChange, placeholder = "Medya seç
                     <div className="relative h-6 w-6 rounded overflow-hidden">
                       <Image
                         src={selectedMedia.url.startsWith('/uploads/') 
-                          ? `http://localhost:9005${selectedMedia.url}`
+                          ? `http://localhost:9006${selectedMedia.url}`
                           : selectedMedia.url}
                         alt={selectedMedia.altText || selectedMedia.originalName}
                         width={24}
@@ -286,7 +286,7 @@ export default function MediaPicker({ value, onChange, placeholder = "Medya seç
                         {media.type === 'image' && media.url ? (
                           <Image
                             src={media.url.startsWith('/uploads/') 
-                              ? `http://localhost:9005${media.url}`
+                              ? `http://localhost:9006${media.url}`
                               : media.url}
                             alt={media.altText || media.originalName}
                             width={200}

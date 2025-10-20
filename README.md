@@ -30,11 +30,30 @@ Affexai/
 cd Affexai
 npm install
 
-# Start infrastructure services
+# Start infrastructure services (PostgreSQL, Redis, MinIO)
 npm run docker:up
 
-# Start development servers
-npm run dev
+# Start development servers (RECOMMENDED - Safe startup with port cleanup)
+npm start
+# OR
+./start-dev.sh
+
+# Alternative: Start services separately
+npm run dev:backend   # Backend only
+npm run dev:frontend  # Frontend only
+npm run dev           # Both (parallel, may have port conflicts)
+```
+
+### Stopping Services
+
+```bash
+# Stop development servers (keeps Docker running)
+npm stop
+# OR
+./stop-dev.sh
+
+# Stop Docker services
+npm run docker:down
 ```
 
 ### Services

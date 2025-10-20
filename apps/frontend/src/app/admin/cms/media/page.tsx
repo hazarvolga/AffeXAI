@@ -164,7 +164,7 @@ const MediaManagementPage = () => {
     
     // If relative path, make it absolute
     // NEXT_PUBLIC_API_URL has /api but uploads are at root level
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005/api';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
     const cleanBaseUrl = baseUrl.replace('/api', ''); // Remove /api suffix
     const absoluteUrl = `${cleanBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     console.log('[MediaPage] Converted to absolute:', absoluteUrl);

@@ -16,7 +16,7 @@ import type {
   QueueMetrics,
 } from '@/types/automation';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
 
 // Axios instance with auth token
 const apiClient = axios.create({

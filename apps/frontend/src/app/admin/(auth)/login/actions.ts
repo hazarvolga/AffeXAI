@@ -31,7 +31,7 @@ export async function login(prevState: LoginState, formData: FormData): Promise<
         console.log('Giriş denemesi:', validatedFields.data);
 
         // Call backend API for authentication
-        const response = await fetch('http://localhost:9005/api/auth/login', {
+        const response = await fetch('http://localhost:9006/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

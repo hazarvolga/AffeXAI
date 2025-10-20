@@ -156,7 +156,7 @@ export class HttpClient {
   constructor(config?: HttpClientConfig) {
     // Default configuration
     this.config = {
-      baseURL: config?.baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005',
+      baseURL: config?.baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006',
       timeout: config?.timeout || 30000, // 30 seconds
       headers: config?.headers || {},
       withCredentials: config?.withCredentials ?? true,
@@ -164,6 +164,10 @@ export class HttpClient {
       retryAttempts: config?.retryAttempts || 3,
       retryDelay: config?.retryDelay || 1000,
     };
+
+    // DEBUG: Log the baseURL being used
+    console.log('🔧 HTTP Client initialized with baseURL:', this.config.baseURL);
+    console.log('🔧 process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
 
     // Create axios instance
     this.instance = axios.create({

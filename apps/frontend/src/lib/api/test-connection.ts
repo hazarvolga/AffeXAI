@@ -26,7 +26,7 @@ if (typeof window !== 'undefined') {
       console.log('✅ Backend API is accessible');
     } else {
       console.warn('⚠️ Backend API is not accessible:', result.error);
-      console.log('Please ensure the backend server is running on port 9005');
+      console.log('Please ensure the backend server is running on port 9006');
     }
   });
 }

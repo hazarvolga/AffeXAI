@@ -72,7 +72,7 @@ export function EmailValidator() {
 
     try {
       const response = await fetch(
-        `http://localhost:9005/api/email-marketing/subscribers/validate-email?email=${encodeURIComponent(email)}`,
+        `http://localhost:9006/api/email-marketing/subscribers/validate-email?email=${encodeURIComponent(email)}`,
         {
           method: 'GET',
           headers: {

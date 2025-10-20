@@ -92,3 +92,8 @@ apps/frontend/.turbo/
 
 # Misc
 .vercel
+
+# Development Scripts
+*.log
+.backend.pid
+.frontend.pid

@@ -81,7 +81,7 @@ const CertificateTable = ({ certificatesToShow, onCertificateUpdate, onCertifica
             // If PDF already exists, download it directly
             if (certificate.pdfUrl) {
                 const link = document.createElement('a');
-                link.href = `http://localhost:9005${certificate.pdfUrl}`;
+                link.href = `http://localhost:9006${certificate.pdfUrl}`;
                 link.target = '_blank';
                 link.download = `certificate-${certificate.id}.pdf`;
                 document.body.appendChild(link);
@@ -91,7 +91,7 @@ const CertificateTable = ({ certificatesToShow, onCertificateUpdate, onCertifica
                 // Generate new PDF
                 const result = await certificatesService.generatePdf(certificate.id);
                 const link = document.createElement('a');
-                link.href = `http://localhost:9005${result.pdfUrl}`;
+                link.href = `http://localhost:9006${result.pdfUrl}`;
                 link.target = '_blank';
                 link.download = `certificate-${certificate.id}.pdf`;
                 document.body.appendChild(link);

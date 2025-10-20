@@ -15,7 +15,7 @@ export async function GET(
     }
 
     // Fetch media from backend API
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9005/api';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
     const response = await fetch(`${backendUrl}/media/${id}`, {
       headers: {
         'Content-Type': 'application/json',

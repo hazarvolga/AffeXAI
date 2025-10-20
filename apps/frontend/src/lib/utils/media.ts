@@ -12,7 +12,7 @@ export async function getMediaUrl(mediaId: string): Promise<string | null> {
   // Check cache first
   if (mediaCache.has(mediaId)) {
     const media = mediaCache.get(mediaId)!;
-    return `http://localhost:9005${media.url}`;
+    return `http://localhost:9006${media.url}`;
   }
 
   try {
@@ -22,7 +22,7 @@ export async function getMediaUrl(mediaId: string): Promise<string | null> {
     // Cache the media item
     mediaCache.set(mediaId, media);
     
-    return `http://localhost:9005${media.url}`;
+    return `http://localhost:9006${media.url}`;
   } catch (error) {
     console.error('Error fetching media:', error);
     return null;

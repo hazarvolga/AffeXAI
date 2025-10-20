@@ -13,7 +13,7 @@ export function getLogoUrl(isDarkMode: boolean = false): string {
     
     if (logoId) {
       // Return the media URL directly
-      return `http://localhost:9005/uploads/${logoId}`;
+      return `http://localhost:9006/uploads/${logoId}`;
     }
     
     // Fallback to the direct URL if available

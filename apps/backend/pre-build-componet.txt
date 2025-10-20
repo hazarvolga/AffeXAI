@@ -1,0 +1,462 @@
+# Page Builder Prebuilt Components - Comprehensive Prompt Guide
+
+## 1. HERO SECTIONS
+
+**Component Purpose**: First impression blocks that capture attention and communicate main value proposition
+
+**Required Variations**:
+- Full-width hero with background image/video
+- Split hero (50/50 content-media)
+- Centered hero with minimal design
+- Animated gradient hero
+- Hero with floating elements/cards
+- Multi-layer parallax hero
+
+**Design Specifications**:
+- Height: 100vh, 80vh, or 600-900px options
+- Typography: Large headline (48-72px), subheadline (20-24px), body text (16-18px)
+- CTA Buttons: Primary and secondary button styles, min 2 CTA slots
+- Media Support: Image, video background, lottie animations
+- Overlay Options: Gradient overlays (0-80% opacity), solid color overlays
+- Responsive Behavior: Stack vertically on mobile, maintain visual hierarchy
+- Animation: Fade-in, slide-up on load, parallax scrolling effects
+- Accessibility: High contrast text, readable font sizes, alt text for images
+
+---
+
+## 2. FEATURE SECTIONS
+
+**Component Purpose**: Showcase product/service features with icons and descriptions
+
+**Required Variations**:
+- Grid layout (2x2, 3x3, 4x4)
+- Horizontal cards with alternating image placement
+- Icon-based feature list with centered alignment
+- Tabbed features with content switching
+- Carousel/slider for mobile-friendly browsing
+- Bento box style (asymmetric grid)
+
+**Design Specifications**:
+- Icon Size: 48-64px, support for custom icons, illustrations, or images
+- Card Padding: 24-48px internal spacing
+- Grid Gap: 24-32px between items
+- Typography: Feature title (20-24px bold), description (16-18px)
+- Visual Elements: Hover effects (lift, glow, scale), subtle shadows
+- Color Scheme: Support for background variants (white, light gray, colored sections)
+- Layout Options: Left-aligned, centered, or alternating alignment
+- Image Aspect Ratios: 16:9, 4:3, 1:1 options
+- Responsive: 4 columns → 2 columns → 1 column breakpoints
+
+---
+
+## 3. CALL-TO-ACTION (CTA) BLOCKS
+
+**Component Purpose**: Drive conversions with focused, action-oriented sections
+
+**Required Variations**:
+- Full-width banner CTA
+- Centered card CTA with background
+- Split CTA (image + content)
+- Floating/sticky CTA bar
+- Multi-CTA comparison block
+- Newsletter signup CTA
+
+**Design Specifications**:
+- Background Options: Solid color, gradient, image, video
+- Button Styles: Filled, outlined, ghost, with icons
+- Size Options: Compact (200px height), standard (400px), large (600px)
+- Typography: Headline (32-48px), supporting text (18-20px)
+- Visual Hierarchy: Clear focal point, high contrast between text and background
+- Animation: Pulse effect on buttons, entrance animations
+- Form Elements: Email input, name fields, checkbox for terms
+- Urgency Elements: Countdown timers, limited offer badges
+- Responsive: Maintain button visibility, stack elements on mobile
+
+---
+
+## 4. TESTIMONIAL/SOCIAL PROOF SECTIONS
+
+**Component Purpose**: Build trust through customer feedback and social validation
+
+**Required Variations**:
+- Card-based testimonial grid
+- Carousel/slider with navigation
+- Featured testimonial with large quote
+- Video testimonial embed
+- Logo wall (customer/partner logos)
+- Star rating showcase with statistics
+
+**Design Specifications**:
+- Card Design: Photo (80-120px circle/square), name, title, company
+- Quote Styling: Large quotation marks, italic text (18-20px)
+- Photo Treatment: Grayscale to color on hover, circular masks
+- Rating Display: 5-star system, numerical scores (4.8/5.0)
+- Logo Grid: Grayscale logos with hover color, uniform sizing
+- Carousel Controls: Dots, arrows, auto-play toggle
+- Layout Density: 2-4 testimonials per row desktop, 1 on mobile
+- Background: Subtle patterns, light colors to differentiate from main content
+- Trust Badges: Security seals, certification logos, award emblems
+
+---
+
+## 5. PRICING TABLES
+
+**Component Purpose**: Present pricing plans with clear comparisons and CTAs
+
+**Required Variations**:
+- 3-column pricing tiers (Basic, Pro, Enterprise)
+- Comparison table with checkmarks
+- Toggle between monthly/annual pricing
+- Featured/recommended plan highlight
+- Tiered feature list with expandable details
+- Single product pricing with add-ons
+
+**Design Specifications**:
+- Card Elevation: Featured plan elevated with shadow/border
+- Typography: Plan name (24-28px), price (48-56px), period (16px)
+- Feature List: Checkmarks (green) and X marks (red/gray), 16px text
+- Button Placement: Bottom of each card, consistent sizing
+- Color Coding: Different accent colors per tier (e.g., blue, purple, gold)
+- Highlight Badge: "Most Popular", "Best Value" labels
+- Spacing: 40-60px padding inside cards
+- Toggle Switch: Clean iOS-style toggle for billing period
+- Responsive: Stack cards vertically on mobile, maintain feature alignment
+- Tooltips: Info icons for feature explanations
+
+---
+
+## 6. CONTENT BLOCKS (Text + Media)
+
+**Component Purpose**: Flexible content sections for storytelling and information
+
+**Required Variations**:
+- 60/40 split (text/image or image/text)
+- Centered content with side images
+- Full-width text with background image
+- Multi-column text layout
+- Quote callouts with author
+- Timeline/process visualization
+
+**Design Specifications**:
+- Image Aspect Ratios: 16:9, 4:3, 1:1, custom
+- Text Column Width: Max 700px for readability
+- Typography: H2 (36-42px), H3 (28-32px), body (16-18px), line-height 1.6-1.8
+- Spacing: 80-120px vertical padding between sections
+- Image Treatment: Rounded corners (8-16px), shadows, overlays
+- Alternating Layout: Switch image position for visual rhythm
+- Media Types: Support images, videos, GIFs, embedded content
+- Decorative Elements: Abstract shapes, accent lines, gradient blobs
+- Read More/Expand: Accordion for long content
+- Responsive: Image full-width on mobile, text follows
+
+---
+
+## 7. GALLERY/PORTFOLIO SECTIONS
+
+**Component Purpose**: Showcase visual work, products, or projects
+
+**Required Variations**:
+- Masonry grid (Pinterest-style)
+- Uniform grid with hover effects
+- Carousel with thumbnails
+- Lightbox/modal view
+- Filterable gallery by category
+- Before/after slider
+
+**Design Specifications**:
+- Grid Spacing: 8-24px gaps between items
+- Hover Effects: Overlay with title/description, zoom, color filter
+- Image Loading: Lazy loading, blur-up effect
+- Aspect Ratios: Mixed or uniform (1:1, 4:3, 16:9)
+- Filter Buttons: Pill-shaped, active state highlighting
+- Lightbox: Full-screen view, navigation arrows, close button, caption area
+- Columns: 2-5 columns responsive (5→4→3→2→1)
+- Load More: Pagination or infinite scroll options
+- Image Quality: Support for high-res with optimization
+- Captions: Overlays or below image options
+
+---
+
+## 8. FORM SECTIONS
+
+**Component Purpose**: Capture user information and facilitate communication
+
+**Required Variations**:
+- Contact form (name, email, message)
+- Newsletter signup (email only)
+- Multi-step form with progress indicator
+- Inline form within content
+- Survey/quiz format
+- Lead magnet download form
+
+**Design Specifications**:
+- Input Fields: 48-56px height, 16px text, clear labels
+- Field Spacing: 16-24px between fields
+- Button Style: Full-width or auto-width, loading state
+- Validation: Inline error messages in red, success in green
+- Required Fields: Asterisk or "Required" label
+- Privacy: Checkbox for terms acceptance, GDPR compliance text
+- Layout: Single column (preferred) or two-column for short fields
+- Background: Card with shadow or section with background color
+- Success State: Thank you message or redirect option
+- Icons: Input icons for context (email, phone, user icons)
+- Responsive: Full-width fields on mobile, appropriate keyboard types
+
+---
+
+## 9. HEADER/NAVIGATION
+
+**Component Purpose**: Primary navigation and branding placement
+
+**Required Variations**:
+- Fixed/sticky header
+- Transparent header (for hero sections)
+- Centered logo with side menus
+- Left logo with right navigation
+- Mega menu dropdown
+- Mobile hamburger menu
+
+**Design Specifications**:
+- Height: 70-90px desktop, 60-70px mobile
+- Logo Size: 120-180px width or 40-50px height
+- Menu Items: 16px text, 20-40px spacing between items
+- CTA Button: Prominent styling, different from menu items
+- Dropdown: Smooth animation, shadow, 200-300px width
+- Mobile Menu: Full-screen or slide-in panel
+- Scroll Behavior: Shrink height, add shadow, change background opacity
+- Active State: Underline, color change, or background highlight
+- Search Icon: Optional search bar toggle
+- Accessibility: Keyboard navigation, focus indicators
+- Z-index: High enough to overlay content (100-1000)
+
+---
+
+## 10. FOOTER
+
+**Component Purpose**: Secondary navigation, legal info, and additional resources
+
+**Required Variations**:
+- Multi-column footer (3-5 columns)
+- Minimal single-row footer
+- Newsletter signup footer
+- Social media prominent footer
+- Large footer with sitemap
+- Sticky bottom CTA footer
+
+**Design Specifications**:
+- Background: Dark (common) or light with border
+- Column Layout: Logo + 3-4 link columns + social/newsletter
+- Typography: Column headers (14-16px bold), links (14px)
+- Link Spacing: 12-16px vertical spacing
+- Social Icons: 32-40px, hover effects
+- Copyright: Small text (12-14px), centered or left-aligned
+- Newsletter Form: Inline input + button
+- Divider: Optional line separating footer sections
+- Height: 300-500px depending on content
+- Responsive: Stack columns vertically on mobile
+- Links: Hover underline or color change
+
+---
+
+## 11. STATS/NUMBERS SECTIONS
+
+**Component Purpose**: Highlight key metrics and achievements with visual impact
+
+**Required Variations**:
+- Counter animation (number increment)
+- Icon + number + label grid
+- Full-width banner with stats
+- Circular progress bars
+- Comparison bars (vs competitors)
+- Timeline with milestone numbers
+
+**Design Specifications**:
+- Number Size: 48-72px, bold weight
+- Label Size: 16-18px below number
+- Icon Size: 48-64px above number
+- Animation: Count-up effect on scroll into view
+- Layout: 2-6 items per row, centered alignment
+- Background: Contrasting section (colored or image background)
+- Dividers: Vertical lines between stats (optional)
+- Suffix/Prefix: Support for +, %, K, M symbols
+- Color Scheme: Accent colors for numbers
+- Spacing: 60-80px padding, 40-60px between items
+- Responsive: 2 columns → 1 column on mobile
+
+---
+
+## 12. FAQ/ACCORDION SECTIONS
+
+**Component Purpose**: Address common questions with expandable content
+
+**Required Variations**:
+- Single-column accordion
+- Two-column layout
+- Search-enabled FAQ
+- Category-based FAQ tabs
+- FAQ with icons per question
+- Hybrid FAQ (some expanded by default)
+
+**Design Specifications**:
+- Item Height: 60-80px collapsed, auto expanded
+- Typography: Question (18-20px medium/bold), answer (16px)
+- Icon: Plus/minus or chevron (24px)
+- Spacing: 16-24px between items
+- Animation: Smooth 300ms expand/collapse
+- Background: Alternating row colors or borders only
+- Border Radius: 8-12px for card style
+- Active State: Different background or border color
+- Max Width: 900px for readability
+- Search Box: Sticky at top, filters questions in real-time
+- Responsive: Full-width on mobile, maintain touch-friendly targets
+
+---
+
+## 13. TEAM/ABOUT SECTIONS
+
+**Component Purpose**: Introduce team members and company culture
+
+**Required Variations**:
+- Grid of team member cards
+- Carousel with featured members
+- Org chart visualization
+- Full-width bio sections
+- Hover-reveal info cards
+- Video introduction section
+
+**Design Specifications**:
+- Photo Size: 200-300px, circular or square with rounded corners
+- Card Design: Photo, name (20-24px), title (16px), bio (14-16px)
+- Hover Effect: Overlay with social links or extended bio
+- Grid Layout: 3-4 columns desktop, 2 tablet, 1 mobile
+- Social Icons: LinkedIn, Twitter, etc., 24-32px
+- Background: Clean, light colors to focus on people
+- Spacing: 32-48px between cards
+- Bio Length: 50-150 words, expandable option
+- Filters: By department or role
+- Animation: Subtle fade-in on scroll
+
+---
+
+## 14. BLOG/CONTENT GRID SECTIONS
+
+**Component Purpose**: Display blog posts, articles, or content listings
+
+**Required Variations**:
+- Card grid (2-3 columns)
+- List view with thumbnails
+- Featured post + grid
+- Masonry blog layout
+- Category filters/tabs
+- Sidebar with latest posts
+
+**Design Specifications**:
+- Card Components: Image (16:9), title, excerpt, date, author, category tag
+- Image Treatment: Hover zoom, overlay gradient
+- Typography: Title (20-24px), excerpt (16px), meta (14px)
+- Card Spacing: 24-32px gaps
+- Read More: Button or text link
+- Pagination: Numbers, prev/next buttons, or load more
+- Category Tags: Colored pills/badges, clickable
+- Date Format: "Jan 15, 2025" or "3 days ago"
+- Excerpt Length: 120-150 characters with "..."
+- Featured Card: Larger, different layout (e.g., horizontal)
+- Responsive: 3→2→1 column breakpoints
+
+---
+
+## 15. VIDEO/MEDIA SECTIONS
+
+**Component Purpose**: Embed and showcase video content effectively
+
+**Required Variations**:
+- Full-width video hero
+- Video popup/modal trigger
+- Video with transcript
+- Multiple video grid
+- Video testimonials
+- YouTube/Vimeo embed with custom controls
+
+**Design Specifications**:
+- Aspect Ratio: 16:9 (standard), 21:9 (cinematic), 9:16 (mobile)
+- Thumbnail: Custom image with play button overlay
+- Play Button: 80-120px, centered, hover scale effect
+- Player Controls: Custom styling to match brand
+- Autoplay: Option with mute, user preference consideration
+- Captions: Support for subtitles/closed captions
+- Background: Video backgrounds with overlay text support
+- Loading: Blur placeholder while loading
+- Fullscreen: Native fullscreen capability
+- Responsive: Maintain aspect ratio, full-width on mobile
+- Accessibility: Transcript link, keyboard controls
+
+---
+
+## UNIVERSAL DESIGN PRINCIPLES
+
+**For All Components:**
+
+1. **Spacing System**: Use 8px base unit (8, 16, 24, 32, 40, 48, 64, 80, 120px)
+
+2. **Color System**: 
+   - Primary (brand color)
+   - Secondary (accent)
+   - Neutral scale (white to black, 7-9 shades)
+   - Semantic colors (success green, error red, warning yellow, info blue)
+
+3. **Typography Scale**:
+   - H1: 48-72px
+   - H2: 36-48px
+   - H3: 28-36px
+   - H4: 24-28px
+   - Body: 16-18px
+   - Small: 14px
+   - Tiny: 12px
+
+4. **Breakpoints**:
+   - Mobile: < 640px
+   - Tablet: 640-1024px
+   - Desktop: 1024-1440px
+   - Large: > 1440px
+
+5. **Animation Timing**:
+   - Fast: 150ms (small interactions)
+   - Standard: 300ms (most transitions)
+   - Slow: 500ms (large movements)
+
+6. **Shadow System**:
+   - Small: 0 1px 3px rgba(0,0,0,0.1)
+   - Medium: 0 4px 6px rgba(0,0,0,0.1)
+   - Large: 0 10px 25px rgba(0,0,0,0.15)
+   - XL: 0 20px 40px rgba(0,0,0,0.2)
+
+7. **Border Radius**:
+   - Small: 4px
+   - Medium: 8px
+   - Large: 16px
+   - Full: 9999px (pills/circles)
+
+8. **Accessibility Requirements**:
+   - WCAG 2.1 AA minimum
+   - 4.5:1 contrast ratio for body text
+   - 3:1 for large text
+   - Keyboard navigation support
+   - Screen reader friendly markup
+   - Focus indicators visible
+   - Touch targets minimum 44x44px
+
+9. **Performance**:
+   - Lazy loading for images below fold
+   - Optimized images (WebP with fallbacks)
+   - Minimal animation jank (60fps)
+   - Fast initial render (< 3s)
+
+10. **Customization Options for Each Component**:
+    - Background color/image
+    - Text colors
+    - Spacing (padding/margin presets)
+    - Border toggle
+    - Shadow toggle
+    - Animation toggle
+    - Alignment options (left/center/right)
+    - Width constraints (full-width, container, narrow)

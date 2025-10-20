@@ -1,0 +1,82 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from './config/config.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SharedModule } from './shared/shared.module';
+import { EventsModule } from './modules/events/events.module';
+import { EmailMarketingModule } from './modules/email-marketing/email-marketing.module';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
+import { MediaModule } from './modules/media/media.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { SettingsModule } from './modules/settings/settings.module';
+import { CertificatesModule } from './modules/certificates/certificates.module';
+import { CmsModule } from './modules/cms/cms.module';
+import { MailModule } from './modules/mail/mail.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { AiModule } from './modules/ai/ai.module';
+import { PlatformIntegrationModule } from './modules/platform-integration/platform-integration.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
+
+@Module({
+  imports: [
+    ConfigModule,
+    EventEmitterModule.forRoot({
+      // Use this instance across the entire Nest application
+      wildcard: false,
+      delimiter: '.',
+      newListener: false,
+      removeListener: false,
+      maxListeners: 10,
+      verboseMemoryLeak: false,
+      ignoreErrors: false,
+    }),
+    CacheModule.register({
+      ttl: 60, // seconds
+      max: 100, // maximum number of items in cache
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5433,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'aluplan_dev',
+      autoLoadEntities: true,
+      synchronize: true, // Temporary: Will sync schema with entities
+      logging: ['error', 'warn'], // Log only errors and warnings
+    }),
+    BullBoardModule.forRoot({
+      route: '/admin/queues',
+      adapter: ExpressAdapter,
+    }),
+    ScheduleModule.forRoot(), // Enable scheduling for the entire application
+    SharedModule,
+    MailModule,
+    UsersModule,
+    AuthModule,
+    EventsModule,
+    EmailMarketingModule,
+    MediaModule,
+    NotificationsModule,
+    SettingsModule,
+    CertificatesModule,
+    CmsModule,
+    TicketsModule,
+    RolesModule,
+    AiModule,
+    PlatformIntegrationModule,
+    AnalyticsModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}

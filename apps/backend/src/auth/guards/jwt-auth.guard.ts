@@ -78,6 +78,8 @@ export class JwtAuthGuard implements CanActivate {
       request['user'] = {
         id: user.id,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         roles: user.roles, // Fresh roles from DB
         roleNames: user.roleNames, // Fresh role names
         primaryRole: user.primaryRole, // Fresh primary role

@@ -32,7 +32,7 @@ export class UserAiPreferencesController {
    */
   @Get('global/preference')
   async getGlobalPreference(@Req() req: any) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const preference = await this.preferencesService.getGlobalPreference(userId);
 
     if (!preference) {
@@ -59,7 +59,7 @@ export class UserAiPreferencesController {
       enabled: boolean;
     },
   ) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const preference = await this.preferencesService.upsertGlobalPreference(
       userId,
       dto,
@@ -77,7 +77,7 @@ export class UserAiPreferencesController {
   @Delete('global/preference')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteGlobalPreference(@Req() req: any) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     await this.preferencesService.deleteGlobalPreference(userId);
   }
 
@@ -90,7 +90,7 @@ export class UserAiPreferencesController {
    */
   @Get()
   async getUserPreferences(@Req() req: any) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const preferences = await this.preferencesService.getUserPreferences(userId);
 
     // Mask API keys in response
@@ -108,7 +108,7 @@ export class UserAiPreferencesController {
     @Req() req: any,
     @Param('module') module: string,
   ) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const preference = await this.preferencesService.getUserPreferenceForModule(
       userId,
       module,
@@ -135,10 +135,10 @@ export class UserAiPreferencesController {
   ) {
     try {
       console.log('[DEBUG] POST /user-ai-preferences called');
-      console.log('[DEBUG] User ID:', req.user?.userId);
+      console.log('[DEBUG] User ID:', req.user?.id);
       console.log('[DEBUG] DTO:', JSON.stringify(dto, null, 2));
 
-      const userId = req.user.userId;
+      const userId = req.user.id;
       const preference = await this.preferencesService.upsertPreference(
         userId,
         dto,
@@ -187,7 +187,7 @@ export class UserAiPreferencesController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAllPreferences(@Req() req: any) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     await this.preferencesService.deleteAllUserPreferences(userId);
   }
 

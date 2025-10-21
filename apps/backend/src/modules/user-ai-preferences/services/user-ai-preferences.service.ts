@@ -248,6 +248,8 @@ export class UserAiPreferencesService {
       return updated;
     }
 
+    this.logger.log(`Creating global preference for userId: ${userId}`);
+    
     const preference = this.globalPreferenceRepository.create({
       userId,
       provider: dto.provider as any,
@@ -255,6 +257,14 @@ export class UserAiPreferencesService {
       apiKey: dto.apiKey ? this.encryptApiKey(dto.apiKey) : null,
       enabled: dto.enabled,
     });
+
+    this.logger.log(`Created preference object:`, JSON.stringify({
+      userId: preference.userId,
+      provider: preference.provider,
+      model: preference.model,
+      enabled: preference.enabled,
+      hasApiKey: !!preference.apiKey
+    }));
 
     const saved = await this.globalPreferenceRepository.save(preference);
     this.logger.log(`Created global AI preference for user ${userId}`);

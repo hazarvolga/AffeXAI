@@ -133,17 +133,26 @@ export class UserAiPreferencesController {
     @Req() req: any,
     @Body() dto: CreateUserAiPreferenceDto,
   ) {
-    const userId = req.user.userId;
-    const preference = await this.preferencesService.upsertPreference(
-      userId,
-      dto,
-    );
+    try {
+      console.log('[DEBUG] POST /user-ai-preferences called');
+      console.log('[DEBUG] User ID:', req.user?.userId);
+      console.log('[DEBUG] DTO:', JSON.stringify(dto, null, 2));
 
-    // Mask API key in response
-    return {
-      ...preference,
-      apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
-    };
+      const userId = req.user.userId;
+      const preference = await this.preferencesService.upsertPreference(
+        userId,
+        dto,
+      );
+
+      // Mask API key in response
+      return {
+        ...preference,
+        apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
+      };
+    } catch (error) {
+      console.error('[ERROR] POST /user-ai-preferences failed:', error);
+      throw error;
+    }
   }
 
   /**

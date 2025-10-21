@@ -9,14 +9,18 @@ import { Bot, KeyRound, TestTube2, Loader2, CheckCircle2, AlertCircle, Sparkles 
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import userAiPreferencesService, {
   AiModule,
   AiProvider,
   UserAiPreference,
   CreateUserAiPreferenceDto,
+  GlobalAiPreference,
+  UpsertGlobalPreferenceDto,
 } from '@/lib/api/user-ai-preferences';
 
 // Available AI models grouped by provider
@@ -88,12 +92,26 @@ interface ModulePreference {
   model: string;
   apiKey: string;
   enabled: boolean;
+  useGlobal: boolean; // NEW: Whether to use global preference
 }
 
 export default function UserAiPreferencesPage() {
+  // Global preference state
+  const [globalPreference, setGlobalPreference] = useState<GlobalAiPreference | null>(null);
+  const [globalForm, setGlobalForm] = useState({
+    provider: AiProvider.OPENAI,
+    model: 'gpt-4o',
+    apiKey: '',
+    enabled: true,
+  });
+  
+  // Module preferences state
   const [modulePreferences, setModulePreferences] = useState<ModulePreference[]>([]);
+  
+  // Loading and saving states
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState<AiModule | null>(null);
+  const [isSaving, setIsSaving] = useState<AiModule | 'global' | null>(null);
+  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,12 +121,31 @@ export default function UserAiPreferencesPage() {
   const loadPreferences = async () => {
     try {
       setIsLoading(true);
+      
+      // Load global preference
+      const globalPref = await userAiPreferencesService.getGlobalPreference();
+      setGlobalPreference(globalPref);
+      
+      // Update global form if global preference exists
+      if (globalPref) {
+        setGlobalForm({
+          provider: globalPref.provider,
+          model: globalPref.model,
+          apiKey: '', // Don't show existing API key
+          enabled: globalPref.enabled,
+        });
+      }
+      
+      // Load module preferences
       const preferences = await userAiPreferencesService.getUserPreferences();
 
       // Initialize module preferences with existing data or defaults
       const modules = Object.values(AiModule);
       const prefs: ModulePreference[] = modules.map((module) => {
         const existing = preferences.find((p) => p.module === module);
+        const hasModuleSpecific = !!existing;
+        const shouldUseGlobal = !hasModuleSpecific && !!globalPref;
+        
         return {
           module,
           preference: existing || null,
@@ -116,6 +153,7 @@ export default function UserAiPreferencesPage() {
           model: existing?.model || 'gpt-4o',
           apiKey: '',
           enabled: existing?.enabled ?? true,
+          useGlobal: shouldUseGlobal, // NEW: Auto-determine global usage
         };
       });
 
@@ -172,13 +210,86 @@ export default function UserAiPreferencesPage() {
     }
   };
 
+  // Global preference save function
+  const handleSaveGlobal = async () => {
+    try {
+      setIsSaving('global');
+
+      const dto: UpsertGlobalPreferenceDto = {
+        provider: globalForm.provider,
+        model: globalForm.model,
+        apiKey: globalForm.apiKey || undefined,
+        enabled: globalForm.enabled,
+      };
+
+      const result = await userAiPreferencesService.upsertGlobalPreference(dto);
+      setGlobalPreference(result);
+      
+      // Clear API key from form
+      setGlobalForm(prev => ({ ...prev, apiKey: '' }));
+      
+      // Update modules that use global to reflect new global settings
+      setModulePreferences((prev) =>
+        prev.map((p) => 
+          p.useGlobal ? { 
+            ...p, 
+            provider: result.provider, 
+            model: result.model 
+          } : p
+        )
+      );
+
+      toast({
+        title: 'Başarılı',
+        description: 'Global AI tercihleri kaydedildi.',
+      });
+    } catch (error: any) {
+      console.error('Failed to save global AI preference:', error);
+      toast({
+        title: 'Hata',
+        description: error.message || 'Global AI tercihleri kaydedilemedi.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(null);
+    }
+  };
+
   const updateModulePreference = (
     module: AiModule,
-    updates: Partial<Omit<ModulePreference, 'module' | 'preference'>>
+    updates: Partial<Omit<ModulePreference, 'module'>>
   ) => {
     setModulePreferences((prev) =>
       prev.map((p) => (p.module === module ? { ...p, ...updates } : p))
     );
+  };
+
+  // Toggle global usage for a module
+  const toggleGlobalUsage = async (module: AiModule, useGlobal: boolean) => {
+    const pref = modulePreferences.find((p) => p.module === module);
+    if (!pref) return;
+
+    if (useGlobal) {
+      // Switch to global - delete module-specific preference if exists
+      if (pref.preference) {
+        try {
+          await userAiPreferencesService.deletePreference(pref.preference.id);
+        } catch (error) {
+          console.error('Failed to delete module preference:', error);
+        }
+      }
+      
+      // Update state to use global
+      updateModulePreference(module, { 
+        useGlobal: true,
+        provider: globalPreference?.provider || AiProvider.OPENAI,
+        model: globalPreference?.model || 'gpt-4o',
+        preference: null,
+      });
+    } else {
+      // Switch to custom - just update state, user will need to save
+      updateModulePreference(module, { useGlobal: false });
+    }
   };
 
   const getAvailableModels = (provider: AiProvider) => {
@@ -203,17 +314,161 @@ export default function UserAiPreferencesPage() {
             Kişisel AI Tercihleri
           </h1>
           <p className="text-muted-foreground mt-2">
-            Her modül için kendi AI provider'ınızı ve API key'inizi seçin
+            Global ayar ile tek API key kullanın veya her modül için özel ayar yapın
           </p>
         </div>
       </div>
 
+      {/* Global AI Preference Card */}
+      <Card className="border-2 border-primary/20 bg-primary/5">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                🌐 Global AI Ayarları
+                <Badge variant="secondary">Tüm Modüller</Badge>
+              </CardTitle>
+              <CardDescription>
+                Tek API key ile tüm AI özelliklerini kullanın (Önerilen)
+              </CardDescription>
+            </div>
+            <Switch
+              checked={globalForm.enabled}
+              onCheckedChange={(checked) =>
+                setGlobalForm(prev => ({ ...prev, enabled: checked }))
+              }
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {globalPreference ? (
+            <Alert>
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertDescription>
+                ✅ Global ayar aktif: {PROVIDER_LABELS[globalPreference.provider]} - {globalPreference.model}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                ⚠️ AI kullanmak için global ayar yapın veya her modül için ayrı key girin
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="global-provider">AI Provider</Label>
+              <Select
+                value={globalForm.provider}
+                onValueChange={(value) => {
+                  const newProvider = value as AiProvider;
+                  const defaultModel = getAvailableModels(newProvider)[0]?.value || '';
+                  setGlobalForm(prev => ({
+                    ...prev,
+                    provider: newProvider,
+                    model: defaultModel,
+                  }));
+                }}
+              >
+                <SelectTrigger id="global-provider">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={AiProvider.OPENAI}>
+                    OpenAI (GPT-4, GPT-3.5)
+                  </SelectItem>
+                  <SelectItem value={AiProvider.ANTHROPIC}>
+                    Anthropic (Claude 3)
+                  </SelectItem>
+                  <SelectItem value={AiProvider.GOOGLE}>
+                    Google (Gemini Pro, Flash)
+                  </SelectItem>
+                  <SelectItem value={AiProvider.OPENROUTER}>
+                    OpenRouter (100+ Models) 🌐
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="global-model">Model</Label>
+              <Select
+                value={globalForm.model}
+                onValueChange={(value) =>
+                  setGlobalForm(prev => ({ ...prev, model: value }))
+                }
+              >
+                <SelectTrigger id="global-model">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableModels(globalForm.provider).map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      {model.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="global-api-key">
+              API Key (zorunlu - AI özelliklerini kullanmak için)
+            </Label>
+            <Input
+              id="global-api-key"
+              type="password"
+              placeholder={
+                globalForm.provider === AiProvider.OPENAI
+                  ? 'sk-proj-...'
+                  : globalForm.provider === AiProvider.ANTHROPIC
+                  ? 'sk-ant-...'
+                  : 'API key giriniz'
+              }
+              value={globalForm.apiKey}
+              onChange={(e) =>
+                setGlobalForm(prev => ({ ...prev, apiKey: e.target.value }))
+              }
+              icon={KeyRound}
+            />
+            <p className="text-xs text-muted-foreground">
+              {globalPreference?.apiKey
+                ? `Kaydedilmiş API key: ${globalPreference.apiKey}`
+                : 'Global API key tüm modüller tarafından kullanılacak'}
+            </p>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveGlobal}
+              disabled={isSaving === 'global' || !globalForm.apiKey}
+            >
+              {isSaving === 'global' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Global Ayarı Kaydet
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Kişisel AI Tercihleri</AlertTitle>
+        <AlertTitle>AI Tercihleri Nasıl Çalışır?</AlertTitle>
         <AlertDescription>
-          Buradan her modül için farklı AI provider ve kendi API key'lerinizi kullanabilirsiniz.
-          API key'ler güvenli bir şekilde şifrelenerek saklanır ve sadece sizin erişiminize açıktır.
+          <strong>Basit Kullanım:</strong> Global ayar ile tek API key tüm modüllerde kullanılır. <br />
+          <strong>İleri Kullanım:</strong> Her modül için farklı AI provider seçebilirsiniz. <br />
+          API key'ler güvenli şekilde şifrelenir ve sadece sizin erişiminize açıktır.
         </AlertDescription>
       </Alert>
 
@@ -228,20 +483,39 @@ export default function UserAiPreferencesPage() {
                     {MODULE_LABELS[pref.module]}
                   </CardTitle>
                   <CardDescription>
-                    {pref.preference
-                      ? `Mevcut: ${PROVIDER_LABELS[pref.preference.provider]} - ${pref.preference.model}`
-                      : 'Henüz tercih belirlenmemiş'}
+                    {globalPreference && pref.useGlobal ? (
+                      <span className="text-green-600">
+                        🌐 Global ayar kullanılıyor: {PROVIDER_LABELS[globalPreference.provider]} - {globalPreference.model}
+                      </span>
+                    ) : pref.preference ? (
+                      `Özel ayar: ${PROVIDER_LABELS[pref.preference.provider]} - ${pref.preference.model}`
+                    ) : (
+                      'Henüz tercih belirlenmemiş'
+                    )}
                   </CardDescription>
                 </div>
-                <Checkbox
-                  checked={pref.enabled}
-                  onCheckedChange={(checked) =>
-                    updateModulePreference(pref.module, { enabled: Boolean(checked) })
-                  }
-                />
+                <div className="flex items-center gap-4">
+                  {globalPreference && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={pref.useGlobal}
+                        onCheckedChange={(checked) => toggleGlobalUsage(pref.module, checked)}
+                      />
+                      <Label className="text-sm">Global ayarı kullan</Label>
+                    </div>
+                  )}
+                  <Checkbox
+                    checked={pref.enabled}
+                    onCheckedChange={(checked) =>
+                      updateModulePreference(pref.module, { enabled: Boolean(checked) })
+                    }
+                  />
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {/* Sadece global kullanmıyorsa ayarları göster */}
+            {(!globalPreference || !pref.useGlobal) && (
+              <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor={`${pref.module}-provider`}>AI Provider</Label>
@@ -300,7 +574,7 @@ export default function UserAiPreferencesPage() {
 
               <div className="space-y-2">
                 <Label htmlFor={`${pref.module}-api-key`}>
-                  API Key (opsiyonel - kendi key'inizi kullanmak için)
+                  API Key (zorunlu - bu modül için özel provider kullanıyorsunuz)
                 </Label>
                 <Input
                   id={`${pref.module}-api-key`}
@@ -321,7 +595,7 @@ export default function UserAiPreferencesPage() {
                 <p className="text-xs text-muted-foreground">
                   {pref.preference?.apiKey
                     ? `Kaydedilmiş API key: ${pref.preference.apiKey}`
-                    : 'API key girilmemiş (admin key veya default kullanılacak)'}
+                    : 'Özel API key gerekli - bu modül için farklı provider kullanıyorsunuz'}
                 </p>
               </div>
 
@@ -343,7 +617,8 @@ export default function UserAiPreferencesPage() {
                   )}
                 </Button>
               </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         ))}
       </div>
@@ -354,7 +629,7 @@ export default function UserAiPreferencesPage() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-2">
           <p>
-            <strong>API Key Önceliği:</strong> Kendi API key'iniz → Admin global key → Ücretsiz tier
+            <strong>API Key Önceliği:</strong> Modül-specific key → Global key → AI kullanılamaz
           </p>
           <p>
             <strong>Öneriler:</strong>

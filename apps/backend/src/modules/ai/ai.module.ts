@@ -6,6 +6,7 @@ import { AiController } from './ai.controller';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { GoogleProvider } from './providers/google.provider';
+import { OpenRouterProvider } from './providers/openrouter.provider';
 import { AiProviderFactory } from './providers/provider.factory';
 import { UserAiPreferencesModule } from '../user-ai-preferences/user-ai-preferences.module';
 
@@ -19,6 +20,7 @@ import { UserAiPreferencesModule } from '../user-ai-preferences/user-ai-preferen
     OpenAIProvider,
     AnthropicProvider,
     GoogleProvider,
+    OpenRouterProvider,
     AiProviderFactory,
 
     // Services

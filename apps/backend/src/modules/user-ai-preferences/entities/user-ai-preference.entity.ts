@@ -6,6 +6,7 @@ export enum AiProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GOOGLE = 'google',
+  OPENROUTER = 'openrouter',
 }
 
 export enum AiModule {
@@ -38,7 +39,7 @@ export class UserAiPreference extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 50,
-    comment: 'AI provider: openai, anthropic, google',
+    comment: 'AI provider: openai, anthropic, google, openrouter',
   })
   provider: AiProvider;
 

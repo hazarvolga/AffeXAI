@@ -4,6 +4,7 @@ export enum AiProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GOOGLE = 'google',
+  OPENROUTER = 'openrouter',
 }
 
 export enum AiModule {

@@ -3,8 +3,9 @@ import { IAiProvider } from '../interfaces/ai-provider.interface';
 import { OpenAIProvider } from './openai.provider';
 import { AnthropicProvider } from './anthropic.provider';
 import { GoogleProvider } from './google.provider';
+import { OpenRouterProvider } from './openrouter.provider';
 
-export type ProviderType = 'openai' | 'anthropic' | 'google';
+export type ProviderType = 'openai' | 'anthropic' | 'google' | 'openrouter';
 
 @Injectable()
 export class AiProviderFactory {
@@ -15,13 +16,15 @@ export class AiProviderFactory {
     private readonly openaiProvider: OpenAIProvider,
     private readonly anthropicProvider: AnthropicProvider,
     private readonly googleProvider: GoogleProvider,
+    private readonly openrouterProvider: OpenRouterProvider,
   ) {
     // Register providers
     this.providers.set('openai', openaiProvider);
     this.providers.set('anthropic', anthropicProvider);
     this.providers.set('google', googleProvider);
+    this.providers.set('openrouter', openrouterProvider);
 
-    this.logger.log('AI Provider Factory initialized with OpenAI, Anthropic, and Google providers');
+    this.logger.log('AI Provider Factory initialized with OpenAI, Anthropic, Google, and OpenRouter providers');
   }
 
   /**

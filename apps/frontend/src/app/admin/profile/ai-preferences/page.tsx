@@ -39,12 +39,37 @@ const AI_MODELS_BY_PROVIDER: Record<AiProvider, { value: string; label: string }
     { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash ⏱️ (Fast)' },
     { value: 'gemini-pro', label: 'Gemini Pro ⚖️ (Balanced)' },
   ],
+  [AiProvider.OPENROUTER]: [
+    // OpenAI models via OpenRouter
+    { value: 'openai/gpt-4-turbo', label: 'GPT-4 Turbo' },
+    { value: 'openai/gpt-4o', label: 'GPT-4o' },
+    { value: 'openai/gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    // Anthropic models via OpenRouter
+    { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus' },
+    { value: 'anthropic/claude-3-sonnet', label: 'Claude 3 Sonnet' },
+    { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku' },
+    // Google models via OpenRouter
+    { value: 'google/gemini-pro', label: 'Gemini Pro' },
+    { value: 'google/palm-2-chat-bison', label: 'PaLM 2 Chat' },
+    // Meta models
+    { value: 'meta-llama/llama-3-70b-instruct', label: 'Llama 3 70B' },
+    { value: 'meta-llama/llama-2-70b-chat', label: 'Llama 2 70B Chat' },
+    // Mistral models
+    { value: 'mistralai/mixtral-8x7b-instruct', label: 'Mixtral 8x7B' },
+    { value: 'mistralai/mistral-7b-instruct', label: 'Mistral 7B' },
+    // Perplexity models
+    { value: 'perplexity/pplx-70b-online', label: 'PPLX 70B Online 🌐' },
+    { value: 'perplexity/pplx-7b-chat', label: 'PPLX 7B Chat' },
+    // Auto-routing (best model for task)
+    { value: 'openrouter/auto', label: '🤖 Auto (Best for Task)' },
+  ],
 };
 
 const PROVIDER_LABELS: Record<AiProvider, string> = {
   [AiProvider.OPENAI]: 'OpenAI',
   [AiProvider.ANTHROPIC]: 'Anthropic',
   [AiProvider.GOOGLE]: 'Google',
+  [AiProvider.OPENROUTER]: 'OpenRouter',
 };
 
 const MODULE_LABELS: Record<AiModule, string> = {
@@ -243,6 +268,9 @@ export default function UserAiPreferencesPage() {
                       </SelectItem>
                       <SelectItem value={AiProvider.GOOGLE}>
                         Google (Gemini Pro, Flash)
+                      </SelectItem>
+                      <SelectItem value={AiProvider.OPENROUTER}>
+                        OpenRouter (100+ Models) 🌐
                       </SelectItem>
                     </SelectContent>
                   </Select>

@@ -1,0 +1,1 @@
+{"version":3,"file":"validation-results.d.ts","sourceRoot":"","sources":["validation-results.tsx"],"names":[],"mappings":"AAmCA,OAAO,EACL,SAAS,EAIV,MAAM,uBAAuB,CAAC;AAG/B,UAAU,sBAAsB;IAC9B,GAAG,EAAE,SAAS,CAAC;IACf,OAAO,CAAC,EAAE,MAAM,IAAI,CAAC;IACrB,gBAAgB,CAAC,EAAE,MAAM,IAAI,CAAC;CAC/B;AAkBD,wBAAgB,iBAAiB,CAAC,EAAE,GAAG,EAAE,OAAO,EAAE,gBAAgB,EAAE,EAAE,sBAAsB,+BAgf3F"}

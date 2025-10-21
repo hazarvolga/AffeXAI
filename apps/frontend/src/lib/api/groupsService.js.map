@@ -1,0 +1,1 @@
+{"version":3,"file":"groupsService.js","sourceRoot":"","sources":["groupsService.ts"],"names":[],"mappings":";;;AAAA,iDAAgD;AAchD;;;GAGG;AACH,MAAM,aAAc,SAAQ,6BAAqD;IAC/E;QACE,KAAK,CAAC,EAAE,QAAQ,EAAE,yBAAyB,EAAE,mBAAmB,EAAE,IAAI,EAAE,CAAC,CAAC;IAC5E,CAAC;CACF;AAEY,QAAA,aAAa,GAAG,IAAI,aAAa,EAAE,CAAC;AACjD,kBAAe,qBAAa,CAAC"}

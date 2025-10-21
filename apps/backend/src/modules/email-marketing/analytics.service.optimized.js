@@ -1,0 +1,416 @@
+"use strict";
+var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+    function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
+    var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+    var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+    var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+    var _, done = false;
+    for (var i = decorators.length - 1; i >= 0; i--) {
+        var context = {};
+        for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
+        for (var p in contextIn.access) context.access[p] = contextIn.access[p];
+        context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
+        var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+        if (kind === "accessor") {
+            if (result === void 0) continue;
+            if (result === null || typeof result !== "object") throw new TypeError("Object expected");
+            if (_ = accept(result.get)) descriptor.get = _;
+            if (_ = accept(result.set)) descriptor.set = _;
+            if (_ = accept(result.init)) initializers.unshift(_);
+        }
+        else if (_ = accept(result)) {
+            if (kind === "field") initializers.unshift(_);
+            else descriptor[key] = _;
+        }
+    }
+    if (target) Object.defineProperty(target, contextIn.name, descriptor);
+    done = true;
+};
+var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
+    var useValue = arguments.length > 2;
+    for (var i = 0; i < initializers.length; i++) {
+        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+    }
+    return useValue ? value : void 0;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AnalyticsService = void 0;
+const common_1 = require("@nestjs/common");
+const typeorm_1 = require("typeorm");
+let AnalyticsService = (() => {
+    let _classDecorators = [(0, common_1.Injectable)()];
+    let _classDescriptor;
+    let _classExtraInitializers = [];
+    let _classThis;
+    var AnalyticsService = class {
+        static { _classThis = this; }
+        static {
+            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
+            __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
+            AnalyticsService = _classThis = _classDescriptor.value;
+            if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
+            __runInitializers(_classThis, _classExtraInitializers);
+        }
+        campaignRepository;
+        subscriberRepository;
+        emailLogRepository;
+        constructor(campaignRepository, subscriberRepository, emailLogRepository) {
+            this.campaignRepository = campaignRepository;
+            this.subscriberRepository = subscriberRepository;
+            this.emailLogRepository = emailLogRepository;
+        }
+        async getDashboardData(startDate, endDate, period = 'month') {
+            const dateRange = this.getDateRange(startDate, endDate);
+            // ✅ OPTIMIZATION: Parallel execution instead of sequential
+            const [overview, campaignAnalytics, subscriberGrowth, emailEngagement, revenueMetrics, topCampaigns, abTestSummary,] = await Promise.all([
+                this.getOverviewMetrics(startDate, endDate),
+                this.getCampaignAnalytics(startDate, endDate, 50),
+                this.getSubscriberGrowth(startDate, endDate, period),
+                this.getEmailEngagement(startDate, endDate, period),
+                this.getRevenueMetrics(startDate, endDate, period),
+                this.getTopCampaigns(startDate, endDate, 10, 'score'),
+                this.getAbTestSummary(startDate, endDate, 20),
+            ]);
+            return {
+                overview,
+                campaignAnalytics,
+                subscriberGrowth,
+                emailEngagement,
+                revenueMetrics,
+                topCampaigns,
+                abTestSummary,
+                dateRange: {
+                    startDate: dateRange.start.toISOString().split('T')[0],
+                    endDate: dateRange.end.toISOString().split('T')[0],
+                    period,
+                },
+            };
+        }
+        async getOverviewMetrics(startDate, endDate) {
+            const dateRange = this.getDateRange(startDate, endDate);
+            // ✅ OPTIMIZATION: Single aggregation query instead of multiple counts
+            const [campaignStats, subscriberStats, campaignMetrics] = await Promise.all([
+                this.campaignRepository.createQueryBuilder('campaign')
+                    .select('COUNT(*)', 'total')
+                    .addSelect('SUM(CASE WHEN status = \'sent\' THEN 1 ELSE 0 END)', 'active')
+                    .getRawOne(),
+                this.subscriberRepository.createQueryBuilder('subscriber')
+                    .select('COUNT(CASE WHEN status = \'active\' THEN 1 END)', 'active')
+                    .addSelect('COUNT(CASE WHEN createdAt >= :startDate THEN 1 END)', 'new')
+                    .addSelect('COUNT(CASE WHEN createdAt < :startDate THEN 1 END)', 'previous')
+                    .setParameters({ startDate: dateRange.start })
+                    .getRawOne(),
+                this.campaignRepository.createQueryBuilder('campaign')
+                    .select('SUM(sentCount)', 'totalSent')
+                    .addSelect('SUM(openedCount)', 'totalOpened')
+                    .addSelect('SUM(clickedCount)', 'totalClicked')
+                    .addSelect('SUM(CAST(metadata->>\'revenue\' AS DECIMAL))', 'totalRevenue')
+                    .where('sentAt BETWEEN :start AND :end', { start: dateRange.start, end: dateRange.end })
+                    .getRawOne(),
+            ]);
+            const totalEmailsSent = parseInt(campaignMetrics.totalSent || '0');
+            const totalOpened = parseInt(campaignMetrics.totalOpened || '0');
+            const totalClicked = parseInt(campaignMetrics.totalClicked || '0');
+            const totalRevenue = parseFloat(campaignMetrics.totalRevenue || '0');
+            const averageOpenRate = totalEmailsSent > 0 ? (totalOpened / totalEmailsSent) * 100 : 0;
+            const averageClickRate = totalEmailsSent > 0 ? (totalClicked / totalEmailsSent) * 100 : 0;
+            // ✅ OPTIMIZATION: Calculate actual subscriber growth rate
+            const activeSubscribers = parseInt(subscriberStats.active || '0');
+            const newSubscribers = parseInt(subscriberStats.new || '0');
+            const previousSubscribers = parseInt(subscriberStats.previous || '0');
+            const subscriberGrowthRate = previousSubscribers > 0
+                ? ((activeSubscribers - previousSubscribers) / previousSubscribers) * 100
+                : 0;
+            return {
+                totalCampaigns: parseInt(campaignStats.total || '0'),
+                totalSubscribers: activeSubscribers,
+                totalEmailsSent,
+                averageOpenRate: Math.round(averageOpenRate * 100) / 100,
+                averageClickRate: Math.round(averageClickRate * 100) / 100,
+                totalRevenue,
+                activeCampaigns: parseInt(campaignStats.active || '0'),
+                activeAbTests: 0, // TODO: Implement when A/B test entity exists
+                subscriberGrowthRate: Math.round(subscriberGrowthRate * 100) / 100,
+                engagementTrend: averageOpenRate > 25 ? 'up' : averageOpenRate < 15 ? 'down' : 'stable',
+            };
+        }
+        async getCampaignAnalytics(startDate, endDate, limit = 50) {
+            const dateRange = this.getDateRange(startDate, endDate);
+            const campaigns = await this.campaignRepository.find({
+                where: {
+                    sentAt: (0, typeorm_1.Between)(dateRange.start, dateRange.end),
+                },
+                order: {
+                    sentAt: 'DESC',
+                },
+                take: limit,
+            });
+            return campaigns.map(campaign => this.calculateCampaignMetrics(campaign));
+        }
+        async getSubscriberGrowth(startDate, endDate, period = 'day') {
+            const dateRange = this.getDateRange(startDate, endDate);
+            // ✅ OPTIMIZATION: Single query with date truncation instead of loop
+            const format = this.getDateTruncFormat(period);
+            const growthData = await this.subscriberRepository.createQueryBuilder('subscriber')
+                .select(`DATE_TRUNC('${format}', createdAt)`, 'date')
+                .addSelect('COUNT(*)', 'newSubscribers')
+                .where('createdAt BETWEEN :start AND :end', { start: dateRange.start, end: dateRange.end })
+                .groupBy('date')
+                .orderBy('date', 'ASC')
+                .getRawMany();
+            const unsubscribeData = await this.subscriberRepository.createQueryBuilder('subscriber')
+                .select(`DATE_TRUNC('${format}', updatedAt)`, 'date')
+                .addSelect('COUNT(*)', 'unsubscribes')
+                .where('status = :status', { status: 'unsubscribed' })
+                .andWhere('updatedAt BETWEEN :start AND :end', { start: dateRange.start, end: dateRange.end })
+                .groupBy('date')
+                .orderBy('date', 'ASC')
+                .getRawMany();
+            // Merge data by date
+            const dataMap = new Map();
+            growthData.forEach(row => {
+                const dateStr = new Date(row.date).toISOString().split('T')[0];
+                dataMap.set(dateStr, { new: parseInt(row.newSubscribers), unsub: 0 });
+            });
+            unsubscribeData.forEach(row => {
+                const dateStr = new Date(row.date).toISOString().split('T')[0];
+                const existing = dataMap.get(dateStr) || { new: 0, unsub: 0 };
+                existing.unsub = parseInt(row.unsubscribes);
+                dataMap.set(dateStr, existing);
+            });
+            // Calculate cumulative totals
+            let cumulativeTotal = await this.subscriberRepository.count({
+                where: { createdAt: (0, typeorm_1.Between)(new Date('2020-01-01'), dateRange.start), status: 'active' },
+            });
+            const result = [];
+            const sortedDates = Array.from(dataMap.keys()).sort();
+            for (const date of sortedDates) {
+                const data = dataMap.get(date);
+                const netGrowth = data.new - data.unsub;
+                cumulativeTotal += netGrowth;
+                const growthRate = cumulativeTotal > 0 ? (netGrowth / cumulativeTotal) * 100 : 0;
+                result.push({
+                    date,
+                    totalSubscribers: cumulativeTotal,
+                    newSubscribers: data.new,
+                    unsubscribes: data.unsub,
+                    netGrowth,
+                    growthRate: Math.round(growthRate * 100) / 100,
+                });
+            }
+            return result;
+        }
+        async getEmailEngagement(startDate, endDate, period = 'day') {
+            const dateRange = this.getDateRange(startDate, endDate);
+            const format = this.getDateTruncFormat(period);
+            // ✅ OPTIMIZATION: Single aggregation query instead of loop with multiple queries
+            const engagementData = await this.emailLogRepository.createQueryBuilder('log')
+                .select(`DATE_TRUNC('${format}', sentAt)`, 'date')
+                .addSelect('COUNT(*)', 'emailsSent')
+                .addSelect('COUNT(CASE WHEN openedAt IS NOT NULL THEN 1 END)', 'uniqueOpens')
+                .addSelect('COUNT(CASE WHEN clickedAt IS NOT NULL THEN 1 END)', 'uniqueClicks')
+                .addSelect('AVG(EXTRACT(EPOCH FROM (openedAt - sentAt)) / 60)', 'avgTimeToOpen')
+                .addSelect('AVG(EXTRACT(EPOCH FROM (clickedAt - openedAt)) / 60)', 'avgTimeToClick')
+                .where('sentAt BETWEEN :start AND :end', { start: dateRange.start, end: dateRange.end })
+                .groupBy('date')
+                .orderBy('date', 'ASC')
+                .getRawMany();
+            return engagementData.map(row => {
+                const emailsSent = parseInt(row.emailsSent);
+                const uniqueOpens = parseInt(row.uniqueOpens);
+                const uniqueClicks = parseInt(row.uniqueClicks);
+                return {
+                    date: new Date(row.date).toISOString().split('T')[0],
+                    emailsSent,
+                    uniqueOpens,
+                    uniqueClicks,
+                    openRate: emailsSent > 0 ? Math.round((uniqueOpens / emailsSent) * 10000) / 100 : 0,
+                    clickRate: emailsSent > 0 ? Math.round((uniqueClicks / emailsSent) * 10000) / 100 : 0,
+                    avgTimeToOpen: parseFloat(row.avgTimeToOpen) || 0,
+                    avgTimeToClick: parseFloat(row.avgTimeToClick) || 0,
+                };
+            });
+        }
+        async getRevenueMetrics(startDate, endDate, period = 'day') {
+            const dateRange = this.getDateRange(startDate, endDate);
+            const format = this.getDateTruncFormat(period);
+            // ✅ OPTIMIZATION: Single aggregation query
+            const revenueData = await this.campaignRepository.createQueryBuilder('campaign')
+                .select(`DATE_TRUNC('${format}', sentAt)`, 'date')
+                .addSelect('SUM(CAST(metadata->>\'revenue\' AS DECIMAL))', 'revenue')
+                .addSelect('SUM(CAST(metadata->>\'conversions\' AS INT))', 'conversions')
+                .addSelect('SUM(sentCount)', 'emailsSent')
+                .where('sentAt BETWEEN :start AND :end', { start: dateRange.start, end: dateRange.end })
+                .groupBy('date')
+                .orderBy('date', 'ASC')
+                .getRawMany();
+            return revenueData.map(row => {
+                const revenue = parseFloat(row.revenue || '0');
+                const conversions = parseInt(row.conversions || '0');
+                const emailsSent = parseInt(row.emailsSent || '0');
+                return {
+                    date: new Date(row.date).toISOString().split('T')[0],
+                    revenue,
+                    conversions,
+                    averageOrderValue: conversions > 0 ? Math.round((revenue / conversions) * 100) / 100 : 0,
+                    revenuePerEmail: emailsSent > 0 ? Math.round((revenue / emailsSent) * 100) / 100 : 0,
+                    conversionRate: emailsSent > 0 ? Math.round((conversions / emailsSent) * 10000) / 100 : 0,
+                };
+            });
+        }
+        async getTopCampaigns(startDate, endDate, limit = 10, sortBy = 'score') {
+            const dateRange = this.getDateRange(startDate, endDate);
+            const campaigns = await this.campaignRepository.find({
+                where: {
+                    sentAt: (0, typeorm_1.Between)(dateRange.start, dateRange.end),
+                },
+            });
+            const topCampaigns = campaigns
+                .map(campaign => {
+                const metrics = this.calculateCampaignMetrics(campaign);
+                // Composite score calculation
+                const score = (metrics.openRate + metrics.clickRate + metrics.conversionRate * 10) / 3;
+                return {
+                    campaignId: campaign.id,
+                    campaignName: campaign.name,
+                    sentAt: campaign.sentAt?.toISOString() || '',
+                    openRate: metrics.openRate,
+                    clickRate: metrics.clickRate,
+                    conversionRate: metrics.conversionRate,
+                    revenue: metrics.revenue,
+                    score: Math.round(score * 100) / 100,
+                };
+            })
+                .sort((a, b) => b[sortBy] - a[sortBy])
+                .slice(0, limit);
+            return topCampaigns;
+        }
+        async getAbTestSummary(startDate, endDate, limit = 20) {
+            // TODO: Implement when A/B test entity is created
+            return [];
+        }
+        async compareCampaigns(campaignIds, metrics) {
+            // ✅ OPTIMIZATION: Use findBy instead of deprecated findByIds
+            const campaigns = await this.campaignRepository.findBy({
+                id: campaignIds, // TypeORM In() operator
+            });
+            const campaignAnalytics = campaigns.map(campaign => this.calculateCampaignMetrics(campaign));
+            // Generate comparison data
+            const comparison = {};
+            metrics.forEach(metric => {
+                const values = campaignAnalytics.map(c => Number(c[metric]) || 0);
+                comparison[metric] = {
+                    average: Math.round((values.reduce((sum, val) => sum + val, 0) / values.length) * 100) / 100,
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                };
+            });
+            return {
+                campaigns: campaignAnalytics,
+                comparison,
+            };
+        }
+        async getDataStatus() {
+            const [campaignCount, subscriberCount, emailLogCount, recentCampaigns] = await Promise.all([
+                this.campaignRepository.count(),
+                this.subscriberRepository.count(),
+                this.emailLogRepository.count(),
+                this.campaignRepository.find({
+                    order: { createdAt: 'DESC' },
+                    take: 5,
+                    select: ['id', 'name', 'status', 'sentCount', 'openedCount', 'clickedCount', 'createdAt', 'sentAt'],
+                }),
+            ]);
+            return {
+                campaigns: campaignCount,
+                subscribers: subscriberCount,
+                emailLogs: emailLogCount,
+                recentCampaigns,
+            };
+        }
+        async exportData(type, format = 'csv', startDate, endDate) {
+            let csvContent = '';
+            switch (type) {
+                case 'campaigns': {
+                    const campaigns = await this.getCampaignAnalytics(startDate, endDate, 10000);
+                    csvContent = 'Campaign Name,Sent Count,Open Rate,Click Rate,Conversion Rate,Revenue\n';
+                    campaigns.forEach(c => {
+                        csvContent += `"${c.campaignName}",${c.sentCount},${c.openRate.toFixed(2)}%,${c.clickRate.toFixed(2)}%,${c.conversionRate.toFixed(2)}%,${c.revenue}\n`;
+                    });
+                    break;
+                }
+                case 'subscribers': {
+                    const subscriberGrowth = await this.getSubscriberGrowth(startDate, endDate, 'day');
+                    csvContent = 'Date,Total Subscribers,New Subscribers,Unsubscribes,Growth Rate\n';
+                    subscriberGrowth.forEach(s => {
+                        csvContent += `${s.date},${s.totalSubscribers},${s.newSubscribers},${s.unsubscribes},${s.growthRate.toFixed(2)}%\n`;
+                    });
+                    break;
+                }
+                case 'engagement': {
+                    const engagement = await this.getEmailEngagement(startDate, endDate, 'day');
+                    csvContent = 'Date,Emails Sent,Open Rate,Click Rate,Avg Time to Open,Avg Time to Click\n';
+                    engagement.forEach(e => {
+                        csvContent += `${e.date},${e.emailsSent},${e.openRate.toFixed(2)}%,${e.clickRate.toFixed(2)}%,${e.avgTimeToOpen.toFixed(1)}min,${e.avgTimeToClick.toFixed(1)}min\n`;
+                    });
+                    break;
+                }
+                case 'revenue': {
+                    const revenue = await this.getRevenueMetrics(startDate, endDate, 'day');
+                    csvContent = 'Date,Revenue,Conversions,Average Order Value,Revenue Per Email\n';
+                    revenue.forEach(r => {
+                        csvContent += `${r.date},${r.revenue.toFixed(2)},${r.conversions},${r.averageOrderValue.toFixed(2)},${r.revenuePerEmail.toFixed(4)}\n`;
+                    });
+                    break;
+                }
+            }
+            return csvContent;
+        }
+        // ✅ HELPER: Extract campaign metrics calculation to avoid duplication
+        calculateCampaignMetrics(campaign) {
+            const sentCount = campaign.sentCount || 0;
+            const openedCount = campaign.openedCount || 0;
+            const clickedCount = campaign.clickedCount || 0;
+            const conversionCount = campaign.metadata?.conversions || 0;
+            const revenue = campaign.metadata?.revenue || 0;
+            const bounceCount = campaign.metadata?.bounces || 0;
+            const unsubscribeCount = campaign.metadata?.unsubscribes || 0;
+            return {
+                campaignId: campaign.id,
+                campaignName: campaign.name,
+                sentCount,
+                openedCount,
+                clickedCount,
+                conversionCount,
+                revenue,
+                bounceCount,
+                unsubscribeCount,
+                openRate: sentCount > 0 ? Math.round((openedCount / sentCount) * 10000) / 100 : 0,
+                clickRate: sentCount > 0 ? Math.round((clickedCount / sentCount) * 10000) / 100 : 0,
+                conversionRate: sentCount > 0 ? Math.round((conversionCount / sentCount) * 10000) / 100 : 0,
+                bounceRate: sentCount > 0 ? Math.round((bounceCount / sentCount) * 10000) / 100 : 0,
+                unsubscribeRate: sentCount > 0 ? Math.round((unsubscribeCount / sentCount) * 10000) / 100 : 0,
+                sentAt: campaign.sentAt?.toISOString() || '',
+                status: campaign.status,
+            };
+        }
+        getDateRange(startDate, endDate) {
+            const end = endDate ? new Date(endDate) : new Date();
+            const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return { start, end };
+        }
+        getDateTruncFormat(period) {
+            const formats = {
+                day: 'day',
+                week: 'week',
+                month: 'month',
+                quarter: 'quarter',
+                year: 'year',
+            };
+            return formats[period];
+        }
+    };
+    return AnalyticsService = _classThis;
+})();
+exports.AnalyticsService = AnalyticsService;
+//# sourceMappingURL=analytics.service.optimized.js.map

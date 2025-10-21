@@ -1,0 +1,1 @@
+{"version":3,"file":"debug-panel.d.ts","sourceRoot":"","sources":["debug-panel.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAmB,MAAM,OAAO,CAAC;AASxC,UAAU,eAAe;IACvB,QAAQ,EAAE,GAAG,CAAC;IACd,UAAU,EAAE,GAAG,EAAE,CAAC;IAClB,aAAa,EAAE,GAAG,CAAC;CACpB;AAED,eAAO,MAAM,UAAU,EAAE,KAAK,CAAC,EAAE,CAAC,eAAe,CA2KhD,CAAC;AAEF,eAAe,UAAU,CAAC"}

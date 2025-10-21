@@ -1,0 +1,1 @@
+{"version":3,"file":"heatmap-canvas.d.ts","sourceRoot":"","sources":["heatmap-canvas.tsx"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,WAAW,EAAgB,MAAM,+BAA+B,CAAC;AAE/E,UAAU,kBAAkB;IAC1B,IAAI,EAAE,WAAW,GAAG,IAAI,CAAC;IACzB,SAAS,CAAC,EAAE,OAAO,CAAC;CACrB;AAED,wBAAgB,aAAa,CAAC,EAAE,IAAI,EAAE,SAAS,EAAE,EAAE,kBAAkB,+BAkKpE"}

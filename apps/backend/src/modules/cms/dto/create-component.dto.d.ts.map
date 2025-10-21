@@ -1,0 +1,1 @@
+{"version":3,"file":"create-component.dto.d.ts","sourceRoot":"","sources":["create-component.dto.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,aAAa,EAAE,MAAM,uBAAuB,CAAC;AAEtD,qBAAa,kBAAkB;IAE7B,MAAM,EAAE,MAAM,CAAC;IAIf,QAAQ,CAAC,EAAE,MAAM,CAAC;IAGlB,IAAI,EAAE,aAAa,CAAC;IAGpB,KAAK,EAAE,GAAG,CAAC;IAIX,UAAU,CAAC,EAAE,MAAM,CAAC;CACrB"}

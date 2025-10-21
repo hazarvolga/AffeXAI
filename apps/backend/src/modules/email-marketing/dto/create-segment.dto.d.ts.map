@@ -1,0 +1,1 @@
+{"version":3,"file":"create-segment.dto.d.ts","sourceRoot":"","sources":["create-segment.dto.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,gBAAgB,IAAI,iBAAiB,EAAE,MAAM,uBAAuB,CAAC;AAE9E,qBAAa,gBAAiB,YAAW,iBAAiB;IAGxD,IAAI,EAAE,MAAM,CAAC;IAIb,WAAW,CAAC,EAAE,MAAM,CAAC;IAIrB,QAAQ,CAAC,EAAE,MAAM,CAAC;IAGlB,QAAQ,CAAC,EAAE,MAAM,CAAC;IAGlB,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB"}

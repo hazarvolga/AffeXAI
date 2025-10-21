@@ -1,0 +1,1 @@
+{"version":3,"file":"device-distribution-chart.d.ts","sourceRoot":"","sources":["device-distribution-chart.tsx"],"names":[],"mappings":"AAKA,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,+BAA+B,CAAC;AAEhE,UAAU,4BAA4B;IACpC,YAAY,EAAE,MAAM,CAAC,UAAU,EAAE,MAAM,CAAC,CAAC;IACzC,SAAS,CAAC,EAAE,OAAO,CAAC;CACrB;AAoBD,wBAAgB,uBAAuB,CAAC,EAAE,YAAY,EAAE,SAAS,EAAE,EAAE,4BAA4B,+BAgGhG"}

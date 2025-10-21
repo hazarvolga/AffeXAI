@@ -1,0 +1,287 @@
+/**
+ * CMS Template System - Enhanced Type Definitions with Design Token Integration
+ *
+ * Implements W3C Design Tokens integration with page templates for:
+ * - Theme-aware templates supporting multiple contexts (public/admin/portal)
+ * - Design token references using {tokenPath} alias format
+ * - Template versioning and validation
+ * - Component-level template parts for reusability
+ */
+import type { ThemeContext, ThemeMode, DesignTokens } from './design-tokens';
+/**
+ * Template Categories for Organization
+ */
+export type TemplateCategory = 'landing' | 'content' | 'ecommerce' | 'dashboard' | 'authentication' | 'error' | 'portfolio' | 'custom';
+/**
+ * Layout Configuration for Templates
+ */
+export interface LayoutConfig {
+    maxWidth?: 'full' | 'wide' | 'standard' | 'narrow';
+    spacing?: 'compact' | 'normal' | 'spacious';
+    containerPadding?: string;
+    gridColumns?: number;
+    gridGap?: string;
+}
+/**
+ * Template Constraints to Control Usage
+ */
+export interface TemplateConstraints {
+    requiredBlocks?: string[];
+    maxBlocks?: number;
+    minBlocks?: number;
+    allowedCategories?: string[];
+    forbiddenBlocks?: string[];
+    lockLayout?: boolean;
+    lockOrder?: boolean;
+}
+/**
+ * Design System Integration for Templates
+ */
+export interface TemplateDesignSystem {
+    /**
+     * Supported theme contexts (public/admin/portal)
+     */
+    supportedContexts: ThemeContext[];
+    /**
+     * Preferred theme mode (light/dark)
+     */
+    preferredMode?: ThemeMode;
+    /**
+     * Custom token overrides specific to this template
+     */
+    customTokens?: Partial<DesignTokens>;
+    /**
+     * Color scheme using design token references
+     */
+    colorScheme: {
+        primary: string;
+        secondary?: string;
+        accent: string;
+        background: string;
+        foreground: string;
+        muted?: string;
+        card?: string;
+        border?: string;
+    };
+    /**
+     * Typography using design token references
+     */
+    typography: {
+        heading: string;
+        subheading?: string;
+        body: string;
+        caption?: string;
+    };
+    /**
+     * Spacing using design token references
+     */
+    spacing: {
+        section: string;
+        component: string;
+        element?: string;
+    };
+    /**
+     * Optional shadow and border tokens
+     */
+    effects?: {
+        shadow?: string;
+        border?: string;
+        radius?: string;
+    };
+}
+/**
+ * Block Instance in Template
+ */
+export interface BlockInstance {
+    id: string;
+    type: string;
+    category: string;
+    properties: Record<string, any>;
+    children?: BlockInstance[];
+    locked?: boolean;
+}
+/**
+ * Template Preview Information
+ */
+export interface TemplatePreview {
+    thumbnail: string;
+    previewUrl?: string;
+    screenshots?: {
+        desktop?: string;
+        tablet?: string;
+        mobile?: string;
+    };
+}
+/**
+ * Template Metadata
+ */
+export interface TemplateMetadata {
+    author?: string;
+    authorUrl?: string;
+    license?: string;
+    tags?: string[];
+    keywords?: string[];
+    industry?: string[];
+    designStyle?: string[];
+}
+/**
+ * Template Version History
+ */
+export interface TemplateVersion {
+    version: number;
+    createdAt: Date;
+    createdBy?: string;
+    changelog?: string;
+    blocks: BlockInstance[];
+    designSystem: TemplateDesignSystem;
+}
+/**
+ * Main Page Template Interface
+ */
+export interface PageTemplate {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Template name (user-facing)
+     */
+    name: string;
+    /**
+     * Template description
+     */
+    description: string;
+    /**
+     * Template category for organization
+     */
+    category: TemplateCategory;
+    /**
+     * Block instances that make up this template
+     */
+    blocks: BlockInstance[];
+    /**
+     * Layout configuration
+     */
+    layoutOptions: LayoutConfig;
+    /**
+     * Design system integration with token references
+     */
+    designSystem: TemplateDesignSystem;
+    /**
+     * Template constraints to control usage
+     */
+    constraints?: TemplateConstraints;
+    /**
+     * Preview assets
+     */
+    preview: TemplatePreview;
+    /**
+     * Additional metadata
+     */
+    metadata?: TemplateMetadata;
+    /**
+     * Usage statistics
+     */
+    usageCount: number;
+    /**
+     * Current version number
+     */
+    version: number;
+    /**
+     * Version history
+     */
+    versionHistory?: TemplateVersion[];
+    /**
+     * Timestamps
+     */
+    createdAt: Date;
+    updatedAt: Date;
+    /**
+     * Published status
+     */
+    isPublished: boolean;
+    /**
+     * Featured template
+     */
+    isFeatured?: boolean;
+}
+/**
+ * Template Part - Reusable Section
+ */
+export interface TemplatePart {
+    id: string;
+    name: string;
+    description: string;
+    type: 'header' | 'footer' | 'sidebar' | 'section' | 'custom';
+    blocks: BlockInstance[];
+    designSystem?: Partial<TemplateDesignSystem>;
+    preview?: TemplatePreview;
+    usageCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+/**
+ * Template Library Filter Options
+ */
+export interface TemplateFilters {
+    category?: TemplateCategory[];
+    context?: ThemeContext[];
+    tags?: string[];
+    industry?: string[];
+    designStyle?: string[];
+    isFeatured?: boolean;
+    sortBy?: 'popular' | 'recent' | 'name' | 'category';
+    sortOrder?: 'asc' | 'desc';
+}
+/**
+ * Template Application Result
+ */
+export interface TemplateApplicationResult {
+    success: boolean;
+    errors?: string[];
+    warnings?: string[];
+    appliedBlocks: number;
+    resolvedTokens: number;
+    validationResults?: TemplateValidationResult;
+}
+/**
+ * Template Validation Result
+ */
+export interface TemplateValidationResult {
+    isValid: boolean;
+    errors: TemplateValidationError[];
+    warnings: TemplateValidationWarning[];
+}
+/**
+ * Template Validation Error
+ */
+export interface TemplateValidationError {
+    type: 'token_not_found' | 'constraint_violation' | 'invalid_block' | 'missing_required_block';
+    message: string;
+    blockId?: string;
+    tokenPath?: string;
+    severity: 'error' | 'warning';
+}
+/**
+ * Template Validation Warning
+ */
+export interface TemplateValidationWarning {
+    type: 'deprecated_token' | 'performance' | 'accessibility' | 'best_practice';
+    message: string;
+    suggestion?: string;
+}
+/**
+ * Type guard to check if a value is a token alias
+ */
+export declare function isTokenAlias(value: unknown): value is string;
+/**
+ * Extract token path from alias format
+ * @example "{color.primary}" -> "color.primary"
+ */
+export declare function extractTokenPath(alias: string): string;
+/**
+ * Create token alias from path
+ * @example "color.primary" -> "{color.primary}"
+ */
+export declare function createTokenAlias(path: string): string;
+//# sourceMappingURL=cms-template.d.ts.map

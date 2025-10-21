@@ -1,0 +1,1 @@
+{"version":3,"file":"block-renderer.d.ts","sourceRoot":"","sources":["block-renderer.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,MAAM,OAAO,CAAC;AAqB1B,UAAU,kBAAkB;IAC1B,OAAO,EAAE,MAAM,CAAC;IAChB,KAAK,CAAC,EAAE,GAAG,CAAC;CACb;AAED,eAAO,MAAM,aAAa,EAAE,KAAK,CAAC,EAAE,CAAC,kBAAkB,CAsDtD,CAAC;AAEF,eAAe,aAAa,CAAC"}

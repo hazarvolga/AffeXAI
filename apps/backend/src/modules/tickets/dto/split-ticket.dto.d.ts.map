@@ -1,0 +1,1 @@
+{"version":3,"file":"split-ticket.dto.d.ts","sourceRoot":"","sources":["split-ticket.dto.ts"],"names":[],"mappings":"AAGA;;GAEG;AACH,qBAAa,cAAc;IAOzB,gBAAgB,EAAE,MAAM,CAAC;IAQzB,gBAAgB,EAAE,MAAM,CAAC;IAQzB,oBAAoB,EAAE,MAAM,CAAC;IAS7B,iBAAiB,CAAC,EAAE,MAAM,CAAC;IAQ3B,mBAAmB,CAAC,EAAE,MAAM,CAAC;IAU7B,UAAU,CAAC,EAAE,MAAM,EAAE,CAAC;IAQtB,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB"}

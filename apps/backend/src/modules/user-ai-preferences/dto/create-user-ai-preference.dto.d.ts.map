@@ -1,0 +1,1 @@
+{"version":3,"file":"create-user-ai-preference.dto.d.ts","sourceRoot":"","sources":["create-user-ai-preference.dto.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,UAAU,EAAE,QAAQ,EAAE,MAAM,uCAAuC,CAAC;AAE7E,qBAAa,yBAAyB;IAEpC,MAAM,EAAE,QAAQ,CAAC;IAGjB,QAAQ,EAAE,UAAU,CAAC;IAIrB,KAAK,EAAE,MAAM,CAAC;IAId,MAAM,CAAC,EAAE,MAAM,CAAC;IAIhB,OAAO,CAAC,EAAE,OAAO,CAAC;CACnB"}

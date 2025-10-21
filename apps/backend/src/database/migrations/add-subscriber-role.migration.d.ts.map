@@ -1,0 +1,1 @@
+{"version":3,"file":"add-subscriber-role.migration.d.ts","sourceRoot":"","sources":["add-subscriber-role.migration.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,WAAW,EAAE,MAAM,SAAS,CAAC;AAE1D,qBAAa,8BAA+B,YAAW,kBAAkB;IAC1D,EAAE,CAAC,WAAW,EAAE,WAAW,GAAG,OAAO,CAAC,IAAI,CAAC;IAmB3C,IAAI,CAAC,WAAW,EAAE,WAAW,GAAG,OAAO,CAAC,IAAI,CAAC;CAK3D"}

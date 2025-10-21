@@ -1,0 +1,1 @@
+{"version":3,"file":"create-campaign.dto.d.ts","sourceRoot":"","sources":["create-campaign.dto.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,iBAAiB,IAAI,kBAAkB,EAAE,MAAM,uBAAuB,CAAC;AAEhF,qBAAa,iBAAkB,YAAW,kBAAkB;IAG1D,IAAI,EAAE,MAAM,CAAC;IAIb,OAAO,EAAE,MAAM,CAAC;IAIhB,OAAO,EAAE,MAAM,CAAC;IAIhB,WAAW,CAAC,EAAE,IAAI,CAAC;IAInB,MAAM,CAAC,EAAE,MAAM,CAAC;CACjB"}

@@ -5,6 +5,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { AiController } from './ai.controller';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
+import { GoogleProvider } from './providers/google.provider';
 import { AiProviderFactory } from './providers/provider.factory';
 import { UserAiPreferencesModule } from '../user-ai-preferences/user-ai-preferences.module';
 
@@ -17,8 +18,9 @@ import { UserAiPreferencesModule } from '../user-ai-preferences/user-ai-preferen
     // Providers
     OpenAIProvider,
     AnthropicProvider,
+    GoogleProvider,
     AiProviderFactory,
-    
+
     // Services
     AiService,
     AiEmailService,

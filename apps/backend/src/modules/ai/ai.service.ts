@@ -188,5 +188,15 @@ export class AiService {
     } catch (e) {
       // Anthropic provider might not be available yet
     }
+
+    // Clear Google cache
+    try {
+      const googleProvider = this.providerFactory.getProvider('google');
+      if ('clearCache' in googleProvider && typeof googleProvider.clearCache === 'function') {
+        googleProvider.clearCache(apiKey);
+      }
+    } catch (e) {
+      // Google provider might not be available yet
+    }
   }
 }

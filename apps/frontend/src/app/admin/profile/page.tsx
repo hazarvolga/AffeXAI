@@ -39,27 +39,33 @@ export default function AdminProfilePage() {
         return;
       }
 
-      const user = authService.getUserFromToken();
-      if (!user) {
+      const tokenUser = authService.getUserFromToken();
+      if (!tokenUser) {
         router.push('/admin/login');
         return;
       }
 
-      setCurrentUser(user);
+      console.log('🔄 Loading fresh user data from API...');
+      // IMPORTANT: Fetch fresh data from API, not from cached JWT token!
+      // The JWT token contains user data from login time, not current database state
+      const freshUser = await usersService.getCurrentUser();
+      console.log('✅ Fresh user data loaded:', freshUser);
 
-      // Set form values from user data
-      setFirstName(user.firstName || '');
-      setLastName(user.lastName || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || '');
-      setCity(user.city || '');
-      setCountry(user.country || '');
-      setAddress(user.address || '');
-      setBio(user.bio || '');
+      setCurrentUser(freshUser);
+
+      // Set form values from FRESH user data
+      setFirstName(freshUser.firstName || '');
+      setLastName(freshUser.lastName || '');
+      setEmail(freshUser.email || '');
+      setPhone(freshUser.phone || '');
+      setCity(freshUser.city || '');
+      setCountry(freshUser.country || '');
+      setAddress(freshUser.address || '');
+      setBio(freshUser.bio || '');
 
       setLoading(false);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('❌ Error loading user data:', error);
       toast({
         title: 'Hata',
         description: 'Kullanıcı bilgileri yüklenemedi',
@@ -70,10 +76,27 @@ export default function AdminProfilePage() {
   };
 
   const handleSaveProfile = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('❌ No currentUser - cannot save profile');
+      return;
+    }
+
+    console.log('💾 PROFILE SAVE - Starting:', {
+      userId: currentUser.id,
+      updateData: {
+        firstName,
+        lastName,
+        phone,
+        city,
+        country,
+        address,
+        bio,
+      },
+    });
 
     setSaving(true);
     try {
+      console.log('📡 Calling usersService.updateUser...');
       await usersService.updateUser(currentUser.id, {
         firstName,
         lastName,
@@ -84,15 +107,17 @@ export default function AdminProfilePage() {
         bio,
       });
 
+      console.log('✅ Profile update successful');
       toast({
         title: 'Başarılı',
         description: 'Profil bilgileriniz güncellendi',
       });
 
       // Refresh user data
+      console.log('🔄 Refreshing user data...');
       await loadUserData();
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('❌ Error updating profile:', error);
       toast({
         title: 'Hata',
         description: 'Profil güncellenirken bir hata oluştu',

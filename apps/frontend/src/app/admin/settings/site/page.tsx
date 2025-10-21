@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import MediaPicker from '@/components/media/MediaPicker';
 import settingsService from '@/lib/api/settingsService';
-import AiSettingsTab from '@/components/admin/settings/AiSettingsTab';
+// import AiSettingsTab from '@/components/admin/settings/AiSettingsTab'; // REMOVED: Users now manage AI preferences individually
 
 const socialIcons: { [key: string]: React.ElementType } = {
     facebook: Facebook,
@@ -194,9 +194,8 @@ export default function SiteSettingsPage() {
             </div>
             <form action={formAction}>
                  <Tabs defaultValue="company">
-                    <TabsList className="grid w-full grid-cols-5">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="company">Company</TabsTrigger>
-                        <TabsTrigger value="ai">AI</TabsTrigger>
                         <TabsTrigger value="email">Email Settings</TabsTrigger>
                         <TabsTrigger value="social">Social Media</TabsTrigger>
                         <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -293,9 +292,6 @@ export default function SiteSettingsPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </TabsContent>
-                    <TabsContent value="ai" className="mt-6">
-                        <AiSettingsTab />
                     </TabsContent>
                     <TabsContent value="email" className="mt-6">
                          <Card>

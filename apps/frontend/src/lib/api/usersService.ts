@@ -96,7 +96,20 @@ class UsersService extends BaseApiService<User, CreateUserDto, UpdateUserDto> {
    * Update user profile
    */
   async updateUser(userId: string, data: UpdateUserDto): Promise<User> {
-    return this.client.patchWrapped<User>(`${this.endpoint}/${userId}`, data);
+    console.log('🔧 usersService.updateUser called:', {
+      endpoint: `${this.endpoint}/${userId}`,
+      userId,
+      data,
+    });
+
+    try {
+      const result = await this.client.patchWrapped<User>(`${this.endpoint}/${userId}`, data);
+      console.log('✅ usersService.updateUser success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ usersService.updateUser error:', error);
+      throw error;
+    }
   }
 
   /**

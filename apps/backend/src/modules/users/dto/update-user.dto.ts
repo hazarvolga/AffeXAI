@@ -4,6 +4,25 @@ import { IsOptional, IsBoolean, IsString, IsDate, IsUUID, IsArray } from 'class-
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
+  // Override firstName and lastName to make them explicitly optional
+  @ApiProperty({
+    description: 'First name',
+    example: 'John',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({
+    description: 'Last name',
+    example: 'Doe',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
   // NEW: Primary role support
   @ApiProperty({
     description: 'Primary role ID (UUID)',

@@ -1,0 +1,101 @@
+import httpClient from './http-client';
+
+export enum AiProvider {
+  OPENAI = 'openai',
+  ANTHROPIC = 'anthropic',
+  GOOGLE = 'google',
+}
+
+export enum AiModule {
+  EMAIL = 'email',
+  SOCIAL = 'social',
+  SUPPORT = 'support',
+  ANALYTICS = 'analytics',
+}
+
+export interface UserAiPreference {
+  id: string;
+  userId: string;
+  module: AiModule;
+  provider: AiProvider;
+  model: string;
+  apiKey: string | null; // Masked in responses
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateUserAiPreferenceDto {
+  module: AiModule;
+  provider: AiProvider;
+  model: string;
+  apiKey?: string;
+  enabled?: boolean;
+}
+
+export interface UpdateUserAiPreferenceDto {
+  provider?: AiProvider;
+  model?: string;
+  apiKey?: string;
+  enabled?: boolean;
+}
+
+class UserAiPreferencesService {
+  private baseUrl = '/user-ai-preferences';
+
+  /**
+   * Get all AI preferences for current user
+   */
+  async getUserPreferences(): Promise<UserAiPreference[]> {
+    const response = await httpClient.getWrapped<UserAiPreference[]>(this.baseUrl);
+    return response;
+  }
+
+  /**
+   * Get AI preference for specific module
+   */
+  async getPreferenceForModule(module: AiModule): Promise<UserAiPreference | null> {
+    try {
+      const response = await httpClient.getWrapped<UserAiPreference>(`${this.baseUrl}/${module}`);
+      return response;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Create or update AI preference
+   */
+  async upsertPreference(dto: CreateUserAiPreferenceDto): Promise<UserAiPreference> {
+    const response = await httpClient.postWrapped<UserAiPreference>(this.baseUrl, dto);
+    return response;
+  }
+
+  /**
+   * Update AI preference by ID
+   */
+  async updatePreference(id: string, dto: UpdateUserAiPreferenceDto): Promise<UserAiPreference> {
+    const response = await httpClient.putWrapped<UserAiPreference>(`${this.baseUrl}/${id}`, dto);
+    return response;
+  }
+
+  /**
+   * Delete AI preference by ID
+   */
+  async deletePreference(id: string): Promise<void> {
+    await httpClient.delete(`${this.baseUrl}/${id}`);
+  }
+
+  /**
+   * Delete all AI preferences for current user
+   */
+  async deleteAllPreferences(): Promise<void> {
+    await httpClient.delete(this.baseUrl);
+  }
+}
+
+export const userAiPreferencesService = new UserAiPreferencesService();
+export default userAiPreferencesService;

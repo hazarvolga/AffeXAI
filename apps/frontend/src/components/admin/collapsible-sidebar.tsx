@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, User, Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 
 const navLinks = [
     { href: "/admin", label: "Genel Bakış", icon: Home, permission: null }, // Everyone can see dashboard
+    { href: "/admin/profile/ai-preferences", label: "AI Tercihleri", icon: Sparkles, permission: null }, // Everyone can see their AI preferences
     { href: "/admin/events", label: "Etkinlikler", icon: Calendar, permission: Permission.EVENTS_VIEW },
     { href: "/admin/certificates", label: "Sertifikalar", icon: Award, permission: Permission.CERTIFICATES_VIEW },
     { href: "/admin/social-media", label: "Sosyal Medya", icon: Share2, permission: Permission.SOCIAL_MEDIA_VIEW },

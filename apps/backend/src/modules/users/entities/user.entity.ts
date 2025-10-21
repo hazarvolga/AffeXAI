@@ -14,10 +14,10 @@ export class User extends BaseEntity {
   @Exclude()
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
 
   @Column({ nullable: true, length: 20 })

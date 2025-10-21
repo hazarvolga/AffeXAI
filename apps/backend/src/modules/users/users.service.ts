@@ -209,7 +209,18 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    console.log('📝 UPDATE USER - Start:', {
+      userId: id,
+      updateData: updateUserDto,
+    });
+
     const user = await this.findOne(id);
+    console.log('👤 Current user data:', {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
 
     // Check if email is being changed and if it's already taken
     if (updateUserDto.email && updateUserDto.email !== user.email) {
@@ -270,15 +281,29 @@ export class UsersService {
 
     // IMPORTANT: Use update() instead of save() to avoid eager loading issues
     // save() tries to persist eager loaded relations which causes userId to become null
-    await this.usersRepository.update(id, updateUserDto);
+    console.log('💾 Executing database update with data:', updateUserDto);
+    const updateResult = await this.usersRepository.update(id, updateUserDto);
+    console.log('✅ Database update result:', {
+      affected: updateResult.affected,
+      raw: updateResult.raw,
+    });
 
     // Clear cache
     await this.cacheService.del(`users:${id}`);
     await this.cacheService.del(`users:email:${user.email}`);
     await this.cacheService.del('users:all');
+    console.log('🗑️ Cache cleared for user:', id);
 
     // Reload user with updated roles
-    return this.findOne(id);
+    const updatedUser = await this.findOne(id);
+    console.log('🔄 Reloaded user data:', {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+    });
+
+    return updatedUser;
   }
 
   // Alias for update method (for compatibility)

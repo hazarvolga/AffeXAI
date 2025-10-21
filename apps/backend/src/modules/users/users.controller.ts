@@ -93,16 +93,33 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update a user (admin only)' })
+  @ApiOperation({ summary: 'Update a user (self-service or admin)' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 409, description: 'Email already in use' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin only' })
+  @ApiResponse({ status: 403, description: 'Forbidden - can only update own profile or admin required' })
   update(
-    @Param('id') id: string, 
+    @CurrentUser('id') currentUserId: string,
+    @CurrentUser('role') currentUserRole: string,
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    console.log('🎯 PATCH /users/:id - Request received:', {
+      currentUserId,
+      currentUserRole,
+      targetUserId: id,
+      updateData: updateUserDto,
+      isSelfUpdate: currentUserId === id,
+      isAdmin: currentUserRole === UserRole.ADMIN,
+    });
+
+    // Allow users to update their own profile, or admins to update any profile
+    if (currentUserId !== id && currentUserRole !== UserRole.ADMIN) {
+      console.log('❌ AUTHORIZATION FAILED: User not allowed to update this profile');
+      throw new ForbiddenException('You can only update your own profile');
+    }
+
+    console.log('✅ AUTHORIZATION PASSED: Proceeding with update');
     return this.usersService.update(id, updateUserDto);
   }
 

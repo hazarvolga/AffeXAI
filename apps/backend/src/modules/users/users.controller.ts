@@ -110,12 +110,19 @@ export class UsersController {
       targetUserId: id,
       updateData: updateUserDto,
       isSelfUpdate: currentUserId === id,
-      isAdmin: currentUserRole === UserRole.ADMIN,
+      isAdmin: currentUserRole?.toLowerCase() === UserRole.ADMIN.toLowerCase(),
+      roleComparison: `'${currentUserRole}' vs '${UserRole.ADMIN}'`,
     });
 
     // Allow users to update their own profile, or admins to update any profile
-    if (currentUserId !== id && currentUserRole !== UserRole.ADMIN) {
-      console.log('❌ AUTHORIZATION FAILED: User not allowed to update this profile');
+    const isAdmin = currentUserRole?.toLowerCase() === UserRole.ADMIN.toLowerCase();
+    if (currentUserId !== id && !isAdmin) {
+      console.log('❌ AUTHORIZATION FAILED: User not allowed to update this profile', {
+        currentUserRole,
+        expectedAdminRole: UserRole.ADMIN,
+        isAdmin,
+        comparison: `'${currentUserRole?.toLowerCase()}' === '${UserRole.ADMIN.toLowerCase()}'`
+      });
       throw new ForbiddenException('You can only update your own profile');
     }
 

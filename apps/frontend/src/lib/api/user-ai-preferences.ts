@@ -43,6 +43,24 @@ export interface UpdateUserAiPreferenceDto {
   enabled?: boolean;
 }
 
+export interface GlobalAiPreference {
+  id: string;
+  userId: string;
+  provider: AiProvider;
+  model: string;
+  apiKey: string | null;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpsertGlobalPreferenceDto {
+  provider: AiProvider;
+  model: string;
+  apiKey?: string;
+  enabled: boolean;
+}
+
 class UserAiPreferencesService {
   private baseUrl = '/user-ai-preferences';
 
@@ -97,6 +115,40 @@ class UserAiPreferencesService {
    */
   async deleteAllPreferences(): Promise<void> {
     await httpClient.delete(this.baseUrl);
+  }
+
+  // ============================================
+  // Global AI Preference Methods
+  // ============================================
+
+  /**
+   * Get global AI preference for current user
+   */
+  async getGlobalPreference(): Promise<GlobalAiPreference | null> {
+    try {
+      const response = await httpClient.getWrapped<GlobalAiPreference>(`${this.baseUrl}/global/preference`);
+      return response;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Create or update global AI preference
+   */
+  async upsertGlobalPreference(dto: UpsertGlobalPreferenceDto): Promise<GlobalAiPreference> {
+    const response = await httpClient.postWrapped<GlobalAiPreference>(`${this.baseUrl}/global/preference`, dto);
+    return response;
+  }
+
+  /**
+   * Delete global AI preference
+   */
+  async deleteGlobalPreference(): Promise<void> {
+    await httpClient.delete(`${this.baseUrl}/global/preference`);
   }
 }
 

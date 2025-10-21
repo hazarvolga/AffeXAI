@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bot, KeyRound, TestTube2, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Bot, KeyRound, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -306,7 +305,7 @@ export default function UserAiPreferencesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -472,50 +471,86 @@ export default function UserAiPreferencesPage() {
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4 sm:gap-6">
         {modulePreferences.map((pref) => (
-          <Card key={pref.module}>
+          <Card 
+            key={pref.module}
+            className={`transition-all duration-300 ${
+              globalPreference && pref.useGlobal 
+                ? 'opacity-75 bg-muted/30 border-muted' 
+                : 'hover:shadow-md'
+            }`}
+          >
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex-1">
                   <CardTitle className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-primary" />
                     {MODULE_LABELS[pref.module]}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="flex flex-wrap items-center gap-2 mt-2">
                     {globalPreference && pref.useGlobal ? (
-                      <span className="text-green-600">
-                        🌐 Global ayar kullanılıyor: {PROVIDER_LABELS[globalPreference.provider]} - {globalPreference.model}
-                      </span>
+                      <>
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
+                          🌐 Global
+                        </Badge>
+                        <span className="text-green-600 font-medium">
+                          {PROVIDER_LABELS[globalPreference.provider]} - {globalPreference.model}
+                        </span>
+                      </>
                     ) : pref.preference ? (
-                      `Özel ayar: ${PROVIDER_LABELS[pref.preference.provider]} - ${pref.preference.model}`
+                      <>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          ⚙️ Özel
+                        </Badge>
+                        <span className="text-muted-foreground">
+                          {PROVIDER_LABELS[pref.preference.provider]} - {pref.preference.model}
+                        </span>
+                      </>
                     ) : (
-                      'Henüz tercih belirlenmemiş'
+                      <>
+                        <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-200">
+                          ⚠️ Yapılandırılmamış
+                        </Badge>
+                        <span className="text-muted-foreground">
+                          AI kullanmak için ayar gerekli
+                        </span>
+                      </>
                     )}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   {globalPreference && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/50 border transition-colors hover:bg-muted/70">
                       <Switch
                         checked={pref.useGlobal}
                         onCheckedChange={(checked) => toggleGlobalUsage(pref.module, checked)}
+                        className="data-[state=checked]:bg-green-600"
                       />
-                      <Label className="text-sm">Global ayarı kullan</Label>
+                      <Label className="text-sm font-medium cursor-pointer select-none">
+                        Global ayarı kullan
+                      </Label>
                     </div>
                   )}
-                  <Checkbox
-                    checked={pref.enabled}
-                    onCheckedChange={(checked) =>
-                      updateModulePreference(pref.module, { enabled: Boolean(checked) })
-                    }
-                  />
+                  <div className="flex items-center gap-2 px-2 py-1">
+                    <Checkbox
+                      checked={pref.enabled}
+                      onCheckedChange={(checked) =>
+                        updateModulePreference(pref.module, { enabled: Boolean(checked) })
+                      }
+                    />
+                    <Label className="text-sm text-muted-foreground cursor-pointer select-none">
+                      Modül aktif
+                    </Label>
+                  </div>
                 </div>
               </div>
             </CardHeader>
-            {/* Sadece global kullanmıyorsa ayarları göster */}
-            {(!globalPreference || !pref.useGlobal) && (
-              <CardContent className="space-y-4">
+            {/* Sadece global kullanmıyorsa ayarları göster - Smooth collapse/expand */}
+            <div className={`transition-all duration-300 overflow-hidden ${
+              (!globalPreference || !pref.useGlobal) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+              <CardContent className="space-y-4 pb-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor={`${pref.module}-provider`}>AI Provider</Label>
@@ -599,10 +634,12 @@ export default function UserAiPreferencesPage() {
                 </p>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-2 border-t">
                 <Button
                   onClick={() => handleSave(pref.module)}
-                  disabled={isSaving === pref.module}
+                  disabled={isSaving === pref.module || !pref.apiKey}
+                  className="min-w-[120px] transition-all duration-200"
+                  size="sm"
                 >
                   {isSaving === pref.module ? (
                     <>
@@ -612,13 +649,13 @@ export default function UserAiPreferencesPage() {
                   ) : (
                     <>
                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Kaydet
+                      Özel Ayarı Kaydet
                     </>
                   )}
                 </Button>
               </div>
               </CardContent>
-            )}
+            </div>
           </Card>
         ))}
       </div>

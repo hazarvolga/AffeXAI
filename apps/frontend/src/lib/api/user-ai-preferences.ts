@@ -9,8 +9,10 @@ export enum AiProvider {
 export enum AiModule {
   EMAIL = 'email',
   SOCIAL = 'social',
-  SUPPORT = 'support',
+  SUPPORT_AGENT = 'support_agent',
+  SUPPORT_CHATBOT = 'support_chatbot',
   ANALYTICS = 'analytics',
+  FAQ_AUTO_RESPONSE = 'faq_auto_response',
 }
 
 export interface UserAiPreference {

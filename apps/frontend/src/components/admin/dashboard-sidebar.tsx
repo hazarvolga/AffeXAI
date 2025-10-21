@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -349,14 +349,25 @@ export function DashboardSidebar() {
                             Design
                         </Link>
                         )}
+                        {/* AI Preferences - Available to all authenticated users */}
+                        <Link
+                            href="/admin/profile/ai-preferences"
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                pathname.startsWith('/admin/profile/ai-preferences') && "bg-muted text-primary"
+                            )}
+                        >
+                            <Sparkles className="h-4 w-4" />
+                            AI Tercihleri
+                        </Link>
                         {/* Settings - Permission: SETTINGS_VIEW */}
                         {hasPermission(Permission.SETTINGS_VIEW) && (
-                        <Accordion type="single" collapsible defaultValue={pathname.startsWith('/admin/settings') ? 'settings-management' : undefined}>
+                        <Accordion type="single" collapsible defaultValue={(pathname.startsWith('/admin/settings') || pathname.startsWith('/admin/profile/ai-preferences')) ? 'settings-management' : undefined}>
                             <AccordionItem value="settings-management" className="border-none">
                                 <AccordionTrigger
                                     className={cn(
                                         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
-                                        pathname.startsWith('/admin/settings') && "bg-muted text-primary"
+                                        (pathname.startsWith('/admin/settings') || pathname.startsWith('/admin/profile/ai-preferences')) && "bg-muted text-primary"
                                     )}
                                 >
                                     <div className="flex items-center gap-3">

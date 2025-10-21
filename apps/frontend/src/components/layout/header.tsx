@@ -307,7 +307,7 @@ export function Header() {
                     width={200}
                     height={60}
                     onError={(e) => {
-                      console.error('[Header] Light logo failed to load:', getDynamicLogoUrl(false));
+                      // Silently fallback to placeholder on error
                       e.currentTarget.src = 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo';
                     }}
                 />
@@ -318,7 +318,7 @@ export function Header() {
                     width={200}
                     height={60}
                     onError={(e) => {
-                      console.error('[Header] Dark logo failed to load:', getDynamicLogoUrl(true));
+                      // Silently fallback to placeholder on error
                       e.currentTarget.src = 'https://placehold.co/140x40/171717/f0f0f0?text=Logo';
                     }}
                 />
@@ -348,7 +348,7 @@ export function Header() {
                           height={45}
                           className="h-auto"
                           onError={(e) => {
-                            console.error('[Header] Mobile logo failed:', getDynamicLogoUrl(false));
+                            // Silently fallback to placeholder on error
                             e.currentTarget.src = 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo';
                           }}
                         />

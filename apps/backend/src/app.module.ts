@@ -21,6 +21,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AiModule } from './modules/ai/ai.module';
+import { UserAiPreferencesModule } from './modules/user-ai-preferences/user-ai-preferences.module';
 import { PlatformIntegrationModule } from './modules/platform-integration/platform-integration.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -73,6 +74,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     TicketsModule,
     RolesModule,
     AiModule,
+    UserAiPreferencesModule,
     PlatformIntegrationModule,
     AnalyticsModule,
   ],

@@ -23,6 +23,68 @@ export class UserAiPreferencesController {
     private readonly preferencesService: UserAiPreferencesService,
   ) {}
 
+  // ============================================
+  // Global AI Preference Endpoints (MUST BE BEFORE :module routes)
+  // ============================================
+
+  /**
+   * Get global AI preference for current user
+   */
+  @Get('global/preference')
+  async getGlobalPreference(@Req() req: any) {
+    const userId = req.user.userId;
+    const preference = await this.preferencesService.getGlobalPreference(userId);
+
+    if (!preference) {
+      return null;
+    }
+
+    return {
+      ...preference,
+      apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
+    };
+  }
+
+  /**
+   * Create or update global AI preference
+   */
+  @Post('global/preference')
+  async upsertGlobalPreference(
+    @Req() req: any,
+    @Body()
+    dto: {
+      provider: string;
+      model: string;
+      apiKey?: string;
+      enabled: boolean;
+    },
+  ) {
+    const userId = req.user.userId;
+    const preference = await this.preferencesService.upsertGlobalPreference(
+      userId,
+      dto,
+    );
+
+    return {
+      ...preference,
+      apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
+    };
+  }
+
+  /**
+   * Delete global AI preference
+   */
+  @Delete('global/preference')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteGlobalPreference(@Req() req: any) {
+    const userId = req.user.userId;
+    await this.preferencesService.deleteGlobalPreference(userId);
+  }
+
+  // ============================================
+  // Module-Specific Preference Endpoints
+  // ============================================
+
   /**
    * Get all AI preferences for current user
    */
@@ -118,64 +180,6 @@ export class UserAiPreferencesController {
   async deleteAllPreferences(@Req() req: any) {
     const userId = req.user.userId;
     await this.preferencesService.deleteAllUserPreferences(userId);
-  }
-
-  // ============================================
-  // Global AI Preference Endpoints
-  // ============================================
-
-  /**
-   * Get global AI preference for current user
-   */
-  @Get('global/preference')
-  async getGlobalPreference(@Req() req: any) {
-    const userId = req.user.userId;
-    const preference = await this.preferencesService.getGlobalPreference(userId);
-
-    if (!preference) {
-      return null;
-    }
-
-    return {
-      ...preference,
-      apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
-    };
-  }
-
-  /**
-   * Create or update global AI preference
-   */
-  @Post('global/preference')
-  async upsertGlobalPreference(
-    @Req() req: any,
-    @Body()
-    dto: {
-      provider: string;
-      model: string;
-      apiKey?: string;
-      enabled: boolean;
-    },
-  ) {
-    const userId = req.user.userId;
-    const preference = await this.preferencesService.upsertGlobalPreference(
-      userId,
-      dto,
-    );
-
-    return {
-      ...preference,
-      apiKey: preference.apiKey ? this.maskApiKey(preference.apiKey) : null,
-    };
-  }
-
-  /**
-   * Delete global AI preference
-   */
-  @Delete('global/preference')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteGlobalPreference(@Req() req: any) {
-    const userId = req.user.userId;
-    await this.preferencesService.deleteGlobalPreference(userId);
   }
 
   /**

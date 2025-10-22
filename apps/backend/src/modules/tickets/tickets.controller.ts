@@ -77,12 +77,39 @@ export class TicketsController {
     @Query() filters: TicketFiltersDto,
     @CurrentUser() user: any,
   ) {
-    // If user is CUSTOMER, only show their tickets
-    if (user.roleEntity?.name === UserRole.CUSTOMER) {
-      filters.userId = user.id;
+    // Multi-role system: Check all user roles
+    const userRoles = new Set<string>();
+    
+    // Add primary role
+    if (user.primaryRole?.name) {
+      userRoles.add(user.primaryRole.name);
     }
     
-    return this.ticketsService.findAll(filters);
+    // Add legacy role (backward compatibility)
+    if (user.roleEntity?.name) {
+      userRoles.add(user.roleEntity.name);
+    }
+    
+    // Add additional roles from multi-role system
+    if (user.roles && Array.isArray(user.roles)) {
+      user.roles.forEach(role => {
+        if (role.name) {
+          userRoles.add(role.name);
+        }
+      });
+    }
+    
+    // Check if user has ADMIN or EDITOR role
+    const hasAdminAccess = userRoles.has(UserRole.ADMIN) || userRoles.has(UserRole.EDITOR);
+    
+    if (hasAdminAccess) {
+      // Admin/Editor can see all tickets - no filter needed
+      return this.ticketsService.findAll(filters);
+    } else {
+      // All other users can only see their own tickets
+      filters.userId = user.id;
+      return this.ticketsService.findAll(filters);
+    }
   }
 
   /**

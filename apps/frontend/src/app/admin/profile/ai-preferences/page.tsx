@@ -199,9 +199,21 @@ export default function UserAiPreferencesPage() {
       });
     } catch (error: any) {
       console.error('Failed to save AI preference:', error);
+      
+      let errorMessage = 'AI tercihleri kaydedilemedi.';
+      if (error.response?.status === 401) {
+        errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Bu işlem için yetkiniz bulunmuyor.';
+      } else if (error.message?.includes('API key')) {
+        errorMessage = 'API key geçersiz. Lütfen doğru API key girin.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Hata',
-        description: error.message || 'AI tercihleri kaydedilemedi.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -244,9 +256,21 @@ export default function UserAiPreferencesPage() {
       });
     } catch (error: any) {
       console.error('Failed to save global AI preference:', error);
+      
+      let errorMessage = 'Global AI tercihleri kaydedilemedi.';
+      if (error.response?.status === 401) {
+        errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Bu işlem için yetkiniz bulunmuyor.';
+      } else if (error.message?.includes('API key')) {
+        errorMessage = 'API key geçersiz. Lütfen doğru API key girin.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Hata',
-        description: error.message || 'Global AI tercihleri kaydedilemedi.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -298,8 +322,16 @@ export default function UserAiPreferencesPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <Skeleton className="h-96 w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-64 w-full" />
+        <div className="space-y-4">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
       </div>
     );
   }
@@ -336,15 +368,20 @@ export default function UserAiPreferencesPage() {
               onCheckedChange={(checked) =>
                 setGlobalForm(prev => ({ ...prev, enabled: checked }))
               }
+              aria-label="Global AI ayarlarını etkinleştir"
             />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {globalPreference ? (
-            <Alert>
-              <CheckCircle2 className="h-4 w-4" />
+            <Alert className="animate-in fade-in-50 duration-500">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription>
                 ✅ Global ayar aktif: {PROVIDER_LABELS[globalPreference.provider]} - {globalPreference.model}
+                <br />
+                <span className="text-xs text-muted-foreground">
+                  Tüm modüller bu ayarı kullanacak (özel ayar yapılmadıkça)
+                </span>
               </AlertDescription>
             </Alert>
           ) : (
@@ -482,7 +519,7 @@ export default function UserAiPreferencesPage() {
             }`}
           >
             <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="flex-1">
                   <CardTitle className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-primary" />
@@ -672,9 +709,11 @@ export default function UserAiPreferencesPage() {
             <strong>Öneriler:</strong>
           </p>
           <ul className="list-disc list-inside space-y-1 ml-4">
-            <li>Email Marketing için GPT-4o (hızlı ve kaliteli)</li>
-            <li>Support için Claude 3.5 Sonnet (doğal konuşma)</li>
-            <li>Analytics için GPT-3.5 Turbo (uygun maliyetli)</li>
+            <li><strong>Basit Kullanım:</strong> Global ayar ile tek API key kullanın</li>
+            <li><strong>Email Marketing:</strong> GPT-4o (hızlı ve kaliteli içerik)</li>
+            <li><strong>Support:</strong> Claude 3.5 Sonnet (doğal konuşma)</li>
+            <li><strong>Analytics:</strong> GPT-3.5 Turbo (uygun maliyetli)</li>
+            <li><strong>Sosyal Medya:</strong> Gemini Pro (yaratıcı içerik)</li>
           </ul>
         </CardContent>
       </Card>

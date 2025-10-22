@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFormState, useFormStatus } from 'react-dom';
 import {
   Card,
   CardContent,
@@ -32,9 +31,15 @@ import {
   ClipboardCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { analyzeSupportTicket, FormState } from './actions';
+// import { analyzeSupportTicket, FormState } from './actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ticketsService, type TicketCategory } from '@/lib/api/ticketsService';
+import { 
+  ticketsService, 
+  type TicketCategory, 
+  TicketPriority,
+  type TicketAnalysisRequest,
+  type AiAnalysisResponse 
+} from '@/lib/api/ticketsService';
 import { authService } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -65,51 +70,36 @@ const renderCategoryOptions = (
   return options;
 };
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analiz Ediliyor...
-        </>
-      ) : (
-        <>
-          <Lightbulb className="mr-2 h-4 w-4" /> Analiz Et ve Devam Et
-        </>
-      )}
-    </Button>
-  );
-}
+// Removed SubmitButton component - will use inline button
 
 export default function NewSupportTicketPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [step, setStep] = useState(1);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState('');
   
-  const initialState: FormState = {
-    step: 1,
-    message: '',
-  };
-  const [state, formAction] = useFormState(analyzeSupportTicket, initialState);
+  // Form data
+  const [formData, setFormData] = useState({
+    title: '',
+    problemDescription: '',
+    category: '',
+    priority: 'medium'
+  });
+  
+  // AI Analysis results
+  const [analysisData, setAnalysisData] = useState<{
+    summary: string;
+    priority: string;
+    suggestion: string;
+  } | null>(null);
 
   useEffect(() => {
     loadCategories();
   }, []);
-
-  useEffect(() => {
-    // Check if ticket was created successfully
-    if (state.ticketCreated && state.ticketId) {
-      toast({
-        title: 'Başarılı! 🎉',
-        description: 'Destek talebiniz başarıyla oluşturuldu. Yönlendiriliyorsunuz...',
-      });
-      setTimeout(() => {
-        router.push(`/portal/support/${state.ticketId}`);
-      }, 1500);
-    }
-  }, [state.ticketCreated, state.ticketId, router, toast]);
 
   const loadCategories = async () => {
     try {
@@ -132,6 +122,90 @@ export default function NewSupportTicketPage() {
     }
   };
 
+  const handleAnalyze = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsAnalyzing(true);
+
+    try {
+      const analysisRequest: TicketAnalysisRequest = {
+        title: formData.title,
+        description: formData.problemDescription,
+        category: formData.category,
+        priority: formData.priority,
+      };
+
+      const response: AiAnalysisResponse = await ticketsService.analyzeTicket(analysisRequest);
+      
+      if (!response.success) {
+        if (!response.aiAvailable) {
+          // AI not available - show warning and allow direct ticket creation
+          setError(response.message || 'AI analizi kullanılamıyor. Doğrudan destek talebi oluşturabilirsiniz.');
+          // Skip to step 2 with basic data
+          setAnalysisData({
+            summary: `${formData.title} - ${formData.problemDescription.substring(0, 100)}...`,
+            priority: formData.priority,
+            suggestion: 'AI analizi şu anda kullanılamıyor. Destek ekibimiz talebinizi inceleyecek ve size geri dönüş yapacaktır.',
+          });
+          setStep(2);
+          return;
+        } else {
+          throw new Error(response.message || 'AI analizi başarısız oldu');
+        }
+      }
+
+      if (response.data) {
+        setAnalysisData({
+          summary: response.data.summary,
+          priority: response.data.suggestedPriority,
+          suggestion: response.data.aiSuggestion,
+        });
+        setStep(2);
+      }
+    } catch (error: any) {
+      setError('Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin veya doğrudan destek talebi oluşturun.');
+      console.error('AI Analysis error:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    setError('');
+    setIsCreating(true);
+
+    try {
+      const ticketData = {
+        title: formData.title,
+        description: formData.problemDescription,
+        categoryId: formData.category,
+        priority: formData.priority as TicketPriority,
+        summary: analysisData?.summary || '',
+      };
+
+      const response = await ticketsService.createTicket(ticketData);
+      
+      toast({
+        title: 'Başarılı! 🎉',
+        description: 'Destek talebiniz başarıyla oluşturuldu. Yönlendiriliyorsunuz...',
+      });
+      
+      setTimeout(() => {
+        router.push(`/portal/support/${response.id}`);
+      }, 1500);
+    } catch (error: any) {
+      setError('Talep oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleBack = () => {
+    setStep(1);
+    setAnalysisData(null);
+    setError('');
+  };
+
   return (
     <div className="flex-1 space-y-8">
       <div className="flex items-center justify-between">
@@ -145,8 +219,8 @@ export default function NewSupportTicketPage() {
       </div>
 
       <Card>
-        {state.step === 1 && (
-          <form action={formAction}>
+        {step === 1 && (
+          <form onSubmit={handleAnalyze}>
             <CardHeader>
               <CardTitle>1. Adım: Sorununuzu Anlatın</CardTitle>
               <CardDescription>
@@ -165,11 +239,19 @@ export default function NewSupportTicketPage() {
                     required
                     minLength={10}
                     maxLength={100}
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">Kategori *</Label>
-                  <Select name="category" required disabled={loadingCategories}>
+                  <Select 
+                    name="category" 
+                    required 
+                    disabled={loadingCategories}
+                    value={formData.category}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                  >
                     <SelectTrigger id="category">
                       <SelectValue placeholder={loadingCategories ? "Yükleniyor..." : "Bir kategori seçin"} />
                     </SelectTrigger>
@@ -188,12 +270,19 @@ export default function NewSupportTicketPage() {
                   className="min-h-[250px]"
                   required
                   minLength={50}
+                  value={formData.problemDescription}
+                  onChange={(e) => setFormData(prev => ({ ...prev, problemDescription: e.target.value }))}
                 />
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="priority">Öncelik *</Label>
-                  <Select name="priority" defaultValue="medium" required>
+                  <Select 
+                    name="priority" 
+                    required
+                    value={formData.priority}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value }))}
+                  >
                     <SelectTrigger id="priority">
                       <SelectValue />
                     </SelectTrigger>
@@ -208,18 +297,28 @@ export default function NewSupportTicketPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col items-end gap-4">
-              {state.message && !state.data && (
+              {error && (
                 <Alert variant="destructive" className="w-full">
                   <AlertTitle>Hata</AlertTitle>
-                  <AlertDescription>{state.message}</AlertDescription>
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <SubmitButton />
+              <Button type="submit" disabled={isAnalyzing} className="w-full sm:w-auto">
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analiz Ediliyor...
+                  </>
+                ) : (
+                  <>
+                    <Lightbulb className="mr-2 h-4 w-4" /> Analiz Et ve Devam Et
+                  </>
+                )}
+              </Button>
             </CardFooter>
           </form>
         )}
 
-        {state.step === 2 && state.data && (
+        {step === 2 && analysisData && (
           <div>
             <CardHeader>
               <CardTitle>2. Adım: AI Analizi ve Onay</CardTitle>
@@ -235,7 +334,7 @@ export default function NewSupportTicketPage() {
                   AI Çözüm Önerisi
                 </AlertTitle>
                 <AlertDescription className="text-blue-700">
-                  {state.data.suggestion}
+                  {analysisData.suggestion}
                 </AlertDescription>
               </Alert>
 
@@ -249,46 +348,37 @@ export default function NewSupportTicketPage() {
                   <div>
                     <Label className="font-semibold">Problem Özeti</Label>
                     <p className="text-sm text-muted-foreground">
-                      {state.data.summary}
+                      {analysisData.summary}
                     </p>
                   </div>
                   <div>
                     <Label className="font-semibold">AI Tarafından Önerilen Öncelik</Label>
                      <p className="text-sm font-semibold text-primary">
-                      {state.data.priority}
+                      {analysisData.priority}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
-                <form action={formAction}>
-                    {/* Hidden fields to pass data to the next step */}
-                    <input type="hidden" name="title" value={state.originalInput?.title} />
-                    <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
-                    <input type="hidden" name="category" value={state.originalInput?.category} />
-                    <input type="hidden" name="priority" value={state.originalInput?.priority} />
-                    <input type="hidden" name="summary" value={state.data.summary} />
-                    <input type="hidden" name="aiPriority" value={state.data.priority} />
-                    <div className="flex gap-2">
-                      <Button variant="outline" type="submit" name="action" value="back">
-                          Geri Dön ve Düzenle
-                      </Button>
-                      <Button type="submit" name="action" value="create_ticket" disabled={state.creating}>
-                          {state.creating ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Oluşturuluyor...
-                            </>
-                          ) : (
-                            <>
-                              <ClipboardCheck className="mr-2 h-4 w-4" />
-                              Destek Talebi Oluştur
-                            </>
-                          )}
-                      </Button>
-                    </div>
-                </form>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleBack}>
+                  Geri Dön ve Düzenle
+                </Button>
+                <Button onClick={handleCreateTicket} disabled={isCreating}>
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Oluşturuluyor...
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardCheck className="mr-2 h-4 w-4" />
+                      Destek Talebi Oluştur
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardFooter>
           </div>
         )}

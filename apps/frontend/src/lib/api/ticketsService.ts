@@ -126,6 +126,44 @@ export interface CreateTicketDto {
 }
 
 /**
+ * Ticket Analysis Request
+ */
+export interface TicketAnalysisRequest {
+  title: string;
+  description: string;
+  category?: string;
+  priority?: string;
+}
+
+/**
+ * Ticket Analysis Result
+ */
+export interface TicketAnalysisResult {
+  summary: string;
+  suggestedPriority: string;
+  suggestedCategory?: string;
+  aiSuggestion: string;
+  confidence: number;
+  relatedArticles?: Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    relevanceScore: number;
+  }>;
+}
+
+/**
+ * AI Analysis Response
+ */
+export interface AiAnalysisResponse {
+  success: boolean;
+  aiAvailable: boolean;
+  message?: string;
+  data?: TicketAnalysisResult;
+  error?: string;
+}
+
+/**
  * Update Ticket DTO
  */
 export interface UpdateTicketDto {
@@ -220,6 +258,13 @@ class TicketsService extends BaseApiService<Ticket, CreateTicketDto, UpdateTicke
    */
   async getTicketById(id: string): Promise<Ticket> {
     return this.client.getWrapped<Ticket>(`${this.endpoint}/${id}`);
+  }
+
+  /**
+   * Analyze ticket content using AI
+   */
+  async analyzeTicket(data: TicketAnalysisRequest): Promise<AiAnalysisResponse> {
+    return this.client.postWrapped<AiAnalysisResponse>(`${this.endpoint}/analyze`, data);
   }
 
   /**

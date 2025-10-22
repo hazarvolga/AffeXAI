@@ -9,8 +9,9 @@ import { authService, usersService, type CurrentUser } from '@/lib/api';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useUserSync } from '@/hooks/useUserSync';
 import { useToast } from '@/hooks/use-toast';
-import { User } from 'types-shared';
+// import { User } from 'types-shared';
 import { isStaffRole, isPortalRole } from '@/lib/permissions/constants';
+import { ChatProvider } from '@/components/chat/chat-provider';
 
 // Role name mapping from role ID
 const roleIdToName: { [key: string]: string } = {
@@ -50,7 +51,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     /**
      * Handle role changes detected by useUserSync
      */
-    const handleRoleChange = useCallback((newUser: User, oldUser: User) => {
+    const handleRoleChange = useCallback((newUser: any, oldUser: any) => {
         console.log('🔄 Role change detected in portal layout', {
             old: oldUser.roleNames,
             new: newUser.roleNames,
@@ -196,15 +197,17 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     const isAdmin = currentUser?.roleId === ADMIN_ROLE_ID;
 
     return (
-        <div className="theme-portal flex min-h-screen w-full">
-            <CollapsiblePortalSidebar user={currentUser} />
-            <div className="flex flex-col flex-1 min-w-0">
-                {isAdmin && <AdminTopBar currentRole={effectiveRole} />}
-                <PortalHeader currentUser={currentUser} />
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
-                    {children}
-                </main>
+        <ChatProvider enableChat={true}>
+            <div className="theme-portal flex min-h-screen w-full">
+                <CollapsiblePortalSidebar user={currentUser} />
+                <div className="flex flex-col flex-1 min-w-0">
+                    {isAdmin && <AdminTopBar currentRole={effectiveRole} />}
+                    <PortalHeader currentUser={currentUser} />
+                    <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
+                        {children}
+                    </main>
+                </div>
             </div>
-        </div>
+        </ChatProvider>
     );
 }

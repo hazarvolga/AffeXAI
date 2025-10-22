@@ -2,6 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { AiService } from '../../ai/ai.service';
 import { AiModule } from '../../user-ai-preferences/entities/user-ai-preference.entity';
 import { KnowledgeBaseService } from './knowledge-base.service';
+import { AiFaqLearningService } from './ai-faq-learning.service';
 
 export interface TicketAnalysisRequest {
   title: string;
@@ -22,6 +23,13 @@ export interface TicketAnalysisResult {
     excerpt: string;
     relevanceScore: number;
   }>;
+  suggestedFaqs?: Array<{
+    id: string;
+    question: string;
+    answer: string;
+    confidence: number;
+    matchType: string;
+  }>;
 }
 
 @Injectable()
@@ -31,6 +39,7 @@ export class TicketAiAnalysisService {
   constructor(
     private readonly aiService: AiService,
     private readonly knowledgeBaseService: KnowledgeBaseService,
+    private readonly faqLearningService: AiFaqLearningService,
   ) {}
 
   /**
@@ -46,13 +55,17 @@ export class TicketAiAnalysisService {
       // 1. Search knowledge base for related articles
       const relatedArticles = await this.findRelatedArticles(request);
 
-      // 2. Generate AI analysis
-      const aiAnalysis = await this.generateAiAnalysis(userId, request, relatedArticles);
+      // 2. Search FAQ entries
+      const suggestedFaqs = await this.findRelatedFaqs(request);
 
-      // 3. Combine results
+      // 3. Generate AI analysis with all context
+      const aiAnalysis = await this.generateAiAnalysis(userId, request, relatedArticles, suggestedFaqs);
+
+      // 4. Combine results
       return {
         ...aiAnalysis,
         relatedArticles: relatedArticles.slice(0, 3), // Top 3 most relevant
+        suggestedFaqs: suggestedFaqs.slice(0, 2), // Top 2 FAQ suggestions
       };
     } catch (error) {
       this.logger.error(`Ticket analysis failed: ${error.message}`);
@@ -77,6 +90,27 @@ export class TicketAiAnalysisService {
       this.logger.warn(`AI not available for user ${userId}: ${error.message}`);
       return false;
     }
+  }
+
+  /**
+   * Find related FAQ entries
+   */
+  private async findRelatedFaqs(request: TicketAnalysisRequest) {
+    const searchQuery = `${request.title} ${request.description}`;
+    
+    const faqResults = await this.faqLearningService.searchFaq(
+      searchQuery,
+      request.category,
+      3
+    );
+
+    return faqResults.map(result => ({
+      id: result.entry.id,
+      question: result.entry.question,
+      answer: result.entry.answer,
+      confidence: result.entry.confidence,
+      matchType: result.matchType,
+    }));
   }
 
   /**
@@ -105,11 +139,18 @@ export class TicketAiAnalysisService {
     userId: string,
     request: TicketAnalysisRequest,
     relatedArticles: any[],
+    suggestedFaqs: any[],
   ) {
     const knowledgeContext = relatedArticles.length > 0 
       ? `\n\nİlgili bilgi bankası makaleleri:\n${relatedArticles.map(a => 
           `- ${a.title}: ${a.excerpt}`
         ).join('\n')}`
+      : '';
+
+    const faqContext = suggestedFaqs.length > 0
+      ? `\n\nBenzer sorular ve cevaplar:\n${suggestedFaqs.map(faq => 
+          `S: ${faq.question}\nC: ${faq.answer}`
+        ).join('\n\n')}`
       : '';
 
     const prompt = `
@@ -119,7 +160,7 @@ BAŞLIK: ${request.title}
 AÇIKLAMA: ${request.description}
 KATEGORİ: ${request.category || 'Belirtilmemiş'}
 ÖNCELİK: ${request.priority || 'Belirtilmemiş'}
-${knowledgeContext}
+${knowledgeContext}${faqContext}
 
 Lütfen şunları sağla:
 1. ÖZET: Sorunun kısa özeti (1-2 cümle)

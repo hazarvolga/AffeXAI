@@ -10,6 +10,8 @@ import { TicketTemplate } from './entities/ticket-template.entity';
 import { TicketCSAT } from './entities/ticket-csat.entity';
 import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
+import { AiFaqEntry } from './entities/ai-faq-entry.entity';
+import { ChatContent } from './entities/chat-content.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { TicketAssignmentRulesController } from './controllers/ticket-assignment-rules.controller';
@@ -42,6 +44,7 @@ import { KnowledgeBaseService } from './services/knowledge-base.service';
 import { TicketMacroService } from './services/ticket-macro.service';
 import { AICategorizationService } from './services/ai-categorization.service';
 import { TicketAiAnalysisService } from './services/ticket-ai-analysis.service';
+import { AiFaqLearningService } from './services/ai-faq-learning.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
@@ -65,6 +68,8 @@ import { AiModule } from '../ai/ai.module';
       TicketCSAT,
       KnowledgeBaseArticle,
       TicketMacro,
+      AiFaqEntry,
+      ChatContent,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -112,6 +117,7 @@ import { AiModule } from '../ai/ai.module';
     TicketMacroService,
     AICategorizationService,
     TicketAiAnalysisService,
+    AiFaqLearningService,
     TicketTemplatesService,
     TicketAnalyticsService,
     TicketNotificationsGateway,

@@ -79,6 +79,8 @@ export class ChatController {
     @Body() dto: SendMessageDto,
     @CurrentUser('id') userId: string,
   ) {
+    console.error('🤖 Chat API called:', { userId, message: dto.message, sessionId: dto.sessionId });
+    
     if (!dto.message || dto.message.trim().length === 0) {
       throw new BadRequestException('Message cannot be empty');
     }

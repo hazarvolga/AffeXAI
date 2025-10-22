@@ -24,7 +24,7 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   message: string;
-  conversationId?: string;
+  sessionId?: string;
   context?: {
     currentPage?: string;
     userAgent?: string;
@@ -33,11 +33,19 @@ export interface ChatRequest {
 }
 
 export interface ChatResponse {
-  success: boolean;
-  message: ChatMessage;
-  conversationId: string;
-  aiAvailable: boolean;
-  error?: string;
+  content: string;
+  confidence: number;
+  responseTime: number;
+  tokensUsed?: number;
+  sources?: Array<{
+    type: 'kb' | 'faq' | 'document';
+    title: string;
+    excerpt?: string;
+    url?: string;
+  }>;
+  suggestedActions?: string[];
+  sessionId: string;
+  messageId: string;
 }
 
 export interface ChatSession {
@@ -71,9 +79,7 @@ class ChatService extends BaseApiService<ChatSession, any, any> {
   constructor() {
     super({ 
       endpoint: '/chat',
-      defaultHeaders: {
-        'Content-Type': 'application/json',
-      }
+      useWrappedResponses: true
     });
   }
 
@@ -146,7 +152,7 @@ class ChatService extends BaseApiService<ChatSession, any, any> {
   async getSuggestedQuestions(context?: {
     currentPage?: string;
     category?: string;
-  }): Promise<string[]> {
+  }): Promise<{ success: boolean; suggestions: string[] }> {
     return this.client.postWrapped(`${this.endpoint}/suggestions`, context || {});
   }
 
@@ -190,7 +196,7 @@ class ChatService extends BaseApiService<ChatSession, any, any> {
     const response = await this.client.get(`${this.endpoint}/session/${sessionId}/export`, {
       params: { format },
       responseType: 'blob'
-    });
+    }) as any;
     return response.data;
   }
 }

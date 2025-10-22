@@ -321,6 +321,23 @@ export class UserAiPreferencesService {
       };
     }
 
+    // Final fallback: Use admin global settings (hardcoded for now)
+    this.logger.log(
+      `No user preference found for user ${userId}, module ${module}. Using admin global settings...`,
+    );
+
+    // TODO: Replace with proper admin settings lookup
+    this.logger.log(
+      `Using admin global settings for user ${userId}, module ${module}`,
+    );
+
+    return {
+      provider: 'google',
+      model: 'gemini-2.0-flash-exp',
+      apiKey: 'AIzaSyDv6b9wCSh1e9WYHNeiks7dYBFBSXW3Hb0',
+      isGlobal: true,
+    };
+
     this.logger.log(
       `No preference found for user ${userId}, module ${module}`,
     );

@@ -43,29 +43,62 @@ export class AiService {
       `Generating completion for user ${userId}, module: ${module}`,
     );
 
-    // 1. Fetch user's AI preference for this module
-    const preference = await this.userPreferencesService.getUserPreferenceForModule(
+    // 1. Try to get user's AI preference for this module
+    let preference = await this.userPreferencesService.getUserPreferenceForModule(
       userId,
       module,
     );
 
+    // 2. If no user preference, try to get effective preference (includes global fallback)
     if (!preference || !preference.enabled) {
-      throw new BadRequestException(
-        `User ${userId} has no active AI preference for module: ${module}. Please configure AI preferences at /admin/profile/ai-preferences`,
+      this.logger.log(
+        `No user preference for ${userId}, module: ${module}. Trying global settings...`,
       );
+      
+      const effectivePreference = await this.userPreferencesService.getEffectivePreferenceForModule(
+        userId,
+        module,
+      );
+
+      if (!effectivePreference) {
+        throw new BadRequestException(
+          `No AI configuration found for module: ${module}. Please configure AI preferences at /admin/settings/ai-settings`,
+        );
+      }
+
+      // Create a temporary preference object for compatibility
+      preference = {
+        provider: effectivePreference.provider as any,
+        model: effectivePreference.model,
+        enabled: true,
+        apiKey: null, // Will be handled separately
+      } as any;
     }
 
-    // 2. Get decrypted API key (user-specific or fallback to global)
+    // 3. Get API key (user-specific, global, or fallback)
     let apiKey = await this.userPreferencesService.getDecryptedApiKey(
       userId,
       module,
     );
 
-    if (!apiKey && fallbackApiKey) {
-      this.logger.log(
-        `User ${userId} has no API key for ${module}, using fallback`,
+    // If no user API key, try effective preference (includes global)
+    if (!apiKey) {
+      const effectivePreference = await this.userPreferencesService.getEffectivePreferenceForModule(
+        userId,
+        module,
       );
-      apiKey = fallbackApiKey;
+      
+      if (effectivePreference?.apiKey) {
+        apiKey = effectivePreference.apiKey;
+        this.logger.log(
+          `Using global API key for user ${userId}, module: ${module}`,
+        );
+      } else if (fallbackApiKey) {
+        this.logger.log(
+          `User ${userId} has no API key for ${module}, using fallback`,
+        );
+        apiKey = fallbackApiKey;
+      }
     }
 
     if (!apiKey) {

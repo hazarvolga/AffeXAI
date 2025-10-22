@@ -60,6 +60,7 @@ export class ChatAiService {
     request: ChatRequest,
   ): Promise<ChatResponse> {
     const startTime = Date.now();
+    console.error('🤖 ChatAiService.processMessage called:', { userId, message: request.message });
     this.logger.log(`Processing chat message for user ${userId}: ${request.message.substring(0, 50)}...`);
 
     try {

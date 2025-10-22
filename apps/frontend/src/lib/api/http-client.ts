@@ -276,6 +276,16 @@ export class HttpClient {
           this.logger.logRequest(config);
         }
 
+        // Debug chat requests
+        if (config.url?.includes('/chat/')) {
+          console.log('🤖 HTTP Client: Chat request detected:', {
+            method: config.method,
+            url: config.url,
+            data: config.data,
+            hasAuth: !!config.headers.Authorization
+          });
+        }
+
         return config;
       },
       (error: AxiosError) => {

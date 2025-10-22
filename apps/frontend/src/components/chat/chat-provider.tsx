@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { ChatBox } from './chat-box';
+import { ChatBox } from './chat-box';
 import { ChatToggle } from './chat-toggle';
 import { useAuth } from '@/lib/auth/auth-context';
 
@@ -88,10 +88,10 @@ export function ChatProvider({ children, enableChat = true }: ChatProviderProps)
             onClick={toggleChat}
             hasUnreadMessages={hasUnreadMessages}
           />
-          {/* <ChatBox
+          <ChatBox
             isOpen={isOpen}
-            onToggle={toggleChat}
-          /> */}
+            onClose={closeChat}
+          />
         </>
       )}
     </ChatContext.Provider>

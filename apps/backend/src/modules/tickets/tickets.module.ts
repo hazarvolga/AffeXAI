@@ -12,6 +12,8 @@ import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
 import { AiFaqEntry } from './entities/ai-faq-entry.entity';
 import { ChatContent } from './entities/chat-content.entity';
+import { ChatSession } from './entities/chat-session.entity';
+import { ChatMessage } from './entities/chat-message.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { TicketAssignmentRulesController } from './controllers/ticket-assignment-rules.controller';
@@ -24,6 +26,7 @@ import { TicketCSATController } from './controllers/ticket-csat.controller';
 import { KnowledgeBaseController } from './controllers/knowledge-base.controller';
 import { TicketMacroController } from './controllers/ticket-macro.controller';
 import { AICategorizationController } from './controllers/ai-categorization.controller';
+import { ChatController } from './controllers/chat.controller';
 import { UsersModule } from '../users/users.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthModule } from '../../auth/auth.module';
@@ -45,6 +48,7 @@ import { TicketMacroService } from './services/ticket-macro.service';
 import { AICategorizationService } from './services/ai-categorization.service';
 import { TicketAiAnalysisService } from './services/ticket-ai-analysis.service';
 import { AiFaqLearningService } from './services/ai-faq-learning.service';
+import { ChatAiService } from './services/chat-ai.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
@@ -70,6 +74,8 @@ import { AiModule } from '../ai/ai.module';
       TicketMacro,
       AiFaqEntry,
       ChatContent,
+      ChatSession,
+      ChatMessage,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -100,6 +106,7 @@ import { AiModule } from '../ai/ai.module';
     KnowledgeBaseController,
     TicketMacroController,
     AICategorizationController,
+    ChatController,
   ],
   providers: [
     TicketsService,
@@ -118,6 +125,7 @@ import { AiModule } from '../ai/ai.module';
     AICategorizationService,
     TicketAiAnalysisService,
     AiFaqLearningService,
+    ChatAiService,
     TicketTemplatesService,
     TicketAnalyticsService,
     TicketNotificationsGateway,

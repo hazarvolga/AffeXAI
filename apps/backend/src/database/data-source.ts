@@ -18,6 +18,8 @@ import { ExportJob } from '../modules/email-marketing/entities/export-job.entity
 import { ImportResult } from '../modules/email-marketing/entities/import-result.entity';
 import { AiFaqEntry } from '../modules/tickets/entities/ai-faq-entry.entity';
 import { ChatContent } from '../modules/tickets/entities/chat-content.entity';
+import { ChatSession } from '../modules/tickets/entities/chat-session.entity';
+import { ChatMessage } from '../modules/tickets/entities/chat-message.entity';
 import { Page } from '../modules/cms/entities/page.entity';
 import { Component } from '../modules/cms/entities/component.entity';
 import { Category } from '../modules/cms/entities/category.entity';
@@ -72,6 +74,8 @@ export const AppDataSource = new DataSource({
     TicketEscalationRule,
     AiFaqEntry,
     ChatContent,
+    ChatSession,
+    ChatMessage,
   ],
   migrations: ['src/database/migrations/**/*.ts'],
   subscribers: [],

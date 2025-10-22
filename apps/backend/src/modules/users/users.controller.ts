@@ -99,29 +99,36 @@ export class UsersController {
   @ApiResponse({ status: 409, description: 'Email already in use' })
   @ApiResponse({ status: 403, description: 'Forbidden - can only update own profile or admin required' })
   update(
-    @CurrentUser('id') currentUserId: string,
-    @CurrentUser('role') currentUserRole: string,
+    @CurrentUser() currentUser: any, // Get full user object from JWT guard
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     console.log('🎯 PATCH /users/:id - Request received:', {
-      currentUserId,
-      currentUserRole,
+      currentUserId: currentUser?.id,
+      currentUserRoles: currentUser?.roleNames,
+      currentUserPrimaryRole: currentUser?.primaryRole?.name,
       targetUserId: id,
       updateData: updateUserDto,
-      isSelfUpdate: currentUserId === id,
-      isAdmin: currentUserRole?.toLowerCase() === UserRole.ADMIN.toLowerCase(),
-      roleComparison: `'${currentUserRole}' vs '${UserRole.ADMIN}'`,
+      isSelfUpdate: currentUser?.id === id,
     });
 
     // Allow users to update their own profile, or admins to update any profile
-    const isAdmin = currentUserRole?.toLowerCase() === UserRole.ADMIN.toLowerCase();
-    if (currentUserId !== id && !isAdmin) {
+    // Check if user has admin role (from fresh DB data via JWT guard)
+    const hasAdminRole = currentUser?.roleNames?.includes('admin') || 
+                        currentUser?.primaryRole?.name === 'admin';
+    
+    console.log('🔍 Admin check details:', {
+      roleNames: currentUser?.roleNames,
+      primaryRole: currentUser?.primaryRole?.name,
+      hasAdminRole,
+      expectedRole: 'admin',
+    });
+
+    if (currentUser?.id !== id && !hasAdminRole) {
       console.log('❌ AUTHORIZATION FAILED: User not allowed to update this profile', {
-        currentUserRole,
-        expectedAdminRole: UserRole.ADMIN,
-        isAdmin,
-        comparison: `'${currentUserRole?.toLowerCase()}' === '${UserRole.ADMIN.toLowerCase()}'`
+        currentUserRoles: currentUser?.roleNames,
+        hasAdminRole,
+        isSelfUpdate: currentUser?.id === id,
       });
       throw new ForbiddenException('You can only update your own profile');
     }

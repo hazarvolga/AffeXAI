@@ -21,6 +21,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
+import { TicketAiAnalysisService, TicketAnalysisRequest } from './services/ticket-ai-analysis.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
@@ -44,7 +45,52 @@ import { UserRole } from '../users/enums/user-role.enum';
 @Controller('tickets')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(
+    private readonly ticketsService: TicketsService,
+    private readonly ticketAiAnalysisService: TicketAiAnalysisService,
+  ) {}
+
+  /**
+   * Analyze ticket content using AI before creation
+   * Available to: All authenticated users
+   */
+  @Post('analyze')
+  @ApiOperation({ summary: 'Analyze ticket content using AI' })
+  @ApiResponse({ status: 200, description: 'Analysis completed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data or AI not available' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async analyzeTicket(
+    @Body() analysisRequest: TicketAnalysisRequest,
+    @CurrentUser('id') userId: string,
+  ) {
+    // Check if AI is available for this user
+    const isAiAvailable = await this.ticketAiAnalysisService.isAiAvailable(userId);
+    
+    if (!isAiAvailable) {
+      return {
+        success: false,
+        aiAvailable: false,
+        message: 'AI analizi şu anda kullanılamıyor. Lütfen AI tercihlerinizi kontrol edin veya doğrudan destek talebi oluşturun.',
+      };
+    }
+
+    try {
+      const analysis = await this.ticketAiAnalysisService.analyzeTicket(userId, analysisRequest);
+      
+      return {
+        success: true,
+        aiAvailable: true,
+        data: analysis,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        aiAvailable: true,
+        message: 'AI analizi sırasında bir hata oluştu. Lütfen tekrar deneyin veya doğrudan destek talebi oluşturun.',
+        error: error.message,
+      };
+    }
+  }
 
   /**
    * Create a new support ticket

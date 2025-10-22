@@ -41,10 +41,12 @@ import { BusinessHoursService } from './services/business-hours.service';
 import { KnowledgeBaseService } from './services/knowledge-base.service';
 import { TicketMacroService } from './services/ticket-macro.service';
 import { AICategorizationService } from './services/ai-categorization.service';
+import { TicketAiAnalysisService } from './services/ticket-ai-analysis.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AiModule } from '../ai/ai.module';
 
 /**
  * Tickets Module
@@ -78,6 +80,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailModule, // For email notifications
     AuthModule, // For authentication guards
     MediaModule, // For media management
+    AiModule, // For AI analysis services
     ScheduleModule.forRoot(), // Enable scheduling for automation
   ],
   controllers: [
@@ -108,6 +111,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     KnowledgeBaseService,
     TicketMacroService,
     AICategorizationService,
+    TicketAiAnalysisService,
     TicketTemplatesService,
     TicketAnalyticsService,
     TicketNotificationsGateway,

@@ -238,10 +238,17 @@ export default function ConfigurationManagementPage() {
     try {
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       
-      // Save all configurations
+      // Prepare all configurations for bulk update
+      const allConfigs: Array<{
+        configKey: string;
+        configValue: any;
+        description?: string;
+        category?: string;
+      }> = [];
+
       for (const section of configSections) {
         for (const setting of section.settings) {
-          await FaqLearningService.updateConfig({
+          allConfigs.push({
             configKey: setting.key,
             configValue: setting.value,
             description: setting.description,
@@ -249,19 +256,43 @@ export default function ConfigurationManagementPage() {
           });
         }
       }
+
+      console.log('💾 Saving configurations:', allConfigs.length, 'items');
       
-      toast({
-        title: 'Başarılı',
-        description: 'Tüm ayarlar kaydedildi'
-      });
+      // Bulk save all configurations
+      const result = await FaqLearningService.bulkUpdateConfig(allConfigs);
       
-      setHasChanges(false);
-      setValidationErrors({}); // Clear validation errors after successful save
+      if (result.success) {
+        toast({
+          title: 'Başarılı',
+          description: `${allConfigs.length} ayar başarıyla kaydedildi`
+        });
+        
+        setHasChanges(false);
+        setValidationErrors({}); // Clear validation errors after successful save
+      } else {
+        throw new Error(result.message || 'Bulk update failed');
+      }
+      
+      // Show detailed results if available
+      if (result.results) {
+        const { successful, failed } = result.results;
+        
+        if (failed && failed.length > 0) {
+          console.warn('Some configurations failed to save:', failed);
+          toast({
+            title: 'Kısmi Başarı',
+            description: `${successful.length} ayar kaydedildi, ${failed.length} ayar başarısız oldu`,
+            variant: 'destructive'
+          });
+        }
+      }
+      
     } catch (error) {
       console.error('Failed to save configuration:', error);
       toast({
         title: 'Hata',
-        description: 'Ayarlar kaydedilemedi',
+        description: error instanceof Error ? error.message : 'Ayarlar kaydedilemedi',
         variant: 'destructive'
       });
     } finally {
@@ -548,12 +579,12 @@ export default function ConfigurationManagementPage() {
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Kaydediliyor...
+                Kaydediliyor... ({configSections.reduce((total, section) => total + section.settings.length, 0)} ayar)
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Tüm Ayarları Kaydet
+                Tüm Ayarları Kaydet ({configSections.reduce((total, section) => total + section.settings.length, 0)} ayar)
               </>
             )}
           </Button>

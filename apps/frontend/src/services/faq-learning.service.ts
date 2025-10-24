@@ -415,7 +415,36 @@ export class FaqLearningService {
     success: boolean;
     message: string;
   }> {
-    return await httpClient.put(`${this.BASE_URL}/config`, config);
+    const response = await httpClient.put<any>(`${this.BASE_URL}/config`, config);
+    
+    // Handle wrapped response
+    const data = response.data || response;
+    return data;
+  }
+
+  /**
+   * Bulk update configurations
+   */
+  static async bulkUpdateConfig(configs: Array<{
+    configKey: string;
+    configValue: any;
+    description?: string;
+    category?: string;
+  }>): Promise<{
+    success: boolean;
+    message: string;
+    results?: {
+      successful: string[];
+      failed: Array<{ configKey: string; error: string }>;
+    };
+  }> {
+    const response = await httpClient.put<any>(`${this.BASE_URL}/config/bulk`, { configs });
+    
+    console.log('💾 Bulk config update response:', response);
+    
+    // Handle wrapped response
+    const data = response.data || response;
+    return data;
   }
 
   /**

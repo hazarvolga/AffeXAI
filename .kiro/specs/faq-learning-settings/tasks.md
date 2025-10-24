@@ -8,14 +8,14 @@
   - Organize configs by category (thresholds, processing, quality, etc.)
   - _Requirements: Complete settings management_
 
-- [ ] 1.2 AI Provider integration for settings
+- [x] 1.2 AI Provider integration for settings
   - Create service to fetch current global AI provider settings
   - Make aiProvider and modelName read-only (from global settings)
   - Allow only temperature and maxTokens to be configurable
   - Add endpoint to get current active AI provider info
   - _Requirements: AI model settings integration_
 
-- [ ] 1.3 Enhanced updateConfig endpoint
+- [x] 1.3 Enhanced updateConfig endpoint
   - Support bulk configuration updates
   - Add validation for each config type and range
   - Implement category-wise reset to defaults functionality

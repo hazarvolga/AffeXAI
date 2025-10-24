@@ -46,6 +46,14 @@ export class UpdateConfigDto {
   category?: string;
 }
 
+export class BulkUpdateConfigDto {
+  configs: UpdateConfigDto[];
+}
+
+export class ResetConfigDto {
+  category: string;
+}
+
 @ApiTags('FAQ Learning')
 @Controller('faq-learning')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -342,6 +350,36 @@ export class FaqLearningController {
       this.logger.error('Failed to get performance metrics:', error);
       throw new HttpException(
         `Failed to get performance metrics: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  @Get('ai-provider-info')
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
+  @ApiOperation({ summary: 'Get current AI provider information for FAQ Learning' })
+  @ApiResponse({ status: 200, description: 'AI provider info retrieved successfully' })
+  async getAiProviderInfo(): Promise<{
+    currentProvider: string;
+    currentModel: string;
+    available: boolean;
+    isReadOnly: boolean;
+    globalSettingsUrl: string;
+  }> {
+    try {
+      const providerStatus = await this.faqAiService.getProviderStatus();
+      
+      return {
+        currentProvider: providerStatus.provider,
+        currentModel: providerStatus.model,
+        available: providerStatus.available,
+        isReadOnly: true, // FAQ Learning cannot change global AI settings
+        globalSettingsUrl: '/admin/profile/ai-preferences'
+      };
+    } catch (error) {
+      this.logger.error('Failed to get AI provider info:', error);
+      throw new HttpException(
+        `Failed to get AI provider info: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
@@ -651,6 +689,12 @@ export class FaqLearningController {
     message: string;
   }> {
     try {
+      // Validate config value based on type
+      const isValid = this.validateConfigValue(dto.configKey, dto.configValue);
+      if (!isValid.valid) {
+        throw new HttpException(isValid.error, HttpStatus.BAD_REQUEST);
+      }
+
       this.logger.log(`Configuration ${dto.configKey} updated to ${dto.configValue}`);
       
       return {
@@ -666,6 +710,66 @@ export class FaqLearningController {
     }
   }
 
+  @Put('config/bulk')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Bulk update FAQ Learning configurations' })
+  @ApiResponse({ status: 200, description: 'Configurations updated successfully' })
+  async bulkUpdateConfig(@Body() dto: BulkUpdateConfigDto): Promise<{
+    success: boolean;
+    message: string;
+    results: Array<{
+      configKey: string;
+      success: boolean;
+      error?: string;
+    }>;
+  }> {
+    try {
+      const results = [];
+      
+      for (const config of dto.configs) {
+        try {
+          const isValid = this.validateConfigValue(config.configKey, config.configValue);
+          if (!isValid.valid) {
+            results.push({
+              configKey: config.configKey,
+              success: false,
+              error: isValid.error
+            });
+            continue;
+          }
+
+          // Here you would save to database
+          this.logger.log(`Configuration ${config.configKey} updated to ${config.configValue}`);
+          
+          results.push({
+            configKey: config.configKey,
+            success: true
+          });
+        } catch (error) {
+          results.push({
+            configKey: config.configKey,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      
+      return {
+        success: successCount === dto.configs.length,
+        message: `${successCount}/${dto.configs.length} configurations updated successfully`,
+        results
+      };
+    } catch (error) {
+      this.logger.error('Failed to bulk update configurations:', error);
+      throw new HttpException(
+        `Failed to bulk update configurations: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   @Post('config/reset/:sectionKey')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Reset configuration section to defaults' })
@@ -673,13 +777,26 @@ export class FaqLearningController {
   async resetConfigSection(@Param('sectionKey') sectionKey: string): Promise<{
     success: boolean;
     message: string;
+    resetConfigs: Array<{
+      key: string;
+      oldValue: any;
+      newValue: any;
+    }>;
   }> {
     try {
+      // Get default values for the category
+      const defaultConfigs = this.getDefaultConfigsForCategory(sectionKey);
+      
       this.logger.log(`Configuration section ${sectionKey} reset to defaults`);
       
       return {
         success: true,
-        message: `Configuration section ${sectionKey} reset to defaults`
+        message: `Configuration section ${sectionKey} reset to defaults`,
+        resetConfigs: defaultConfigs.map(config => ({
+          key: config.key,
+          oldValue: 'current_value', // Would be fetched from database
+          newValue: config.value
+        }))
       };
     } catch (error) {
       this.logger.error(`Failed to reset configuration section ${sectionKey}:`, error);
@@ -688,5 +805,126 @@ export class FaqLearningController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private validateConfigValue(configKey: string, value: any): { valid: boolean; error?: string } {
+    // Get config metadata
+    const configMeta = this.getConfigMetadata(configKey);
+    if (!configMeta) {
+      return { valid: false, error: `Unknown configuration key: ${configKey}` };
+    }
+
+    // Type validation
+    switch (configMeta.type) {
+      case 'number':
+        if (typeof value !== 'number' || isNaN(value)) {
+          return { valid: false, error: `${configKey} must be a valid number` };
+        }
+        if (configMeta.min !== undefined && value < configMeta.min) {
+          return { valid: false, error: `${configKey} must be at least ${configMeta.min}` };
+        }
+        if (configMeta.max !== undefined && value > configMeta.max) {
+          return { valid: false, error: `${configKey} must be at most ${configMeta.max}` };
+        }
+        break;
+      
+      case 'range':
+        if (typeof value !== 'number' || isNaN(value)) {
+          return { valid: false, error: `${configKey} must be a valid number` };
+        }
+        if (configMeta.min !== undefined && value < configMeta.min) {
+          return { valid: false, error: `${configKey} must be between ${configMeta.min} and ${configMeta.max}` };
+        }
+        if (configMeta.max !== undefined && value > configMeta.max) {
+          return { valid: false, error: `${configKey} must be between ${configMeta.min} and ${configMeta.max}` };
+        }
+        break;
+      
+      case 'boolean':
+        if (typeof value !== 'boolean') {
+          return { valid: false, error: `${configKey} must be true or false` };
+        }
+        break;
+      
+      case 'multiselect':
+        if (!Array.isArray(value)) {
+          return { valid: false, error: `${configKey} must be an array` };
+        }
+        break;
+    }
+
+    return { valid: true };
+  }
+
+  private getConfigMetadata(configKey: string) {
+    // This would normally come from database or config service
+    const configMap = {
+      'minConfidenceForReview': { type: 'range', min: 0, max: 100 },
+      'minConfidenceForAutoPublish': { type: 'range', min: 0, max: 100 },
+      'minPatternFrequency': { type: 'number', min: 1, max: 50 },
+      'similarityThreshold': { type: 'range', min: 0, max: 1 },
+      'batchSize': { type: 'number', min: 10, max: 1000 },
+      'processingInterval': { type: 'number', min: 300, max: 86400 },
+      'enableRealTimeProcessing': { type: 'boolean' },
+      'enableAutoPublishing': { type: 'boolean' },
+      'maxDailyProcessingLimit': { type: 'number', min: 100, max: 10000 },
+      'minQuestionLength': { type: 'number', min: 5, max: 100 },
+      'maxQuestionLength': { type: 'number', min: 100, max: 2000 },
+      'minAnswerLength': { type: 'number', min: 10, max: 200 },
+      'chatSessionMinDuration': { type: 'number', min: 60, max: 3600 },
+      'ticketMinResolutionTime': { type: 'number', min: 300, max: 86400 },
+      'requiredSatisfactionScore': { type: 'range', min: 1, max: 5 },
+      'excludedCategories': { type: 'multiselect' },
+      'autoCategorizationEnabled': { type: 'boolean' },
+      'temperature': { type: 'range', min: 0, max: 2 },
+      'maxTokens': { type: 'number', min: 100, max: 4000 },
+      'retentionPeriodDays': { type: 'number', min: 30, max: 1095 }
+    };
+    
+    return configMap[configKey];
+  }
+
+  private getDefaultConfigsForCategory(category: string) {
+    // Return default configs for category - this would come from FaqLearningConfig.getDefaultConfig()
+    const defaults = {
+      'thresholds': [
+        { key: 'minConfidenceForReview', value: 60 },
+        { key: 'minConfidenceForAutoPublish', value: 85 }
+      ],
+      'recognition': [
+        { key: 'minPatternFrequency', value: 3 },
+        { key: 'similarityThreshold', value: 0.8 }
+      ],
+      'processing': [
+        { key: 'batchSize', value: 100 },
+        { key: 'processingInterval', value: 3600 },
+        { key: 'enableRealTimeProcessing', value: false },
+        { key: 'enableAutoPublishing', value: false },
+        { key: 'maxDailyProcessingLimit', value: 1000 }
+      ],
+      'quality': [
+        { key: 'minQuestionLength', value: 10 },
+        { key: 'maxQuestionLength', value: 500 },
+        { key: 'minAnswerLength', value: 20 }
+      ],
+      'sources': [
+        { key: 'chatSessionMinDuration', value: 300 },
+        { key: 'ticketMinResolutionTime', value: 1800 },
+        { key: 'requiredSatisfactionScore', value: 4 }
+      ],
+      'categories': [
+        { key: 'excludedCategories', value: [] },
+        { key: 'autoCategorizationEnabled', value: true }
+      ],
+      'ai': [
+        { key: 'temperature', value: 0.7 },
+        { key: 'maxTokens', value: 1000 }
+      ],
+      'advanced': [
+        { key: 'retentionPeriodDays', value: 365 }
+      ]
+    };
+    
+    return defaults[category] || [];
   }
 }

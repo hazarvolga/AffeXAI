@@ -317,6 +317,26 @@ export class FaqLearningService {
   }
 
   /**
+   * Get current AI provider information
+   */
+  static async getAiProviderInfo(): Promise<{
+    currentProvider: string;
+    currentModel: string;
+    available: boolean;
+    isReadOnly: boolean;
+    globalSettingsUrl: string;
+  }> {
+    const response = await httpClient.get<any>(`${this.BASE_URL}/ai-provider-info`);
+    
+    console.log('🤖 AI Provider info response:', response);
+    
+    // Handle wrapped response
+    const data = response.data || response;
+    
+    return data;
+  }
+
+  /**
    * Get AI usage statistics for FAQ Learning
    */
   static async getAiUsageStats(): Promise<{

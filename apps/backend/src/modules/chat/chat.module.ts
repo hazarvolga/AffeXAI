@@ -15,6 +15,7 @@ import { ChatSessionService } from './services/chat-session.service';
 import { ChatMessageService } from './services/chat-message.service';
 import { DocumentProcessorService } from './services/document-processor.service';
 import { FileValidatorService } from './services/file-validator.service';
+import { ChatContextEngineService } from './services/chat-context-engine.service';
 
 // Controllers
 import { DocumentUploadController } from './controllers/document-upload.controller';
@@ -24,6 +25,12 @@ import { ChatGateway } from './gateways/chat.gateway';
 
 // External entities
 import { User } from '../users/entities/user.entity';
+import { KnowledgeBaseArticle } from '../tickets/entities/knowledge-base-article.entity';
+import { LearnedFaqEntry } from '../faq-learning/entities/learned-faq-entry.entity';
+import { LearningPattern } from '../faq-learning/entities/learning-pattern.entity';
+
+// External services
+import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-search.service';
 
 @Module({
   imports: [
@@ -37,6 +44,9 @@ import { User } from '../users/entities/user.entity';
       ChatUrlCache,
       // External entities
       User,
+      KnowledgeBaseArticle,
+      LearnedFaqEntry,
+      LearningPattern,
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-secret-key',
@@ -51,6 +61,8 @@ import { User } from '../users/entities/user.entity';
     ChatMessageService,
     DocumentProcessorService,
     FileValidatorService,
+    ChatContextEngineService,
+    FaqEnhancedSearchService,
     ChatGateway,
   ],
   exports: [
@@ -58,6 +70,7 @@ import { User } from '../users/entities/user.entity';
     ChatMessageService,
     DocumentProcessorService,
     FileValidatorService,
+    ChatContextEngineService,
     ChatGateway,
   ],
 })

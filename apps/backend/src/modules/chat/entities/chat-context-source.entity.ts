@@ -47,6 +47,22 @@ export class ChatContextSource extends BaseEntity {
     extractedAt?: Date;
     confidence?: number;
     matchedKeywords?: string[];
+    searchQuery?: string;
+    // Additional metadata fields for different source types
+    viewCount?: number;
+    helpfulCount?: number;
+    usageCount?: number;
+    fileType?: string;
+    fileSize?: number;
+    uploadedAt?: Date;
+    processingStatus?: string;
+    fullContent?: string;
+    answer?: string;
+    keywords?: string[];
+    source?: string;
+    status?: string;
+    publishedAt?: Date;
+    summary?: string;
   };
 
   // Relations

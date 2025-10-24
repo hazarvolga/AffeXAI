@@ -758,6 +758,35 @@ export class FaqLearningController {
     }
   }
 
+  @Get('provider-status')
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
+  @ApiOperation({ summary: 'Get current AI provider status for FAQ Learning' })
+  @ApiResponse({ status: 200, description: 'Provider status retrieved successfully' })
+  async getProviderStatus(): Promise<{
+    success: boolean;
+    data: {
+      provider: string;
+      model: string;
+      available: boolean;
+      responseTime?: number;
+    };
+  }> {
+    try {
+      const status = await this.faqAiService.getProviderStatus();
+      
+      return {
+        success: true,
+        data: status
+      };
+    } catch (error) {
+      this.logger.error('Failed to get provider status:', error);
+      throw new HttpException(
+        `Failed to get provider status: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   @Get('config')
   @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get all FAQ Learning configurations' })
@@ -840,33 +869,6 @@ export class FaqLearningController {
       this.logger.error('Failed to update configuration:', error);
       throw new HttpException(
         `Failed to update configuration: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
-
-  @Post('config/reset/:sectionKey')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Reset configuration section to defaults' })
-  @ApiResponse({ status: 200, description: 'Configuration section reset successfully' })
-  async resetConfigSection(@Param('sectionKey') sectionKey: string): Promise<{
-    success: boolean;
-    message: string;
-  }> {
-    try {
-      // This would reset the configuration section to defaults
-      // Implementation would go here
-      
-      this.logger.log(`Configuration section ${sectionKey} reset to defaults`);
-      
-      return {
-        success: true,
-        message: `Configuration section ${sectionKey} reset to defaults`
-      };
-    } catch (error) {
-      this.logger.error(`Failed to reset configuration section ${sectionKey}:`, error);
-      throw new HttpException(
-        `Failed to reset configuration section: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

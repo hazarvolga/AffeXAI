@@ -44,7 +44,7 @@ import { AuditLoggingService } from './services/audit-logging.service';
 // Controllers
 import { FaqLearningController } from './controllers/faq-learning.controller';
 import { ReviewManagementController } from './controllers/review-management.controller';
-import { AiProviderController } from './controllers/ai-provider.controller';
+
 import { LearnedFaqController } from './controllers/learned-faq.controller';
 import { AnalyticsController } from './controllers/analytics.controller';
 import { MonitoringController } from './controllers/monitoring.controller';
@@ -53,6 +53,8 @@ import { MonitoringController } from './controllers/monitoring.controller';
 import { TicketsModule } from '../tickets/tickets.module';
 import { MailModule } from '../mail/mail.module';
 import { UsersModule } from '../users/users.module';
+import { AiModule } from '../ai/ai.module';
+import { SettingsModule } from '../settings/settings.module';
 import { forwardRef } from '@nestjs/common';
 
 @Module({
@@ -66,6 +68,8 @@ import { forwardRef } from '@nestjs/common';
     forwardRef(() => TicketsModule),
     MailModule,
     UsersModule,
+    AiModule,
+    SettingsModule,
   ],
   providers: [
     // Data Extraction Services
@@ -105,7 +109,7 @@ import { forwardRef } from '@nestjs/common';
   controllers: [
     FaqLearningController,
     ReviewManagementController,
-    AiProviderController,
+
     LearnedFaqController,
     AnalyticsController,
     MonitoringController,

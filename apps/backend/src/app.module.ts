@@ -23,6 +23,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { AiModule } from './modules/ai/ai.module';
 import { PlatformIntegrationModule } from './modules/platform-integration/platform-integration.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { FaqLearningModule } from './modules/faq-learning/faq-learning.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -75,6 +76,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AiModule,
     PlatformIntegrationModule,
     AnalyticsModule,
+    FaqLearningModule,
   ],
   controllers: [AppController],
   providers: [AppService],

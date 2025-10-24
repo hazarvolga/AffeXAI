@@ -2,263 +2,285 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FaqLearningConfig } from '../entities/faq-learning-config.entity';
-import { AiProvider, AiProviderConfig, FaqGenerationRequest, FaqGenerationResponse } from '../interfaces/ai-provider.interface';
-import { OpenAiProvider } from './ai-providers/openai.provider';
-import { AnthropicProvider } from './ai-providers/anthropic.provider';
+import { FaqAiInterface, FaqGenerationRequest, FaqGenerationResponse, PatternAnalysisRequest, PatternAnalysisResponse } from '../interfaces/faq-ai.interface';
+import { AiService } from '../../ai/ai.service';
+import { SettingsService } from '../../settings/settings.service';
+import { AiModel } from '../../settings/dto/ai-settings.dto';
 
 @Injectable()
-export class FaqAiService {
+export class FaqAiService implements FaqAiInterface {
   private readonly logger = new Logger(FaqAiService.name);
-  private providers: Map<string, AiProvider> = new Map();
-  private currentProvider: string = 'openai';
 
   constructor(
     @InjectRepository(FaqLearningConfig)
     private configRepository: Repository<FaqLearningConfig>,
-  ) {
-    this.initializeProviders();
-  }
+    private aiService: AiService,
+    private settingsService: SettingsService,
+  ) {}
 
+  /**
+   * Generate FAQ answer using global AI service
+   */
   async generateFaqAnswer(request: FaqGenerationRequest): Promise<FaqGenerationResponse> {
-    const provider = await this.getActiveProvider();
+    const startTime = Date.now();
     
-    if (!provider) {
-      throw new Error('No AI provider available');
-    }
-
     try {
-      this.logger.log(`Generating FAQ answer using ${provider.name} provider`);
-      return await provider.generateFaqAnswer(request);
-    } catch (error) {
-      this.logger.error(`FAQ generation failed with ${provider.name}:`, error);
+      // Get AI settings for support module
+      const aiSettings = await this.settingsService.getAiSettings();
+      const supportSettings = aiSettings.support;
       
-      // Try fallback provider
-      const fallbackProvider = await this.getFallbackProvider();
-      if (fallbackProvider && fallbackProvider.name !== provider.name) {
-        this.logger.log(`Trying fallback provider: ${fallbackProvider.name}`);
-        try {
-          return await fallbackProvider.generateFaqAnswer(request);
-        } catch (fallbackError) {
-          this.logger.error(`Fallback provider also failed:`, fallbackError);
-        }
+      if (!supportSettings.enabled) {
+        throw new Error('AI support is disabled in settings');
       }
+
+      // Use global API key if single key mode is enabled
+      const apiKey = aiSettings.useSingleApiKey 
+        ? aiSettings.global?.apiKey 
+        : supportSettings.apiKey;
+
+      if (!apiKey) {
+        throw new Error('No AI API key configured for FAQ learning');
+      }
+
+      const prompt = this.buildFaqPrompt(request);
       
+      const result = await this.aiService.generateCompletion(apiKey, prompt, {
+        model: supportSettings.model,
+        temperature: 0.7,
+        maxTokens: 1000,
+        systemPrompt: 'You are an expert FAQ generator. Create clear, helpful FAQ entries based on conversation patterns.'
+      });
+
+      const processingTime = Date.now() - startTime;
+      
+      // Parse AI response (expecting JSON format)
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(result.content);
+      } catch {
+        // Fallback if not JSON
+        parsedResponse = {
+          answer: result.content,
+          confidence: 75,
+          keywords: this.extractKeywords(result.content),
+          category: 'General'
+        };
+      }
+
+      return {
+        answer: parsedResponse.answer || result.content,
+        confidence: parsedResponse.confidence || 75,
+        keywords: parsedResponse.keywords || this.extractKeywords(result.content),
+        category: parsedResponse.category || 'General',
+        processingTime,
+        metadata: {
+          aiProvider: this.getProviderFromModel(supportSettings.model),
+          model: supportSettings.model,
+          processingTime,
+          tokensUsed: result.tokensUsed
+        }
+      };
+    } catch (error) {
+      this.logger.error('Failed to generate FAQ answer:', error);
       throw new Error(`FAQ generation failed: ${error.message}`);
     }
   }
 
-  async improveAnswer(originalAnswer: string, feedback: string): Promise<string> {
-    const provider = await this.getActiveProvider();
+  /**
+   * Analyze patterns in conversation data
+   */
+  async analyzePatterns(request: PatternAnalysisRequest): Promise<PatternAnalysisResponse> {
+    const startTime = Date.now();
     
-    if (!provider) {
-      throw new Error('No AI provider available');
-    }
-
-    return await provider.improveAnswer(originalAnswer, feedback);
-  }
-
-  async categorizeQuestion(question: string, availableCategories: string[]): Promise<string> {
-    const provider = await this.getActiveProvider();
-    
-    if (!provider) {
-      return 'General';
-    }
-
-    return await provider.categorizeQuestion(question, availableCategories);
-  }
-
-  async extractKeywords(text: string): Promise<string[]> {
-    const provider = await this.getActiveProvider();
-    
-    if (!provider) {
-      return [];
-    }
-
-    return await provider.extractKeywords(text);
-  }
-
-  async generateRelatedQuestions(question: string, answer: string): Promise<string[]> {
-    const provider = await this.getActiveProvider();
-    
-    if (!provider) {
-      return [];
-    }
-
-    return await provider.generateRelatedQuestions(question, answer);
-  }
-
-  async switchProvider(providerName: string): Promise<boolean> {
-    const provider = this.providers.get(providerName);
-    
-    if (!provider) {
-      this.logger.error(`Provider ${providerName} not found`);
-      return false;
-    }
-
-    const isAvailable = await provider.isAvailable();
-    if (!isAvailable) {
-      this.logger.error(`Provider ${providerName} is not available`);
-      return false;
-    }
-
-    this.currentProvider = providerName;
-    
-    // Update configuration
-    await this.updateProviderConfig(providerName);
-    
-    this.logger.log(`Switched to provider: ${providerName}`);
-    return true;
-  }
-
-  async testProvider(providerName: string): Promise<boolean> {
-    const provider = this.providers.get(providerName);
-    
-    if (!provider) {
-      return false;
-    }
-
-    return await provider.testConnection();
-  }
-
-  async getProviderStatus(): Promise<Array<{name: string, available: boolean}>> {
-    const status = [];
-    
-    for (const [name, provider] of this.providers) {
-      const available = await provider.isAvailable();
-      status.push({ name, available });
-    }
-    
-    return status;
-  }
-
-  private async initializeProviders(): Promise<void> {
     try {
-      // Load AI configuration
-      const aiConfig = await this.getAiConfig();
-      const providerSettings = await this.getProviderSettings();
-
-      // Initialize OpenAI provider
-      if (providerSettings.openai) {
-        const openaiConfig: AiProviderConfig = {
-          provider: 'openai',
-          apiKey: process.env.OPENAI_API_KEY || '',
-          model: providerSettings.openai.defaultModel || 'gpt-4',
-          temperature: aiConfig.temperature || 0.7,
-          maxTokens: aiConfig.maxTokens || 1000
-        };
-        this.providers.set('openai', new OpenAiProvider(openaiConfig));
-      }
-
-      // Initialize Anthropic provider
-      if (providerSettings.anthropic) {
-        const anthropicConfig: AiProviderConfig = {
-          provider: 'anthropic',
-          apiKey: process.env.ANTHROPIC_API_KEY || '',
-          model: providerSettings.anthropic.defaultModel || 'claude-3-sonnet',
-          temperature: aiConfig.temperature || 0.7,
-          maxTokens: aiConfig.maxTokens || 1000
-        };
-        this.providers.set('anthropic', new AnthropicProvider(anthropicConfig));
-      }
-
-      // Set current provider from config
-      this.currentProvider = aiConfig.aiProvider || 'openai';
+      const aiSettings = await this.settingsService.getAiSettings();
+      const supportSettings = aiSettings.support;
       
-      this.logger.log(`Initialized ${this.providers.size} AI providers`);
-    } catch (error) {
-      this.logger.error('Failed to initialize AI providers:', error);
-    }
-  }
+      const apiKey = aiSettings.useSingleApiKey 
+        ? aiSettings.global?.apiKey 
+        : supportSettings.apiKey;
 
-  private async getActiveProvider(): Promise<AiProvider | null> {
-    const provider = this.providers.get(this.currentProvider);
-    
-    if (!provider) {
-      this.logger.error(`Current provider ${this.currentProvider} not found`);
-      return null;
-    }
-
-    const isAvailable = await provider.isAvailable();
-    if (!isAvailable) {
-      this.logger.warn(`Current provider ${this.currentProvider} is not available`);
-      return null;
-    }
-
-    return provider;
-  }
-
-  private async getFallbackProvider(): Promise<AiProvider | null> {
-    // Try to find any available provider that's not the current one
-    for (const [name, provider] of this.providers) {
-      if (name !== this.currentProvider) {
-        const isAvailable = await provider.isAvailable();
-        if (isAvailable) {
-          return provider;
-        }
+      if (!apiKey) {
+        throw new Error('No AI API key configured for pattern analysis');
       }
-    }
-    
-    return null;
-  }
 
-  private async getAiConfig(): Promise<any> {
-    try {
-      const config = await this.configRepository.findOne({
-        where: { configKey: 'ai_model_settings' }
+      const prompt = this.buildPatternAnalysisPrompt(request);
+      
+      const result = await this.aiService.generateCompletion(apiKey, prompt, {
+        model: supportSettings.model,
+        temperature: 0.3, // Lower temperature for more consistent analysis
+        maxTokens: 800,
+        systemPrompt: 'You are an expert at analyzing conversation patterns and identifying frequently asked questions.'
       });
+
+      const processingTime = Date.now() - startTime;
       
-      return config?.configValue || {
-        aiProvider: 'openai',
-        temperature: 0.7,
-        maxTokens: 1000
-      };
-    } catch (error) {
-      this.logger.error('Failed to load AI config:', error);
+      // Parse AI response
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(result.content);
+      } catch {
+        parsedResponse = {
+          patterns: [],
+          confidence: 50,
+          recommendations: ['Unable to parse AI response']
+        };
+      }
+
       return {
-        aiProvider: 'openai',
-        temperature: 0.7,
-        maxTokens: 1000
-      };
-    }
-  }
-
-  private async getProviderSettings(): Promise<any> {
-    try {
-      const config = await this.configRepository.findOne({
-        where: { configKey: 'provider_settings' }
-      });
-      
-      return config?.configValue || {
-        openai: {
-          models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-          defaultModel: 'gpt-4'
-        },
-        anthropic: {
-          models: ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-          defaultModel: 'claude-3-sonnet'
+        patterns: parsedResponse.patterns || [],
+        confidence: parsedResponse.confidence || 50,
+        recommendations: parsedResponse.recommendations || [],
+        processingTime,
+        metadata: {
+          aiProvider: this.getProviderFromModel(supportSettings.model),
+          model: supportSettings.model,
+          processingTime,
+          tokensUsed: result.tokensUsed
         }
       };
     } catch (error) {
-      this.logger.error('Failed to load provider settings:', error);
-      return {};
+      this.logger.error('Failed to analyze patterns:', error);
+      throw new Error(`Pattern analysis failed: ${error.message}`);
     }
   }
 
-  private async updateProviderConfig(providerName: string): Promise<void> {
+  /**
+   * Get current AI provider status and statistics
+   */
+  async getProviderStatus(): Promise<{
+    provider: string;
+    model: string;
+    available: boolean;
+    responseTime?: number;
+  }> {
     try {
-      const config = await this.configRepository.findOne({
-        where: { configKey: 'ai_model_settings' }
-      });
+      const aiSettings = await this.settingsService.getAiSettings();
+      const supportSettings = aiSettings.support;
       
-      if (config) {
-        config.configValue = {
-          ...config.configValue,
-          aiProvider: providerName as any
+      const apiKey = aiSettings.useSingleApiKey 
+        ? aiSettings.global?.apiKey 
+        : supportSettings.apiKey;
+
+      if (!apiKey) {
+        return {
+          provider: this.getProviderFromModel(supportSettings.model),
+          model: supportSettings.model,
+          available: false
         };
-        await this.configRepository.save(config);
       }
+
+      const startTime = Date.now();
+      const isAvailable = await this.aiService.testApiKey(apiKey, supportSettings.model);
+      const responseTime = Date.now() - startTime;
+
+      return {
+        provider: this.getProviderFromModel(supportSettings.model),
+        model: supportSettings.model,
+        available: isAvailable,
+        responseTime: isAvailable ? responseTime : undefined
+      };
     } catch (error) {
-      this.logger.error('Failed to update provider config:', error);
+      this.logger.error('Failed to get provider status:', error);
+      return {
+        provider: 'unknown',
+        model: 'unknown',
+        available: false
+      };
     }
+  }
+
+  /**
+   * Build FAQ generation prompt
+   */
+  private buildFaqPrompt(request: FaqGenerationRequest): string {
+    return `
+Generate a comprehensive FAQ entry based on the following conversation data:
+
+Context: ${request.context}
+Question Pattern: ${request.questionPattern}
+Answer Pattern: ${request.answerPattern}
+
+Please provide a JSON response with the following structure:
+{
+  "question": "Clear, concise question that users would ask",
+  "answer": "Comprehensive, helpful answer",
+  "confidence": 85,
+  "keywords": ["keyword1", "keyword2", "keyword3"],
+  "category": "appropriate_category_name"
+}
+
+Make sure the FAQ entry is:
+- Clear and easy to understand
+- Comprehensive but concise
+- Helpful for users with similar questions
+- Properly categorized
+    `.trim();
+  }
+
+  /**
+   * Build pattern analysis prompt
+   */
+  private buildPatternAnalysisPrompt(request: PatternAnalysisRequest): string {
+    return `
+Analyze the following conversation data to identify patterns and potential FAQ entries:
+
+Conversations: ${JSON.stringify(request.conversations)}
+Time Range: ${request.timeRange.from} to ${request.timeRange.to}
+
+Please provide a JSON response with:
+{
+  "patterns": [
+    {
+      "type": "question_pattern",
+      "pattern": "description of the pattern",
+      "frequency": 5,
+      "confidence": 85,
+      "examples": ["example1", "example2"]
+    }
+  ],
+  "confidence": 80,
+  "recommendations": [
+    "Create FAQ for pattern X",
+    "Consider improving documentation for topic Y"
+  ]
+}
+
+Focus on:
+- Frequently asked questions
+- Common problem patterns
+- Recurring themes
+- User pain points
+    `.trim();
+  }
+
+  /**
+   * Extract keywords from text (fallback method)
+   */
+  private extractKeywords(text: string): string[] {
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3);
+    
+    // Simple frequency-based keyword extraction
+    const wordCount = new Map<string, number>();
+    words.forEach(word => {
+      wordCount.set(word, (wordCount.get(word) || 0) + 1);
+    });
+    
+    return Array.from(wordCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word]) => word);
+  }
+
+  /**
+   * Get provider name from AI model
+   */
+  private getProviderFromModel(model: AiModel): string {
+    if (model.startsWith('gpt-')) return 'openai';
+    if (model.startsWith('claude-')) return 'anthropic';
+    return 'unknown';
   }
 }

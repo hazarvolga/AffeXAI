@@ -481,7 +481,7 @@ export default function FaqLearningDashboard() {
                 {recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg">
                     <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === 'success' ? 'bg-green-500' :
-                        activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                      activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                       }`} />
                     <div className="flex-1">
                       <p className="text-sm">{activity.description}</p>

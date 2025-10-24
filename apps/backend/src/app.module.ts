@@ -47,10 +47,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: 5433,
+      port: parseInt(process.env.DB_PORT || '5434', 10),
       username: 'postgres',
       password: 'postgres',
-      database: 'aluplan_dev',
+      database: process.env.DB_NAME || 'affexai_dev',
       autoLoadEntities: true,
       synchronize: true, // Temporary: Will sync schema with entities
       logging: ['error', 'warn'], // Log only errors and warnings

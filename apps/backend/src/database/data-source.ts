@@ -32,10 +32,10 @@ import { TicketEscalationRule } from '../modules/tickets/entities/ticket-escalat
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: 'localhost',
-  port: 5433,
+  port: 5434,
   username: 'postgres',
   password: 'postgres',
-  database: 'aluplan_dev',
+  database: 'affexai_dev',
   synchronize: false,
   logging: false,
   entities: [

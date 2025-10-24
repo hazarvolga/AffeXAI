@@ -99,4 +99,13 @@ export class ChatMessage extends BaseEntity {
   get wordCount(): number {
     return this.content.split(/\s+/).length;
   }
+
+  // Compatibility aliases for FAQ learning services
+  get messageType(): MessageType {
+    return this.type;
+  }
+
+  get confidenceScore(): number {
+    return this.helpfulnessScore;
+  }
 }

@@ -1,12 +1,16 @@
 export interface ExtractedData {
   id: string;
   sourceId: string;
-  type: 'chat' | 'ticket';
-  sourceType: 'chat' | 'ticket';
+  source: 'chat' | 'ticket';
   question: string;
   answer: string;
   context?: string;
   confidence: number;
+  keywords: string[];
+  category: string;
+  extractedAt: Date;
+  sessionDuration?: number;
+  satisfactionScore?: number;
   metadata: {
     timestamp: Date;
     userId?: string;

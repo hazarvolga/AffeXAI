@@ -4,10 +4,10 @@ export default registerAs('database', () => ({
   url: process.env.DATABASE_URL,
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5433', 10),
+  port: parseInt(process.env.DB_PORT || '5434', 10),
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'aluplan_dev',
+  database: process.env.DB_NAME || 'affexai_dev',
   synchronize: process.env.DB_SYNCHRONIZE === 'true' || true,
   logging: process.env.DB_LOGGING === 'true' || false,
 }));

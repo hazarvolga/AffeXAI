@@ -253,15 +253,19 @@ export class FaqLearningService {
     try {
       const patternData = normalizedData.map(d => ({
         id: d.id || crypto.randomUUID(),
+        sourceId: d.sourceId,
+        source: d.source,
         question: d.question,
         answer: d.answer || '',
-        confidence: d.confidence || 50,
-        sourceId: d.sourceId,
-        type: (d.source === 'chat' ? 'chat' : 'ticket') as 'chat' | 'ticket',
-        sourceType: (d.source === 'chat' ? 'chat' : 'ticket') as 'chat' | 'ticket',
         context: d.context,
+        confidence: d.confidence || 50,
+        keywords: d.keywords || [],
+        category: d.category || 'General',
+        extractedAt: d.extractedAt || new Date(),
+        sessionDuration: d.sessionDuration,
+        satisfactionScore: d.satisfactionScore,
         metadata: {
-          timestamp: d.timestamp || new Date(),
+          timestamp: d.extractedAt || new Date(),
           ...d.metadata
         }
       }));
@@ -296,8 +300,8 @@ export class FaqLearningService {
         // Generate AI answer if confidence is sufficient
         if (confidenceResult.overallConfidence >= 50) {
           const aiResponse = await this.faqAiService.generateFaqAnswer({
-            question: data.question,
-            context: data.context,
+            context: `Question: ${data.question}\nContext: ${data.context}`,
+            questionPattern: data.question,
             category: data.category
           });
 

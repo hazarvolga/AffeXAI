@@ -97,7 +97,7 @@ export class ConfidenceCalculatorService {
   private calculateSourceQuality(data: ExtractedData): number {
     let score = 50; // Base score
     
-    if (data.type === 'ticket') {
+    if (data.source === 'ticket') {
       score += 20; // Tickets generally have higher quality
       
       // Check resolution time - longer resolution might indicate complexity/quality
@@ -106,7 +106,7 @@ export class ConfidenceCalculatorService {
           score += 10;
         }
       }
-    } else if (data.type === 'chat') {
+    } else if (data.source === 'chat') {
       score += 10; // Chat is good but less structured
       
       // Check session duration
@@ -138,12 +138,12 @@ export class ConfidenceCalculatorService {
     let score = 60; // Default assumption
     
     // For tickets, check if it was resolved
-    if (data.type === 'ticket' && data.metadata.isResolved) {
+    if (data.source === 'ticket' && data.metadata.isResolved) {
       score = 85;
     }
     
     // For chat, check satisfaction or session completion
-    if (data.type === 'chat') {
+    if (data.source === 'chat') {
       if (data.metadata.satisfactionScore && data.metadata.satisfactionScore >= 4) {
         score = 80;
       } else if (data.metadata.sessionDuration && data.metadata.sessionDuration > 180) {

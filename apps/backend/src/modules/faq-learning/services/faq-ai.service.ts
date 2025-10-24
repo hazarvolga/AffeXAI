@@ -2,11 +2,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FaqLearningConfig } from '../entities/faq-learning-config.entity';
-import { FaqAiInterface, FaqGenerationRequest, FaqGenerationResponse, PatternAnalysisRequest, PatternAnalysisResponse } from '../interfaces/faq-ai.interface';
+import { 
+  FaqAiInterface, 
+  FaqGenerationRequest, 
+  FaqGenerationResponse, 
+  PatternAnalysisRequest, 
+  PatternAnalysisResponse,
+  ProviderStatus
+} from '../interfaces/faq-ai.interface';
 import { AiService } from '../../ai/ai.service';
 import { SettingsService } from '../../settings/settings.service';
 import { AiModel } from '../../settings/dto/ai-settings.dto';
 
+/**
+ * FAQ AI Service
+ * Integrates with global AI service for FAQ generation and analysis
+ */
 @Injectable()
 export class FaqAiService implements FaqAiInterface {
   private readonly logger = new Logger(FaqAiService.name);
@@ -148,12 +159,7 @@ export class FaqAiService implements FaqAiInterface {
   /**
    * Get current AI provider status and statistics
    */
-  async getProviderStatus(): Promise<{
-    provider: string;
-    model: string;
-    available: boolean;
-    responseTime?: number;
-  }> {
+  async getProviderStatus(): Promise<ProviderStatus> {
     try {
       const aiSettings = await this.settingsService.getAiSettings();
       const supportSettings = aiSettings.support;
@@ -198,8 +204,8 @@ export class FaqAiService implements FaqAiInterface {
 Generate a comprehensive FAQ entry based on the following conversation data:
 
 Context: ${request.context}
-Question Pattern: ${request.questionPattern}
-Answer Pattern: ${request.answerPattern}
+${request.questionPattern ? `Question Pattern: ${request.questionPattern}` : ''}
+${request.answerPattern ? `Answer Pattern: ${request.answerPattern}` : ''}
 
 Please provide a JSON response with the following structure:
 {
@@ -273,6 +279,31 @@ Focus on:
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([word]) => word);
+  }
+
+  /**
+   * Improve existing FAQ answer (compatibility method)
+   */
+  async improveAnswer(question: string, answer: string, feedback?: string[]): Promise<FaqGenerationResponse> {
+    const request: FaqGenerationRequest = {
+      context: `Question: ${question}\nCurrent Answer: ${answer}\nFeedback: ${feedback?.join(', ') || 'None'}`,
+      questionPattern: question,
+      answerPattern: answer
+    };
+    
+    return this.generateFaqAnswer(request);
+  }
+
+  /**
+   * Categorize question (compatibility method)
+   */
+  async categorizeQuestion(question: string, availableCategories: string[]): Promise<string> {
+    const request: FaqGenerationRequest = {
+      context: `Question: ${question}\nAvailable Categories: ${availableCategories.join(', ')}`
+    };
+    
+    const response = await this.generateFaqAnswer(request);
+    return response.category;
   }
 
   /**

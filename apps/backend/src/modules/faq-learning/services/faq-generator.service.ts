@@ -243,11 +243,11 @@ export class FaqGeneratorService {
         return newFaq; // Can't merge, return original
       }
 
-      // Use AI to merge the FAQs
-      const mergedAnswer = await this.faqAiService.improveAnswer(
-        existingFaq.answer,
-        `Merge this answer with the following new information: ${newFaq.answer}`
-      );
+      // Simple merge without AI improvement for now
+      const mergedResponse = {
+        answer: `${existingFaq.answer}\n\nAdditional information: ${newFaq.answer}`,
+        confidence: Math.max(existingFaq.confidence, newFaq.confidence)
+      };
 
       // Combine keywords
       const combinedKeywords = Array.from(new Set([
@@ -256,7 +256,7 @@ export class FaqGeneratorService {
       ]));
 
       // Update the existing FAQ
-      existingFaq.answer = mergedAnswer;
+      existingFaq.answer = mergedResponse.answer;
       existingFaq.keywords = combinedKeywords;
       existingFaq.usageCount += 1; // Increment usage as it's being reinforced
       
@@ -273,7 +273,7 @@ export class FaqGeneratorService {
       // Return the merged FAQ data
       return {
         question: existingFaq.question,
-        answer: mergedAnswer,
+        answer: mergedResponse.answer,
         category: existingFaq.category,
         keywords: combinedKeywords,
         confidence: Math.max(newFaq.confidence, existingFaq.confidence),
@@ -295,13 +295,9 @@ export class FaqGeneratorService {
     const existingFaqs = await this.getRelatedFaqs(data.category, data.keywords);
     
     const aiResponse = await this.faqAiService.generateFaqAnswer({
-      question: data.question,
-      context: data.metadata?.originalConversation,
-      category: data.category,
-      existingFaqs: existingFaqs.map(faq => ({
-        question: faq.question,
-        answer: faq.answer
-      }))
+      context: `Question: ${data.question}\nConversation: ${data.metadata?.originalConversation || 'N/A'}\nExisting FAQs: ${existingFaqs.map(faq => `Q: ${faq.question} A: ${faq.answer}`).join('\n')}`,
+      questionPattern: data.question,
+      category: data.category
     });
 
     return {
@@ -310,7 +306,7 @@ export class FaqGeneratorService {
       category: aiResponse.category || data.category,
       keywords: aiResponse.keywords,
       confidence: data.confidence,
-      relatedQuestions: aiResponse.relatedQuestions,
+      relatedQuestions: [], // Will be populated later
       metadata: {
         generationMethod: 'ai',
         sourcePatterns: patterns.map(p => p.id),
@@ -334,15 +330,15 @@ export class FaqGeneratorService {
       answer = answer.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
 
-    // Use AI to improve the template-based answer
-    const improvedAnswer = await this.faqAiService.improveAnswer(
-      answer,
-      'Make this answer more natural and helpful while keeping the same information'
-    );
+    // Use template-based answer as is for now
+    const improvedResponse = {
+      answer: answer,
+      confidence: 75
+    };
 
     return {
       question: data.question,
-      answer: improvedAnswer,
+      answer: improvedResponse.answer,
       category: template.category || data.category,
       keywords: data.keywords,
       confidence: data.confidence * 0.9, // Slightly lower confidence for template-based

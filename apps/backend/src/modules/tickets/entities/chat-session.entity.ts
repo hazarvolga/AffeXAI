@@ -74,4 +74,13 @@ export class ChatSession extends BaseEntity {
   get hasPositiveFeedback(): boolean {
     return this.satisfactionScore >= 4;
   }
+
+  // Compatibility aliases for FAQ learning services
+  get durationSeconds(): number {
+    return this.duration;
+  }
+
+  get satisfactionRating(): number {
+    return this.satisfactionScore;
+  }
 }

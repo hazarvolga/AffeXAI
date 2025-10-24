@@ -138,7 +138,7 @@ export class DataNormalizerService {
     }
 
     // Factor 8: Session engagement (for chat data)
-    if (data.sourceType === 'chat' && data.metadata.messageCount) {
+    if (data.source === 'chat' && data.metadata.messageCount) {
       if (data.metadata.messageCount >= 3 && data.metadata.messageCount <= 10) {
         confidence += 5; // Good engagement
       } else if (data.metadata.messageCount > 20) {

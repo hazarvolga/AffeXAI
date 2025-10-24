@@ -1,33 +1,71 @@
 import { ExtractedData } from './data-extraction.interface';
 import { LearningPattern } from '../entities/learning-pattern.entity';
 
+/**
+ * FAQ Generation Request Interface
+ * Used for generating FAQ entries from conversation data
+ */
 export interface FaqGenerationRequest {
-  question: string;
-  answer: string;
-  context?: string;
+  context: string;
+  questionPattern?: string;
+  answerPattern?: string;
   category?: string;
   keywords?: string[];
-  sourceType: 'chat' | 'ticket';
+  sourceType?: 'chat' | 'ticket';
   metadata?: any;
 }
 
-export interface FaqGenerationResult {
-  question: string;
+/**
+ * FAQ Generation Response Interface
+ * Returned after AI generates FAQ content
+ */
+export interface FaqGenerationResponse {
   answer: string;
   confidence: number;
-  category: string;
   keywords: string[];
+  category: string;
+  processingTime: number;
   metadata: {
     aiProvider: string;
     model: string;
     processingTime: number;
-    tokensUsed: number;
-    originalQuestion?: string;
-    originalAnswer?: string;
-    improvements?: string[];
+    tokensUsed?: number;
   };
 }
 
+/**
+ * Pattern Analysis Request Interface
+ * Used for analyzing conversation patterns
+ */
+export interface PatternAnalysisRequest {
+  conversations: any[];
+  timeRange: {
+    from: string;
+    to: string;
+  };
+  analysisType?: 'similarity' | 'categorization' | 'quality' | 'deduplication';
+}
+
+/**
+ * Pattern Analysis Response Interface
+ * Returned after AI analyzes patterns
+ */
+export interface PatternAnalysisResponse {
+  patterns: any[];
+  confidence: number;
+  recommendations: string[];
+  processingTime: number;
+  metadata: {
+    aiProvider: string;
+    model: string;
+    processingTime: number;
+    tokensUsed?: number;
+  };
+}
+
+/**
+ * FAQ Improvement Suggestion Interface
+ */
 export interface FaqImprovementSuggestion {
   type: 'clarity' | 'completeness' | 'accuracy' | 'formatting';
   description: string;
@@ -35,98 +73,33 @@ export interface FaqImprovementSuggestion {
   confidence: number;
 }
 
-export interface PatternAnalysisRequest {
-  patterns: LearningPattern[];
-  extractedData: ExtractedData[];
-  analysisType: 'similarity' | 'categorization' | 'quality' | 'deduplication';
+/**
+ * Provider Status Interface
+ */
+export interface ProviderStatus {
+  provider: string;
+  model: string;
+  available: boolean;
+  responseTime?: number;
 }
 
-export interface PatternAnalysisResult {
-  analysisType: string;
-  results: any;
-  confidence: number;
-  recommendations: string[];
-  metadata: {
-    aiProvider: string;
-    model: string;
-    processingTime: number;
-    tokensUsed: number;
-  };
-}
-
-export interface IFaqAiService {
+/**
+ * FAQ AI Service Interface
+ * Defines the contract for FAQ AI operations using global AI service
+ */
+export interface FaqAiInterface {
   /**
-   * Generate FAQ entry from extracted data using AI
+   * Generate FAQ answer using global AI service
    */
-  generateFaqFromData(data: ExtractedData, provider?: string): Promise<FaqGenerationResult>;
+  generateFaqAnswer(request: FaqGenerationRequest): Promise<FaqGenerationResponse>;
 
   /**
-   * Improve existing FAQ entry using AI
+   * Analyze patterns in conversation data
    */
-  improveFaqEntry(
-    question: string, 
-    answer: string, 
-    feedback?: string[], 
-    provider?: string
-  ): Promise<FaqGenerationResult>;
+  analyzePatterns(request: PatternAnalysisRequest): Promise<PatternAnalysisResponse>;
 
   /**
-   * Analyze patterns using AI for better categorization
+   * Get current AI provider status
    */
-  analyzePatterns(request: PatternAnalysisRequest, provider?: string): Promise<PatternAnalysisResult>;
-
-  /**
-   * Generate FAQ suggestions from conversation
-   */
-  generateFaqSuggestions(
-    conversation: Array<{ role: 'user' | 'assistant'; content: string }>,
-    provider?: string
-  ): Promise<FaqGenerationResult[]>;
-
-  /**
-   * Validate FAQ quality using AI
-   */
-  validateFaqQuality(
-    question: string, 
-    answer: string, 
-    provider?: string
-  ): Promise<{
-    score: number;
-    issues: FaqImprovementSuggestion[];
-    recommendations: string[];
-  }>;
-
-  /**
-   * Categorize FAQ automatically using AI
-   */
-  categorizeFaq(
-    question: string, 
-    answer: string, 
-    availableCategories: string[], 
-    provider?: string
-  ): Promise<{
-    category: string;
-    confidence: number;
-    alternativeCategories: Array<{ category: string; confidence: number }>;
-  }>;
-
-  /**
-   * Switch AI provider for FAQ generation
-   */
-  switchProvider(provider: 'openai' | 'anthropic' | 'google' | 'openrouter'): Promise<void>;
-
-  /**
-   * Get available AI providers and models
-   */
-  getAvailableProviders(): Promise<Array<{
-    type: string;
-    name: string;
-    models: string[];
-    isAvailable: boolean;
-  }>>;
-
-  /**
-   * Test AI provider connection
-   */
-  testProviderConnection(provider: string, apiKey?: string): Promise<boolean>;
+  getProviderStatus(): Promise<ProviderStatus>;
 }

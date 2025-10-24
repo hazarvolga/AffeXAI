@@ -6,6 +6,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LearnedFaqEntry } from './entities/learned-faq-entry.entity';
 import { LearningPattern } from './entities/learning-pattern.entity';
 import { FaqLearningConfig } from './entities/faq-learning-config.entity';
+import { ChatSession } from '../tickets/entities/chat-session.entity';
+import { ChatMessage } from '../tickets/entities/chat-message.entity';
+import { KnowledgeBaseArticle } from '../tickets/entities/knowledge-base-article.entity';
+import { KnowledgeBaseCategory } from '../tickets/entities/knowledge-base-category.entity';
+import { Ticket } from '../tickets/entities/ticket.entity';
 
 // Services - Data Extraction
 import { ChatDataExtractorService } from './services/chat-data-extractor.service';
@@ -63,6 +68,11 @@ import { forwardRef } from '@nestjs/common';
       LearnedFaqEntry,
       LearningPattern,
       FaqLearningConfig,
+      ChatSession,
+      ChatMessage,
+      KnowledgeBaseArticle,
+      KnowledgeBaseCategory,
+      Ticket,
     ]),
     ScheduleModule.forRoot(),
     forwardRef(() => TicketsModule),

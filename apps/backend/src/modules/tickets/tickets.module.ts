@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Ticket } from './entities/ticket.entity';
 import { TicketMessage } from './entities/ticket-message.entity';
 import { TicketCategory } from './entities/ticket-category.entity';
+import { ChatSession } from './entities/chat-session.entity';
+import { ChatMessage } from './entities/chat-message.entity';
 import { TicketAssignmentRule } from './entities/ticket-assignment-rule.entity';
 import { TicketEscalationRule } from './entities/ticket-escalation-rule.entity';
 import { TicketAuditLog } from './entities/ticket-audit-log.entity';
@@ -56,6 +58,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       Ticket,
       TicketMessage,
       TicketCategory,
+      ChatSession,
+      ChatMessage,
       TicketAssignmentRule,
       TicketEscalationRule,
       TicketAuditLog,

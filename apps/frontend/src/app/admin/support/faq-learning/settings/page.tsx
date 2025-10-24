@@ -63,11 +63,29 @@ export default function ConfigurationManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState('thresholds');
+  const [aiProviderInfo, setAiProviderInfo] = useState<{
+    currentProvider: string;
+    currentModel: string;
+    available: boolean;
+    isReadOnly: boolean;
+    globalSettingsUrl: string;
+  } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     loadConfiguration();
+    loadAiProviderInfo();
   }, []);
+
+  const loadAiProviderInfo = async () => {
+    try {
+      const { FaqLearningService } = await import('@/services/faq-learning.service');
+      const data = await FaqLearningService.getAiProviderInfo();
+      setAiProviderInfo(data);
+    } catch (error) {
+      console.error('Failed to load AI provider info:', error);
+    }
+  };
 
   const loadConfiguration = async () => {
     setIsLoading(true);
@@ -106,21 +124,31 @@ export default function ConfigurationManagementPage() {
         key: config.key,
         label: formatLabel(config.key),
         description: config.description || '',
-        type: inferType(config.value),
+        type: config.type || inferType(config.value),
         value: config.value,
         defaultValue: config.value,
+        min: config.min,
+        max: config.max,
+        step: config.step,
+        unit: config.unit,
+        options: config.options,
+        validation: config.validation
       });
       return acc;
     }, {} as Record<string, ConfigSetting[]>);
 
-    // Create sections
-    return Object.entries(grouped).map(([category, settings]) => ({
-      key: category,
-      title: formatCategoryTitle(category),
-      description: getCategoryDescription(category),
-      icon: getCategoryIcon(category),
-      settings
-    }));
+    // Ensure all 6 categories exist with proper order
+    const orderedCategories = ['thresholds', 'recognition', 'processing', 'quality', 'sources', 'categories', 'ai', 'advanced'];
+    
+    return orderedCategories
+      .filter(category => grouped[category] && grouped[category].length > 0)
+      .map(category => ({
+        key: category,
+        title: formatCategoryTitle(category),
+        description: getCategoryDescription(category),
+        icon: getCategoryIcon(category),
+        settings: grouped[category]
+      }));
   };
 
   const formatLabel = (key: string): string => {
@@ -139,11 +167,12 @@ export default function ConfigurationManagementPage() {
   const formatCategoryTitle = (category: string): string => {
     const titles: Record<string, string> = {
       thresholds: 'Güven Eşikleri',
-      processing: 'İşleme Ayarları',
       recognition: 'Pattern Tanıma',
+      processing: 'İşleme Ayarları',
       quality: 'Kalite Kontrol',
       sources: 'Veri Kaynakları',
       categories: 'Kategori Yönetimi',
+      ai: 'AI Modeli',
       advanced: 'Gelişmiş Ayarlar'
     };
     return titles[category] || category;
@@ -152,12 +181,13 @@ export default function ConfigurationManagementPage() {
   const getCategoryDescription = (category: string): string => {
     const descriptions: Record<string, string> = {
       thresholds: 'FAQ onay ve yayınlama için güven skorları',
+      recognition: 'Pattern tanıma ve benzerlik eşikleri',
       processing: 'Batch işleme ve gerçek zamanlı işleme ayarları',
-      recognition: 'Pattern tanıma ve öğrenme parametreleri',
       quality: 'Kalite kontrol ve doğrulama kuralları',
       sources: 'Chat ve ticket veri kaynağı ayarları',
-      categories: 'Otomatik kategori atama ayarları',
-      advanced: 'Gelişmiş sistem ayarları'
+      categories: 'Otomatik kategori atama ve yönetim',
+      ai: 'AI model parametreleri (sadece temperature ve maxTokens)',
+      advanced: 'Gelişmiş sistem ayarları ve veri saklama'
     };
     return descriptions[category] || '';
   };
@@ -165,11 +195,12 @@ export default function ConfigurationManagementPage() {
   const getCategoryIcon = (category: string): React.ReactNode => {
     const icons: Record<string, React.ReactNode> = {
       thresholds: <BarChart3 className="h-5 w-5" />,
-      processing: <Zap className="h-5 w-5" />,
       recognition: <Brain className="h-5 w-5" />,
+      processing: <Zap className="h-5 w-5" />,
       quality: <Shield className="h-5 w-5" />,
       sources: <Filter className="h-5 w-5" />,
       categories: <Calendar className="h-5 w-5" />,
+      ai: <Brain className="h-5 w-5" />,
       advanced: <Settings className="h-5 w-5" />
     };
     return icons[category] || <Settings className="h-5 w-5" />;
@@ -338,6 +369,49 @@ export default function ConfigurationManagementPage() {
           </div>
         );
 
+      case 'multiselect':
+        return (
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {setting.value && Array.isArray(setting.value) && setting.value.map((selectedValue: string) => (
+                <Badge key={selectedValue} variant="secondary" className="flex items-center gap-1">
+                  {setting.options?.find(opt => opt.value === selectedValue)?.label || selectedValue}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newValue = setting.value.filter((v: string) => v !== selectedValue);
+                      updateSettingValue(section.key, setting.key, newValue);
+                    }}
+                    className="ml-1 text-xs hover:text-red-500"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <Select
+              value=""
+              onValueChange={(value) => {
+                if (value && !setting.value.includes(value)) {
+                  const newValue = [...(setting.value || []), value];
+                  updateSettingValue(section.key, setting.key, newValue);
+                }
+              }}
+            >
+              <SelectTrigger id={inputId}>
+                <SelectValue placeholder="Kategori seçin..." />
+              </SelectTrigger>
+              <SelectContent>
+                {setting.options?.filter(option => !setting.value?.includes(option.value)).map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
       default:
         return (
           <Input
@@ -433,7 +507,7 @@ export default function ConfigurationManagementPage() {
       {/* Tabs */}
       {configSections.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
             {configSections.map((section) => (
               <TabsTrigger key={section.key} value={section.key} className="flex items-center gap-2">
                 {section.icon}
@@ -444,49 +518,161 @@ export default function ConfigurationManagementPage() {
 
         {configSections.map((section) => (
           <TabsContent key={section.key} value={section.key} className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
+            {section.key === 'ai' ? (
+              // Special AI Model Tab
+              <div className="space-y-4">
+                {/* AI Provider Info Card */}
+                <Card>
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      {section.icon}
-                      {section.title}
+                      <Brain className="h-5 w-5" />
+                      Mevcut AI Sağlayıcısı
                     </CardTitle>
-                    <CardDescription>{section.description}</CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReset(section.key)}
-                  >
-                    <RefreshCw className="mr-2 h-3 w-3" />
-                    Varsayılana Dön
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {section.settings.map((setting) => (
-                  <div key={setting.key} className="space-y-3 pb-6 border-b last:border-0 last:pb-0">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <Label htmlFor={`${section.key}-${setting.key}`} className="text-base font-medium">
-                          {setting.label}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          {setting.description}
-                        </p>
+                    <CardDescription>
+                      Global AI ayarlarından gelen aktif sağlayıcı bilgileri
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {aiProviderInfo ? (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium">Sağlayıcı</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant={aiProviderInfo.available ? "default" : "destructive"}>
+                                {aiProviderInfo.currentProvider.toUpperCase()}
+                              </Badge>
+                              {aiProviderInfo.available ? (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Model</Label>
+                            <div className="mt-1 font-mono text-sm">
+                              {aiProviderInfo.currentModel}
+                            </div>
+                          </div>
+                        </div>
+                        <Alert>
+                          <Info className="h-4 w-4" />
+                          <AlertDescription>
+                            AI sağlayıcısını ve modelini değiştirmek için{' '}
+                            <a 
+                              href={aiProviderInfo.globalSettingsUrl} 
+                              className="underline hover:text-primary"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Global AI Ayarları
+                            </a>
+                            'na gidin. Burada sadece model parametrelerini ayarlayabilirsiniz.
+                          </AlertDescription>
+                        </Alert>
+                      </>
+                    ) : (
+                      <div className="text-center py-4 text-muted-foreground">
+                        AI sağlayıcı bilgileri yükleniyor...
                       </div>
-                      {setting.value !== setting.defaultValue && (
-                        <Badge variant="secondary" className="ml-2">
-                          Değiştirildi
-                        </Badge>
-                      )}
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* AI Model Parameters Card */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {section.icon}
+                          Model Parametreleri
+                        </CardTitle>
+                        <CardDescription>
+                          FAQ oluşturma için AI model ayarları
+                        </CardDescription>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleReset(section.key)}
+                      >
+                        <RefreshCw className="mr-2 h-3 w-3" />
+                        Varsayılana Dön
+                      </Button>
                     </div>
-                    {renderSettingInput(section, setting)}
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {section.settings.map((setting) => (
+                      <div key={setting.key} className="space-y-3 pb-6 border-b last:border-0 last:pb-0">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <Label htmlFor={`${section.key}-${setting.key}`} className="text-base font-medium">
+                              {setting.label}
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              {setting.description}
+                            </p>
+                          </div>
+                          {setting.value !== setting.defaultValue && (
+                            <Badge variant="secondary" className="ml-2">
+                              Değiştirildi
+                            </Badge>
+                          )}
+                        </div>
+                        {renderSettingInput(section, setting)}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              // Regular Tab
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {section.icon}
+                        {section.title}
+                      </CardTitle>
+                      <CardDescription>{section.description}</CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleReset(section.key)}
+                    >
+                      <RefreshCw className="mr-2 h-3 w-3" />
+                      Varsayılana Dön
+                    </Button>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {section.settings.map((setting) => (
+                    <div key={setting.key} className="space-y-3 pb-6 border-b last:border-0 last:pb-0">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <Label htmlFor={`${section.key}-${setting.key}`} className="text-base font-medium">
+                            {setting.label}
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            {setting.description}
+                          </p>
+                        </div>
+                        {setting.value !== setting.defaultValue && (
+                          <Badge variant="secondary" className="ml-2">
+                            Değiştirildi
+                          </Badge>
+                        )}
+                      </div>
+                      {renderSettingInput(section, setting)}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         ))}
         </Tabs>

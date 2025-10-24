@@ -107,8 +107,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   server: Server;
 
   private readonly logger = new Logger(ChatGateway.name);
-  private connectedUsers = new Map<string, { socket: Socket; userId: string; sessionId?: string }>();
+  private connectedUsers = new Map<string, { socket: Socket; userId: string; sessionId?: string; lastHeartbeat?: Date }>();
   private typingUsers = new Map<string, Set<string>>(); // sessionId -> Set of userIds
+  private heartbeatIntervals = new Map<string, NodeJS.Timeout>(); // socketId -> interval
 
   constructor(
     private readonly jwtService: JwtService,
@@ -118,6 +119,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   afterInit(server: Server) {
     this.logger.log('Chat WebSocket Gateway initialized');
+    this.initializeCleanup();
   }
 
   async handleConnection(client: Socket) {
@@ -126,6 +128,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       
       if (!token) {
         this.logger.warn(`Client ${client.id} connected without token`);
+        client.emit('error', {
+          code: 'AUTHENTICATION_REQUIRED',
+          message: 'Authentication token required',
+          retryable: false,
+          timestamp: new Date()
+        });
         client.disconnect();
         return;
       }
@@ -135,8 +143,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       if (!userId) {
         this.logger.warn(`Invalid token for client ${client.id}`);
+        client.emit('error', {
+          code: 'INVALID_TOKEN',
+          message: 'Invalid authentication token',
+          retryable: false,
+          timestamp: new Date()
+        });
         client.disconnect();
         return;
+      }
+
+      // Check for existing connections from the same user
+      const existingConnection = Array.from(this.connectedUsers.values())
+        .find(conn => conn.userId === userId);
+      
+      if (existingConnection) {
+        this.logger.log(`User ${userId} reconnecting, closing previous connection`);
+        existingConnection.socket.disconnect();
+        this.connectedUsers.delete(existingConnection.socket.id);
       }
 
       this.connectedUsers.set(client.id, { socket: client, userId });
@@ -144,11 +168,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       this.logger.log(`User ${userId} connected with socket ${client.id}`);
       
-      // Emit connection success
-      client.emit('connection-established', { userId, socketId: client.id });
+      // Emit connection success with user info
+      client.emit('connection-established', { 
+        userId, 
+        socketId: client.id,
+        timestamp: new Date(),
+        serverTime: new Date().toISOString()
+      });
+
+      // Set up heartbeat for connection monitoring
+      this.setupHeartbeat(client);
 
     } catch (error) {
       this.logger.error(`Authentication failed for client ${client.id}:`, error.message);
+      client.emit('error', {
+        code: 'AUTHENTICATION_FAILED',
+        message: 'Authentication failed',
+        retryable: false,
+        timestamp: new Date()
+      });
       client.disconnect();
     }
   }
@@ -161,6 +199,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       // Remove from typing indicators
       if (sessionId) {
         this.removeFromTyping(sessionId, userId);
+        
+        // Notify session participants about user leaving
+        client.to(sessionId).emit('user-left', { 
+          userId, 
+          sessionId,
+          timestamp: new Date()
+        });
+      }
+
+      // Clear heartbeat interval
+      const heartbeatInterval = this.heartbeatIntervals.get(client.id);
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        this.heartbeatIntervals.delete(client.id);
       }
 
       this.connectedUsers.delete(client.id);
@@ -326,31 +378,71 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       // Validate session access
       const hasAccess = await this.chatSessionService.validateSessionAccess(sessionId, userId);
       if (!hasAccess) {
-        client.emit('error', { message: 'Access denied to session' });
+        client.emit('error', { 
+          code: 'ACCESS_DENIED',
+          message: 'Access denied to session',
+          retryable: false,
+          timestamp: new Date()
+        });
         return;
       }
 
-      // Emit processing status
+      // Validate file size (10MB limit)
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+      if (fileSize > maxFileSize) {
+        client.emit('error', {
+          code: 'FILE_TOO_LARGE',
+          message: `File size exceeds ${maxFileSize / (1024 * 1024)}MB limit`,
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['pdf', 'docx', 'xlsx', 'txt', 'md'];
+      const fileExtension = filename.split('.').pop()?.toLowerCase();
+      if (!fileExtension || !allowedTypes.includes(fileExtension)) {
+        client.emit('error', {
+          code: 'INVALID_FILE_FORMAT',
+          message: `File type not supported. Allowed types: ${allowedTypes.join(', ')}`,
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Generate temporary document ID
+      const tempDocumentId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Emit processing status to all session participants
       this.server.to(sessionId).emit('file-processing-status', {
         sessionId,
-        documentId: 'temp-id', // Will be replaced with actual document ID
+        documentId: tempDocumentId,
         status: 'pending',
-        filename
+        filename,
+        fileSize,
+        progress: 0
       });
 
-      // TODO: Implement actual file processing in document processor service
-      // For now, just acknowledge the upload
+      // Acknowledge the upload to sender
       client.emit('file-upload-acknowledged', {
         sessionId,
+        documentId: tempDocumentId,
         filename,
         status: 'received'
       });
 
-      this.logger.log(`File upload initiated in session ${sessionId}: ${filename}`);
+      this.logger.log(`File upload initiated in session ${sessionId}: ${filename} (${fileSize} bytes)`);
 
     } catch (error) {
       this.logger.error('Error handling file upload:', error);
-      client.emit('error', { message: 'Failed to process file upload' });
+      client.emit('error', { 
+        code: 'FILE_PROCESSING_FAILED',
+        message: 'Failed to process file upload',
+        retryable: true,
+        timestamp: new Date()
+      });
     }
   }
 
@@ -366,19 +458,48 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       // Validate session access
       const hasAccess = await this.chatSessionService.validateSessionAccess(sessionId, userId);
       if (!hasAccess) {
-        client.emit('error', { message: 'Access denied to session' });
+        client.emit('error', { 
+          code: 'ACCESS_DENIED',
+          message: 'Access denied to session',
+          retryable: false,
+          timestamp: new Date()
+        });
         return;
       }
 
-      // Emit processing status
+      // Basic URL validation
+      try {
+        new URL(url);
+      } catch (urlError) {
+        client.emit('error', {
+          code: 'INVALID_URL',
+          message: 'Invalid URL format',
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Check for supported protocols
+      const urlObj = new URL(url);
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        client.emit('error', {
+          code: 'INVALID_URL',
+          message: 'Only HTTP and HTTPS URLs are supported',
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Emit processing status to all session participants
       this.server.to(sessionId).emit('url-processing-status', {
         sessionId,
         url,
         status: 'pending'
       });
 
-      // TODO: Implement actual URL processing in URL processor service
-      // For now, just acknowledge the request
+      // Acknowledge the request to sender
       client.emit('url-process-acknowledged', {
         sessionId,
         url,
@@ -389,7 +510,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     } catch (error) {
       this.logger.error('Error handling URL processing:', error);
-      client.emit('error', { message: 'Failed to process URL' });
+      client.emit('error', { 
+        code: 'URL_PROCESSING_FAILED',
+        message: 'Failed to process URL',
+        retryable: true,
+        timestamp: new Date()
+      });
     }
   }
 
@@ -646,5 +772,169 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   getConnectedUsersCount(): number {
     return this.connectedUsers.size;
+  }
+
+  // Additional event handlers for enhanced functionality
+
+  @SubscribeMessage('heartbeat')
+  async handleHeartbeat(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { timestamp: string }
+  ) {
+    const connection = this.connectedUsers.get(client.id);
+    if (connection) {
+      connection.lastHeartbeat = new Date();
+      client.emit('heartbeat-ack', { 
+        timestamp: new Date().toISOString(),
+        clientTimestamp: data.timestamp
+      });
+    }
+  }
+
+  @SubscribeMessage('get-session-info')
+  async handleGetSessionInfo(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionId: string }
+  ) {
+    try {
+      const userId = client.data.userId;
+      const { sessionId } = data;
+
+      // Validate session access
+      const hasAccess = await this.chatSessionService.validateSessionAccess(sessionId, userId);
+      if (!hasAccess) {
+        client.emit('error', {
+          code: 'ACCESS_DENIED',
+          message: 'Access denied to session',
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Get session info
+      const session = await this.chatSessionService.getSession(sessionId);
+      const participantCount = this.getSessionUserCount(sessionId);
+      const typingUsers = this.typingUsers.get(sessionId) || new Set();
+
+      client.emit('session-info', {
+        session,
+        participantCount,
+        typingUserCount: typingUsers.size,
+        timestamp: new Date()
+      });
+
+    } catch (error) {
+      this.logger.error('Error getting session info:', error);
+      client.emit('error', {
+        code: 'SESSION_INFO_FAILED',
+        message: 'Failed to get session information',
+        retryable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  @SubscribeMessage('ping')
+  async handlePing(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { timestamp: string }
+  ) {
+    client.emit('pong', {
+      timestamp: new Date().toISOString(),
+      clientTimestamp: data.timestamp
+    });
+  }
+
+  // Private helper methods
+
+  /**
+   * Set up heartbeat monitoring for a client
+   */
+  private setupHeartbeat(client: Socket) {
+    const heartbeatInterval = setInterval(() => {
+      const connection = this.connectedUsers.get(client.id);
+      if (!connection) {
+        clearInterval(heartbeatInterval);
+        return;
+      }
+
+      const now = new Date();
+      const lastHeartbeat = connection.lastHeartbeat || now;
+      const timeSinceLastHeartbeat = now.getTime() - lastHeartbeat.getTime();
+
+      // If no heartbeat for 60 seconds, disconnect
+      if (timeSinceLastHeartbeat > 60000) {
+        this.logger.warn(`Client ${client.id} heartbeat timeout, disconnecting`);
+        client.disconnect();
+        clearInterval(heartbeatInterval);
+        return;
+      }
+
+      // Send heartbeat request
+      client.emit('heartbeat-request', { timestamp: now.toISOString() });
+    }, 30000); // Check every 30 seconds
+
+    this.heartbeatIntervals.set(client.id, heartbeatInterval);
+  }
+
+  /**
+   * Broadcast connection status to session participants
+   */
+  async broadcastConnectionStatus(sessionId: string, userId: string, status: 'online' | 'offline') {
+    this.server.to(sessionId).emit('user-connection-status', {
+      sessionId,
+      userId,
+      status,
+      timestamp: new Date()
+    });
+  }
+
+  /**
+   * Get session statistics
+   */
+  getSessionStats(sessionId: string) {
+    const participantCount = this.getSessionUserCount(sessionId);
+    const typingUsers = this.typingUsers.get(sessionId) || new Set();
+    
+    return {
+      participantCount,
+      typingUserCount: typingUsers.size,
+      typingUsers: Array.from(typingUsers)
+    };
+  }
+
+  /**
+   * Cleanup stale connections
+   */
+  private cleanupStaleConnections() {
+    const now = new Date();
+    const staleThreshold = 5 * 60 * 1000; // 5 minutes
+
+    for (const [socketId, connection] of this.connectedUsers.entries()) {
+      const lastHeartbeat = connection.lastHeartbeat || now;
+      const timeSinceLastHeartbeat = now.getTime() - lastHeartbeat.getTime();
+
+      if (timeSinceLastHeartbeat > staleThreshold) {
+        this.logger.warn(`Cleaning up stale connection for user ${connection.userId}`);
+        connection.socket.disconnect();
+        this.connectedUsers.delete(socketId);
+        
+        const heartbeatInterval = this.heartbeatIntervals.get(socketId);
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+          this.heartbeatIntervals.delete(socketId);
+        }
+      }
+    }
+  }
+
+  /**
+   * Initialize cleanup interval
+   */
+  private initializeCleanup() {
+    setInterval(() => {
+      this.cleanupStaleConnections();
+    }, 5 * 60 * 1000); // Run every 5 minutes
   }
 }

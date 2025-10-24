@@ -1459,10 +1459,8 @@ export default function ConfigurationManagementPage() {
                           <AlertDescription>
                             AI sağlayıcısını ve modelini değiştirmek için{' '}
                             <a 
-                              href={aiProviderInfo.globalSettingsUrl} 
+                              href="/admin/ai-settings" 
                               className="underline hover:text-primary"
-                              target="_blank"
-                              rel="noopener noreferrer"
                             >
                               Global AI Ayarları
                             </a>

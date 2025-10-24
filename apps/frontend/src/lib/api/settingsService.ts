@@ -33,16 +33,31 @@ export interface SiteSettings {
 
 // AI Settings Types
 export type AiModel = 
+  // OpenAI Models
   | 'gpt-4' 
   | 'gpt-4-turbo' 
   | 'gpt-4o' 
   | 'gpt-3.5-turbo'
-  | 'claude-3-opus'
-  | 'claude-3-sonnet'
-  | 'claude-3-haiku'
-  | 'claude-3-5-sonnet';
+  // Anthropic Models
+  | 'claude-3-5-sonnet-20241022'
+  | 'claude-3-opus-20240229'
+  | 'claude-3-sonnet-20240229'
+  | 'claude-3-haiku-20240307'
+  // Google Models
+  | 'gemini-pro'
+  | 'gemini-pro-vision'
+  | 'gemini-1.5-pro'
+  | 'gemini-1.5-flash'
+  // OpenRouter Models
+  | 'openai/gpt-4'
+  | 'anthropic/claude-3.5-sonnet'
+  | 'meta-llama/llama-3.1-70b-instruct'
+  // Local Models
+  | 'llama3.1'
+  | 'mistral'
+  | 'codellama';
 
-export type AiProvider = 'openai' | 'anthropic';
+export type AiProvider = 'openai' | 'anthropic' | 'google' | 'openrouter' | 'local';
 
 export interface AiModuleSettings {
   apiKey?: string; // Optional - may use global key

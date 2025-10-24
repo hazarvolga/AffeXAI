@@ -90,7 +90,7 @@ export default function ProvidersPage() {
   };
 
   const handleConfigureAI = () => {
-    router.push('/admin/profile/ai-preferences');
+    router.push('/admin/ai-settings');
   };
 
   if (loading) {
@@ -143,7 +143,7 @@ export default function ProvidersPage() {
         <AlertTitle>Global AI Configuration</AlertTitle>
         <AlertDescription>
           FAQ Learning uses the global AI provider settings. To change the AI provider or model, 
-          use the AI Preferences page in your profile settings.
+          use the AI Settings page in the main navigation.
         </AlertDescription>
       </Alert>
 
@@ -297,12 +297,12 @@ export default function ProvidersPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            FAQ Learning uses the global AI configuration from your profile settings. 
+            FAQ Learning uses the global AI configuration from the AI Settings page. 
             You can configure AI providers, models, and API keys there.
           </p>
           <Button variant="outline" onClick={handleConfigureAI} className="w-full">
             <ExternalLink className="h-4 w-4 mr-2" />
-            Open AI Preferences
+            Open AI Settings
           </Button>
         </CardContent>
       </Card>

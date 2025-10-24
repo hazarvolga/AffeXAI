@@ -2,16 +2,47 @@ import { IsString, IsBoolean, IsEnum, IsOptional, ValidateNested } from 'class-v
 import { Type } from 'class-transformer';
 
 /**
+ * Supported AI Providers
+ */
+export enum AiProvider {
+  OPENAI = 'openai',
+  ANTHROPIC = 'anthropic',
+  GOOGLE = 'google',
+  OPENROUTER = 'openrouter',
+  LOCAL = 'local',
+}
+
+/**
  * Supported AI Models
  */
 export enum AiModel {
+  // OpenAI Models
   GPT_4 = 'gpt-4',
   GPT_4_TURBO = 'gpt-4-turbo',
   GPT_4O = 'gpt-4o',
   GPT_3_5_TURBO = 'gpt-3.5-turbo',
+  
+  // Anthropic Models
+  CLAUDE_3_5_SONNET = 'claude-3-5-sonnet-20241022',
   CLAUDE_3_OPUS = 'claude-3-opus-20240229',
   CLAUDE_3_SONNET = 'claude-3-sonnet-20240229',
   CLAUDE_3_HAIKU = 'claude-3-haiku-20240307',
+  
+  // Google Models
+  GEMINI_PRO = 'gemini-pro',
+  GEMINI_PRO_VISION = 'gemini-pro-vision',
+  GEMINI_1_5_PRO = 'gemini-1.5-pro',
+  GEMINI_1_5_FLASH = 'gemini-1.5-flash',
+  
+  // OpenRouter Models (Popular ones)
+  OPENROUTER_GPT_4 = 'openai/gpt-4',
+  OPENROUTER_CLAUDE_3_5_SONNET = 'anthropic/claude-3.5-sonnet',
+  OPENROUTER_LLAMA_3_1_70B = 'meta-llama/llama-3.1-70b-instruct',
+  
+  // Local Models (Ollama)
+  LOCAL_LLAMA_3_1 = 'llama3.1',
+  LOCAL_MISTRAL = 'mistral',
+  LOCAL_CODELLAMA = 'codellama',
 }
 
 /**
@@ -30,8 +61,8 @@ export class AiModuleSettingsDto {
   enabled: boolean;
 
   @IsOptional()
-  @IsString()
-  provider?: 'openai' | 'anthropic'; // Auto-detected from model, but can override
+  @IsEnum(AiProvider)
+  provider?: AiProvider; // Auto-detected from model, but can override
 }
 
 /**

@@ -17,6 +17,7 @@ const navLinks = [
     { href: "/admin/certificates", label: "Sertifikalar", icon: Award, permission: Permission.CERTIFICATES_VIEW },
     { href: "/admin/social-media", label: "Sosyal Medya", icon: Share2, permission: Permission.SOCIAL_MEDIA_VIEW },
     { href: "/admin/notifications", label: "Bildirimler", icon: Bell, permission: Permission.NOTIFICATIONS_VIEW },
+    { href: "/admin/ai-settings", label: "AI Ayarları", icon: Bot, permission: Permission.SETTINGS_VIEW },
     { href: "/admin/logs", label: "Aktivite Kayıtları", icon: LineChart, permission: Permission.LOGS_VIEW },
 ];
 

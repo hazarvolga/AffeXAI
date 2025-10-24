@@ -374,7 +374,7 @@ export class FaqLearningController {
         currentModel: providerStatus.model,
         available: providerStatus.available,
         isReadOnly: true, // FAQ Learning cannot change global AI settings
-        globalSettingsUrl: '/admin/profile/ai-preferences'
+        globalSettingsUrl: '/admin/ai-settings'
       };
     } catch (error) {
       this.logger.error('Failed to get AI provider info:', error);

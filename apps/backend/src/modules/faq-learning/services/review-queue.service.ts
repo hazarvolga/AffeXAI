@@ -367,7 +367,7 @@ export class ReviewQueueService {
         .addSelect('COUNT(*)', 'reviewCount')
         .where('faq.reviewedBy IS NOT NULL')
         .groupBy('reviewer.id, reviewer.firstName, reviewer.lastName')
-        .orderBy('reviewCount', 'DESC')
+        .orderBy('"reviewCount"', 'DESC')
         .limit(10)
         .getRawMany();
 

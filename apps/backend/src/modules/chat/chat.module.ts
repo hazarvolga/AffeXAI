@@ -2,6 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 
+// External modules
+import { AiModule } from '../ai/ai.module';
+import { SettingsModule } from '../settings/settings.module';
+import { FaqLearningModule } from '../faq-learning/faq-learning.module';
+
 // Entities
 import { ChatSession } from './entities/chat-session.entity';
 import { ChatMessage } from './entities/chat-message.entity';
@@ -18,10 +23,19 @@ import { FileValidatorService } from './services/file-validator.service';
 import { ChatContextEngineService } from './services/chat-context-engine.service';
 import { UrlProcessorService } from './services/url-processor.service';
 import { UrlCacheService } from './services/url-cache.service';
+import { ChatAiService } from './services/chat-ai.service';
+import { ChatAiSettingsService } from './services/chat-ai-settings.service';
+import { ChatSupportAssignmentService } from './services/chat-support-assignment.service';
+import { ChatHandoffService } from './services/chat-handoff.service';
+import { SupportDashboardService } from './services/support-dashboard.service';
 
 // Controllers
 import { DocumentUploadController } from './controllers/document-upload.controller';
 import { UrlProcessingController } from './controllers/url-processing.controller';
+import { ChatAiController } from './controllers/chat-ai.controller';
+import { SupportAssignmentController } from './controllers/support-assignment.controller';
+import { ChatHandoffController } from './controllers/chat-handoff.controller';
+import { SupportDashboardController } from './controllers/support-dashboard.controller';
 
 // Gateways
 import { ChatGateway } from './gateways/chat.gateway';
@@ -55,10 +69,18 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: '24h' },
     }),
+    // External modules
+    AiModule,
+    SettingsModule,
+    FaqLearningModule,
   ],
   controllers: [
     DocumentUploadController,
     UrlProcessingController,
+    ChatAiController,
+    SupportAssignmentController,
+    ChatHandoffController,
+    SupportDashboardController,
   ],
   providers: [
     ChatSessionService,
@@ -68,6 +90,11 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     ChatContextEngineService,
     UrlProcessorService,
     UrlCacheService,
+    ChatAiService,
+    ChatAiSettingsService,
+    ChatSupportAssignmentService,
+    ChatHandoffService,
+    SupportDashboardService,
     FaqEnhancedSearchService,
     ChatGateway,
   ],
@@ -79,6 +106,11 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     ChatContextEngineService,
     UrlProcessorService,
     UrlCacheService,
+    ChatAiService,
+    ChatAiSettingsService,
+    ChatSupportAssignmentService,
+    ChatHandoffService,
+    SupportDashboardService,
     ChatGateway,
   ],
 })

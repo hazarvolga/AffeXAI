@@ -71,6 +71,29 @@ export interface SupportLeftData {
   supportUserName: string;
 }
 
+export interface SupportAssignmentData {
+  sessionId: string;
+  supportUserId: string;
+  assignedBy?: string;
+  assignmentType: 'manual' | 'auto' | 'escalated';
+  notes?: string;
+}
+
+export interface SupportTransferData {
+  sessionId: string;
+  fromSupportUserId: string;
+  toSupportUserId: string;
+  transferredBy: string;
+  notes?: string;
+}
+
+export interface SupportEscalationData {
+  sessionId: string;
+  escalatedBy: string;
+  escalatedTo: string;
+  notes?: string;
+}
+
 @Injectable()
 @WebSocketGateway({
   cors: {
@@ -370,6 +393,97 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @SubscribeMessage('request-support')
+  async handleRequestSupport(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionId: string; notes?: string }
+  ) {
+    try {
+      const userId = client.data.userId;
+      const { sessionId, notes } = data;
+
+      // Validate session access
+      const hasAccess = await this.chatSessionService.validateSessionAccess(sessionId, userId);
+      if (!hasAccess) {
+        client.emit('error', { message: 'Access denied to session' });
+        return;
+      }
+
+      // Emit support request to managers/admins
+      this.server.emit('support-requested', {
+        sessionId,
+        userId,
+        notes,
+        timestamp: new Date(),
+      });
+
+      // Acknowledge the request
+      client.emit('support-request-acknowledged', { sessionId });
+
+      this.logger.log(`Support requested for session ${sessionId} by user ${userId}`);
+
+    } catch (error) {
+      this.logger.error('Error handling support request:', error);
+      client.emit('error', { message: 'Failed to request support' });
+    }
+  }
+
+  @SubscribeMessage('join-support')
+  async handleJoinSupport(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionId: string }
+  ) {
+    try {
+      const userId = client.data.userId;
+      const { sessionId } = data;
+
+      // TODO: Validate user has support role
+      // For now, assume validation is done at controller level
+
+      // Join the session as support
+      await client.join(sessionId);
+
+      // Notify session participants
+      client.to(sessionId).emit('support-joined', {
+        sessionId,
+        supportUserId: userId,
+        supportUserName: 'Support Agent', // TODO: Get actual user name
+      });
+
+      this.logger.log(`Support user ${userId} joined session ${sessionId}`);
+
+    } catch (error) {
+      this.logger.error('Error handling support join:', error);
+      client.emit('error', { message: 'Failed to join as support' });
+    }
+  }
+
+  @SubscribeMessage('leave-support')
+  async handleLeaveSupport(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionId: string }
+  ) {
+    try {
+      const userId = client.data.userId;
+      const { sessionId } = data;
+
+      // Leave the session
+      await client.leave(sessionId);
+
+      // Notify session participants
+      client.to(sessionId).emit('support-left', {
+        sessionId,
+        supportUserId: userId,
+        supportUserName: 'Support Agent', // TODO: Get actual user name
+      });
+
+      this.logger.log(`Support user ${userId} left session ${sessionId}`);
+
+    } catch (error) {
+      this.logger.error('Error handling support leave:', error);
+    }
+  }
+
   // Public methods for other services to emit events
 
   /**
@@ -450,6 +564,55 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   async broadcastSessionUpdate(sessionId: string, session: any) {
     this.server.to(sessionId).emit('session-updated', session);
+  }
+
+  /**
+   * Broadcast support assignment notification
+   */
+  async broadcastSupportAssignment(data: SupportAssignmentData) {
+    this.server.to(data.sessionId).emit('support-assigned', data);
+  }
+
+  /**
+   * Broadcast support transfer notification
+   */
+  async broadcastSupportTransfer(data: SupportTransferData) {
+    this.server.to(data.sessionId).emit('support-transferred', data);
+  }
+
+  /**
+   * Broadcast support escalation notification
+   */
+  async broadcastSupportEscalation(data: SupportEscalationData) {
+    this.server.to(data.sessionId).emit('support-escalated', data);
+    
+    // Also notify managers/admins
+    this.server.emit('escalation-alert', data);
+  }
+
+  /**
+   * Send notification to specific user
+   */
+  async sendUserNotification(userId: string, notification: any) {
+    const userSockets = await this.server.fetchSockets();
+    const userSocket = userSockets.find(socket => socket.data.userId === userId);
+    
+    if (userSocket) {
+      userSocket.emit('notification', notification);
+    }
+  }
+
+  /**
+   * Send notification to users with specific roles
+   */
+  async sendRoleNotification(roles: string[], notification: any) {
+    const sockets = await this.server.fetchSockets();
+    
+    sockets.forEach(socket => {
+      // TODO: Check user roles from socket data
+      // For now, send to all connected users
+      socket.emit('role-notification', notification);
+    });
   }
 
   // Private helper methods

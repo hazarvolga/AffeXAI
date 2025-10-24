@@ -65,6 +65,27 @@ export class ChatMessage extends BaseEntity {
     };
     isEdited?: boolean;
     editedAt?: Date;
+    handoffContext?: {
+      fromUserId: string;
+      toUserId: string;
+      reason: string;
+      contextSummary: string;
+      urgencyLevel: string;
+    };
+    escalationContext?: {
+      escalatedBy: string;
+      reason: string;
+      urgencyLevel: string;
+      contextSummary: string;
+      escalatedAt: Date;
+    };
+    handoffNote?: {
+      isPrivate: boolean;
+      actualContent: string;
+      authorName: string;
+      tags: string[];
+      noteType: string;
+    };
   };
 
   // Relations

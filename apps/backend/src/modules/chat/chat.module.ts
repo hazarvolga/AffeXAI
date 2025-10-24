@@ -16,9 +16,12 @@ import { ChatMessageService } from './services/chat-message.service';
 import { DocumentProcessorService } from './services/document-processor.service';
 import { FileValidatorService } from './services/file-validator.service';
 import { ChatContextEngineService } from './services/chat-context-engine.service';
+import { UrlProcessorService } from './services/url-processor.service';
+import { UrlCacheService } from './services/url-cache.service';
 
 // Controllers
 import { DocumentUploadController } from './controllers/document-upload.controller';
+import { UrlProcessingController } from './controllers/url-processing.controller';
 
 // Gateways
 import { ChatGateway } from './gateways/chat.gateway';
@@ -55,6 +58,7 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
   ],
   controllers: [
     DocumentUploadController,
+    UrlProcessingController,
   ],
   providers: [
     ChatSessionService,
@@ -62,6 +66,8 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     DocumentProcessorService,
     FileValidatorService,
     ChatContextEngineService,
+    UrlProcessorService,
+    UrlCacheService,
     FaqEnhancedSearchService,
     ChatGateway,
   ],
@@ -71,6 +77,8 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     DocumentProcessorService,
     FileValidatorService,
     ChatContextEngineService,
+    UrlProcessorService,
+    UrlCacheService,
     ChatGateway,
   ],
 })

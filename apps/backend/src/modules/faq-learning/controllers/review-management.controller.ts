@@ -26,20 +26,64 @@ import {
   BulkReviewRequest
 } from '../services/review-queue.service';
 import { FaqEntryStatus } from '../entities/learned-faq-entry.entity';
+import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ReviewQueueQueryDto {
+  @IsOptional()
+  @IsString()
   status?: string; // comma-separated values
+  
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   confidence_min?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   confidence_max?: number;
+  
+  @IsOptional()
+  @IsString()
   source?: string; // comma-separated values
+  
+  @IsOptional()
+  @IsString()
   category?: string; // comma-separated values
+  
+  @IsOptional()
+  @IsString()
   date_from?: string;
+  
+  @IsOptional()
+  @IsString()
   date_to?: string;
+  
+  @IsOptional()
+  @IsString()
   reviewed_by?: string;
+  
+  @IsOptional()
+  @IsString()
   created_by?: string;
+  
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   page?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   limit?: number;
+  
+  @IsOptional()
+  @IsEnum(['createdAt', 'confidence', 'usageCount', 'helpfulCount'])
   sort_by?: 'createdAt' | 'confidence' | 'usageCount' | 'helpfulCount';
+  
+  @IsOptional()
+  @IsEnum(['ASC', 'DESC'])
   sort_order?: 'ASC' | 'DESC';
 }
 

@@ -231,20 +231,24 @@ export class FaqLearningService {
       params.append('limit', filters.limit.toString());
     }
 
-    const response = await httpClient.get<{
-      items: any[];
-      total: number;
-      page: number;
-      totalPages: number;
-    }>(`/review/queue?${params.toString()}`);
+    const response = await httpClient.get<any>(`/review/queue?${params.toString()}`);
+
+    console.log('📋 Review queue response:', response);
+    
+    // Handle wrapped response (success, data, meta structure)
+    const data = response.data || response;
+    
+    console.log('📋 Extracted review queue data:', data);
 
     // Convert date strings to Date objects
-    response.items = response.items.map(item => ({
-      ...item,
-      createdAt: new Date(item.createdAt)
-    }));
+    if (data.items && Array.isArray(data.items)) {
+      data.items = data.items.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt)
+      }));
+    }
 
-    return response;
+    return data;
   }
 
   /**
@@ -352,15 +356,20 @@ export class FaqLearningService {
       updatedAt: Date;
     }>;
   }> {
-    const response = await httpClient.get<{
-      configurations: any[];
-    }>(`${this.BASE_URL}/config`);
+    const response = await httpClient.get<any>(`${this.BASE_URL}/config`);
+    
+    console.log('🔧 Config response:', response);
+    
+    // Handle wrapped response (success, data, meta structure)
+    const data = response.data || response;
+    
+    console.log('🔧 Extracted config data:', data);
     
     // Handle both response formats: { configurations: [] } or direct array
-    const configs = response.configurations || response || [];
+    const configs = data.configurations || data || [];
     
     return {
-      configurations: Array.isArray(configs) ? configs.map(c => ({
+      configurations: Array.isArray(configs) ? configs.map((c: any) => ({
         ...c,
         updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date()
       })) : []

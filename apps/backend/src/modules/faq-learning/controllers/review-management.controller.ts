@@ -10,7 +10,8 @@ import {
   HttpStatus,
   HttpException,
   Logger,
-  ParseUUIDPipe
+  ParseUUIDPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -127,8 +128,10 @@ export class ReviewManagementController {
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 20)' })
   @ApiQuery({ name: 'sort_by', required: false, enum: ['createdAt', 'confidence', 'usageCount', 'helpfulCount'] })
   @ApiQuery({ name: 'sort_order', required: false, enum: ['ASC', 'DESC'] })
-  async getReviewQueue(@Query() query: ReviewQueueQueryDto): Promise<ReviewQueueResponse> {
+  async getReviewQueue(@Query(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: false })) query: ReviewQueueQueryDto): Promise<ReviewQueueResponse> {
     try {
+      this.logger.log('📋 Review queue request received with query:', JSON.stringify(query));
+      
       const filters: ReviewQueueFilters = {};
 
       // Parse status filter
@@ -182,7 +185,13 @@ export class ReviewManagementController {
       if (query.sort_by) filters.sortBy = query.sort_by;
       if (query.sort_order) filters.sortOrder = query.sort_order;
 
-      return await this.reviewQueueService.getReviewQueue(filters);
+      this.logger.log('📋 Parsed filters:', JSON.stringify(filters));
+      
+      const result = await this.reviewQueueService.getReviewQueue(filters);
+      
+      this.logger.log(`📋 Returning ${result.items.length} items, page ${result.page}/${result.totalPages}`);
+      
+      return result;
 
     } catch (error) {
       this.logger.error('Failed to get review queue:', error);
@@ -193,7 +202,7 @@ export class ReviewManagementController {
     }
   }
 
-  @Get('queue/stats')
+  @Get('stats')
   @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get review queue statistics' })
   @ApiResponse({ status: 200, description: 'Review statistics retrieved successfully' })

@@ -75,6 +75,16 @@ export default function ReviewQueuePage() {
     category: [],
     search: ''
   });
+  
+  // Stats state
+  const [stats, setStats] = useState({
+    total: 0,
+    pendingReview: 0,
+    approved: 0,
+    rejected: 0,
+    published: 0,
+    averageConfidence: 0
+  });
 
   // Review form state
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | 'edit'>('approve');
@@ -85,7 +95,18 @@ export default function ReviewQueuePage() {
 
   useEffect(() => {
     loadReviewQueue();
+    loadStats();
   }, [currentPage, filters]);
+
+  const loadStats = async () => {
+    try {
+      const { FaqLearningService } = await import('@/services/faq-learning.service');
+      const data = await FaqLearningService.getReviewStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Review stats yüklenemedi:', error);
+    }
+  };
 
   const loadReviewQueue = async () => {
     setIsLoading(true);
@@ -158,6 +179,7 @@ export default function ReviewQueuePage() {
         console.log('FAQ başarıyla incelendi:', result.message);
         setIsReviewModalOpen(false);
         loadReviewQueue(); // Refresh the list
+        loadStats(); // Refresh stats
       }
     } catch (error) {
       console.error('Review işlemi başarısız:', error);
@@ -180,6 +202,7 @@ export default function ReviewQueuePage() {
         console.log('Toplu işlem başarılı:', result.message);
         setSelectedItems([]);
         loadReviewQueue(); // Refresh the list
+        loadStats(); // Refresh stats
       }
     } catch (error) {
       console.error('Toplu işlem başarısız:', error);
@@ -230,7 +253,7 @@ export default function ReviewQueuePage() {
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-yellow-600" />
               <div>
-                <div className="text-2xl font-bold">{reviewItems.filter(i => i.status === 'pending_review').length}</div>
+                <div className="text-2xl font-bold">{stats.pendingReview}</div>
                 <div className="text-sm text-muted-foreground">İnceleme Bekleyen</div>
               </div>
             </div>
@@ -242,8 +265,8 @@ export default function ReviewQueuePage() {
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">45</div>
-                <div className="text-sm text-muted-foreground">Bu Hafta Onaylanan</div>
+                <div className="text-2xl font-bold">{stats.approved}</div>
+                <div className="text-sm text-muted-foreground">Onaylanmış</div>
               </div>
             </div>
           </CardContent>
@@ -254,7 +277,7 @@ export default function ReviewQueuePage() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold">78%</div>
+                <div className="text-2xl font-bold">{stats.averageConfidence}%</div>
                 <div className="text-sm text-muted-foreground">Ortalama Güven</div>
               </div>
             </div>
@@ -264,10 +287,10 @@ export default function ReviewQueuePage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">3</div>
-                <div className="text-sm text-muted-foreground">Düşük Güven</div>
+                <div className="text-2xl font-bold">{stats.published}</div>
+                <div className="text-sm text-muted-foreground">Yayınlanmış</div>
               </div>
             </div>
           </CardContent>

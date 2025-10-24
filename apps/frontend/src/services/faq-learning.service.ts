@@ -306,7 +306,14 @@ export class FaqLearningService {
     published: number;
     averageConfidence: number;
   }> {
-    return await httpClient.get('/review/queue/stats');
+    const response = await httpClient.get<any>('/review/stats');
+    
+    console.log('📊 Review stats response:', response);
+    
+    // Handle wrapped response
+    const data = response.data || response;
+    
+    return data;
   }
 
   /**

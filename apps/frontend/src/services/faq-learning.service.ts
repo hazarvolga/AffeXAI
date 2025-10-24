@@ -58,31 +58,39 @@ export class FaqLearningService {
    * Get dashboard statistics and data
    */
   static async getDashboardStats(): Promise<DashboardData> {
-    const response = await httpClient.get<DashboardData>(`${this.BASE_URL}/dashboard`);
+    console.log('🔗 Calling dashboard API:', `${this.BASE_URL}/dashboard`);
+    const response = await httpClient.get<any>(`${this.BASE_URL}/dashboard`);
+    
+    console.log('🔗 Raw response:', response);
+    
+    // Handle wrapped response (success, data, meta structure)
+    const data = response.data || response;
+    
+    console.log('🔗 Extracted data:', data);
     
     // Convert date strings to Date objects with null checks
-    if (response.stats && response.stats.lastRun) {
-      response.stats.lastRun = new Date(response.stats.lastRun);
+    if (data.stats && data.stats.lastRun) {
+      data.stats.lastRun = new Date(data.stats.lastRun);
     }
-    if (response.stats && response.stats.nextRun) {
-      response.stats.nextRun = new Date(response.stats.nextRun);
+    if (data.stats && data.stats.nextRun) {
+      data.stats.nextRun = new Date(data.stats.nextRun);
     }
     
-    if (response.providers && Array.isArray(response.providers)) {
-      response.providers = response.providers.map(p => ({
+    if (data.providers && Array.isArray(data.providers)) {
+      data.providers = data.providers.map((p: any) => ({
         ...p,
         lastChecked: new Date(p.lastChecked)
       }));
     }
     
-    if (response.recentActivity && Array.isArray(response.recentActivity)) {
-      response.recentActivity = response.recentActivity.map(a => ({
+    if (data.recentActivity && Array.isArray(data.recentActivity)) {
+      data.recentActivity = data.recentActivity.map((a: any) => ({
         ...a,
         timestamp: new Date(a.timestamp)
       }));
     }
     
-    return response;
+    return data as DashboardData;
   }
 
   /**

@@ -479,7 +479,7 @@ export class FaqLearningService {
     try {
       const result = await this.faqRepository
         .createQueryBuilder('faq')
-        .select('AVG(faq.confidenceScore)', 'avg')
+        .select('AVG(faq.confidence)', 'avg')
         .where('faq.status = :status', { status: FaqEntryStatus.PUBLISHED })
         .getRawOne();
       

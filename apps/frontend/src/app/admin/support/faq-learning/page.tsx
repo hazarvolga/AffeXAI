@@ -7,12 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Brain, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Brain,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   Settings,
   Play,
   Pause,
@@ -68,19 +68,19 @@ export default function FaqLearningDashboard() {
     averageConfidence: 0,
     processingStatus: 'stopped'
   });
-  
+
   const [learningProgress, setLearningProgress] = useState<LearningProgress>({
     fromChat: 0,
     fromTickets: 0,
     fromSuggestions: 0
   });
-  
+
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
     highConfidence: 0,
     mediumConfidence: 0,
     lowConfidence: 0
   });
-  
+
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,17 +93,35 @@ export default function FaqLearningDashboard() {
 
   const loadDashboardData = async () => {
     try {
+      console.log('📊 Loading dashboard data...');
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const data = await FaqLearningService.getDashboardStats();
-      
+
+      console.log('📊 Dashboard data received:', data);
+      console.log('📊 Data type:', typeof data);
+      console.log('📊 Data keys:', data ? Object.keys(data) : 'null');
+      console.log('📊 Stats:', data?.stats);
+      console.log('📊 Learning Progress:', data?.learningProgress);
+
+      // Ensure data structure is correct
+      if (!data) {
+        throw new Error('No data received from API');
+      }
+
+      if (!data.stats) {
+        console.error('📊 Missing stats in data. Full data:', JSON.stringify(data, null, 2));
+        throw new Error('Invalid dashboard data structure - missing stats');
+      }
+
       setStats(data.stats);
-      setLearningProgress(data.learningProgress);
-      setQualityMetrics(data.qualityMetrics);
-      setProviders(data.providers);
-      setRecentActivity(data.recentActivity);
+      setLearningProgress(data.learningProgress || { fromChat: 0, fromTickets: 0, fromSuggestions: 0 });
+      setQualityMetrics(data.qualityMetrics || { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0 });
+      setProviders(data.providers || []);
+      setRecentActivity(data.recentActivity || []);
       setIsLoading(false);
     } catch (error) {
-      console.error('Dashboard verisi yüklenemedi:', error);
+      console.error('❌ Dashboard verisi yüklenemedi:', error);
+      console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error');
       // Fallback to empty data on error
       setStats({
         totalFaqs: 0,
@@ -132,7 +150,7 @@ export default function FaqLearningDashboard() {
     try {
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.startPipeline();
-      
+
       if (result.success) {
         console.log('Learning pipeline başlatıldı:', result.message);
         // Refresh dashboard data
@@ -147,7 +165,7 @@ export default function FaqLearningDashboard() {
     try {
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.stopPipeline();
-      
+
       if (result.success) {
         console.log('Learning pipeline durduruldu:', result.message);
         // Refresh dashboard data
@@ -253,8 +271,8 @@ export default function FaqLearningDashboard() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold capitalize ${getStatusColor(stats.processingStatus)}`}>
-              {stats.processingStatus === 'running' ? 'Çalışıyor' : 
-               stats.processingStatus === 'stopped' ? 'Durduruldu' : 'Hata'}
+              {stats.processingStatus === 'running' ? 'Çalışıyor' :
+                stats.processingStatus === 'stopped' ? 'Durduruldu' : 'Hata'}
             </div>
             <p className="text-xs text-muted-foreground">
               {stats.lastRun && `Son çalışma: ${stats.lastRun.toLocaleTimeString('tr-TR')}`}
@@ -292,13 +310,13 @@ export default function FaqLearningDashboard() {
                     <span className="font-medium">{learningProgress.fromChat} FAQ</span>
                   </div>
                   <Progress value={learningProgress.fromChat > 0 ? Math.min((learningProgress.fromChat / stats.totalFaqs) * 100, 100) : 0} />
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Ticket Verilerinden</span>
                     <span className="font-medium">{learningProgress.fromTickets} FAQ</span>
                   </div>
                   <Progress value={learningProgress.fromTickets > 0 ? Math.min((learningProgress.fromTickets / stats.totalFaqs) * 100, 100) : 0} />
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Kullanıcı Önerilerinden</span>
                     <span className="font-medium">{learningProgress.fromSuggestions} FAQ</span>
@@ -330,7 +348,7 @@ export default function FaqLearningDashboard() {
                     </div>
                     <span className="font-medium">{qualityMetrics.highConfidence} FAQ</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
@@ -340,7 +358,7 @@ export default function FaqLearningDashboard() {
                     </div>
                     <span className="font-medium">{qualityMetrics.mediumConfidence} FAQ</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Badge variant="destructive" className="bg-red-100 text-red-800">
@@ -462,10 +480,9 @@ export default function FaqLearningDashboard() {
               <div className="space-y-4">
                 {recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.status === 'success' ? 'bg-green-500' :
-                      activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
+                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.status === 'success' ? 'bg-green-500' :
+                        activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`} />
                     <div className="flex-1">
                       <p className="text-sm">{activity.description}</p>
                       <p className="text-xs text-muted-foreground">

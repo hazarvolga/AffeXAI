@@ -21,7 +21,7 @@ export enum MessageStatus {
 @Index(['sessionId', 'createdAt'])
 @Index(['senderId'])
 export class ChatMessage extends BaseEntity {
-  @Column('uuid')
+  @Column('uuid', { nullable: true })
   @Index()
   sessionId: string;
 

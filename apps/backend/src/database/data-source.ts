@@ -28,6 +28,8 @@ import { TicketCategory } from '../modules/tickets/entities/ticket-category.enti
 import { TicketAuditLog } from '../modules/tickets/entities/ticket-audit-log.entity';
 import { TicketAssignmentRule } from '../modules/tickets/entities/ticket-assignment-rule.entity';
 import { TicketEscalationRule } from '../modules/tickets/entities/ticket-escalation-rule.entity';
+import { ChatSession } from '../modules/tickets/entities/chat-session.entity';
+import { ChatMessage } from '../modules/tickets/entities/chat-message.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -68,6 +70,8 @@ export const AppDataSource = new DataSource({
     TicketAuditLog,
     TicketAssignmentRule,
     TicketEscalationRule,
+    ChatSession,
+    ChatMessage,
   ],
   migrations: ['src/database/migrations/**/*.ts'],
   subscribers: [],

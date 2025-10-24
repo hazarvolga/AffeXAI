@@ -8,6 +8,6 @@ export default registerAs('database', () => ({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'affexai_dev',
-  synchronize: process.env.DB_SYNCHRONIZE === 'true' || true,
+  synchronize: true, // Temporarily enabled to fix schema
   logging: process.env.DB_LOGGING === 'true' || false,
 }));

@@ -39,6 +39,13 @@ const supportLinks = [
     { href: "/admin/support/ai-insights", label: "AI Insights", icon: Brain },
 ];
 
+const faqLearningLinks = [
+    { href: "/admin/support/faq-learning", label: "Dashboard", icon: Home },
+    { href: "/admin/support/faq-learning/review", label: "İnceleme Kuyruğu", icon: FileText },
+    { href: "/admin/support/faq-learning/providers", label: "AI Sağlayıcılar", icon: Bot },
+    { href: "/admin/support/faq-learning/settings", label: "Ayarlar", icon: Settings },
+];
+
 const userManagementLinks = [
     { href: "/admin/users", label: "Kullanıcı Listesi"},
     { href: "/admin/users/roles", label: "Roller ve İzinler"},
@@ -202,6 +209,41 @@ export function CollapsibleDashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
+                                        const isActive = pathname === link.href;
+                                        return (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                className={cn(
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                    isActive && "bg-muted text-primary"
+                                                )}
+                                            >
+                                                <link.icon className="h-3 w-3" />
+                                                {link.label}
+                                            </Link>
+                                        )
+                                    })}
+                                    </nav>
+                                </AccordionContent>
+                            </AccordionItem>
+                             )}
+
+                             {/* FAQ Learning System - Permission: TICKETS_VIEW_ALL */}
+                             {hasAnyPermission([Permission.TICKETS_VIEW_ALL, Permission.TICKETS_VIEW_OWN]) && (
+                             <AccordionItem value="faq-learning" className="border-none">
+                                <AccordionTrigger className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
+                                    pathname.startsWith('/admin/support/faq-learning') && "bg-muted text-primary"
+                                )}>
+                                    <div className="flex items-center gap-3">
+                                        <Brain className="h-4 w-4" />
+                                        FAQ Öğrenme Sistemi
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-8 pt-1">
+                                    <nav className="grid gap-1">
+                                    {faqLearningLinks.map(link => {
                                         const isActive = pathname === link.href;
                                         return (
                                             <Link

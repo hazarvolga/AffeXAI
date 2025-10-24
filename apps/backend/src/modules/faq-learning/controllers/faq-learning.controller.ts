@@ -190,6 +190,8 @@ export class FaqLearningController {
     }>;
   }> {
     try {
+      this.logger.log('📊 Dashboard endpoint called');
+      
       const pipelineStatus = await this.faqLearningService.getPipelineStatus();
       const providerStatus = await this.faqAiService.getProviderStatus();
       
@@ -202,13 +204,15 @@ export class FaqLearningController {
       const learningProgress = await this.faqLearningService.getLearningProgressBySource();
       const qualityMetrics = await this.faqLearningService.getQualityMetrics();
 
-      return {
+      this.logger.log(`📊 Dashboard stats: totalFaqs=${totalFaqs}, newFaqsToday=${newFaqsToday}, pendingReview=${pendingReview}`);
+
+      const response = {
         stats: {
           totalFaqs,
           newFaqsToday,
           pendingReview,
           averageConfidence,
-          processingStatus: pipelineStatus.isProcessing ? 'running' : 'stopped',
+          processingStatus: (pipelineStatus.isProcessing ? 'running' : 'stopped') as 'running' | 'stopped' | 'error',
           lastRun: pipelineStatus.lastRun,
           nextRun: pipelineStatus.nextScheduledRun
         },
@@ -236,6 +240,9 @@ export class FaqLearningController {
           status: activity.status as any
         }))
       };
+      
+      this.logger.log('📊 Returning dashboard response');
+      return response;
     } catch (error) {
       this.logger.error('Failed to get dashboard data:', error);
       throw new HttpException(

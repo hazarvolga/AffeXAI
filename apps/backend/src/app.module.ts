@@ -24,6 +24,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { PlatformIntegrationModule } from './modules/platform-integration/platform-integration.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { FaqLearningModule } from './modules/faq-learning/faq-learning.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -77,6 +78,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     PlatformIntegrationModule,
     AnalyticsModule,
     FaqLearningModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

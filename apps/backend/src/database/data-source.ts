@@ -28,8 +28,12 @@ import { TicketCategory } from '../modules/tickets/entities/ticket-category.enti
 import { TicketAuditLog } from '../modules/tickets/entities/ticket-audit-log.entity';
 import { TicketAssignmentRule } from '../modules/tickets/entities/ticket-assignment-rule.entity';
 import { TicketEscalationRule } from '../modules/tickets/entities/ticket-escalation-rule.entity';
-import { ChatSession } from '../modules/tickets/entities/chat-session.entity';
-import { ChatMessage } from '../modules/tickets/entities/chat-message.entity';
+import { ChatSession } from '../modules/chat/entities/chat-session.entity';
+import { ChatMessage } from '../modules/chat/entities/chat-message.entity';
+import { ChatDocument } from '../modules/chat/entities/chat-document.entity';
+import { ChatContextSource } from '../modules/chat/entities/chat-context-source.entity';
+import { ChatSupportAssignment } from '../modules/chat/entities/chat-support-assignment.entity';
+import { ChatUrlCache } from '../modules/chat/entities/chat-url-cache.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -72,6 +76,10 @@ export const AppDataSource = new DataSource({
     TicketEscalationRule,
     ChatSession,
     ChatMessage,
+    ChatDocument,
+    ChatContextSource,
+    ChatSupportAssignment,
+    ChatUrlCache,
   ],
   migrations: ['src/database/migrations/**/*.ts'],
   subscribers: [],

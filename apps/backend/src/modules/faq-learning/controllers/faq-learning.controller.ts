@@ -359,17 +359,29 @@ export class FaqLearningController {
       category?: string;
       isActive: boolean;
       updatedAt: Date;
+      type?: string;
+      min?: number;
+      max?: number;
+      step?: number;
+      unit?: string;
+      options?: Array<{value: any; label: string}>;
     }>;
   }> {
     try {
-      // Mock configuration data
+      // Complete configuration data with all settings
       return {
         configurations: [
+          // Confidence Thresholds
           {
             key: 'minConfidenceForReview',
             value: 60,
             description: 'Minimum confidence score for review',
             category: 'thresholds',
+            type: 'range',
+            min: 0,
+            max: 100,
+            step: 1,
+            unit: '%',
             isActive: true,
             updatedAt: new Date()
           },
@@ -378,6 +390,244 @@ export class FaqLearningController {
             value: 85,
             description: 'Minimum confidence score for auto-publish',
             category: 'thresholds',
+            type: 'range',
+            min: 0,
+            max: 100,
+            step: 1,
+            unit: '%',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Pattern Recognition
+          {
+            key: 'minPatternFrequency',
+            value: 3,
+            description: 'Minimum pattern frequency for recognition',
+            category: 'recognition',
+            type: 'number',
+            min: 1,
+            max: 50,
+            step: 1,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'similarityThreshold',
+            value: 0.8,
+            description: 'Similarity threshold for pattern matching',
+            category: 'recognition',
+            type: 'range',
+            min: 0,
+            max: 1,
+            step: 0.01,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Processing Settings
+          {
+            key: 'batchSize',
+            value: 100,
+            description: 'Number of items to process in each batch',
+            category: 'processing',
+            type: 'number',
+            min: 10,
+            max: 1000,
+            step: 10,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'processingInterval',
+            value: 3600,
+            description: 'Processing interval in seconds',
+            category: 'processing',
+            type: 'number',
+            min: 300,
+            max: 86400,
+            step: 300,
+            unit: 'seconds',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'enableRealTimeProcessing',
+            value: false,
+            description: 'Enable real-time processing of new data',
+            category: 'processing',
+            type: 'boolean',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'enableAutoPublishing',
+            value: false,
+            description: 'Automatically publish high-confidence FAQs',
+            category: 'processing',
+            type: 'boolean',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'maxDailyProcessingLimit',
+            value: 1000,
+            description: 'Maximum number of items to process per day',
+            category: 'processing',
+            type: 'number',
+            min: 100,
+            max: 10000,
+            step: 100,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Quality Filters
+          {
+            key: 'minQuestionLength',
+            value: 10,
+            description: 'Minimum question length in characters',
+            category: 'quality',
+            type: 'number',
+            min: 5,
+            max: 100,
+            step: 1,
+            unit: 'characters',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'maxQuestionLength',
+            value: 500,
+            description: 'Maximum question length in characters',
+            category: 'quality',
+            type: 'number',
+            min: 100,
+            max: 2000,
+            step: 50,
+            unit: 'characters',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'minAnswerLength',
+            value: 20,
+            description: 'Minimum answer length in characters',
+            category: 'quality',
+            type: 'number',
+            min: 10,
+            max: 200,
+            step: 5,
+            unit: 'characters',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Data Sources
+          {
+            key: 'chatSessionMinDuration',
+            value: 300,
+            description: 'Minimum chat session duration in seconds',
+            category: 'sources',
+            type: 'number',
+            min: 60,
+            max: 3600,
+            step: 30,
+            unit: 'seconds',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'ticketMinResolutionTime',
+            value: 1800,
+            description: 'Minimum ticket resolution time in seconds',
+            category: 'sources',
+            type: 'number',
+            min: 300,
+            max: 86400,
+            step: 300,
+            unit: 'seconds',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'requiredSatisfactionScore',
+            value: 4,
+            description: 'Required satisfaction score (1-5)',
+            category: 'sources',
+            type: 'range',
+            min: 1,
+            max: 5,
+            step: 1,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Category Management
+          {
+            key: 'excludedCategories',
+            value: [],
+            description: 'Categories to exclude from processing',
+            category: 'categories',
+            type: 'multiselect',
+            options: [
+              { value: 'spam', label: 'Spam' },
+              { value: 'test', label: 'Test' },
+              { value: 'internal', label: 'Internal' },
+              { value: 'billing', label: 'Billing' },
+              { value: 'technical', label: 'Technical' }
+            ],
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'autoCategorizationEnabled',
+            value: true,
+            description: 'Enable automatic categorization of FAQs',
+            category: 'categories',
+            type: 'boolean',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // AI Model Settings (Note: provider and model will be read-only)
+          {
+            key: 'temperature',
+            value: 0.7,
+            description: 'AI model creativity level (0 = focused, 2 = creative)',
+            category: 'ai',
+            type: 'range',
+            min: 0,
+            max: 2,
+            step: 0.1,
+            isActive: true,
+            updatedAt: new Date()
+          },
+          {
+            key: 'maxTokens',
+            value: 1000,
+            description: 'Maximum tokens for AI responses',
+            category: 'ai',
+            type: 'number',
+            min: 100,
+            max: 4000,
+            step: 100,
+            unit: 'tokens',
+            isActive: true,
+            updatedAt: new Date()
+          },
+          
+          // Advanced Settings
+          {
+            key: 'retentionPeriodDays',
+            value: 365,
+            description: 'Data retention period in days',
+            category: 'advanced',
+            type: 'number',
+            min: 30,
+            max: 1095,
+            step: 30,
+            unit: 'days',
             isActive: true,
             updatedAt: new Date()
           }

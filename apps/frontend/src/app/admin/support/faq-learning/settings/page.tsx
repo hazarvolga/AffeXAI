@@ -63,6 +63,7 @@ export default function ConfigurationManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState('thresholds');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [aiProviderInfo, setAiProviderInfo] = useState<{
     currentProvider: string;
     currentModel: string;
@@ -76,6 +77,19 @@ export default function ConfigurationManagementPage() {
     loadConfiguration();
     loadAiProviderInfo();
   }, []);
+
+  // Unsaved changes warning
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = 'Kaydedilmemiş değişiklikleriniz var. Sayfadan ayrılmak istediğinizden emin misiniz?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
 
   const loadAiProviderInfo = async () => {
     try {
@@ -209,6 +223,17 @@ export default function ConfigurationManagementPage() {
 
 
   const handleSave = async () => {
+    // Check for validation errors
+    const hasValidationErrors = Object.values(validationErrors).some(error => error !== '');
+    if (hasValidationErrors) {
+      toast({
+        title: 'Doğrulama Hatası',
+        description: 'Lütfen tüm hataları düzeltin ve tekrar deneyin.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { FaqLearningService } = await import('@/services/faq-learning.service');
@@ -231,6 +256,7 @@ export default function ConfigurationManagementPage() {
       });
       
       setHasChanges(false);
+      setValidationErrors({}); // Clear validation errors after successful save
     } catch (error) {
       console.error('Failed to save configuration:', error);
       toast({
@@ -268,7 +294,46 @@ export default function ConfigurationManagementPage() {
     }
   };
 
+  const validateSetting = (setting: ConfigSetting, value: any): string | null => {
+    // Type validation
+    switch (setting.type) {
+      case 'number':
+      case 'range':
+        if (typeof value !== 'number' || isNaN(value)) {
+          return `${setting.label} geçerli bir sayı olmalıdır`;
+        }
+        if (setting.min !== undefined && value < setting.min) {
+          return `${setting.label} en az ${setting.min} olmalıdır`;
+        }
+        if (setting.max !== undefined && value > setting.max) {
+          return `${setting.label} en fazla ${setting.max} olmalıdır`;
+        }
+        break;
+      
+      case 'string':
+        if (setting.validation?.required && (!value || value.trim() === '')) {
+          return `${setting.label} zorunludur`;
+        }
+        break;
+    }
+    
+    return null;
+  };
+
   const updateSettingValue = (sectionKey: string, settingKey: string, value: any) => {
+    // Find the setting for validation
+    const section = configSections.find(s => s.key === sectionKey);
+    const setting = section?.settings.find(s => s.key === settingKey);
+    
+    // Validate the new value
+    if (setting) {
+      const error = validateSetting(setting, value);
+      setValidationErrors(prev => ({
+        ...prev,
+        [`${sectionKey}-${settingKey}`]: error || ''
+      }));
+    }
+
     setConfigSections(prev =>
       prev.map(section =>
         section.key === sectionKey
@@ -286,6 +351,8 @@ export default function ConfigurationManagementPage() {
 
   const renderSettingInput = (section: ConfigSection, setting: ConfigSetting) => {
     const inputId = `${section.key}-${setting.key}`;
+    const errorKey = `${section.key}-${setting.key}`;
+    const hasError = validationErrors[errorKey];
 
     switch (setting.type) {
       case 'boolean':
@@ -342,29 +409,40 @@ export default function ConfigurationManagementPage() {
 
       case 'textarea':
         return (
-          <Textarea
-            id={inputId}
-            value={setting.value}
-            onChange={(e) => updateSettingValue(section.key, setting.key, e.target.value)}
-            rows={4}
-          />
+          <div className="space-y-1">
+            <Textarea
+              id={inputId}
+              value={setting.value}
+              onChange={(e) => updateSettingValue(section.key, setting.key, e.target.value)}
+              rows={4}
+              className={hasError ? 'border-red-500 focus:border-red-500' : ''}
+            />
+            {hasError && (
+              <p className="text-sm text-red-500">{validationErrors[errorKey]}</p>
+            )}
+          </div>
         );
 
       case 'number':
         return (
-          <div className="flex items-center gap-2">
-            <Input
-              id={inputId}
-              type="number"
-              value={setting.value}
-              onChange={(e) => updateSettingValue(section.key, setting.key, Number(e.target.value))}
-              min={setting.min}
-              max={setting.max}
-              step={setting.step}
-              className="max-w-[200px]"
-            />
-            {setting.unit && (
-              <span className="text-sm text-muted-foreground">{setting.unit}</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Input
+                id={inputId}
+                type="number"
+                value={setting.value}
+                onChange={(e) => updateSettingValue(section.key, setting.key, Number(e.target.value))}
+                min={setting.min}
+                max={setting.max}
+                step={setting.step}
+                className={`max-w-[200px] ${hasError ? 'border-red-500 focus:border-red-500' : ''}`}
+              />
+              {setting.unit && (
+                <span className="text-sm text-muted-foreground">{setting.unit}</span>
+              )}
+            </div>
+            {hasError && (
+              <p className="text-sm text-red-500">{validationErrors[errorKey]}</p>
             )}
           </div>
         );
@@ -414,12 +492,18 @@ export default function ConfigurationManagementPage() {
 
       default:
         return (
-          <Input
-            id={inputId}
-            type="text"
-            value={setting.value}
-            onChange={(e) => updateSettingValue(section.key, setting.key, e.target.value)}
-          />
+          <div className="space-y-1">
+            <Input
+              id={inputId}
+              type="text"
+              value={setting.value}
+              onChange={(e) => updateSettingValue(section.key, setting.key, e.target.value)}
+              className={hasError ? 'border-red-500 focus:border-red-500' : ''}
+            />
+            {hasError && (
+              <p className="text-sm text-red-500">{validationErrors[errorKey]}</p>
+            )}
+          </div>
         );
     }
   };
@@ -459,7 +543,7 @@ export default function ConfigurationManagementPage() {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!hasChanges || isSaving}
+            disabled={!hasChanges || isSaving || Object.values(validationErrors).some(error => error !== '')}
           >
             {isSaving ? (
               <>
@@ -610,6 +694,9 @@ export default function ConfigurationManagementPage() {
                           <div className="space-y-1 flex-1">
                             <Label htmlFor={`${section.key}-${setting.key}`} className="text-base font-medium">
                               {setting.label}
+                              {setting.validation?.required && (
+                                <span className="text-red-500 ml-1">*</span>
+                              )}
                             </Label>
                             <p className="text-sm text-muted-foreground">
                               {setting.description}
@@ -656,6 +743,9 @@ export default function ConfigurationManagementPage() {
                         <div className="space-y-1 flex-1">
                           <Label htmlFor={`${section.key}-${setting.key}`} className="text-base font-medium">
                             {setting.label}
+                            {setting.validation?.required && (
+                              <span className="text-red-500 ml-1">*</span>
+                            )}
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             {setting.description}

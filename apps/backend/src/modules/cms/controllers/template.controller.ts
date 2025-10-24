@@ -17,8 +17,8 @@ import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 import { TemplateService } from '../services/template.service';
-import { CreateTemplateDto } from '../dto/create-template.dto';
-import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { CreateCmsTemplateDto } from '../dto/create-template.dto';
+import { UpdateCmsTemplateDto } from '../dto/update-template.dto';
 import { ImportTemplateDto } from '../dto/import-template.dto';
 import { PageTemplate } from '../entities/page-template.entity';
 
@@ -38,7 +38,7 @@ export class TemplateController {
   @ApiResponse({ status: 201, description: 'Template created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid template data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async create(@Body() createTemplateDto: CreateTemplateDto): Promise<PageTemplate> {
+  async create(@Body() createTemplateDto: CreateCmsTemplateDto): Promise<PageTemplate> {
     return await this.templateService.create(createTemplateDto);
   }
 
@@ -99,7 +99,7 @@ export class TemplateController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async update(
     @Param('id') id: string,
-    @Body() updateTemplateDto: UpdateTemplateDto,
+    @Body() updateTemplateDto: UpdateCmsTemplateDto,
   ): Promise<PageTemplate> {
     return await this.templateService.update(id, updateTemplateDto);
   }

@@ -27,7 +27,8 @@ import {
 import Link from 'next/link';
 import emailCampaignsService, { EmailCampaign } from '@/lib/api/emailCampaignsService';
 import abTestService from '@/lib/api/abTestService';
-import trackingService, { TrackingStats } from '@/lib/api/trackingService';
+import trackingService from '@/lib/api/trackingService';
+import type { TrackingStats } from '@/lib/api/trackingService';
 import AbTestCreator from '@/components/admin/email/AbTestCreator';
 import AbTestResults from '@/components/admin/email/AbTestResults';
 import TrackingStatsComponent from '@/components/admin/email/TrackingStats';

@@ -1,7 +1,7 @@
 import { IsString, IsOptional, MinLength, IsBoolean, IsEnum } from 'class-validator';
 import { CreateTemplateDto as ICreateTemplateDto, TemplateType } from '@affexai/shared-types';
 
-export class CreateTemplateDto implements ICreateTemplateDto {
+export class CreateEmailTemplateDto implements ICreateTemplateDto {
   @IsString()
   @MinLength(1)
   name: string;

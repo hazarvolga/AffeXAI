@@ -20,8 +20,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { TicketTemplatesService } from '../services/ticket-templates.service';
-import { CreateTemplateDto } from '../dto/create-template.dto';
-import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { CreateTicketTemplateDto } from '../dto/create-template.dto';
+import { UpdateTicketTemplateDto } from '../dto/update-template.dto';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
@@ -116,7 +116,7 @@ export class TicketTemplatesController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async create(
-    @Body() createTemplateDto: CreateTemplateDto,
+    @Body() createTemplateDto: CreateTicketTemplateDto,
     @CurrentUser('id') userId: string,
   ) {
     return this.templatesService.create({
@@ -137,7 +137,7 @@ export class TicketTemplatesController {
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async update(
     @Param('id') id: string,
-    @Body() updateTemplateDto: UpdateTemplateDto,
+    @Body() updateTemplateDto: UpdateTicketTemplateDto,
   ) {
     return this.templatesService.update(id, updateTemplateDto);
   }

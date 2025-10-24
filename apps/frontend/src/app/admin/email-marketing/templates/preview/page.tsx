@@ -13,9 +13,9 @@ import { WelcomeEmail } from '@/emails/welcome';
 import { PasswordResetEmail } from '@/emails/password-reset';
 import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AbandonedCartEmail } from '@/emails/abandoned-cart';
-import { NewsletterEmail } from '@/emails/monthly-newsletter';
+import { MonthlyNewsletterEmail as NewsletterEmail } from '@/emails/monthly-newsletter';
 import { InvoiceEmail } from '@/emails/invoice';
-import { ShippingUpdateEmail } from '@/emails/shipping-updates';
+import { ShippingUpdatesEmail as ShippingUpdateEmail } from '@/emails/shipping-updates';
 import { SecurityAlertEmail } from '@/emails/security-alert';
 
 const templates = [

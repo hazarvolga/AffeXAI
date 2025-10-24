@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailTemplate, TemplateType } from './entities/email-template.entity';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
+import { CreateEmailTemplateDto } from './dto/create-template.dto';
+import { UpdateEmailTemplateDto } from './dto/update-template.dto';
 import { TemplateFileService } from './services/template-file.service';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class TemplateService {
     private readonly templateFileService: TemplateFileService,
   ) {}
 
-  async create(createTemplateDto: CreateTemplateDto): Promise<EmailTemplate> {
+  async create(createTemplateDto: CreateEmailTemplateDto): Promise<EmailTemplate> {
     const template = this.templatesRepository.create(createTemplateDto);
     return this.templatesRepository.save(template);
   }
@@ -31,7 +31,7 @@ export class TemplateService {
     return template;
   }
 
-  async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<EmailTemplate> {
+  async update(id: string, updateTemplateDto: UpdateEmailTemplateDto): Promise<EmailTemplate> {
     const template = await this.findOne(id);
     Object.assign(template, updateTemplateDto);
     return this.templatesRepository.save(template);
@@ -66,7 +66,7 @@ export class TemplateService {
         `${fileTemplateName}.tsx`,
       );
       
-      const createDto: CreateTemplateDto = {
+      const createDto: CreateEmailTemplateDto = {
         name: customName || this.formatTemplateName(fileTemplateName),
         content,
         type: TemplateType.CUSTOM,

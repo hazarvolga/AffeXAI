@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsOptional, IsObject, IsArray, IsBoolean, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateTemplateDto {
+export class CreateCmsTemplateDto {
   @ApiProperty({ description: 'Template name', example: 'Modern SaaS Landing' })
   @IsString()
   @IsNotEmpty()

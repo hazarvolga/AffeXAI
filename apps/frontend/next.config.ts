@@ -13,6 +13,33 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  
+  // Webpack configuration to handle Genkit/Handlebars issues
+  webpack: (config, { isServer }) => {
+    // Handle handlebars require.extensions issue
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      os: false,
+    };
+
+    // Ignore handlebars require.extensions warnings
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /node_modules\/handlebars/,
+        message: /require\.extensions/,
+      },
+    ];
+
+    // External modules for server-side rendering
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'handlebars'];
+    }
+
+    return config;
+  },
   // Enable compression and optimization
   compress: true, // Enable gzip compression (default in production)
   poweredByHeader: false, // Remove X-Powered-By header for security

@@ -5,8 +5,8 @@ import { Certificate, CertificateStatus } from './entities/certificate.entity';
 import { CertificateTemplate } from './entities/certificate-template.entity';
 import { CreateCertificateDto } from './dto/create-certificate.dto';
 import { UpdateCertificateDto } from './dto/update-certificate.dto';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
+import { CreateCertificateTemplateDto } from './dto/create-template.dto';
+import { UpdateCertificateTemplateDto } from './dto/update-template.dto';
 import { PdfGeneratorService } from './pdf-generator.service';
 import { CertificateEmailService } from './certificate-email.service';
 import { UsersService } from '../users/users.service';
@@ -250,7 +250,7 @@ export class CertificatesServiceV2 {
 
   // ============ TEMPLATE OPERATIONS ============
 
-  async createTemplate(dto: CreateTemplateDto): Promise<CertificateTemplate> {
+  async createTemplate(dto: CreateCertificateTemplateDto): Promise<CertificateTemplate> {
     const template = this.templatesRepository.create(dto);
     return this.templatesRepository.save(template);
   }
@@ -272,7 +272,7 @@ export class CertificatesServiceV2 {
     return template;
   }
 
-  async updateTemplate(id: string, dto: UpdateTemplateDto): Promise<CertificateTemplate> {
+  async updateTemplate(id: string, dto: UpdateCertificateTemplateDto): Promise<CertificateTemplate> {
     const template = await this.findOneTemplate(id);
     Object.assign(template, dto);
     return this.templatesRepository.save(template);

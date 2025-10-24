@@ -5,7 +5,7 @@ import { TicketPriority } from '../enums/ticket-priority.enum';
 /**
  * DTO for creating a ticket template
  */
-export class CreateTemplateDto {
+export class CreateTicketTemplateDto {
   @ApiProperty({
     description: 'Template name',
     example: 'Password Reset Request',

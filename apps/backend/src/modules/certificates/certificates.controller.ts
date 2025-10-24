@@ -17,8 +17,8 @@ import { CertificatesServiceV2 } from './certificates-v2.service';
 import { CreateCertificateDto } from './dto/create-certificate.dto';
 import { UpdateCertificateDto } from './dto/update-certificate.dto';
 import { BulkImportCertificateDto } from './dto/bulk-import.dto';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
+import { CreateCertificateTemplateDto } from './dto/create-template.dto';
+import { UpdateCertificateTemplateDto } from './dto/update-template.dto';
 import { GenerateCertificateDto } from './dto/generate-certificate.dto';
 import type { Multer } from 'multer';
 
@@ -91,7 +91,7 @@ export class CertificatesController {
   // ============ TEMPLATE ENDPOINTS ============
 
   @Post('templates')
-  createTemplate(@Body() dto: CreateTemplateDto) {
+  createTemplate(@Body() dto: CreateCertificateTemplateDto) {
     return this.certificatesServiceV2.createTemplate(dto);
   }
 
@@ -106,7 +106,7 @@ export class CertificatesController {
   }
 
   @Patch('templates/:id')
-  updateTemplate(@Param('id') id: string, @Body() dto: UpdateTemplateDto) {
+  updateTemplate(@Param('id') id: string, @Body() dto: UpdateCertificateTemplateDto) {
     return this.certificatesServiceV2.updateTemplate(id, dto);
   }
 

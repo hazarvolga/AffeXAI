@@ -14,6 +14,7 @@ import {
   AiSettingsDto,
   AiSettingsMaskedDto,
   AiModel,
+  AiProvider,
   AiConnectionTestDto,
 } from './dto/ai-settings.dto';
 
@@ -439,13 +440,23 @@ export class SettingsService {
   /**
    * Helper: Determine provider from model name
    */
-  private getProviderFromModel(model: AiModel): 'openai' | 'anthropic' {
-    if (model.startsWith('gpt-')) {
-      return 'openai';
+  private getProviderFromModel(model: AiModel): AiProvider {
+    if (model.startsWith('gpt-') || model.includes('openai/')) {
+      return AiProvider.OPENAI;
     }
-    if (model.startsWith('claude-')) {
-      return 'anthropic';
+    if (model.startsWith('claude-') || model.includes('anthropic/')) {
+      return AiProvider.ANTHROPIC;
     }
-    return 'openai'; // default
+    if (model.startsWith('gemini-') || model.includes('google/')) {
+      return AiProvider.GOOGLE;
+    }
+    if (model.includes('/') && !model.startsWith('gpt-') && !model.startsWith('claude-')) {
+      return AiProvider.OPENROUTER;
+    }
+    if (['llama3.1', 'mistral', 'codellama'].includes(model)) {
+      return AiProvider.LOCAL;
+    }
+    
+    return AiProvider.OPENAI; // default fallback
   }
 }

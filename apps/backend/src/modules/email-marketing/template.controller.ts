@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, NotFoundException, Query } from '@nestjs/common';
 import { TemplateService } from './template.service';
-import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
+import { CreateEmailTemplateDto } from './dto/create-template.dto';
+import { UpdateEmailTemplateDto } from './dto/update-template.dto';
 import { EmailTemplate } from './entities/email-template.entity';
 import { TemplatePreviewService } from './services/template-preview.service';
 
@@ -13,7 +13,7 @@ export class TemplateController {
   ) {}
 
   @Post()
-  create(@Body() createTemplateDto: CreateTemplateDto): Promise<EmailTemplate> {
+  create(@Body() createTemplateDto: CreateEmailTemplateDto): Promise<EmailTemplate> {
     return this.templateService.create(createTemplateDto);
   }
 
@@ -38,7 +38,7 @@ export class TemplateController {
   @Patch(':id')
   update(
     @Param('id') id: string, 
-    @Body() updateTemplateDto: UpdateTemplateDto,
+    @Body() updateTemplateDto: UpdateEmailTemplateDto,
   ): Promise<EmailTemplate> {
     return this.templateService.update(id, updateTemplateDto);
   }

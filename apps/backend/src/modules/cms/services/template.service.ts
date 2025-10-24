@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PageTemplate } from '../entities/page-template.entity';
-import { CreateTemplateDto } from '../dto/create-template.dto';
-import { UpdateTemplateDto } from '../dto/update-template.dto';
+import { CreateCmsTemplateDto } from '../dto/create-template.dto';
+import { UpdateCmsTemplateDto } from '../dto/update-template.dto';
 import { ImportTemplateDto, ExportTemplateResponseDto } from '../dto/import-template.dto';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class TemplateService {
   /**
    * Create a new template
    */
-  async create(createTemplateDto: CreateTemplateDto): Promise<PageTemplate> {
+  async create(createTemplateDto: CreateCmsTemplateDto): Promise<PageTemplate> {
     const template = this.templateRepository.create(createTemplateDto);
     return await this.templateRepository.save(template);
   }
@@ -68,7 +68,7 @@ export class TemplateService {
   /**
    * Update a template
    */
-  async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<PageTemplate> {
+  async update(id: string, updateTemplateDto: UpdateCmsTemplateDto): Promise<PageTemplate> {
     const template = await this.findOne(id);
     
     Object.assign(template, updateTemplateDto);
@@ -113,7 +113,7 @@ export class TemplateService {
       }
 
       // Create template from imported data
-      const createDto: CreateTemplateDto = {
+      const createDto: CreateCmsTemplateDto = {
         name: templateData.name,
         description: templateData.description,
         category: templateData.category,
@@ -197,7 +197,7 @@ export class TemplateService {
   async duplicate(id: string, newName?: string): Promise<PageTemplate> {
     const original = await this.findOne(id);
 
-    const createDto: CreateTemplateDto = {
+    const createDto: CreateCmsTemplateDto = {
       name: newName || `${original.name} (Copy)`,
       description: original.description,
       category: original.category,

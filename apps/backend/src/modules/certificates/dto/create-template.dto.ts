@@ -1,6 +1,6 @@
 import { IsString, IsBoolean, IsOptional, IsArray, IsEnum } from 'class-validator';
 
-export class CreateTemplateDto {
+export class CreateCertificateTemplateDto {
   @IsString()
   name: string;
 

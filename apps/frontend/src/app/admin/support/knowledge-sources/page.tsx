@@ -186,7 +186,11 @@ export default function KnowledgeSourcesPage() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to add URL source');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error:', errorData);
+        throw new Error(errorData.error?.message || errorData.message || 'Failed to add URL source');
+      }
 
       toast.success('URL source added successfully');
       setAddDialogOpen(false);
@@ -195,7 +199,7 @@ export default function KnowledgeSourcesPage() {
       fetchStatistics();
     } catch (error) {
       console.error('Error adding URL source:', error);
-      toast.error('Failed to add URL source');
+      toast.error(error instanceof Error ? error.message : 'Failed to add URL source');
     }
   };
 

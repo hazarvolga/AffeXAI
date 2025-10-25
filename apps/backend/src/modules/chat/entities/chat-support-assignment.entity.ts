@@ -21,7 +21,6 @@ export enum AssignmentStatus {
 @Index(['status'])
 export class ChatSupportAssignment extends BaseEntity {
   @Column('uuid')
-  @Index()
   sessionId: string;
 
   @Column('uuid')

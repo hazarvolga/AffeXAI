@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -36,6 +36,7 @@ const supportLinks = [
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
     { href: "/admin/support/knowledge-base", label: "Bilgi Bankası", icon: BookOpen },
+    { href: "/admin/support/knowledge-sources", label: "Knowledge Sources", icon: Database },
     { href: "/admin/support/macros", label: "Makro Yönetimi", icon: Wand2 },
     { href: "/admin/support/ai-insights", label: "AI Insights", icon: Brain },
 ];

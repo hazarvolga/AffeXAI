@@ -134,7 +134,7 @@ export default function KnowledgeSourcesPage() {
 
       const response = await fetch(`/api/knowledge-sources?${params.toString()}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -153,7 +153,7 @@ export default function KnowledgeSourcesPage() {
     try {
       const response = await fetch('/api/knowledge-sources/stats/overview', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -173,7 +173,7 @@ export default function KnowledgeSourcesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({
           title: urlForm.title,
@@ -205,7 +205,7 @@ export default function KnowledgeSourcesPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({
           title: textForm.title,
@@ -252,7 +252,7 @@ export default function KnowledgeSourcesPage() {
       const response = await fetch('/api/knowledge-sources', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: formData,
       });
@@ -277,7 +277,7 @@ export default function KnowledgeSourcesPage() {
       const response = await fetch(`/api/knowledge-sources/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -297,7 +297,7 @@ export default function KnowledgeSourcesPage() {
       const response = await fetch(`/api/knowledge-sources/${id}/archive`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 

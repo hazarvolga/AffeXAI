@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AiService } from '../../ai/ai.service';
 import { GeneralCommunicationContextService, PlatformInfoSource } from './general-communication-context.service';
 import { ContextResult } from './chat-context-engine.service';
+import { ChatAiSettingsService } from './chat-ai-settings.service';
 
 export interface GeneralAiResponse {
   content: string;
@@ -26,6 +27,7 @@ export class GeneralCommunicationAiService {
   constructor(
     private readonly aiService: AiService,
     private readonly generalContextService: GeneralCommunicationContextService,
+    private readonly chatAiSettings: ChatAiSettingsService,
   ) {}
 
   /**
@@ -82,25 +84,32 @@ export class GeneralCommunicationAiService {
         { tone, language, maxResponseLength }
       );
 
+      // Get AI configuration
+      const aiConfig = await this.chatAiSettings.getActiveConfiguration();
+
       // Get AI response
-      const aiResponse = await this.aiService.generateCompletion({
+      const aiResponseResult = await this.aiService.generateCompletion(
+        aiConfig.apiKey,
         prompt,
-        maxTokens: Math.ceil(maxResponseLength * 1.5), // Account for token vs character difference
-        temperature: 0.7,
-        systemMessage: this.getSystemMessage(language, tone)
-      });
+        {
+          model: aiConfig.model,
+          maxTokens: Math.ceil(maxResponseLength * 1.5), // Account for token vs character difference
+          temperature: 0.7,
+          systemPrompt: this.getSystemMessage(language, tone)
+        }
+      );
 
       // Calculate confidence based on context quality and response type
-      const confidence = this.calculateResponseConfidence(contextResult, responseType, aiResponse);
+      const confidence = this.calculateResponseConfidence(contextResult, responseType, aiResponseResult.content);
 
       // Extract suggested actions if any
-      const suggestedActions = this.extractSuggestedActions(aiResponse, language);
+      const suggestedActions = this.extractSuggestedActions(aiResponseResult.content, language);
 
       const processingTime = Date.now() - startTime;
       this.logger.log(`General response generated in ${processingTime}ms with confidence: ${confidence}`);
 
       return {
-        content: aiResponse,
+        content: aiResponseResult.content,
         confidence,
         responseType,
         suggestedActions,

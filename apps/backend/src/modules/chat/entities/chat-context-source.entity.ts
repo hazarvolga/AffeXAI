@@ -16,7 +16,6 @@ export enum ContextSourceType {
 @Index(['relevanceScore'])
 export class ChatContextSource extends BaseEntity {
   @Column('uuid')
-  @Index()
   sessionId: string;
 
   @Column('uuid', { nullable: true })

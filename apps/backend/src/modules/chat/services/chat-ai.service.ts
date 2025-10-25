@@ -329,9 +329,9 @@ export class ChatAiService {
    */
   private extractCitations(content: string, sources: ContextSource[]): string[] {
     const citations: string[] = [];
-    const citationMatches = content.match(/\[(\d+)\]/g) || [];
-    
-    citationMatches.forEach((match: string) => {
+    const citationMatches: string[] = content.match(/\[(\d+)\]/g) || [];
+
+    citationMatches.forEach((match) => {
       const index = parseInt(match.replace(/[\[\]]/g, '')) - 1;
       if (index >= 0 && index < sources.length) {
         const source = sources[index];

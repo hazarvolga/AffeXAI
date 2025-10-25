@@ -11,8 +11,10 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import { KnowledgeSourcesService } from '../services/knowledge-sources.service';
 import { CreateKnowledgeSourceDto } from '../dto/create-knowledge-source.dto';
 import { UpdateKnowledgeSourceDto } from '../dto/update-knowledge-source.dto';
@@ -34,8 +36,13 @@ export class KnowledgeSourcesController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createDto: CreateKnowledgeSourceDto) {
-    this.logger.log(`Creating knowledge source: ${createDto.title}`);
+  async create(
+    @Body() createDto: CreateKnowledgeSourceDto,
+    @CurrentUser() user: any,
+  ) {
+    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user.userId}`);
+    // Auto-set uploadedById from authenticated user
+    createDto.uploadedById = user.userId;
     const source = await this.knowledgeSourcesService.create(createDto);
     return {
       success: true,

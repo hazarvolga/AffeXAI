@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+// API Configuration
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -132,7 +135,7 @@ export default function KnowledgeSourcesPage() {
       if (searchQuery) params.append('search', searchQuery);
       params.append('limit', '50');
 
-      const response = await fetch(`/api/knowledge-sources?${params.toString()}`, {
+      const response = await fetch(`${API_URL}/knowledge-sources?${params.toString()}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -151,7 +154,7 @@ export default function KnowledgeSourcesPage() {
 
   const fetchStatistics = async () => {
     try {
-      const response = await fetch('/api/knowledge-sources/stats/overview', {
+      const response = await fetch(`${API_URL}/knowledge-sources/stats/overview`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -169,7 +172,7 @@ export default function KnowledgeSourcesPage() {
 
   const addUrlSource = async () => {
     try {
-      const response = await fetch('/api/knowledge-sources', {
+      const response = await fetch(`${API_URL}/knowledge-sources`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +208,7 @@ export default function KnowledgeSourcesPage() {
 
   const addTextSource = async () => {
     try {
-      const response = await fetch('/api/knowledge-sources', {
+      const response = await fetch(`${API_URL}/knowledge-sources`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +256,7 @@ export default function KnowledgeSourcesPage() {
       formData.append('enableForFaqLearning', String(fileForm.enableForFaqLearning));
       formData.append('enableForChat', String(fileForm.enableForChat));
 
-      const response = await fetch('/api/knowledge-sources', {
+      const response = await fetch(`${API_URL}/knowledge-sources`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,

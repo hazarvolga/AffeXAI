@@ -22,7 +22,6 @@ export enum ChatMessageType {
 @Index(['senderType', 'senderId'])
 export class ChatMessage extends BaseEntity {
   @Column('uuid')
-  @Index()
   sessionId: string;
 
   @Column({

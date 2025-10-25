@@ -23,7 +23,6 @@ export enum ChatSessionStatus {
 @Index(['createdAt'])
 export class ChatSession extends BaseEntity {
   @Column('uuid')
-  @Index()
   userId: string;
 
   @Column({

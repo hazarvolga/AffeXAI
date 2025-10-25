@@ -88,7 +88,7 @@ export class ChatEscalationService {
       });
 
       // Create escalation system message
-      const escalationMessage = await this.chatMessageService.createMessage({
+      const escalationMessage = await this.chatMessageService.sendMessage({
         sessionId,
         senderType: ChatMessageSenderType.AI,
         content: this.generateEscalationMessage(reason, priority),
@@ -106,11 +106,7 @@ export class ChatEscalationService {
       // Try to assign support agent if auto-assignment is enabled
       let assignment: ChatSupportAssignment | undefined;
       try {
-        assignment = await this.supportAssignmentService.autoAssignSupport(sessionId, {
-          priority,
-          category,
-          escalatedFrom: 'general'
-        });
+        assignment = await this.supportAssignmentService.autoAssignSupport(sessionId);
       } catch (assignmentError) {
         this.logger.warn(`Failed to auto-assign support for session ${sessionId}: ${assignmentError.message}`);
         // Continue without assignment - manual assignment can be done later

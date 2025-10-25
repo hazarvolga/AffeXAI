@@ -14,6 +14,7 @@ export interface CreateChatSessionDto {
 export interface UpdateChatSessionDto {
   title?: string;
   status?: ChatSessionStatus;
+  sessionType?: ChatSessionType;
   metadata?: any;
 }
 
@@ -142,11 +143,15 @@ export class ChatSessionService {
 
     if (updateDto.status !== undefined) {
       session.status = updateDto.status;
-      
+
       // Set closedAt when closing session
       if (updateDto.status === ChatSessionStatus.CLOSED) {
         session.closedAt = new Date();
       }
+    }
+
+    if (updateDto.sessionType !== undefined) {
+      session.sessionType = updateDto.sessionType;
     }
 
     if (updateDto.metadata !== undefined) {

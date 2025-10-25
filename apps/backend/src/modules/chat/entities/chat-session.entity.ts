@@ -55,6 +55,14 @@ export class ChatSession extends BaseEntity {
     ipAddress?: string;
     referrer?: string;
     tags?: string[];
+    escalatedFrom?: string;
+    escalationReason?: string;
+    escalationNotes?: string;
+    escalationPriority?: string;
+    escalationCategory?: string;
+    escalatedAt?: Date;
+    escalatedBy?: string;
+    originalSessionType?: string;
   };
 
   @Column({ type: 'timestamp', nullable: true })

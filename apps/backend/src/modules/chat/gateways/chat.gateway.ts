@@ -979,7 +979,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       );
 
       // Create AI message
-      const aiMessage = await this.chatMessageService.createMessage({
+      const aiMessage = await this.chatMessageService.sendMessage({
         sessionId,
         senderType: ChatMessageSenderType.AI,
         content: aiResponse.content,
@@ -1012,7 +1012,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       this.logger.error(`Error generating general communication response: ${error.message}`, error.stack);
       
       // Send error message to session
-      const errorMessage = await this.chatMessageService.createMessage({
+      const errorMessage = await this.chatMessageService.sendMessage({
         sessionId,
         senderType: ChatMessageSenderType.AI,
         content: 'Üzgünüm, şu anda sorununuza uygun bir yanıt oluşturamıyorum. Lütfen sorunuzu daha detaylı açıklayın veya destek ekibimizle iletişime geçin.',
@@ -1099,7 +1099,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         });
 
         // Create system message about escalation
-        const escalationMessage = await this.chatMessageService.createMessage({
+        const escalationMessage = await this.chatMessageService.sendMessage({
           sessionId,
           senderType: ChatMessageSenderType.AI,
           content: 'Sohbet destek ekibine yönlendirildi. Bir destek temsilcisi kısa süre içinde size yardımcı olacak.',

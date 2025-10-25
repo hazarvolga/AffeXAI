@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AiService } from '../../ai/services/ai.service';
+import { AiService } from '../../ai/ai.service';
 import { GeneralCommunicationContextService, PlatformInfoSource } from './general-communication-context.service';
 import { ContextResult } from './chat-context-engine.service';
 
@@ -83,7 +83,7 @@ export class GeneralCommunicationAiService {
       );
 
       // Get AI response
-      const aiResponse = await this.aiService.generateResponse({
+      const aiResponse = await this.aiService.generateCompletion({
         prompt,
         maxTokens: Math.ceil(maxResponseLength * 1.5), // Account for token vs character difference
         temperature: 0.7,

@@ -263,9 +263,11 @@ export default function KnowledgeSourcesPage() {
     }
 
     try {
+      console.log('🔍 Uploading file:', fileForm.file.name);
+
       const formData = new FormData();
       formData.append('file', fileForm.file);
-      formData.append('title', fileForm.title);
+      formData.append('title', fileForm.title || fileForm.file.name);
       if (fileForm.description) formData.append('description', fileForm.description);
       if (fileForm.tags) {
         const tags = fileForm.tags.split(',').map((t) => t.trim()).filter(Boolean);
@@ -274,7 +276,9 @@ export default function KnowledgeSourcesPage() {
       formData.append('enableForFaqLearning', String(fileForm.enableForFaqLearning));
       formData.append('enableForChat', String(fileForm.enableForChat));
 
-      const response = await fetch(`${API_URL}/knowledge-sources`, {
+      console.log('🔍 Sending to:', `${API_URL}/knowledge-sources/upload`);
+
+      const response = await fetch(`${API_URL}/knowledge-sources/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -282,7 +286,14 @@ export default function KnowledgeSourcesPage() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Failed to upload file');
+      console.log('🔍 Upload response:', response.status, response.statusText);
+
+      const responseData = await response.json();
+      console.log('🔍 Upload response data:', responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to upload file');
+      }
 
       toast.success('File uploaded successfully');
       setAddDialogOpen(false);
@@ -291,7 +302,7 @@ export default function KnowledgeSourcesPage() {
       fetchStatistics();
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('Failed to upload file');
+      toast.error(error instanceof Error ? error.message : 'Failed to upload file');
     }
   };
 

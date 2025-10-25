@@ -12,7 +12,12 @@ import {
   HttpStatus,
   Logger,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import { KnowledgeSourcesService } from '../services/knowledge-sources.service';
@@ -53,6 +58,86 @@ export class KnowledgeSourcesController {
       success: true,
       data: source,
       message: 'Knowledge source created successfully',
+    };
+  }
+
+  /**
+   * Upload a file (PDF, DOC, etc.)
+   * POST /knowledge-sources/upload
+   */
+  @Post('upload')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/knowledge-sources',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = /pdf|doc|docx|txt|md/;
+        const ext = extname(file.originalname).toLowerCase().replace('.', '');
+        const mimeType = file.mimetype;
+
+        if (allowedTypes.test(ext) || mimeType.includes('pdf') || mimeType.includes('document')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Invalid file type. Only PDF, DOC, DOCX, TXT, and MD files are allowed.'), false);
+        }
+      },
+    }),
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: any,
+    @CurrentUser() user: any,
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    this.logger.log(`Uploading file: ${file.originalname} by user: ${user?.id}`);
+
+    // Parse tags if provided as JSON string
+    let tags = [];
+    if (body.tags) {
+      try {
+        tags = JSON.parse(body.tags);
+      } catch {
+        tags = body.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+      }
+    }
+
+    // Create DTO from form data
+    const createDto: CreateKnowledgeSourceDto = {
+      title: body.title || file.originalname,
+      description: body.description,
+      sourceType: 'document' as any,
+      filePath: file.path,
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      fileSize: file.size,
+      tags,
+      enableForFaqLearning: body.enableForFaqLearning === 'true',
+      enableForChat: body.enableForChat === 'true',
+      uploadedById: user?.id,
+    };
+
+    if (!createDto.uploadedById) {
+      this.logger.error('User ID not found in request', user);
+      throw new Error('Authentication user ID missing');
+    }
+
+    const source = await this.knowledgeSourcesService.create(createDto);
+    return {
+      success: true,
+      data: source,
+      message: 'File uploaded successfully',
     };
   }
 

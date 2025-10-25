@@ -7,6 +7,9 @@ import { CompanyKnowledgeSource } from './entities/company-knowledge-source.enti
 // External entities (dependencies)
 import { User } from '../users/entities/user.entity';
 
+// Services
+import { KnowledgeSourcesService } from './services/knowledge-sources.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -15,7 +18,11 @@ import { User } from '../users/entities/user.entity';
     ]),
   ],
   controllers: [],
-  providers: [],
-  exports: [],
+  providers: [
+    KnowledgeSourcesService,
+  ],
+  exports: [
+    KnowledgeSourcesService,
+  ],
 })
 export class KnowledgeSourcesModule {}

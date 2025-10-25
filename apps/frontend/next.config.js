@@ -1,0 +1,150 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const bundle_analyzer_1 = __importDefault(require("@next/bundle-analyzer"));
+const bundleAnalyzer = (0, bundle_analyzer_1.default)({
+    enabled: process.env.ANALYZE === 'true',
+});
+const nextConfig = {
+    /* config options here */
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
+    // Webpack configuration to handle Genkit/Handlebars issues
+    webpack: (config, { isServer }) => {
+        // Handle handlebars require.extensions issue
+        config.resolve.fallback = {
+            ...config.resolve.fallback,
+            fs: false,
+            path: false,
+            os: false,
+        };
+        // Ignore handlebars require.extensions warnings
+        config.ignoreWarnings = [
+            ...(config.ignoreWarnings || []),
+            {
+                module: /node_modules\/handlebars/,
+                message: /require\.extensions/,
+            },
+        ];
+        // External modules for server-side rendering
+        if (isServer) {
+            config.externals = [...(config.externals || []), 'handlebars'];
+        }
+        return config;
+    },
+    // Enable compression and optimization
+    compress: true, // Enable gzip compression (default in production)
+    poweredByHeader: false, // Remove X-Powered-By header for security
+    // Optimize production builds
+    productionBrowserSourceMaps: false, // Disable source maps in production
+    // API rewrites for backend proxy
+    async rewrites() {
+        return [
+            {
+                source: '/api/:path*',
+                destination: 'http://localhost:9006/api/:path*',
+            },
+        ];
+    },
+    // HTTP headers for optimization
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'X-DNS-Prefetch-Control',
+                        value: 'on',
+                    },
+                    {
+                        key: 'X-Frame-Options',
+                        value: 'SAMEORIGIN',
+                    },
+                ],
+            },
+            {
+                // Cache static assets aggressively
+                source: '/static/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=31536000, immutable',
+                    },
+                ],
+            },
+            {
+                // Cache API responses with revalidation
+                source: '/api/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=60, stale-while-revalidate=120',
+                    },
+                ],
+            },
+        ];
+    },
+    images: {
+        // Enable modern image formats
+        formats: ['image/avif', 'image/webp'],
+        // Image optimization settings
+        minimumCacheTTL: 60, // Cache images for 60 seconds minimum
+        // Device sizes for responsive images
+        deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+        // Image sizes for different use cases
+        imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+        // Allowed remote image patterns
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'placehold.co',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'picsum.photos',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'i.pravatar.cc',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'http',
+                hostname: '**.localhost',
+                port: '9006',
+                pathname: '/**',
+            },
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+                port: '9006',
+                pathname: '/**',
+            },
+            {
+                protocol: 'http',
+                hostname: '127.0.0.1',
+                port: '9006',
+                pathname: '/**',
+            }
+        ],
+    },
+};
+exports.default = bundleAnalyzer(nextConfig);
+//# sourceMappingURL=next.config.js.map

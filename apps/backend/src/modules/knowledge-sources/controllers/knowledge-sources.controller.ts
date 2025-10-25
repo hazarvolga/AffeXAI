@@ -40,9 +40,14 @@ export class KnowledgeSourcesController {
     @Body() createDto: CreateKnowledgeSourceDto,
     @CurrentUser() user: any,
   ) {
-    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user.sub || user.userId}`);
-    // Auto-set uploadedById from authenticated user (JWT uses 'sub' field)
-    createDto.uploadedById = user.sub || user.userId;
+    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user?.id}`);
+    // Auto-set uploadedById from authenticated user (JwtAuthGuard sets user.id)
+    createDto.uploadedById = user?.id;
+
+    if (!createDto.uploadedById) {
+      this.logger.error('User ID not found in request', user);
+      throw new Error('Authentication user ID missing');
+    }
     const source = await this.knowledgeSourcesService.create(createDto);
     return {
       success: true,

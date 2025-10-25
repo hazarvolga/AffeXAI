@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 
 // External modules
+import { UsersModule } from '../users/users.module';
 import { AiModule } from '../ai/ai.module';
 import { SettingsModule } from '../settings/settings.module';
 import { FaqLearningModule } from '../faq-learning/faq-learning.module';
@@ -74,6 +75,7 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
       signOptions: { expiresIn: '24h' },
     }),
     // External modules
+    UsersModule,
     AiModule,
     SettingsModule,
     FaqLearningModule,

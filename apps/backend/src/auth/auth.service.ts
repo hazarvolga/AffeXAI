@@ -59,7 +59,7 @@ export class AuthService {
     });
 
     // Return user info for initial frontend state (NOT in JWT)
-    // Frontend will call getCurrentUser() for full role information
+    // Include role information for immediate UI rendering
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -69,9 +69,29 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        // Note: roleId kept for backward compatibility but will be deprecated
-        // Frontend should use getCurrentUser() for accurate role information
-        roleId: user.primaryRole?.displayName || user.roleEntity?.displayName || null,
+        // Legacy roleId for backward compatibility
+        roleId: user.roleEntity?.name || null,
+        // Multi-role support: include all roles with full details
+        roles: user.userRoles?.map(ur => ({
+          id: ur.role.id,
+          name: ur.role.name,
+          displayName: ur.role.displayName,
+          isPrimary: ur.isPrimary,
+        })) || [],
+        // Primary role for quick access
+        primaryRole: user.userRoles?.find(ur => ur.isPrimary)?.role
+          ? {
+              id: user.userRoles.find(ur => ur.isPrimary).role.id,
+              name: user.userRoles.find(ur => ur.isPrimary).role.name,
+              displayName: user.userRoles.find(ur => ur.isPrimary).role.displayName,
+            }
+          : user.roleEntity
+          ? {
+              id: user.roleEntity.id,
+              name: user.roleEntity.name,
+              displayName: user.roleEntity.displayName,
+            }
+          : null,
       },
     };
   }

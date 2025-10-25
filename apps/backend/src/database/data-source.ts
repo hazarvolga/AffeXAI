@@ -34,6 +34,7 @@ import { ChatDocument } from '../modules/chat/entities/chat-document.entity';
 import { ChatContextSource } from '../modules/chat/entities/chat-context-source.entity';
 import { ChatSupportAssignment } from '../modules/chat/entities/chat-support-assignment.entity';
 import { ChatUrlCache } from '../modules/chat/entities/chat-url-cache.entity';
+import { CompanyKnowledgeSource } from '../modules/knowledge-sources/entities/company-knowledge-source.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -80,6 +81,7 @@ export const AppDataSource = new DataSource({
     ChatContextSource,
     ChatSupportAssignment,
     ChatUrlCache,
+    CompanyKnowledgeSource,
   ],
   migrations: ['src/database/migrations/**/*.ts'],
   subscribers: [],

@@ -10,12 +10,14 @@
 ## 📊 Executive Summary
 
 Affexai projesi **kısmi bir multi-provider AI sistemi** içeriyor. OpenAI entegrasyonu tam çalışır durumda ancak sistem iki farklı AI implementation'ı barındırıyor:
+
 1. **Modular AI System** (ayarlanabilir) - `modules/ai`
 2. **Hardcoded Genkit** (Google Gemini) - `ai/genkit.ts`
 
 ### Key Findings
 
 ✅ **İyi Taraflar**:
+
 - Modüler yapı kurgulanmış (Email, Social, Support, Analytics)
 - Her modül için ayrı AI model seçimi mevcut
 - Global/Module-specific API key desteği
@@ -23,6 +25,7 @@ Affexai projesi **kısmi bir multi-provider AI sistemi** içeriyor. OpenAI enteg
 - OpenAI SDK başarıyla entegre edilmiş
 
 ⚠️ **Kritik Sorunlar**:
+
 - Anthropic (Claude) sadece UI'da seçilebilir, SDK yok
 - Google Genkit hardcoded, Settings'ten bağımsız
 - İki ayrı AI sistemi paralel çalışıyor (conflict riski)
@@ -37,6 +40,7 @@ Affexai projesi **kısmi bir multi-provider AI sistemi** içeriyor. OpenAI enteg
 #### `/apps/backend/src/modules/ai/`
 
 **ai.service.ts** (150 lines):
+
 ```typescript
 @Injectable()
 export class AiService {
@@ -46,15 +50,16 @@ export class AiService {
     apiKey: string,
     prompt: string,
     options: AiGenerationOptions
-  ): Promise<AiGenerationResult>
+  ): Promise<AiGenerationResult>;
 
-  async testApiKey(apiKey: string, model: AiModel): Promise<boolean>
+  async testApiKey(apiKey: string, model: AiModel): Promise<boolean>;
 
-  clearClientCache(apiKey?: string): void
+  clearClientCache(apiKey?: string): void;
 }
 ```
 
 **Özellikleri**:
+
 - ✅ OpenAI client caching (performance)
 - ✅ Error handling (401, 429, 500, 503)
 - ✅ Token usage tracking
@@ -66,21 +71,24 @@ export class AiService {
 #### `/apps/backend/src/ai/` (Genkit - Ayrı Sistem!)
 
 **genkit.ts**:
+
 ```typescript
 export const ai = genkit({
   plugins: [googleAI()],
-  model: 'googleai/gemini-2.5-flash',  // ← HARDCODED!
+  model: "googleai/gemini-2.5-flash", // ← HARDCODED!
 });
 ```
 
 **support-ticket-analysis.ts**:
+
 ```typescript
 export async function analyzeSupportTicket(
   input: SupportTicketAnalysisInput
-): Promise<SupportTicketAnalysisOutput>
+): Promise<SupportTicketAnalysisOutput>;
 ```
 
 **Sorunlar**:
+
 - ❌ Settings'ten bağımsız (hardcoded Google Gemini)
 - ❌ API key yok (muhtemelen env variable)
 - ❌ Modular AI system ile entegrasyon yok
@@ -91,36 +99,39 @@ export async function analyzeSupportTicket(
 #### `settings/dto/ai-settings.dto.ts`
 
 **Desteklenen Modeller** (Enum):
+
 ```typescript
 enum AiModel {
   // OpenAI - ✅ Working
-  GPT_4 = 'gpt-4',
-  GPT_4_TURBO = 'gpt-4-turbo',
-  GPT_4O = 'gpt-4o',
-  GPT_3_5_TURBO = 'gpt-3.5-turbo',
+  GPT_4 = "gpt-4",
+  GPT_4_TURBO = "gpt-4-turbo",
+  GPT_4O = "gpt-4o",
+  GPT_3_5_TURBO = "gpt-3.5-turbo",
 
   // Anthropic - ❌ UI only, no SDK
-  CLAUDE_3_OPUS = 'claude-3-opus-20240229',
-  CLAUDE_3_SONNET = 'claude-3-sonnet-20240229',
-  CLAUDE_3_HAIKU = 'claude-3-haiku-20240307',
+  CLAUDE_3_OPUS = "claude-3-opus-20240229",
+  CLAUDE_3_SONNET = "claude-3-sonnet-20240229",
+  CLAUDE_3_HAIKU = "claude-3-haiku-20240307",
 }
 ```
 
 **AiModuleSettingsDto**:
+
 ```typescript
 class AiModuleSettingsDto {
-  apiKey?: string;          // Module-specific (optional)
+  apiKey?: string; // Module-specific (optional)
   model: AiModel;
   enabled: boolean;
-  provider?: 'openai' | 'anthropic';  // Auto-detected from model
+  provider?: "openai" | "anthropic"; // Auto-detected from model
 }
 ```
 
 **AiSettingsDto** (Complete Settings):
+
 ```typescript
 class AiSettingsDto {
-  useSingleApiKey: boolean;      // If true → use global.apiKey
-  global?: AiModuleSettingsDto;  // Global settings
+  useSingleApiKey: boolean; // If true → use global.apiKey
+  global?: AiModuleSettingsDto; // Global settings
 
   emailMarketing: AiModuleSettingsDto;
   social: AiModuleSettingsDto;
@@ -130,6 +141,7 @@ class AiSettingsDto {
 ```
 
 **Key Features**:
+
 - ✅ Global/Module-specific API key hierarchy
 - ✅ Automatic API key masking (`***xxxx`)
 - ✅ Per-module enable/disable toggle
@@ -141,6 +153,7 @@ class AiSettingsDto {
 #### `components/admin/settings/AiSettingsTab.tsx` (502 lines)
 
 **Features**:
+
 ```typescript
 // Model selection dropdown
 const AI_MODELS = [
@@ -165,6 +178,7 @@ const AI_MODELS = [
 ```
 
 **UI Components**:
+
 - ✅ Global API Key toggle + input
 - ✅ 4 module cards (Email, Social, Support, Analytics)
 - ✅ Each module: Enable toggle + Model dropdown + API key input
@@ -173,6 +187,7 @@ const AI_MODELS = [
 - ✅ Save button with loading state
 
 **User Experience**:
+
 ```
 [x] Tek API Key Kullan
     ├─ Global API Key: sk-proj-***abc123
@@ -243,10 +258,10 @@ const AI_MODELS = [
 
 ## 📊 Provider Comparison Matrix
 
-| Provider | Backend SDK | Frontend UI | Settings Integration | Actually Works? |
-|----------|-------------|-------------|---------------------|-----------------|
-| **OpenAI** | ✅ Installed | ✅ 4 models listed | ✅ Full integration | ✅ YES |
-| **Anthropic** | ❌ Missing | ✅ 4 models listed | ⚠️ Defined, no impl | ❌ NO (will crash) |
+| Provider          | Backend SDK   | Frontend UI        | Settings Integration | Actually Works?       |
+| ----------------- | ------------- | ------------------ | -------------------- | --------------------- |
+| **OpenAI**        | ✅ Installed  | ✅ 4 models listed | ✅ Full integration  | ✅ YES                |
+| **Anthropic**     | ❌ Missing    | ✅ 4 models listed | ⚠️ Defined, no impl  | ❌ NO (will crash)    |
 | **Google Gemini** | ✅ Genkit SDK | ❌ Not in dropdown | ❌ Hardcoded, bypass | ⚠️ YES (but isolated) |
 
 ---
@@ -256,15 +271,18 @@ const AI_MODELS = [
 ### Issue 1: Dual AI Systems
 
 **Problem**: İki ayrı AI implementation yan yana:
+
 - `modules/ai`: Modular, configurable (OpenAI only)
 - `ai/genkit`: Hardcoded Google Gemini
 
 **Impact**:
+
 - Settings'te "Support AI: Claude 3.5 Sonnet" seçilse bile Genkit kullanılıyor
 - User confusion (UI'da seçim var ama etkisiz)
 - Maintenance overhead (2 sistem sync tutulmalı)
 
 **Solution**:
+
 1. **Option A**: Genkit'i kaldır, Support AI'yi modular sisteme taşı
 2. **Option B**: Genkit'i provider olarak entegre et (Google Gemini option ekle)
 
@@ -273,15 +291,18 @@ const AI_MODELS = [
 **Problem**: UI'da Claude modelleri seçilebilir ama backend SDK yok
 
 **Impact**:
+
 - User Claude seçerse → **Runtime crash**
 - `aiService.generateCompletion()` sadece OpenAI SDK kullanıyor
 
 **Solution**:
+
 ```bash
 npm install @anthropic-ai/sdk
 ```
 
 Then implement:
+
 ```typescript
 private getAnthropicClient(apiKey: string): Anthropic {
   // Similar to getOpenAiClient
@@ -302,6 +323,7 @@ async generateCompletion(...) {
 **Problem**: `ai.service.ts` OpenAI'ye hard-coded
 
 **Current**:
+
 ```typescript
 // Tightly coupled to OpenAI
 async generateCompletion(apiKey, prompt, options) {
@@ -311,6 +333,7 @@ async generateCompletion(apiKey, prompt, options) {
 ```
 
 **Better**:
+
 ```typescript
 interface AIProvider {
   generateCompletion(prompt, options): Promise<AiGenerationResult>;
@@ -329,6 +352,7 @@ class GoogleGeminiProvider implements AIProvider { ... }
 ### Priority 1: Fix Immediate Issues (1-2 days)
 
 1. **Add Anthropic SDK**
+
    ```bash
    cd apps/backend
    npm install @anthropic-ai/sdk
@@ -374,11 +398,12 @@ async analyzeSupportTicket(
 **Option B: Integrate Genkit as Provider**
 
 Keep Genkit but make it configurable:
+
 ```typescript
 class GoogleGeminiProvider implements AIProvider {
   private genkit = genkit({
     plugins: [googleAI()],
-    model: this.config.model  // ← From settings, not hardcoded
+    model: this.config.model, // ← From settings, not hardcoded
   });
 }
 ```
@@ -386,20 +411,22 @@ class GoogleGeminiProvider implements AIProvider {
 ### Priority 3: Add Google Gemini to UI (1 day)
 
 Update `AiSettingsTab.tsx`:
+
 ```typescript
 const AI_MODELS = [
   // ... existing models
-  { value: 'gemini-2.5-flash', label: 'Google Gemini 2.5 Flash (Free)' },
-  { value: 'gemini-pro', label: 'Google Gemini Pro' },
+  { value: "gemini-2.5-flash", label: "Google Gemini 2.5 Flash (Free)" },
+  { value: "gemini-pro", label: "Google Gemini Pro" },
 ];
 ```
 
 Update enum:
+
 ```typescript
 enum AiModel {
   // ... existing
-  GEMINI_2_5_FLASH = 'gemini-2.5-flash',
-  GEMINI_PRO = 'gemini-pro',
+  GEMINI_2_5_FLASH = "gemini-2.5-flash",
+  GEMINI_PRO = "gemini-pro",
 }
 ```
 
@@ -446,7 +473,7 @@ enum AiModel {
 
 ```typescript
 interface AIProvider {
-  readonly name: 'openai' | 'anthropic' | 'google';
+  readonly name: "openai" | "anthropic" | "google";
   readonly supportedModels: AiModel[];
 
   generateCompletion(
@@ -512,12 +539,14 @@ interface AIProvider {
 ### Current Implementation
 
 ✅ **Good**:
+
 - API keys stored encrypted in database
 - Keys masked in frontend (`***1234`)
 - HTTPS required for API calls
 - API keys never logged
 
 ⚠️ **Improvements Needed**:
+
 - [ ] Rotate API keys periodically
 - [ ] Add API key expiration tracking
 - [ ] Implement rate limiting per module
@@ -534,17 +563,18 @@ interface AIProvider {
 
 ```typescript
 interface AIUsageMetrics {
-  module: 'emailMarketing' | 'social' | 'support' | 'analytics';
-  provider: 'openai' | 'anthropic' | 'google';
+  module: "emailMarketing" | "social" | "support" | "analytics";
+  provider: "openai" | "anthropic" | "google";
   model: AiModel;
   tokensUsed: number;
-  estimatedCost: number;  // USD
+  estimatedCost: number; // USD
   requestCount: number;
   timestamp: Date;
 }
 ```
 
 **UI Dashboard**:
+
 ```
 ┌─────────────────────────────────────┐
 │ AI Usage This Month                 │
@@ -579,12 +609,14 @@ interface AIUsageMetrics {
 Affexai'de **solid foundation** var ama **incomplete implementation**:
 
 **Strengths**:
+
 - Modular architecture well-designed
 - UI comprehensive and user-friendly
 - OpenAI integration fully working
 - Settings system flexible
 
 **Gaps**:
+
 - Anthropic not implemented (UI only)
 - Google Gemini isolated (not in settings)
 - No provider abstraction
@@ -593,6 +625,7 @@ Affexai'de **solid foundation** var ama **incomplete implementation**:
 **Action Plan**: **4-5 günlük çalışma** ile production-ready multi-provider sistem kurulabilir.
 
 **Öncelik**:
+
 1. ✅ Fix Anthropic (SDK ekle)
 2. ✅ Unify systems (Genkit → modular)
 3. ✅ Add Google Gemini to UI

@@ -36,6 +36,8 @@ import {
   FileText,
   Eye,
   EyeOff,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { analyzeSupportTicket, FormState } from './actions';
@@ -44,6 +46,8 @@ import { ticketsService, type TicketCategory } from '@/lib/api/ticketsService';
 import { authService } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { ChatBox } from '@/components/support/chatbox';
+import styles from './support-page.module.css';
+import { cn } from '@/lib/utils';
 
 const renderCategoryOptions = (
   categories: TicketCategory[],
@@ -94,15 +98,21 @@ export default function NewSupportTicketPage() {
   const { toast } = useToast();
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [activeTab, setActiveTab] = useState<'form' | 'chat'>(() => {
+  const [activeTab, setActiveTab] = useState<'form' | 'chat' | 'both'>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('support-active-tab') as 'form' | 'chat') || 'form';
+      return (localStorage.getItem('support-active-tab') as 'form' | 'chat' | 'both') || 'form';
     }
     return 'form';
   });
   const [isChatVisible, setIsChatVisible] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('support-chat-visible') === 'true';
+    }
+    return false;
+  });
+  const [isChatMinimized, setIsChatMinimized] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('support-chat-minimized') === 'true';
     }
     return false;
   });
@@ -167,15 +177,42 @@ export default function NewSupportTicketPage() {
     localStorage.setItem('support-chat-visible', newVisibility.toString());
     
     if (newVisibility) {
-      setActiveTab('chat');
-      localStorage.setItem('support-active-tab', 'chat');
+      setIsChatMinimized(false);
+      localStorage.setItem('support-chat-minimized', 'false');
+      if (activeTab === 'form') {
+        setActiveTab('both');
+        localStorage.setItem('support-active-tab', 'both');
+      }
+    } else {
+      if (activeTab === 'both') {
+        setActiveTab('form');
+        localStorage.setItem('support-active-tab', 'form');
+      }
     }
   };
 
+  const toggleChatMinimized = () => {
+    const newMinimized = !isChatMinimized;
+    setIsChatMinimized(newMinimized);
+    localStorage.setItem('support-chat-minimized', newMinimized.toString());
+  };
+
   const handleTabChange = (value: string) => {
-    const newTab = value as 'form' | 'chat';
+    const newTab = value as 'form' | 'chat' | 'both';
     setActiveTab(newTab);
     localStorage.setItem('support-active-tab', newTab);
+    
+    // Auto-show chat when switching to chat or both tabs
+    if ((newTab === 'chat' || newTab === 'both') && !isChatVisible) {
+      setIsChatVisible(true);
+      localStorage.setItem('support-chat-visible', 'true');
+    }
+    
+    // Auto-minimize chat when switching to form only
+    if (newTab === 'form' && isChatVisible) {
+      setIsChatVisible(false);
+      localStorage.setItem('support-chat-visible', 'false');
+    }
   };
 
   return (
@@ -189,6 +226,14 @@ export default function NewSupportTicketPage() {
         </div>
         <div className="flex items-center space-x-2">
           <Button
+            variant={activeTab === 'both' ? "default" : "outline"}
+            onClick={() => handleTabChange(activeTab === 'both' ? 'form' : 'both')}
+            className="flex items-center space-x-2"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>{activeTab === 'both' ? 'Yan Yana Görünüm' : 'Form + Chat'}</span>
+          </Button>
+          <Button
             variant={isChatVisible ? "default" : "outline"}
             onClick={toggleChatVisibility}
             className="flex items-center space-x-2"
@@ -201,19 +246,26 @@ export default function NewSupportTicketPage() {
 
       {/* Support Options Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="form" className="flex items-center space-x-2">
+        <TabsList className={`w-full ${styles.mobileTabsGrid}`}>
+          <TabsTrigger value="form" className={styles.tabTrigger}>
             <FileText className="h-4 w-4" />
-            <span>Destek Talebi Formu</span>
+            <span>Destek Formu</span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="flex items-center space-x-2">
+          <TabsTrigger value="chat" className={styles.tabTrigger}>
             <MessageCircle className="h-4 w-4" />
-            <span>AI Sohbet Asistanı</span>
+            <span>AI Sohbet</span>
             {chatSession && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
                 Aktif
               </Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="both" className={styles.tabTrigger}>
+            <div className="flex items-center space-x-1">
+              <FileText className="h-3 w-3" />
+              <MessageCircle className="h-3 w-3" />
+            </div>
+            <span>Yan Yana</span>
           </TabsTrigger>
         </TabsList>
 
@@ -600,17 +652,296 @@ export default function NewSupportTicketPage() {
             </Card>
           </div>
         </TabsContent>
+
+        {/* Side-by-Side Tab Content */}
+        <TabsContent value="both" className="mt-6">
+          <div className={styles.sideBySideContainer}>
+            {/* Form Section */}
+            <div className={styles.formSection}>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center space-x-2">
+                  <FileText className="h-5 w-5" />
+                  <span>Destek Talebi Formu</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Detaylı destek talebi oluşturun
+                </p>
+              </div>
+              
+              <Card className="flex-1 overflow-auto">
+                {state.step === 1 && (
+                  <form action={formAction}>
+                    <CardHeader>
+                      <CardTitle className="text-base">Sorununuzu Anlatın</CardTitle>
+                      <CardDescription className="text-sm">
+                        Lütfen sorununuzu olabildiğince ayrıntılı açıklayın.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title-both">Başlık *</Label>
+                        <Input
+                          id="title-both"
+                          name="title"
+                          placeholder="Kısa ve öz bir başlık yazın"
+                          required
+                          minLength={10}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category-both">Kategori *</Label>
+                        <Select name="category" required disabled={loadingCategories}>
+                          <SelectTrigger id="category-both">
+                            <SelectValue placeholder={loadingCategories ? "Yükleniyor..." : "Bir kategori seçin"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {renderCategoryOptions(categories)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="problemDescription-both">Açıklama *</Label>
+                        <Textarea
+                          id="problemDescription-both"
+                          name="problemDescription"
+                          placeholder="Yaşadığınız sorunu detaylı bir şekilde anlatın..."
+                          className="min-h-[200px]"
+                          required
+                          minLength={50}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="priority-both">Öncelik *</Label>
+                        <Select name="priority" defaultValue="medium" required>
+                          <SelectTrigger id="priority-both">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Düşük</SelectItem>
+                            <SelectItem value="medium">Orta</SelectItem>
+                            <SelectItem value="high">Yüksek</SelectItem>
+                            <SelectItem value="urgent">Acil</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-4">
+                      {state.message && !state.data && (
+                        <Alert variant="destructive" className="w-full">
+                          <AlertTitle>Hata</AlertTitle>
+                          <AlertDescription>{state.message}</AlertDescription>
+                        </Alert>
+                      )}
+                      <SubmitButton />
+                    </CardFooter>
+                  </form>
+                )}
+
+                {state.step === 2 && state.data && (
+                  <div>
+                    <CardHeader>
+                      <CardTitle className="text-base">AI Analizi ve Onay</CardTitle>
+                      <CardDescription className="text-sm">
+                        Yapay zeka sorununuzu analiz etti. Lütfen inceleyin.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Alert variant="default" className="bg-blue-50 border-blue-200">
+                        <Lightbulb className="h-4 w-4 !text-blue-600" />
+                        <AlertTitle className="text-blue-800 text-sm">
+                          AI Çözüm Önerisi
+                        </AlertTitle>
+                        <AlertDescription className="text-blue-700 text-sm">
+                          {state.data.suggestion}
+                        </AlertDescription>
+                      </Alert>
+
+                      <Card className="bg-secondary/50">
+                        <CardHeader>
+                          <CardTitle className="text-base">
+                            Destek Ekibi İçin Özet
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <Label className="font-semibold text-sm">Problem Özeti</Label>
+                            <p className="text-xs text-muted-foreground">
+                              {state.data.summary}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="font-semibold text-sm">Önerilen Öncelik</Label>
+                             <p className="text-xs font-semibold text-primary">
+                              {state.data.priority}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </CardContent>
+                    <CardFooter className="flex justify-end gap-2">
+                        <form action={formAction}>
+                            {/* Hidden fields to pass data to the next step */}
+                            <input type="hidden" name="title" value={state.originalInput?.title} />
+                            <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
+                            <input type="hidden" name="category" value={state.originalInput?.category} />
+                            <input type="hidden" name="priority" value={state.originalInput?.priority} />
+                            <input type="hidden" name="summary" value={state.data.summary} />
+                            <input type="hidden" name="aiPriority" value={state.data.priority} />
+                            <div className="flex gap-2">
+                              <Button variant="outline" type="submit" name="action" value="back" size="sm">
+                                  Geri Dön
+                              </Button>
+                              <Button type="submit" name="action" value="create_ticket" disabled={state.creating} size="sm">
+                                  {state.creating ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                      Oluşturuluyor...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ClipboardCheck className="mr-2 h-3 w-3" />
+                                      Talebi Oluştur
+                                    </>
+                                  )}
+                              </Button>
+                            </div>
+                        </form>
+                    </CardFooter>
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            {/* Chat Section */}
+            <div className={styles.chatSection}>
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center space-x-2">
+                    <MessageCircle className="h-5 w-5" />
+                    <span>AI Destek Asistanı</span>
+                    {chatSession && (
+                      <Badge variant="outline" className="ml-2">
+                        Aktif
+                      </Badge>
+                    )}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Anında yardım alın veya destek ekibiyle iletişime geçin
+                  </p>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleChatMinimized}
+                    className="h-8 w-8"
+                  >
+                    {isChatMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              
+              <Card className={cn(
+                styles.responsiveCard,
+                "transition-all duration-300",
+                isChatMinimized ? styles.chatMinimized : styles.chatExpanded
+              )}>
+                {isChatMinimized ? (
+                  <CardContent className="flex items-center justify-center h-full">
+                    <Button
+                      variant="ghost"
+                      onClick={toggleChatMinimized}
+                      className="flex items-center space-x-2"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span>Chat'i Genişlet</span>
+                    </Button>
+                  </CardContent>
+                ) : (
+                  <CardContent className={styles.responsiveCardContent}>
+                    <div className={styles.chatContainer}>
+                      <ChatBox
+                        sessionType="support"
+                        onSessionCreate={handleChatSessionCreate}
+                        onMessageSent={handleChatMessageSent}
+                        embedded={true}
+                        showHeader={false}
+                        height="100%"
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            </div>
+          </div>
+
+          {/* Mobile Side-by-Side Info */}
+          <div className="lg:hidden mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Mobil Kullanım İpucu</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Mobil cihazlarda daha iyi deneyim için "Destek Formu" veya "AI Sohbet" sekmelerini ayrı ayrı kullanmanızı öneririz.
+                </p>
+                <div className="flex space-x-2 mt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleTabChange('form')}
+                  >
+                    Forma Geç
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleTabChange('chat')}
+                  >
+                    Chat'e Geç
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Floating Chat Toggle (Mobile) */}
-      {!isChatVisible && (
-        <div className="fixed bottom-4 right-4 z-40 lg:hidden">
+      {(!isChatVisible || (activeTab !== 'chat' && activeTab !== 'both')) && (
+        <div className={styles.floatingButton}>
           <Button
-            onClick={toggleChatVisibility}
+            onClick={() => {
+              if (!isChatVisible) {
+                toggleChatVisibility();
+              }
+              handleTabChange('chat');
+            }}
             className="rounded-full h-14 w-14 shadow-lg"
             size="icon"
           >
             <MessageCircle className="h-6 w-6" />
+          </Button>
+          {chatSession && (
+            <Badge variant="secondary" className="absolute -top-2 -left-2 text-xs">
+              Aktif
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* Floating Chat Minimize Toggle (When chat is visible) */}
+      {isChatVisible && activeTab === 'both' && (
+        <div className={styles.floatingButtonLeft}>
+          <Button
+            onClick={toggleChatMinimized}
+            variant="outline"
+            className="rounded-full h-12 w-12 shadow-lg"
+            size="icon"
+          >
+            {isChatMinimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" />}
           </Button>
         </div>
       )}

@@ -4,32 +4,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
@@ -44,86 +24,123 @@ import {
   XCircle,
   Clock,
   AlertCircle,
-  ThumbsUp,
-  ThumbsDown,
   Plus,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Archive,
 } from 'lucide-react';
 
 interface KnowledgeSource {
   id: string;
-  type: 'url' | 'pdf' | 'word' | 'text' | 'markdown';
-  url?: string;
-  filePath?: string;
-  originalFilename?: string;
   title: string;
   description?: string;
-  keywords: string[];
-  chunkCount: number;
+  sourceType: 'document' | 'url' | 'text';
   status: 'pending' | 'processing' | 'active' | 'failed' | 'archived';
-  processingError?: string;
-  useCount: number;
+  filePath?: string;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
+  url?: string;
+  extractedContent: string;
+  summary?: string;
+  tags?: string[];
+  keywords?: string[];
+  metadata?: Record<string, any>;
+  usageCount: number;
   helpfulCount: number;
-  notHelpfulCount: number;
-  qualityScore: number;
-  tags: string[];
-  category?: string;
-  isEnabled: boolean;
-  autoUpdate: boolean;
-  updateFrequency?: number;
-  lastProcessedAt?: string;
-  nextCheckAt?: string;
+  averageRelevanceScore: number;
+  enableForFaqLearning: boolean;
+  enableForChat: boolean;
+  uploadedById: string;
+  archivedAt?: string;
+  archivedById?: string;
   createdAt: string;
   updatedAt: string;
 }
 
+interface Statistics {
+  total: number;
+  active: number;
+  archived: number;
+  byType: {
+    document: number;
+    url: number;
+    text: number;
+  };
+}
+
 export default function KnowledgeSourcesPage() {
   const [sources, setSources] = useState<KnowledgeSource[]>([]);
+  const [statistics, setStatistics] = useState<Statistics>({
+    total: 0,
+    active: 0,
+    archived: 0,
+    byType: { document: 0, url: 0, text: 0 },
+  });
   const [loading, setLoading] = useState(true);
   const [selectedSource, setSelectedSource] = useState<KnowledgeSource | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addType, setAddType] = useState<'url' | 'file'>('url');
-  const [activeTab, setActiveTab] = useState('all');
+  const [addType, setAddType] = useState<'url' | 'document' | 'text'>('url');
 
-  // Add URL form
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+
+  // Add forms
   const [urlForm, setUrlForm] = useState({
     url: '',
     title: '',
     description: '',
-    category: '',
     tags: '',
-    autoUpdate: false,
-    updateFrequency: 24,
+    enableForFaqLearning: true,
+    enableForChat: true,
   });
 
-  // Add File form
+  const [textForm, setTextForm] = useState({
+    title: '',
+    description: '',
+    content: '',
+    tags: '',
+    enableForFaqLearning: true,
+    enableForChat: true,
+  });
+
   const [fileForm, setFileForm] = useState({
     file: null as File | null,
     title: '',
     description: '',
-    category: '',
     tags: '',
+    enableForFaqLearning: true,
+    enableForChat: true,
   });
 
   useEffect(() => {
     fetchSources();
-  }, [activeTab]);
+    fetchStatistics();
+  }, [statusFilter, typeFilter]);
 
   const fetchSources = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (activeTab !== 'all') params.append('status', activeTab);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (typeFilter !== 'all') params.append('sourceType', typeFilter);
+      if (searchQuery) params.append('search', searchQuery);
+      params.append('limit', '50');
 
-      const response = await fetch(`/api/ai-knowledge-sources?${params.toString()}`, {
+      const response = await fetch(`/api/knowledge-sources?${params.toString()}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
       });
 
       if (!response.ok) throw new Error('Failed to fetch sources');
-      const data = await response.json();
-      setSources(data.sources);
+      const result = await response.json();
+      setSources(result.data || []);
     } catch (error) {
       console.error('Error fetching sources:', error);
       toast.error('Failed to load knowledge sources');
@@ -132,36 +149,85 @@ export default function KnowledgeSourcesPage() {
     }
   };
 
+  const fetchStatistics = async () => {
+    try {
+      const response = await fetch('/api/knowledge-sources/stats/overview', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+
+      if (!response.ok) return;
+      const result = await response.json();
+      if (result.data) {
+        setStatistics(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+    }
+  };
+
   const addUrlSource = async () => {
     try {
-      const response = await fetch('/api/ai-knowledge-sources/url', {
+      const response = await fetch('/api/knowledge-sources', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
         body: JSON.stringify({
-          ...urlForm,
+          title: urlForm.title,
+          description: urlForm.description,
+          sourceType: 'url',
+          url: urlForm.url,
           tags: urlForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
+          enableForFaqLearning: urlForm.enableForFaqLearning,
+          enableForChat: urlForm.enableForChat,
         }),
       });
 
       if (!response.ok) throw new Error('Failed to add URL source');
-      toast.success('URL source added successfully. Processing in background...');
+
+      toast.success('URL source added successfully');
       setAddDialogOpen(false);
-      setUrlForm({
-        url: '',
-        title: '',
-        description: '',
-        category: '',
-        tags: '',
-        autoUpdate: false,
-        updateFrequency: 24,
-      });
+      setUrlForm({ url: '', title: '', description: '', tags: '', enableForFaqLearning: true, enableForChat: true });
       fetchSources();
+      fetchStatistics();
     } catch (error) {
       console.error('Error adding URL source:', error);
       toast.error('Failed to add URL source');
+    }
+  };
+
+  const addTextSource = async () => {
+    try {
+      const response = await fetch('/api/knowledge-sources', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({
+          title: textForm.title,
+          description: textForm.description,
+          sourceType: 'text',
+          extractedContent: textForm.content,
+          tags: textForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
+          enableForFaqLearning: textForm.enableForFaqLearning,
+          enableForChat: textForm.enableForChat,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to add text source');
+
+      toast.success('Text source added successfully');
+      setAddDialogOpen(false);
+      setTextForm({ title: '', description: '', content: '', tags: '', enableForFaqLearning: true, enableForChat: true });
+      fetchSources();
+      fetchStatistics();
+    } catch (error) {
+      console.error('Error adding text source:', error);
+      toast.error('Failed to add text source');
     }
   };
 
@@ -174,15 +240,16 @@ export default function KnowledgeSourcesPage() {
     try {
       const formData = new FormData();
       formData.append('file', fileForm.file);
-      formData.append('title', fileForm.title || fileForm.file.name);
+      formData.append('title', fileForm.title);
       if (fileForm.description) formData.append('description', fileForm.description);
-      if (fileForm.category) formData.append('category', fileForm.category);
       if (fileForm.tags) {
-        const tagsArray = fileForm.tags.split(',').map((t) => t.trim()).filter(Boolean);
-        formData.append('tags', JSON.stringify(tagsArray));
+        const tags = fileForm.tags.split(',').map((t) => t.trim()).filter(Boolean);
+        formData.append('tags', JSON.stringify(tags));
       }
+      formData.append('enableForFaqLearning', String(fileForm.enableForFaqLearning));
+      formData.append('enableForChat', String(fileForm.enableForChat));
 
-      const response = await fetch('/api/ai-knowledge-sources/upload', {
+      const response = await fetch('/api/knowledge-sources', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -191,37 +258,15 @@ export default function KnowledgeSourcesPage() {
       });
 
       if (!response.ok) throw new Error('Failed to upload file');
-      toast.success('File uploaded successfully. Processing in background...');
+
+      toast.success('File uploaded successfully');
       setAddDialogOpen(false);
-      setFileForm({
-        file: null,
-        title: '',
-        description: '',
-        category: '',
-        tags: '',
-      });
+      setFileForm({ file: null, title: '', description: '', tags: '', enableForFaqLearning: true, enableForChat: true });
       fetchSources();
+      fetchStatistics();
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Failed to upload file');
-    }
-  };
-
-  const reprocessSource = async (id: string) => {
-    try {
-      const response = await fetch(`/api/ai-knowledge-sources/${id}/reprocess`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to reprocess source');
-      toast.success('Source reprocessing started');
-      fetchSources();
-    } catch (error) {
-      console.error('Error reprocessing source:', error);
-      toast.error('Failed to reprocess source');
     }
   };
 
@@ -229,7 +274,7 @@ export default function KnowledgeSourcesPage() {
     if (!confirm('Are you sure you want to delete this knowledge source?')) return;
 
     try {
-      const response = await fetch(`/api/ai-knowledge-sources/${id}`, {
+      const response = await fetch(`/api/knowledge-sources/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -237,449 +282,506 @@ export default function KnowledgeSourcesPage() {
       });
 
       if (!response.ok) throw new Error('Failed to delete source');
+
       toast.success('Knowledge source deleted');
       fetchSources();
+      fetchStatistics();
     } catch (error) {
       console.error('Error deleting source:', error);
       toast.error('Failed to delete source');
     }
   };
 
-  const toggleEnabled = async (id: string, isEnabled: boolean) => {
+  const archiveSource = async (id: string) => {
     try {
-      const response = await fetch(`/api/ai-knowledge-sources/${id}`, {
-        method: 'PATCH',
+      const response = await fetch(`/api/knowledge-sources/${id}/archive`, {
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
-        body: JSON.stringify({ isEnabled }),
       });
 
-      if (!response.ok) throw new Error('Failed to update source');
-      toast.success(isEnabled ? 'Source enabled' : 'Source disabled');
+      if (!response.ok) throw new Error('Failed to archive source');
+
+      toast.success('Knowledge source archived');
       fetchSources();
+      fetchStatistics();
     } catch (error) {
-      console.error('Error updating source:', error);
-      toast.error('Failed to update source');
+      console.error('Error archiving source:', error);
+      toast.error('Failed to archive source');
     }
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return (
-          <Badge variant="default" className="bg-green-500">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
-            Active
-          </Badge>
-        );
-      case 'processing':
-        return (
-          <Badge variant="secondary">
-            <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-            Processing
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="secondary">
-            <Clock className="w-3 h-3 mr-1" />
-            Pending
-          </Badge>
-        );
-      case 'failed':
-        return (
-          <Badge variant="destructive">
-            <XCircle className="w-3 h-3 mr-1" />
-            Failed
-          </Badge>
-        );
-      case 'archived':
-        return (
-          <Badge variant="outline">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Archived
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
+    const variants: Record<string, { variant: any; icon: any }> = {
+      pending: { variant: 'outline', icon: Clock },
+      processing: { variant: 'secondary', icon: RefreshCw },
+      active: { variant: 'default', icon: CheckCircle2 },
+      failed: { variant: 'destructive', icon: XCircle },
+      archived: { variant: 'outline', icon: Archive },
+    };
+
+    const { variant, icon: Icon } = variants[status] || variants.pending;
+
+    return (
+      <Badge variant={variant as any} className="flex items-center gap-1">
+        <Icon className="h-3 w-3" />
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'url':
-        return <LinkIcon className="w-4 h-4" />;
-      case 'pdf':
-      case 'word':
-      case 'text':
-      case 'markdown':
-        return <FileText className="w-4 h-4" />;
-      default:
-        return <FileText className="w-4 h-4" />;
-    }
+    const icons = {
+      document: FileText,
+      url: LinkIcon,
+      text: FileText,
+    };
+    const Icon = icons[type as keyof typeof icons] || FileText;
+    return <Icon className="h-4 w-4" />;
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">AI Knowledge Sources</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Knowledge Sources</h1>
           <p className="text-muted-foreground">
-            Manage external documents and URLs that AI uses for learning
+            Manage AI knowledge sources for FAQ learning and chatbot responses
           </p>
         </div>
         <Button onClick={() => setAddDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Source
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Sources
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sources</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{sources.length}</div>
+            <div className="text-2xl font-bold">{statistics.total}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {sources.filter((s) => s.status === 'active').length}
-            </div>
+            <div className="text-2xl font-bold">{statistics.active}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Processing
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Documents</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {sources.filter((s) => s.status === 'processing').length}
-            </div>
+            <div className="text-2xl font-bold">{statistics.byType.document}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Chunks
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">URLs</CardTitle>
+            <LinkIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {sources.reduce((sum, s) => sum + s.chunkCount, 0)}
-            </div>
+            <div className="text-2xl font-bold">{statistics.byType.url}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Table */}
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Search by title, description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="type">Type</Label>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="All types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="document">Documents</SelectItem>
+                  <SelectItem value="url">URLs</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={fetchSources} variant="outline">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sources Table */}
       <Card>
         <CardHeader>
           <CardTitle>Knowledge Sources</CardTitle>
           <CardDescription>
-            External documents and URLs for AI knowledge base
+            {sources.length} source{sources.length !== 1 ? 's' : ''} found
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="processing">Processing</TabsTrigger>
-              <TabsTrigger value="failed">Failed</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeTab} className="mt-4">
-              {loading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
-              ) : sources.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No knowledge sources found. Click "Add Source" to create one.
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Chunks</TableHead>
-                      <TableHead className="text-center">Usage</TableHead>
-                      <TableHead className="text-center">Quality</TableHead>
-                      <TableHead className="text-center">Enabled</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sources.map((source) => (
-                      <TableRow key={source.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getTypeIcon(source.type)}
-                            <span className="text-xs uppercase">{source.type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-md">
-                          <div className="font-medium line-clamp-1">{source.title}</div>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : sources.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No knowledge sources found</h3>
+              <p className="text-muted-foreground mb-4">
+                Get started by adding your first knowledge source
+              </p>
+              <Button onClick={() => setAddDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Source
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Usage</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sources.map((source) => (
+                    <TableRow key={source.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getTypeIcon(source.sourceType)}
+                          <span className="text-xs text-muted-foreground">
+                            {source.sourceType}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{source.title}</div>
                           {source.description && (
-                            <div className="text-sm text-muted-foreground line-clamp-1">
+                            <div className="text-xs text-muted-foreground line-clamp-1">
                               {source.description}
                             </div>
                           )}
-                          {source.url && (
-                            <div className="text-xs text-blue-600 line-clamp-1 mt-1">
-                              {source.url}
+                          {source.tags && source.tags.length > 0 && (
+                            <div className="flex gap-1 mt-1">
+                              {source.tags.slice(0, 3).map((tag, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {source.tags.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{source.tags.length - 3}
+                                </Badge>
+                              )}
                             </div>
                           )}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(source.status)}</TableCell>
-                        <TableCell className="text-center">{source.chunkCount}</TableCell>
-                        <TableCell className="text-center">{source.useCount}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <span className="text-sm font-medium">
-                              {source.qualityScore.toFixed(0)}%
-                            </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(source.status)}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{source.usageCount} uses</div>
+                          <div className="text-xs text-muted-foreground">
+                            {source.helpfulCount} helpful
                           </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={source.isEnabled}
-                            onCheckedChange={(checked) =>
-                              toggleEnabled(source.id, checked)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedSource(source);
-                                setViewDialogOpen(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {(source.status === 'failed' || source.status === 'active') && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => reprocessSource(source.id)}
-                              >
-                                <RefreshCw className="w-4 h-4" />
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteSource(source.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </TabsContent>
-          </Tabs>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium">
+                            {(source.averageRelevanceScore * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(source.createdAt).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedSource(source);
+                              setViewDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => archiveSource(source.id)}
+                          >
+                            <Archive className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteSource(source.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Add Source Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Knowledge Source</DialogTitle>
             <DialogDescription>
-              Add a new URL or document to the AI knowledge base
+              Add a new knowledge source from URL, file, or text
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs value={addType} onValueChange={(v) => setAddType(v as 'url' | 'file')}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="url">
-                <LinkIcon className="w-4 h-4 mr-2" />
-                URL
-              </TabsTrigger>
-              <TabsTrigger value="file">
-                <Upload className="w-4 h-4 mr-2" />
-                File Upload
-              </TabsTrigger>
+          <Tabs value={addType} onValueChange={(v) => setAddType(v as any)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="url">URL</TabsTrigger>
+              <TabsTrigger value="document">Document</TabsTrigger>
+              <TabsTrigger value="text">Text</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="url" className="space-y-4 mt-4">
+            <TabsContent value="url" className="space-y-4">
               <div>
-                <Label htmlFor="url">URL *</Label>
+                <Label htmlFor="url">URL</Label>
                 <Input
                   id="url"
-                  placeholder="https://example.com/documentation"
+                  placeholder="https://example.com/article"
                   value={urlForm.url}
                   onChange={(e) => setUrlForm({ ...urlForm, url: e.target.value })}
                 />
               </div>
-
               <div>
-                <Label htmlFor="url-title">Title *</Label>
+                <Label htmlFor="url-title">Title</Label>
                 <Input
                   id="url-title"
-                  placeholder="Source title"
+                  placeholder="Article title"
                   value={urlForm.title}
                   onChange={(e) => setUrlForm({ ...urlForm, title: e.target.value })}
                 />
               </div>
-
               <div>
-                <Label htmlFor="url-description">Description</Label>
+                <Label htmlFor="url-description">Description (optional)</Label>
                 <Textarea
                   id="url-description"
-                  placeholder="Brief description of this source"
+                  placeholder="Brief description..."
                   value={urlForm.description}
-                  onChange={(e) =>
-                    setUrlForm({ ...urlForm, description: e.target.value })
-                  }
+                  onChange={(e) => setUrlForm({ ...urlForm, description: e.target.value })}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="url-category">Category</Label>
-                  <Input
-                    id="url-category"
-                    placeholder="e.g., Documentation"
-                    value={urlForm.category}
-                    onChange={(e) =>
-                      setUrlForm({ ...urlForm, category: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="url-tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="url-tags"
-                    placeholder="technical, api, guide"
-                    value={urlForm.tags}
-                    onChange={(e) => setUrlForm({ ...urlForm, tags: e.target.value })}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="url-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="url-tags"
+                  placeholder="tag1, tag2, tag3"
+                  value={urlForm.tags}
+                  onChange={(e) => setUrlForm({ ...urlForm, tags: e.target.value })}
+                />
               </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-md">
-                <div>
-                  <Label htmlFor="auto-update">Auto Update</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Periodically check for content changes
-                  </p>
-                </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="url-faq">Enable for FAQ Learning</Label>
                 <Switch
-                  id="auto-update"
-                  checked={urlForm.autoUpdate}
+                  id="url-faq"
+                  checked={urlForm.enableForFaqLearning}
                   onCheckedChange={(checked) =>
-                    setUrlForm({ ...urlForm, autoUpdate: checked })
+                    setUrlForm({ ...urlForm, enableForFaqLearning: checked })
                   }
                 />
               </div>
-
-              {urlForm.autoUpdate && (
-                <div>
-                  <Label htmlFor="update-frequency">Update Frequency (hours)</Label>
-                  <Input
-                    id="update-frequency"
-                    type="number"
-                    min="1"
-                    value={urlForm.updateFrequency}
-                    onChange={(e) =>
-                      setUrlForm({
-                        ...urlForm,
-                        updateFrequency: parseInt(e.target.value),
-                      })
-                    }
-                  />
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <Label htmlFor="url-chat">Enable for Chat</Label>
+                <Switch
+                  id="url-chat"
+                  checked={urlForm.enableForChat}
+                  onCheckedChange={(checked) =>
+                    setUrlForm({ ...urlForm, enableForChat: checked })
+                  }
+                />
+              </div>
             </TabsContent>
 
-            <TabsContent value="file" className="space-y-4 mt-4">
+            <TabsContent value="document" className="space-y-4">
               <div>
-                <Label htmlFor="file">File * (PDF, Word, Text, Markdown)</Label>
+                <Label htmlFor="file">File (PDF, DOCX, TXT, MD)</Label>
                 <Input
                   id="file"
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt,.md"
-                  onChange={(e) =>
-                    setFileForm({ ...fileForm, file: e.target.files?.[0] || null })
-                  }
+                  accept=".pdf,.docx,.txt,.md"
+                  onChange={(e) => setFileForm({ ...fileForm, file: e.target.files?.[0] || null })}
                 />
               </div>
-
               <div>
                 <Label htmlFor="file-title">Title</Label>
                 <Input
                   id="file-title"
-                  placeholder="Leave empty to use filename"
+                  placeholder="Document title"
                   value={fileForm.title}
                   onChange={(e) => setFileForm({ ...fileForm, title: e.target.value })}
                 />
               </div>
-
               <div>
-                <Label htmlFor="file-description">Description</Label>
+                <Label htmlFor="file-description">Description (optional)</Label>
                 <Textarea
                   id="file-description"
-                  placeholder="Brief description of this document"
+                  placeholder="Brief description..."
                   value={fileForm.description}
-                  onChange={(e) =>
-                    setFileForm({ ...fileForm, description: e.target.value })
+                  onChange={(e) => setFileForm({ ...fileForm, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="file-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="file-tags"
+                  placeholder="tag1, tag2, tag3"
+                  value={fileForm.tags}
+                  onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="file-faq">Enable for FAQ Learning</Label>
+                <Switch
+                  id="file-faq"
+                  checked={fileForm.enableForFaqLearning}
+                  onCheckedChange={(checked) =>
+                    setFileForm({ ...fileForm, enableForFaqLearning: checked })
                   }
                 />
               </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="file-chat">Enable for Chat</Label>
+                <Switch
+                  id="file-chat"
+                  checked={fileForm.enableForChat}
+                  onCheckedChange={(checked) =>
+                    setFileForm({ ...fileForm, enableForChat: checked })
+                  }
+                />
+              </div>
+            </TabsContent>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="file-category">Category</Label>
-                  <Input
-                    id="file-category"
-                    placeholder="e.g., Documentation"
-                    value={fileForm.category}
-                    onChange={(e) =>
-                      setFileForm({ ...fileForm, category: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="file-tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="file-tags"
-                    placeholder="technical, api, guide"
-                    value={fileForm.tags}
-                    onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
-                  />
-                </div>
+            <TabsContent value="text" className="space-y-4">
+              <div>
+                <Label htmlFor="text-title">Title</Label>
+                <Input
+                  id="text-title"
+                  placeholder="Knowledge title"
+                  value={textForm.title}
+                  onChange={(e) => setTextForm({ ...textForm, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="text-description">Description (optional)</Label>
+                <Textarea
+                  id="text-description"
+                  placeholder="Brief description..."
+                  value={textForm.description}
+                  onChange={(e) => setTextForm({ ...textForm, description: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div>
+                <Label htmlFor="text-content">Content</Label>
+                <Textarea
+                  id="text-content"
+                  placeholder="Enter your knowledge content here..."
+                  value={textForm.content}
+                  onChange={(e) => setTextForm({ ...textForm, content: e.target.value })}
+                  rows={8}
+                />
+              </div>
+              <div>
+                <Label htmlFor="text-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="text-tags"
+                  placeholder="tag1, tag2, tag3"
+                  value={textForm.tags}
+                  onChange={(e) => setTextForm({ ...textForm, tags: e.target.value })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="text-faq">Enable for FAQ Learning</Label>
+                <Switch
+                  id="text-faq"
+                  checked={textForm.enableForFaqLearning}
+                  onCheckedChange={(checked) =>
+                    setTextForm({ ...textForm, enableForFaqLearning: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="text-chat">Enable for Chat</Label>
+                <Switch
+                  id="text-chat"
+                  checked={textForm.enableForChat}
+                  onCheckedChange={(checked) =>
+                    setTextForm({ ...textForm, enableForChat: checked })
+                  }
+                />
               </div>
             </TabsContent>
           </Tabs>
@@ -688,7 +790,13 @@ export default function KnowledgeSourcesPage() {
             <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={addType === 'url' ? addUrlSource : addFileSource}>
+            <Button
+              onClick={() => {
+                if (addType === 'url') addUrlSource();
+                else if (addType === 'document') addFileSource();
+                else addTextSource();
+              }}
+            >
               Add Source
             </Button>
           </DialogFooter>
@@ -697,106 +805,59 @@ export default function KnowledgeSourcesPage() {
 
       {/* View Source Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Knowledge Source Details</DialogTitle>
-            <DialogDescription>Full source information and statistics</DialogDescription>
+            <DialogTitle>{selectedSource?.title}</DialogTitle>
+            <DialogDescription>
+              {selectedSource?.sourceType} • Created{' '}
+              {selectedSource?.createdAt && new Date(selectedSource.createdAt).toLocaleDateString()}
+            </DialogDescription>
           </DialogHeader>
+
           {selectedSource && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Title</Label>
-                  <div className="mt-1 p-2 bg-muted rounded">{selectedSource.title}</div>
-                </div>
-
-                <div>
-                  <Label>Type</Label>
-                  <div className="mt-1 p-2 bg-muted rounded uppercase">
-                    {selectedSource.type}
-                  </div>
-                </div>
+              <div>
+                <Label>Status</Label>
+                <div className="mt-1">{getStatusBadge(selectedSource.status)}</div>
               </div>
 
               {selectedSource.description && (
                 <div>
                   <Label>Description</Label>
-                  <div className="mt-1 p-2 bg-muted rounded">
-                    {selectedSource.description}
-                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{selectedSource.description}</p>
                 </div>
               )}
 
               {selectedSource.url && (
                 <div>
                   <Label>URL</Label>
-                  <div className="mt-1 p-2 bg-muted rounded text-blue-600 break-all">
-                    <a href={selectedSource.url} target="_blank" rel="noopener noreferrer">
-                      {selectedSource.url}
-                    </a>
-                  </div>
+                  <a
+                    href={selectedSource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 text-sm text-blue-600 hover:underline block"
+                  >
+                    {selectedSource.url}
+                  </a>
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4">
+              {selectedSource.fileName && (
                 <div>
-                  <Label>Status</Label>
-                  <div className="mt-1">{getStatusBadge(selectedSource.status)}</div>
-                </div>
-
-                <div>
-                  <Label>Chunks</Label>
-                  <div className="mt-1">{selectedSource.chunkCount}</div>
-                </div>
-
-                <div>
-                  <Label>Quality Score</Label>
-                  <div className="mt-1">{selectedSource.qualityScore.toFixed(1)}%</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Usage Count</Label>
-                  <div className="mt-1">{selectedSource.useCount} times</div>
-                </div>
-
-                <div>
-                  <Label>Helpful</Label>
-                  <div className="mt-1 flex items-center gap-1">
-                    <ThumbsUp className="w-4 h-4 text-green-600" />
-                    {selectedSource.helpfulCount}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Not Helpful</Label>
-                  <div className="mt-1 flex items-center gap-1">
-                    <ThumbsDown className="w-4 h-4 text-red-600" />
-                    {selectedSource.notHelpfulCount}
-                  </div>
-                </div>
-              </div>
-
-              {selectedSource.keywords.length > 0 && (
-                <div>
-                  <Label>Keywords</Label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {selectedSource.keywords.map((keyword, index) => (
-                      <Badge key={index} variant="secondary">
-                        {keyword}
-                      </Badge>
-                    ))}
-                  </div>
+                  <Label>File</Label>
+                  <p className="mt-1 text-sm">
+                    {selectedSource.fileName} ({selectedSource.fileType}) •{' '}
+                    {selectedSource.fileSize ? `${(selectedSource.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'}
+                  </p>
                 </div>
               )}
 
-              {selectedSource.tags.length > 0 && (
+              {selectedSource.tags && selectedSource.tags.length > 0 && (
                 <div>
                   <Label>Tags</Label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {selectedSource.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline">
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {selectedSource.tags.map((tag, i) => (
+                      <Badge key={i} variant="secondary">
                         {tag}
                       </Badge>
                     ))}
@@ -804,16 +865,50 @@ export default function KnowledgeSourcesPage() {
                 </div>
               )}
 
-              {selectedSource.processingError && (
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-red-600">Error</Label>
-                  <div className="mt-1 p-2 bg-red-50 text-red-900 rounded border border-red-200">
-                    {selectedSource.processingError}
+                  <Label>Usage Count</Label>
+                  <p className="mt-1 text-2xl font-bold">{selectedSource.usageCount}</p>
+                </div>
+                <div>
+                  <Label>Helpful Count</Label>
+                  <p className="mt-1 text-2xl font-bold">{selectedSource.helpfulCount}</p>
+                </div>
+                <div>
+                  <Label>Relevance Score</Label>
+                  <p className="mt-1 text-2xl font-bold">
+                    {(selectedSource.averageRelevanceScore * 100).toFixed(0)}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center justify-between">
+                  <Label>FAQ Learning</Label>
+                  <Badge variant={selectedSource.enableForFaqLearning ? 'default' : 'outline'}>
+                    {selectedSource.enableForFaqLearning ? 'Enabled' : 'Disabled'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Chat</Label>
+                  <Badge variant={selectedSource.enableForChat ? 'default' : 'outline'}>
+                    {selectedSource.enableForChat ? 'Enabled' : 'Disabled'}
+                  </Badge>
+                </div>
+              </div>
+
+              {selectedSource.extractedContent && (
+                <div>
+                  <Label>Extracted Content (Preview)</Label>
+                  <div className="mt-1 p-3 bg-muted rounded-md text-sm max-h-48 overflow-y-auto">
+                    {selectedSource.extractedContent.substring(0, 500)}
+                    {selectedSource.extractedContent.length > 500 && '...'}
                   </div>
                 </div>
               )}
             </div>
           )}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
               Close

@@ -76,13 +76,19 @@ interface ChatBoxProps {
   className?: string;
   onSessionCreate?: (session: ChatSession) => void;
   onMessageSent?: (message: ChatMessage) => void;
+  embedded?: boolean;
+  showHeader?: boolean;
+  height?: string;
 }
 
 export function ChatBox({ 
   sessionType = 'support', 
   className,
   onSessionCreate,
-  onMessageSent 
+  onMessageSent,
+  embedded = false,
+  showHeader = true,
+  height = '600px'
 }: ChatBoxProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -530,7 +536,8 @@ export function ChatBox({
     return Math.random().toString(36).substr(2, 9);
   };
 
-  if (isMinimized) {
+  // Don't show minimized state in embedded mode
+  if (isMinimized && !embedded) {
     return (
       <div className={cn("fixed bottom-4 right-4 z-50", className)}>
         <Button
@@ -551,50 +558,60 @@ export function ChatBox({
 
   return (
     <div className={cn(
-      "fixed bottom-4 right-4 z-50 transition-all duration-300",
-      isExpanded ? "inset-4" : "w-96 h-[600px]",
+      embedded 
+        ? "w-full h-full" 
+        : "fixed bottom-4 right-4 z-50 transition-all duration-300",
+      !embedded && (isExpanded ? "inset-4" : `w-96`),
       className
-    )}>
-      <Card className="h-full flex flex-col shadow-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center space-x-2">
+    )} style={embedded ? { height } : undefined}>
+      <Card className={cn(
+        "h-full flex flex-col",
+        embedded ? "shadow-none border-0" : "shadow-2xl"
+      )}>
+        {showHeader && (
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="flex items-center space-x-2">
-              <Bot className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">
-                {sessionType === 'support' ? 'AI Destek' : 'AI Asistan'}
-              </CardTitle>
+              <div className="flex items-center space-x-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">
+                  {sessionType === 'support' ? 'AI Destek' : 'AI Asistan'}
+                </CardTitle>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className={cn(
+                  "w-2 h-2 rounded-full",
+                  isConnected ? "bg-green-500" : "bg-red-500"
+                )} />
+                <span className="text-xs text-muted-foreground">
+                  {isConnected ? 'Bağlı' : 'Bağlantı Yok'}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <div className={cn(
-                "w-2 h-2 rounded-full",
-                isConnected ? "bg-green-500" : "bg-red-500"
-              )} />
-              <span className="text-xs text-muted-foreground">
-                {isConnected ? 'Bağlı' : 'Bağlantı Yok'}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-8 w-8"
-            >
-              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMinimized(true)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
+            {!embedded && (
+              <div className="flex items-center space-x-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="h-8 w-8"
+                >
+                  {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMinimized(true)}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </CardHeader>
+        )}
         
-        <Separator />
+        {showHeader && <Separator />}
+
         
         {/* Connection Status */}
         <ConnectionStatus

@@ -220,14 +220,14 @@
   - Create escalation notifications for support team
   - _Requirements: 6.3, 6.5_
 
-- [ ] 10. Integrate with portal support page
+- [-] 10. Integrate with portal support page
   - Add chatbox component to existing portal support page
   - Implement side-by-side layout with existing support form
   - Create responsive design for mobile devices
   - Add chatbox toggle and minimize functionality
   - _Requirements: 1.1, 1.5_
 
-- [ ] 10.1 Integrate chatbox into portal support page layout
+- [x] 10.1 Integrate chatbox into portal support page layout
   - Modify existing /portal/support/new page to include chatbox
   - Create responsive grid layout with form and chat
   - Add chatbox visibility toggle and state management

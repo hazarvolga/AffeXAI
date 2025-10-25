@@ -9,6 +9,11 @@ import { User } from '../users/entities/user.entity';
 
 // Services
 import { KnowledgeSourcesService } from './services/knowledge-sources.service';
+import { FileProcessingService } from './services/file-processing.service';
+import { UrlProcessingService } from './services/url-processing.service';
+
+// Controllers
+import { KnowledgeSourcesController } from './controllers/knowledge-sources.controller';
 
 @Module({
   imports: [
@@ -17,12 +22,18 @@ import { KnowledgeSourcesService } from './services/knowledge-sources.service';
       User,
     ]),
   ],
-  controllers: [],
+  controllers: [
+    KnowledgeSourcesController,
+  ],
   providers: [
     KnowledgeSourcesService,
+    FileProcessingService,
+    UrlProcessingService,
   ],
   exports: [
     KnowledgeSourcesService,
+    FileProcessingService,
+    UrlProcessingService,
   ],
 })
 export class KnowledgeSourcesModule {}

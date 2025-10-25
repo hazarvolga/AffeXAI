@@ -15,7 +15,6 @@ export enum DocumentProcessingStatus {
 @Index(['processingStatus'])
 export class ChatDocument extends BaseEntity {
   @Column('uuid')
-  @Index()
   sessionId: string;
 
   @Column('uuid', { nullable: true })

@@ -40,9 +40,9 @@ export class KnowledgeSourcesController {
     @Body() createDto: CreateKnowledgeSourceDto,
     @CurrentUser() user: any,
   ) {
-    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user.userId}`);
-    // Auto-set uploadedById from authenticated user
-    createDto.uploadedById = user.userId;
+    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user.sub || user.userId}`);
+    // Auto-set uploadedById from authenticated user (JWT uses 'sub' field)
+    createDto.uploadedById = user.sub || user.userId;
     const source = await this.knowledgeSourcesService.create(createDto);
     return {
       success: true,

@@ -49,13 +49,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: parseInt(process.env.DB_PORT || '5434', 10),
+      port: parseInt(process.env.DB_PORT || '5432', 10),
       username: 'postgres',
       password: 'postgres',
       database: process.env.DB_NAME || 'affexai_dev',
       autoLoadEntities: true,
       synchronize: true, // Temporary: Will sync schema with entities
-      logging: ['error', 'warn'], // Log only errors and warnings
+      logging: ['query', 'error', 'schema'], // Log SQL queries, errors, and schema changes
     }),
     BullBoardModule.forRoot({
       route: '/admin/queues',

@@ -70,6 +70,6 @@ export class CreateKnowledgeSourceDto {
   enableForChat?: boolean;
 
   @IsString()
-  @IsNotEmpty()
-  uploadedById: string;
+  @IsOptional()
+  uploadedById?: string; // Will be set automatically by controller from @CurrentUser()
 }

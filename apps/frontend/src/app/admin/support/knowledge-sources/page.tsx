@@ -172,28 +172,46 @@ export default function KnowledgeSourcesPage() {
 
   const addUrlSource = async () => {
     try {
+      const requestBody = {
+        title: urlForm.title,
+        description: urlForm.description,
+        sourceType: 'url',
+        url: urlForm.url,
+        tags: urlForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        enableForFaqLearning: urlForm.enableForFaqLearning,
+        enableForChat: urlForm.enableForChat,
+      };
+
+      console.log('🔍 Sending request to:', `${API_URL}/knowledge-sources`);
+      console.log('🔍 Request body:', requestBody);
+      console.log('🔍 Token:', localStorage.getItem('auth_token')?.substring(0, 20) + '...');
+
       const response = await fetch(`${API_URL}/knowledge-sources`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify({
-          title: urlForm.title,
-          description: urlForm.description,
-          sourceType: 'url',
-          url: urlForm.url,
-          tags: urlForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
-          enableForFaqLearning: urlForm.enableForFaqLearning,
-          enableForChat: urlForm.enableForChat,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('🔍 Response status:', response.status, response.statusText);
+
+      const responseText = await response.text();
+      console.log('🔍 Response text:', responseText);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Backend error:', errorData);
-        throw new Error(errorData.error?.message || errorData.message || 'Failed to add URL source');
+        let errorData = {};
+        try {
+          errorData = JSON.parse(responseText);
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        console.error('❌ Backend error:', errorData);
+        throw new Error(errorData.error?.message || errorData.message || responseText || 'Failed to add URL source');
       }
+
+      const result = JSON.parse(responseText);
 
       toast.success('URL source added successfully');
       setAddDialogOpen(false);

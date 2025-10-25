@@ -7,6 +7,9 @@ import { CompanyKnowledgeSource } from './entities/company-knowledge-source.enti
 // External entities (dependencies)
 import { User } from '../users/entities/user.entity';
 
+// External modules
+import { UsersModule } from '../users/users.module';
+
 // Services
 import { KnowledgeSourcesService } from './services/knowledge-sources.service';
 import { FileProcessingService } from './services/file-processing.service';
@@ -21,6 +24,7 @@ import { KnowledgeSourcesController } from './controllers/knowledge-sources.cont
       CompanyKnowledgeSource,
       User,
     ]),
+    UsersModule,
   ],
   controllers: [
     KnowledgeSourcesController,

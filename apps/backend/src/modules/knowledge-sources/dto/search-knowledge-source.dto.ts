@@ -20,7 +20,7 @@ export class SearchKnowledgeSourceDto {
   @Max(1)
   minRelevanceScore?: number = 0.3;
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  tags?: string;
+  tags?: string[];
 }

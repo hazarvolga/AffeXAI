@@ -80,7 +80,7 @@ export class KnowledgeSourcesService {
     // Apply filters
     if (search) {
       queryBuilder.andWhere(
-        '(ks.title ILIKE :search OR ks.description ILIKE :search OR ks.tags ILIKE :search)',
+        '(ks.title ILIKE :search OR ks.description ILIKE :search OR array_to_string(ks.tags, \',\') ILIKE :search)',
         { search: `%${search}%` }
       );
     }
@@ -100,8 +100,8 @@ export class KnowledgeSourcesService {
       queryBuilder.andWhere('ks.uploadedById = :uploadedById', { uploadedById });
     }
 
-    if (tags) {
-      queryBuilder.andWhere('ks.tags ILIKE :tags', { tags: `%${tags}%` });
+    if (tags && tags.length > 0) {
+      queryBuilder.andWhere('ks.tags && :tags', { tags });
     }
 
     if (enableForFaqLearning !== undefined) {
@@ -134,35 +134,35 @@ export class KnowledgeSourcesService {
     // PostgreSQL full-text search
     const queryBuilder = this.knowledgeSourceRepository
       .createQueryBuilder('ks')
-      .select('ks.*')
+      .select('ks')
       .addSelect(
         `ts_rank(
-          to_tsvector('english', COALESCE(ks.title, '') || ' ' || COALESCE(ks.extracted_content, '') || ' ' || COALESCE(ks.tags, '')),
+          to_tsvector('english', COALESCE(ks.title, '') || ' ' || COALESCE(ks.extracted_content, '') || ' ' || array_to_string(COALESCE(ks.tags, '{}'), ' ')),
           plainto_tsquery('english', :query)
         )`,
         'relevance_score'
       )
       .where(
-        `to_tsvector('english', COALESCE(ks.title, '') || ' ' || COALESCE(ks.extracted_content, '') || ' ' || COALESCE(ks.tags, '')) @@ plainto_tsquery('english', :query)`,
+        `to_tsvector('english', COALESCE(ks.title, '') || ' ' || COALESCE(ks.extracted_content, '') || ' ' || array_to_string(COALESCE(ks.tags, '{}'), ' ')) @@ plainto_tsquery('english', :query)`,
         { query }
       )
       .andWhere('ks.status = :status', { status: KnowledgeSourceStatus.ACTIVE })
       .andWhere('ks.enable_for_chat = :enableForChat', { enableForChat: true });
 
-    if (tags) {
-      queryBuilder.andWhere('ks.tags ILIKE :tags', { tags: `%${tags}%` });
+    if (tags && tags.length > 0) {
+      queryBuilder.andWhere('ks.tags && :tags', { tags });
     }
 
     queryBuilder
       .orderBy('relevance_score', 'DESC')
       .limit(limit);
 
-    const results = await queryBuilder.getRawMany();
+    const results = await queryBuilder.getRawAndEntities();
 
-    return results
-      .map(row => ({
-        source: this.knowledgeSourceRepository.create(row),
-        relevanceScore: parseFloat(row.relevance_score),
+    return results.entities
+      .map((entity, index) => ({
+        source: entity,
+        relevanceScore: parseFloat(results.raw[index].relevance_score),
       }))
       .filter(result => result.relevanceScore >= minRelevanceScore);
   }

@@ -27,13 +27,13 @@ export class UpdateKnowledgeSourceDto {
   @IsOptional()
   summary?: string;
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  tags?: string;
+  tags?: string[];
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  keywords?: string;
+  keywords?: string[];
 
   @IsOptional()
   metadata?: Record<string, any>;

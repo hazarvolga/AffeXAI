@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as mammoth from 'mammoth';
-import * as pdf from 'pdf-parse';
+const pdf = require('pdf-parse');
 
 export interface ProcessedDocument {
   text: string;

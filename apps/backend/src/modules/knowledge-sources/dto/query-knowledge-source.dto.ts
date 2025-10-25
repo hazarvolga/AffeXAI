@@ -20,9 +20,9 @@ export class QueryKnowledgeSourceDto {
   @IsOptional()
   uploadedById?: string;
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  tags?: string;
+  tags?: string[];
 
   @IsBoolean()
   @IsOptional()

@@ -12,7 +12,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { KnowledgeSourcesService } from '../services/knowledge-sources.service';
 import { CreateKnowledgeSourceDto } from '../dto/create-knowledge-source.dto';
 import { UpdateKnowledgeSourceDto } from '../dto/update-knowledge-source.dto';

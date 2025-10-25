@@ -85,7 +85,7 @@ export class GeneralCommunicationAiService {
       );
 
       // Get AI configuration
-      const aiConfig = await this.chatAiSettings.getActiveConfiguration();
+      const aiConfig = await this.chatAiSettings.getChatAiConfiguration();
 
       // Get AI response
       const aiResponseResult = await this.aiService.generateCompletion(

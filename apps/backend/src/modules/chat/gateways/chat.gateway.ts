@@ -14,6 +14,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ChatSessionService } from '../services/chat-session.service';
 import { ChatMessageService } from '../services/chat-message.service';
 import { ChatMessageSenderType, ChatMessageType } from '../entities/chat-message.entity';
+import { GeneralCommunicationAiService } from '../services/general-communication-ai.service';
+import { ChatSessionType } from '../entities/chat-session.entity';
 
 // WebSocket event interfaces
 export interface SendMessageData {
@@ -115,6 +117,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly jwtService: JwtService,
     private readonly chatSessionService: ChatSessionService,
     private readonly chatMessageService: ChatMessageService,
+    private readonly generalCommunicationAiService: GeneralCommunicationAiService,
   ) {}
 
   afterInit(server: Server) {
@@ -299,6 +302,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const userId = client.data.userId;
       const { sessionId, content, messageType, metadata } = data;
 
+      // Get session to determine type
+      const session = await this.chatSessionService.getSession(sessionId);
+      if (!session) {
+        client.emit('error', { message: 'Session not found' });
+        return;
+      }
+
       // Send the message
       const message = await this.chatMessageService.sendMessage({
         sessionId,
@@ -311,6 +321,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       // Broadcast to all users in the session
       this.server.to(sessionId).emit('message-received', message);
+
+      // Handle AI response based on session type
+      if (session.sessionType === ChatSessionType.GENERAL) {
+        // Use general communication AI service
+        this.handleGeneralCommunicationResponse(sessionId, content, userId);
+      }
+      // Support sessions are handled by existing support AI service
 
       this.logger.log(`Message sent in session ${sessionId} by user ${userId}`);
 
@@ -936,5 +953,224 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     setInterval(() => {
       this.cleanupStaleConnections();
     }, 5 * 60 * 1000); // Run every 5 minutes
+  }
+
+  // General Communication Methods
+
+  /**
+   * Handle general communication AI response
+   */
+  private async handleGeneralCommunicationResponse(sessionId: string, query: string, userId: string) {
+    try {
+      this.logger.log(`Generating general communication response for session ${sessionId}`);
+
+      // Emit AI response start
+      this.server.to(sessionId).emit('ai-response-start', { sessionId });
+
+      // Generate AI response
+      const aiResponse = await this.generalCommunicationAiService.generateGeneralResponse(
+        query,
+        sessionId,
+        {
+          includeContextSources: true,
+          tone: 'friendly',
+          language: 'tr'
+        }
+      );
+
+      // Create AI message
+      const aiMessage = await this.chatMessageService.createMessage({
+        sessionId,
+        senderType: ChatMessageSenderType.AI,
+        content: aiResponse.content,
+        messageType: ChatMessageType.TEXT,
+        metadata: {
+          aiModel: 'general-communication',
+          confidence: aiResponse.confidence,
+          responseType: aiResponse.responseType,
+          contextSources: aiResponse.contextSources,
+          suggestedActions: aiResponse.suggestedActions,
+          escalationReason: aiResponse.escalationReason
+        }
+      });
+
+      // Broadcast AI response
+      this.server.to(sessionId).emit('ai-response-complete', aiMessage);
+
+      // If escalation is suggested, emit escalation event
+      if (aiResponse.responseType === 'escalation-suggested') {
+        this.server.to(sessionId).emit('escalation-suggested', {
+          sessionId,
+          reason: aiResponse.escalationReason,
+          message: 'AI suggests escalating to support team'
+        });
+      }
+
+      this.logger.log(`General communication response generated for session ${sessionId} with confidence: ${aiResponse.confidence}`);
+
+    } catch (error) {
+      this.logger.error(`Error generating general communication response: ${error.message}`, error.stack);
+      
+      // Send error message to session
+      const errorMessage = await this.chatMessageService.createMessage({
+        sessionId,
+        senderType: ChatMessageSenderType.AI,
+        content: 'Üzgünüm, şu anda sorununuza uygun bir yanıt oluşturamıyorum. Lütfen sorunuzu daha detaylı açıklayın veya destek ekibimizle iletişime geçin.',
+        messageType: ChatMessageType.TEXT,
+        metadata: {
+          aiModel: 'general-communication',
+          confidence: 0.3,
+          responseType: 'error',
+          error: true
+        }
+      });
+
+      this.server.to(sessionId).emit('ai-response-complete', errorMessage);
+    }
+  }
+
+  @SubscribeMessage('get-conversation-starters')
+  async handleGetConversationStarters(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { language?: string }
+  ) {
+    try {
+      const { language = 'tr' } = data;
+      
+      const starters = await this.generalCommunicationAiService.getConversationStarters(language);
+      
+      client.emit('conversation-starters', {
+        starters,
+        language,
+        timestamp: new Date()
+      });
+
+    } catch (error) {
+      this.logger.error('Error getting conversation starters:', error);
+      client.emit('error', { 
+        code: 'CONVERSATION_STARTERS_FAILED',
+        message: 'Failed to get conversation starters',
+        retryable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  @SubscribeMessage('escalate-to-support')
+  async handleEscalateToSupport(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { sessionId: string; reason?: string; notes?: string }
+  ) {
+    try {
+      const userId = client.data.userId;
+      const { sessionId, reason, notes } = data;
+
+      // Validate session access
+      const hasAccess = await this.chatSessionService.validateSessionAccess(sessionId, userId);
+      if (!hasAccess) {
+        client.emit('error', { 
+          code: 'ACCESS_DENIED',
+          message: 'Access denied to session',
+          retryable: false,
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Get current session
+      const session = await this.chatSessionService.getSession(sessionId);
+      if (!session) {
+        client.emit('error', { message: 'Session not found' });
+        return;
+      }
+
+      // Update session type to support if it's currently general
+      if (session.sessionType === ChatSessionType.GENERAL) {
+        await this.chatSessionService.updateSession(sessionId, {
+          sessionType: ChatSessionType.SUPPORT,
+          metadata: {
+            ...session.metadata,
+            escalatedFrom: 'general',
+            escalationReason: reason,
+            escalationNotes: notes,
+            escalatedAt: new Date(),
+            escalatedBy: userId
+          }
+        });
+
+        // Create system message about escalation
+        const escalationMessage = await this.chatMessageService.createMessage({
+          sessionId,
+          senderType: ChatMessageSenderType.AI,
+          content: 'Sohbet destek ekibine yönlendirildi. Bir destek temsilcisi kısa süre içinde size yardımcı olacak.',
+          messageType: ChatMessageType.SYSTEM,
+          metadata: {
+            escalation: true,
+            reason,
+            notes
+          }
+        });
+
+        // Broadcast escalation to session
+        this.server.to(sessionId).emit('session-escalated', {
+          sessionId,
+          reason,
+          notes,
+          escalatedBy: userId,
+          timestamp: new Date()
+        });
+
+        // Broadcast system message
+        this.server.to(sessionId).emit('message-received', escalationMessage);
+
+        // Notify support team
+        this.server.emit('support-escalation-alert', {
+          sessionId,
+          userId,
+          reason,
+          notes,
+          timestamp: new Date()
+        });
+      }
+
+      client.emit('escalation-acknowledged', { sessionId });
+
+      this.logger.log(`Session ${sessionId} escalated to support by user ${userId}`);
+
+    } catch (error) {
+      this.logger.error('Error handling escalation to support:', error);
+      client.emit('error', { 
+        code: 'ESCALATION_FAILED',
+        message: 'Failed to escalate to support',
+        retryable: true,
+        timestamp: new Date()
+      });
+    }
+  }
+
+  @SubscribeMessage('get-suggested-topics')
+  async handleGetSuggestedTopics(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { limit?: number }
+  ) {
+    try {
+      const { limit = 6 } = data;
+      
+      const topics = await this.generalCommunicationAiService['generalContextService'].getSuggestedTopics(limit);
+      
+      client.emit('suggested-topics', {
+        topics,
+        timestamp: new Date()
+      });
+
+    } catch (error) {
+      this.logger.error('Error getting suggested topics:', error);
+      client.emit('error', { 
+        code: 'SUGGESTED_TOPICS_FAILED',
+        message: 'Failed to get suggested topics',
+        retryable: true,
+        timestamp: new Date()
+      });
+    }
   }
 }

@@ -28,6 +28,9 @@ import { ChatAiSettingsService } from './services/chat-ai-settings.service';
 import { ChatSupportAssignmentService } from './services/chat-support-assignment.service';
 import { ChatHandoffService } from './services/chat-handoff.service';
 import { SupportDashboardService } from './services/support-dashboard.service';
+import { GeneralCommunicationContextService } from './services/general-communication-context.service';
+import { GeneralCommunicationAiService } from './services/general-communication-ai.service';
+import { ChatEscalationService } from './services/chat-escalation.service';
 
 // Controllers
 import { DocumentUploadController } from './controllers/document-upload.controller';
@@ -36,6 +39,7 @@ import { ChatAiController } from './controllers/chat-ai.controller';
 import { SupportAssignmentController } from './controllers/support-assignment.controller';
 import { ChatHandoffController } from './controllers/chat-handoff.controller';
 import { SupportDashboardController } from './controllers/support-dashboard.controller';
+import { GeneralCommunicationController } from './controllers/general-communication.controller';
 
 // Gateways
 import { ChatGateway } from './gateways/chat.gateway';
@@ -81,6 +85,7 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     SupportAssignmentController,
     ChatHandoffController,
     SupportDashboardController,
+    GeneralCommunicationController,
   ],
   providers: [
     ChatSessionService,
@@ -95,6 +100,9 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     ChatSupportAssignmentService,
     ChatHandoffService,
     SupportDashboardService,
+    GeneralCommunicationContextService,
+    GeneralCommunicationAiService,
+    ChatEscalationService,
     FaqEnhancedSearchService,
     ChatGateway,
   ],
@@ -111,6 +119,9 @@ import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-
     ChatSupportAssignmentService,
     ChatHandoffService,
     SupportDashboardService,
+    GeneralCommunicationContextService,
+    GeneralCommunicationAiService,
+    ChatEscalationService,
     ChatGateway,
   ],
 })

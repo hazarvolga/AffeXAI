@@ -96,6 +96,7 @@ interface UseChatSocketOptions {
   onTypingIndicator?: (data: TypingIndicatorData) => void;
   onSessionUpdated?: (session: ChatSession) => void;
   onConnectionStatusChange?: (isConnected: boolean) => void;
+  onEscalationSuggested?: (data: { sessionId: string; reason: string; message: string }) => void;
 }
 
 export function useChatSocket(options: UseChatSocketOptions = {}) {
@@ -122,7 +123,8 @@ export function useChatSocket(options: UseChatSocketOptions = {}) {
     onSupportLeft,
     onTypingIndicator,
     onSessionUpdated,
-    onConnectionStatusChange
+    onConnectionStatusChange,
+    onEscalationSuggested
   } = options;
 
   // Initialize socket connection
@@ -278,6 +280,10 @@ export function useChatSocket(options: UseChatSocketOptions = {}) {
         onSessionUpdated?.(session);
       });
 
+      socket.on('escalation-suggested', (data: { sessionId: string; reason: string; message: string }) => {
+        onEscalationSuggested?.(data);
+      });
+
     } catch (error) {
       console.error('Failed to initialize socket:', error);
       setConnectionError('Failed to initialize connection');
@@ -293,7 +299,8 @@ export function useChatSocket(options: UseChatSocketOptions = {}) {
     onSupportLeft,
     onTypingIndicator,
     onSessionUpdated,
-    onConnectionStatusChange
+    onConnectionStatusChange,
+    onEscalationSuggested
   ]);
 
   // Reconnection logic

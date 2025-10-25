@@ -199,21 +199,21 @@
   - Add offline message queuing and sync
   - _Requirements: 8.3, 8.4, 8.5_
 
-- [ ] 9. Create general communication module for customer role
+- [x] 9. Create general communication module for customer role
   - Extend chat system for non-support scenarios
   - Implement general platform information responses
   - Add support escalation from general chat
   - Create separate context handling for general communication
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 9.1 Implement general chat context and responses
+- [x] 9.1 Implement general chat context and responses
   - Create general communication session type
   - Implement platform information and guidance responses
   - Add general context sources (platform docs, help articles)
   - Create non-support specific AI prompt templates
   - _Requirements: 6.1, 6.2, 6.4_
 
-- [ ] 9.2 Add support escalation from general chat
+- [x] 9.2 Add support escalation from general chat
   - Implement escalation trigger detection
   - Create seamless transition from general to support chat
   - Add context preservation during escalation

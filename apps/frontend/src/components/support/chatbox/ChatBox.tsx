@@ -94,6 +94,8 @@ export function ChatBox({
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [showEscalationSuggestion, setShowEscalationSuggestion] = useState(false);
+  const [escalationReason, setEscalationReason] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -118,7 +120,8 @@ export function ChatBox({
     onAiResponseChunk: handleAiResponseChunk,
     onAiResponseComplete: handleAiResponseComplete,
     onTypingIndicator: handleTypingIndicator,
-    onSessionUpdated: handleSessionUpdated
+    onSessionUpdated: handleSessionUpdated,
+    onEscalationSuggested: handleEscalationSuggested
   });
 
   // Auto-scroll to bottom when new messages arrive
@@ -145,23 +148,55 @@ export function ChatBox({
   const initializeSession = async () => {
     try {
       setIsLoading(true);
-      // Create new chat session
-      const newSession: ChatSession = {
-        id: generateId(),
-        userId: 'current-user-id', // This should come from auth context
-        sessionType,
-        status: 'active',
-        title: `${sessionType === 'support' ? 'Destek' : 'Genel'} Sohbeti`,
-        metadata: {
-          aiProvider: 'openai',
-          modelUsed: 'gpt-4o',
-          contextSources: 0,
-          messageCount: 0,
-          supportAssigned: false
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      
+      // Create session via API based on session type
+      let newSession: ChatSession;
+      
+      if (sessionType === 'general') {
+        // Create general communication session
+        const response = await fetch('/api/chat/general/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify({
+            title: 'Genel Sohbet',
+            language: 'tr'
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create general session');
+        }
+        
+        const data = await response.json();
+        newSession = data.session;
+        
+        // Set conversation starters if available
+        if (data.conversationStarters) {
+          // You could show these as quick reply buttons
+          console.log('Conversation starters:', data.conversationStarters);
+        }
+      } else {
+        // Create support session (existing logic)
+        newSession = {
+          id: generateId(),
+          userId: 'current-user-id', // This should come from auth context
+          sessionType,
+          status: 'active',
+          title: 'Destek Sohbeti',
+          metadata: {
+            aiProvider: 'openai',
+            modelUsed: 'gpt-4o',
+            contextSources: 0,
+            messageCount: 0,
+            supportAssigned: false
+          },
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+      }
       
       setSession(newSession);
       onSessionCreate?.(newSession);
@@ -178,11 +213,12 @@ export function ChatBox({
         senderType: 'ai',
         content: sessionType === 'support' 
           ? 'Merhaba! Size nasıl yardımcı olabilirim? Sorularınızı sorabilir, dosya yükleyebilir veya web sayfası linklerini paylaşabilirsiniz.'
-          : 'Merhaba! Genel sorularınız için buradayım. Size nasıl yardımcı olabilirim?',
+          : 'Merhaba! Platform hakkında genel sorularınız için buradayım. Size nasıl yardımcı olabilirim?',
         messageType: 'text',
         metadata: {
-          aiModel: 'gpt-4o',
-          confidence: 1.0
+          aiModel: sessionType === 'general' ? 'general-communication' : 'gpt-4o',
+          confidence: 1.0,
+          responseType: 'welcome'
         },
         createdAt: new Date()
       };
@@ -190,6 +226,28 @@ export function ChatBox({
       setMessages([welcomeMessage]);
     } catch (error) {
       console.error('Failed to initialize chat session:', error);
+      
+      // Fallback to local session creation
+      const fallbackSession: ChatSession = {
+        id: generateId(),
+        userId: 'current-user-id',
+        sessionType,
+        status: 'active',
+        title: `${sessionType === 'support' ? 'Destek' : 'Genel'} Sohbeti`,
+        metadata: {
+          aiProvider: 'openai',
+          modelUsed: sessionType === 'general' ? 'general-communication' : 'gpt-4o',
+          contextSources: 0,
+          messageCount: 0,
+          supportAssigned: false,
+          fallback: true
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      setSession(fallbackSession);
+      onSessionCreate?.(fallbackSession);
     } finally {
       setIsLoading(false);
     }
@@ -405,6 +463,69 @@ export function ChatBox({
     setSession(updatedSession);
   }
 
+  function handleEscalationSuggested(data: { sessionId: string; reason: string; message: string }) {
+    if (data.sessionId === session?.id) {
+      setShowEscalationSuggestion(true);
+      setEscalationReason(data.reason);
+    }
+  }
+
+  const handleEscalateToSupport = async () => {
+    if (!session) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Send escalation via WebSocket
+      if (isConnected) {
+        // Use WebSocket for real-time escalation
+        const escalationData = {
+          sessionId: session.id,
+          reason: escalationReason || 'user-requested',
+          notes: 'Kullanıcı destek ekibiyle iletişime geçmek istiyor'
+        };
+        
+        // Emit escalation event (this would be handled by the WebSocket)
+        // For now, we'll make an API call
+        const response = await fetch(`/api/chat/general/sessions/${session.id}/escalate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify(escalationData)
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSession(data.session);
+          setShowEscalationSuggestion(false);
+          setEscalationReason(null);
+          
+          // Add system message
+          const escalationMessage: ChatMessage = {
+            id: generateId(),
+            sessionId: session.id,
+            senderType: 'ai',
+            content: 'Sohbet destek ekibine yönlendirildi. Bir destek temsilcisi kısa süre içinde size yardımcı olacak.',
+            messageType: 'system',
+            metadata: {
+              escalation: true,
+              escalatedAt: new Date()
+            },
+            createdAt: new Date()
+          };
+          
+          setMessages(prev => [...prev, escalationMessage]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to escalate to support:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const generateId = () => {
     return Math.random().toString(36).substr(2, 9);
   };
@@ -518,6 +639,45 @@ export function ChatBox({
                 onUrlSubmit={handleUrlProcess}
                 onCancel={() => setShowUrlInput(false)}
               />
+            </div>
+          )}
+          
+          {/* Escalation Suggestion */}
+          {showEscalationSuggestion && sessionType === 'general' && (
+            <div className="p-4 border-t bg-blue-50 dark:bg-blue-950">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Destek Ekibiyle İletişim
+                  </h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                    Bu konuda size daha iyi yardımcı olabilmek için destek ekibimizle iletişime geçmenizi öneriyorum.
+                  </p>
+                  <div className="flex space-x-2 mt-3">
+                    <Button
+                      size="sm"
+                      onClick={handleEscalateToSupport}
+                      disabled={isLoading}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Destek Ekibiyle İletişim
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowEscalationSuggestion(false)}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                    >
+                      Devam Et
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
           

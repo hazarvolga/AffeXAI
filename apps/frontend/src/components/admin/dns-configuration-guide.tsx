@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Lightbulb, Copy, CheckCircle2, XCircle } from 'lucide-react';
+import { AlertCircle, Lightbulb, Copy, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { getDNSConfiguration, replaceDomainPlaceholder, type DNSRecord } from '@/lib/email-dns-config';
 import { toast } from 'sonner';
+import { useDNSVerification } from '@/hooks/use-dns-verification';
 
 interface DNSConfigurationGuideProps {
   provider: string;
@@ -22,9 +23,42 @@ export function DNSConfigurationGuide({
   provider,
   domain = 'aluplan.tr',
   onVerify,
-  verificationStatus
+  verificationStatus: externalVerificationStatus
 }: DNSConfigurationGuideProps) {
   const config = getDNSConfiguration(provider);
+  const { verifyDNS, isVerifying, verificationResult } = useDNSVerification();
+  const [localVerificationStatus, setLocalVerificationStatus] = useState<{
+    spf?: boolean;
+    dkim?: boolean;
+    dmarc?: boolean;
+  }>({});
+
+  // Use external status if provided, otherwise use local
+  const verificationStatus = externalVerificationStatus || localVerificationStatus;
+
+  const handleVerify = async () => {
+    try {
+      const result = await verifyDNS(domain, provider);
+
+      setLocalVerificationStatus({
+        spf: result.spf?.verified,
+        dkim: result.dkim?.verified,
+        dmarc: result.dmarc?.verified,
+      });
+
+      if (result.overall) {
+        toast.success('DNS kayıtları başarıyla doğrulandı!');
+      } else {
+        toast.warning('Bazı DNS kayıtları eksik veya hatalı');
+      }
+
+      if (onVerify) {
+        onVerify();
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'DNS doğrulama başarısız');
+    }
+  };
 
   if (!config) {
     return null;
@@ -200,12 +234,24 @@ export function DNSConfigurationGuide({
             </Button>
           )}
 
-          {onVerify && (
-            <Button variant="default" size="sm" onClick={onVerify}>
-              <CheckCircle2 className="mr-2 h-3 w-3" />
-              DNS Kayıtlarını Kontrol Et
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleVerify}
+            disabled={isVerifying}
+          >
+            {isVerifying ? (
+              <>
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Kontrol Ediliyor...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="mr-2 h-3 w-3" />
+                DNS Kayıtlarını Kontrol Et
+              </>
+            )}
+          </Button>
         </div>
       </AlertDescription>
     </Alert>

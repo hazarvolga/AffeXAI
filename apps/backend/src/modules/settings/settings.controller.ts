@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
@@ -14,10 +15,14 @@ import { UpdateSettingDto } from './dto/update-setting.dto';
 import { SiteSettingsDto } from './dto/site-settings.dto';
 import { EmailSettingsDto, EmailSettingsMaskedDto } from './dto/email-settings.dto';
 import { AiSettingsDto, AiSettingsMaskedDto, AiConnectionTestDto } from './dto/ai-settings.dto';
+import { DNSVerificationService, DomainVerificationResult } from './dns-verification.service';
 
 @Controller('settings')
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly dnsVerificationService: DNSVerificationService,
+  ) {}
 
   @Post()
   create(@Body() createSettingDto: CreateSettingDto) {
@@ -105,5 +110,27 @@ export class SettingsController {
       message: 'API key configured (connection test not yet implemented)',
       model,
     };
+  }
+
+  // DNS Verification endpoints
+  @Get('email/verify-dns')
+  async verifyDNS(
+    @Query('domain') domain: string,
+    @Query('provider') provider: string,
+  ): Promise<DomainVerificationResult> {
+    if (!domain || !provider) {
+      throw new Error('Domain and provider parameters are required');
+    }
+
+    return this.dnsVerificationService.verifyDomain(domain, provider);
+  }
+
+  @Get('email/quick-check-dns')
+  async quickCheckDNS(@Query('domain') domain: string) {
+    if (!domain) {
+      throw new Error('Domain parameter is required');
+    }
+
+    return this.dnsVerificationService.quickCheck(domain);
   }
 }

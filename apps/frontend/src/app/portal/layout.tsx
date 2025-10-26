@@ -40,12 +40,53 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     const { toast } = useToast();
     const { user: authUser, updateUser, isLoading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
-    
+
     // Use AuthContext user directly
     const currentUser = authUser;
 
     // Don't show sidebar and header on login page
     const isLoginPage = pathname === '/portal/login';
+
+    /**
+     * CRITICAL SECURITY: Check profile completion before allowing portal access
+     * This prevents users from bypassing /complete-profile by manually typing /portal URL
+     */
+    useEffect(() => {
+        if (isLoginPage) return; // Skip check on login page
+
+        // Get user from localStorage (set during email verification or login)
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            // No user data, redirect to login
+            router.push('/login');
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userStr);
+            const metadata = user?.metadata;
+
+            // Check if profile completion is required
+            const isCustomer = metadata?.isCustomer;
+            const isStudent = metadata?.isStudent;
+
+            // Check if profile is incomplete
+            const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
+            const studentIncomplete = isStudent && (!metadata?.schoolName || !metadata?.studentId);
+
+            if (customerIncomplete || studentIncomplete) {
+                console.log('⚠️ Portal Layout: Profile incomplete, redirecting to /complete-profile');
+                toast({
+                    title: 'Profil Tamamlama Gerekli',
+                    description: 'Portale erişmek için önce profilinizi tamamlamalısınız',
+                    variant: 'destructive',
+                });
+                router.push('/complete-profile');
+            }
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }, [isLoginPage, router, toast]);
 
     /**
      * Handle role changes detected by useUserSync

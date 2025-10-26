@@ -33,6 +33,8 @@ export enum AiModel {
   GEMINI_PRO_VISION = 'gemini-pro-vision',
   GEMINI_1_5_PRO = 'gemini-1.5-pro',
   GEMINI_1_5_FLASH = 'gemini-1.5-flash',
+  GEMINI_2_5_PRO = 'gemini-2.5-pro',
+  GEMINI_2_5_FLASH = 'gemini-2.5-flash',
   
   // OpenRouter Models (Popular ones)
   OPENROUTER_GPT_4 = 'openai/gpt-4',

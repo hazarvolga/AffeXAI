@@ -55,7 +55,7 @@ export class ApiKeyDetector {
     if (trimmedKey.startsWith('AIzaSy')) {
       return {
         provider: AiProvider.GOOGLE,
-        defaultModel: AiModel.GEMINI_1_5_FLASH, // Updated to Gemini 1.5 Flash (gemini-pro is deprecated)
+        defaultModel: AiModel.GEMINI_2_5_FLASH, // Updated to Gemini 2.5 Flash (latest model)
         isValid: trimmedKey.length === 39, // Google API keys are exactly 39 characters
         detectionMethod: 'prefix',
       };
@@ -141,8 +141,10 @@ export class ApiKeyDetector {
 
       case AiProvider.GOOGLE:
         return [
-          AiModel.GEMINI_1_5_FLASH, // Latest and recommended
-          AiModel.GEMINI_1_5_PRO,   // More powerful alternative
+          AiModel.GEMINI_2_5_FLASH, // Latest and recommended
+          AiModel.GEMINI_2_5_PRO,   // More powerful alternative
+          AiModel.GEMINI_1_5_FLASH, // Previous generation
+          AiModel.GEMINI_1_5_PRO,   // Previous generation (powerful)
           AiModel.GEMINI_PRO,        // Legacy (deprecated but still works)
           AiModel.GEMINI_PRO_VISION, // Legacy vision model
         ];

@@ -324,9 +324,85 @@ export default function SiteSettingsPage() {
                                     <h3 className="text-lg font-medium mb-4">API Anahtarları ve Yapılandırma</h3>
                                     <div className="space-y-4">
                                         {selectedEmailService === 'resend' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="resend-api-key">Resend API Key</Label>
-                                                <Input id="resend-api-key" placeholder="re_..." icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="resend-api-key">Resend API Key</Label>
+                                                    <Input id="resend-api-key" placeholder="re_..." icon={KeyRound}/>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        API key almak için: <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">resend.com/api-keys</a>
+                                                    </p>
+                                                </div>
+
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertTitle>DNS Yapılandırması Gerekli</AlertTitle>
+                                                    <AlertDescription className="mt-2 space-y-4">
+                                                        <p className="text-sm">
+                                                            Email'lerinizin spam'e düşmemesi ve güvenli gönderilmesi için domain'inizde (örn: aluplan.tr) aşağıdaki DNS kayıtlarını eklemeniz gerekir:
+                                                        </p>
+
+                                                        <div className="space-y-3 text-xs">
+                                                            <div className="rounded-md bg-muted p-3">
+                                                                <div className="font-semibold mb-2 flex items-center gap-2">
+                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">SPF</span>
+                                                                    Sender Policy Framework
+                                                                </div>
+                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
+                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
+                                                                    <div><span className="text-muted-foreground">Name:</span> aluplan.tr (veya @)</div>
+                                                                    <div><span className="text-muted-foreground">Value:</span> v=spf1 include:_spf.resend.com ~all</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="rounded-md bg-muted p-3">
+                                                                <div className="font-semibold mb-2 flex items-center gap-2">
+                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">DKIM</span>
+                                                                    Domain Keys Identified Mail
+                                                                </div>
+                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
+                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
+                                                                    <div><span className="text-muted-foreground">Name:</span> resend._domainkey.aluplan.tr</div>
+                                                                    <div><span className="text-muted-foreground">Value:</span> <span className="text-orange-500">(Resend dashboard'dan alınacak)</span></div>
+                                                                </div>
+                                                                <p className="text-xs text-muted-foreground mt-2">
+                                                                    Değeri almak için: <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Resend Domains</a> → aluplan.tr → DNS Records
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="rounded-md bg-muted p-3">
+                                                                <div className="font-semibold mb-2 flex items-center gap-2">
+                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">DMARC</span>
+                                                                    Domain-based Message Authentication
+                                                                </div>
+                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
+                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
+                                                                    <div><span className="text-muted-foreground">Name:</span> _dmarc.aluplan.tr</div>
+                                                                    <div><span className="text-muted-foreground">Value:</span> v=DMARC1; p=none; rua=mailto:dmarc@aluplan.tr</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="rounded-md bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 border p-3">
+                                                                <div className="font-semibold mb-2 text-blue-900 dark:text-blue-100">📋 Adımlar:</div>
+                                                                <ol className="space-y-1 text-blue-800 dark:text-blue-200 list-decimal list-inside">
+                                                                    <li>Domain sağlayıcınıza giriş yapın (örn: GoDaddy, Cloudflare, vs.)</li>
+                                                                    <li>DNS yönetim paneline gidin</li>
+                                                                    <li>Yukarıdaki 3 TXT kaydını ekleyin</li>
+                                                                    <li>Değişikliklerin yayılmasını bekleyin (5-60 dakika)</li>
+                                                                    <li>Resend'de domain'i verify edin</li>
+                                                                </ol>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="pt-2 border-t">
+                                                            <Button variant="outline" size="sm" asChild>
+                                                                <a href="https://resend.com/docs/dashboard/domains/introduction" target="_blank" rel="noopener noreferrer">
+                                                                    <Lightbulb className="mr-2 h-3 w-3" />
+                                                                    Resend Domain Setup Dokümantasyonu
+                                                                </a>
+                                                            </Button>
+                                                        </div>
+                                                    </AlertDescription>
+                                                </Alert>
                                             </div>
                                         )}
                                         {selectedEmailService === 'sendgrid' && (

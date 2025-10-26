@@ -52,7 +52,7 @@ export default function CompleteProfilePage() {
     const loadUser = async () => {
       try {
         const currentUser = authService.getUserFromToken();
-        
+
         if (!currentUser) {
           toast({
             title: 'Oturum bulunamadı',
@@ -64,6 +64,30 @@ export default function CompleteProfilePage() {
         }
 
         setUser(currentUser);
+
+        // CRITICAL: Staff roles should NEVER see profile completion page
+        // Redirect them directly to admin panel
+        const primaryRoleName = currentUser?.primaryRole?.name || currentUser?.roleId || '';
+        const userRoles = currentUser?.roles || [];
+
+        // Check if user has any staff role
+        const staffRoles = ['admin', 'editor', 'content editor', 'marketing manager',
+                           'social media manager', 'event coordinator', 'support manager',
+                           'support agent', 'support', 'support team'];
+
+        const hasStaffRole = userRoles.some((role: any) =>
+          staffRoles.includes(role.name?.toLowerCase())
+        ) || staffRoles.includes(primaryRoleName.toLowerCase());
+
+        if (hasStaffRole) {
+          console.log('✅ Staff role detected on complete-profile page, redirecting to admin');
+          toast({
+            title: 'Yönlendiriliyor',
+            description: 'Admin paneline yönlendiriliyorsunuz...',
+          });
+          router.push('/admin');
+          return;
+        }
 
         // Pre-fill existing data if any
         if (currentUser.metadata) {
@@ -83,9 +107,9 @@ export default function CompleteProfilePage() {
         // Check if already completed
         const metadata = currentUser.metadata;
         if (metadata) {
-          const isCustomerComplete = !metadata.isCustomer || 
+          const isCustomerComplete = !metadata.isCustomer ||
             (metadata.customerNumber && metadata.companyName);
-          const isStudentComplete = !metadata.isStudent || 
+          const isStudentComplete = !metadata.isStudent ||
             (metadata.schoolName && metadata.studentId);
 
           if (isCustomerComplete && isStudentComplete) {

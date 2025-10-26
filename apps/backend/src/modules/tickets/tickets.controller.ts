@@ -195,10 +195,10 @@ export class TicketsController {
 
   /**
    * Get ticket statistics
-   * Available to: ADMIN and EDITOR roles only
+   * Available to: ADMIN, EDITOR, and SUPPORT_MANAGER roles
    */
   @Get('stats/overview')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get ticket statistics' })
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })

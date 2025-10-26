@@ -50,7 +50,7 @@ export async function analyzeSupportTicket(
   // Step 2: Create ticket in backend
   if (action === 'create_ticket') {
     try {
-      const title = formData.get('title') as string;
+      const subject = formData.get('title') as string;  // Backend expects 'subject' field
       const description = formData.get('problemDescription') as string;
       const categoryId = formData.get('category') as string;
       const priority = formData.get('priority') as string;
@@ -65,7 +65,7 @@ export async function analyzeSupportTicket(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title,
+          subject,  // Changed from 'title' to 'subject' to match backend DTO
           description: `${description}\n\n---\n**AI Analiz Özeti:** ${aiSummary}`,
           priority,
           categoryId,

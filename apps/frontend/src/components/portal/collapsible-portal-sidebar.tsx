@@ -40,15 +40,15 @@ const allNavLinks: NavLink[] = [
     { href: "/portal/orders", icon: ShoppingCart, label: "Siparişlerim", access: 'customer' },
     { href: "/portal/licenses", icon: FileText, label: "Lisanslarım", access: 'customer' },
     { href: "/portal/support", icon: LifeBuoy, label: "Destek Taleplerim", access: 'customer' },
+    { href: "/portal/kb", icon: BookOpen, label: "Bilgi Bankası", access: 'customer' },
 
     // Education features (Customer + Student)
     { href: "/portal/courses", icon: GraduationCap, label: "Eğitimlerim", access: ['customer', 'student'] },
     { href: "/portal/certificates", icon: Award, label: "Sertifikalarım", access: ['customer', 'student'] },
 
-    // Content features (All users can view)
-    { href: "/portal/kb", icon: BookOpen, label: "Bilgi Bankası", access: 'all' },
+    // Public content features (All users can view)
     { href: "/portal/newsletter", icon: Mail, label: "Bülten Arşivi", access: 'all' },
-    { href: "/portal/events", icon: Calendar, label: "Etkinliklerim", access: 'all' },
+    { href: "/portal/events", icon: Calendar, label: "Etkinlikler", access: 'all' },
 
     // Profile (everyone)
     { href: "/portal/profile", icon: Users, label: "Profilim", access: 'all' },

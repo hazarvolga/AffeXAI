@@ -11,6 +11,7 @@ import { AuthUtilsService } from '../../shared/auth-utils.service';
 import { CacheService } from '../../shared/services/cache.service';
 import { RolesService } from '../roles/roles.service';
 import { UserRolesService } from './user-roles.service';
+import { CrmService } from '../crm/crm.service';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,7 @@ export class UsersService {
     private rolesService: RolesService,
     @Inject(forwardRef(() => UserRolesService))
     private userRolesService: UserRolesService,
+    private crmService: CrmService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -68,17 +70,54 @@ export class UsersService {
 
       console.log('✓ User created successfully:', savedUser.id);
 
+      // CRITICAL: Check if email exists in CRM database
+      // If yes, automatically assign customer role
+      let primaryRoleId = savedUser.roleId;
+      let additionalRoles: string[] = [];
+
+      try {
+        const isCustomer = await this.crmService.isCustomerEmail(savedUser.email);
+
+        if (isCustomer) {
+          console.log('🎯 CRM Check: Email found in CRM database - auto-assigning customer role');
+
+          // Get customer role ID
+          const roles = await this.rolesService.findAll();
+          const customerRole = roles.find(r => r.name === 'customer');
+
+          if (customerRole) {
+            // Set customer as primary role (not viewer)
+            primaryRoleId = customerRole.id;
+            console.log('✅ Customer role will be set as primary:', customerRole.name);
+          } else {
+            console.warn('⚠️ Customer role not found in database, using viewer role');
+          }
+        } else {
+          console.log('ℹ️ CRM Check: Email not found in CRM - assigning viewer role');
+        }
+      } catch (crmError) {
+        console.error('❌ CRM check failed:', crmError.message);
+        // Continue with default viewer role if CRM check fails
+      }
+
       // CRITICAL: Create user_roles junction table entry
       // This is required for multi-role support and proper role loading
       try {
         await this.userRolesService.assignRoles(
           savedUser.id,
-          savedUser.roleId, // Primary role ID
-          [], // No additional roles on signup
+          primaryRoleId, // Will be customer if in CRM, viewer otherwise
+          additionalRoles,
           false, // Don't replace (there are no existing roles)
           undefined, // No assignedBy for self-registration
         );
         console.log('✓ User role assigned in user_roles table');
+
+        // Update user's roleId to match primary role
+        if (primaryRoleId !== savedUser.roleId) {
+          await this.usersRepository.update(savedUser.id, { roleId: primaryRoleId });
+          savedUser.roleId = primaryRoleId;
+          console.log('✓ User roleId updated to match primary role');
+        }
       } catch (roleError) {
         console.error('❌ Error assigning user role:', roleError);
         // Don't fail user creation, but log the error

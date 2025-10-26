@@ -8,12 +8,14 @@ import { UserRole } from './entities/user-role.entity';
 import { Role } from '../roles/entities/role.entity';
 import { SharedModule } from '../../shared/shared.module';
 import { RolesModule } from '../roles/roles.module';
+import { CrmModule } from '../crm/crm.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserRole, Role]),
     SharedModule,
     forwardRef(() => RolesModule),
+    CrmModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UserRolesService],

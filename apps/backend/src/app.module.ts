@@ -26,6 +26,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { FaqLearningModule } from './modules/faq-learning/faq-learning.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { KnowledgeSourcesModule } from './modules/knowledge-sources/knowledge-sources.module';
+import { CrmModule } from './modules/crm/crm.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -81,6 +82,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     FaqLearningModule,
     ChatModule,
     KnowledgeSourcesModule,
+    CrmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

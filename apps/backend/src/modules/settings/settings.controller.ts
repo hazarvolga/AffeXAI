@@ -16,6 +16,7 @@ import { SiteSettingsDto } from './dto/site-settings.dto';
 import { EmailSettingsDto, EmailSettingsMaskedDto } from './dto/email-settings.dto';
 import { AiSettingsDto, AiSettingsMaskedDto, AiConnectionTestDto } from './dto/ai-settings.dto';
 import { DNSVerificationService, DomainVerificationResult } from './dns-verification.service';
+import { ApiKeyDetector } from './utils/api-key-detector';
 
 @Controller('settings')
 export class SettingsController {
@@ -109,6 +110,21 @@ export class SettingsController {
       success: true,
       message: 'API key configured (connection test not yet implemented)',
       model,
+    };
+  }
+
+  @Post('ai/detect-provider')
+  async detectProvider(@Body() body: { apiKey: string }) {
+    const detection = ApiKeyDetector.detect(body.apiKey);
+    const availableModels = ApiKeyDetector.getAvailableModels(detection.provider);
+
+    return {
+      provider: detection.provider,
+      providerName: ApiKeyDetector.getProviderDisplayName(detection.provider),
+      defaultModel: detection.defaultModel,
+      isValid: detection.isValid,
+      detectionMethod: detection.detectionMethod,
+      availableModels,
     };
   }
 

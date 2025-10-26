@@ -54,15 +54,16 @@ export class AiModuleSettingsDto {
   @IsString()
   apiKey?: string; // Module-specific API key (optional if using global)
 
+  @IsOptional()
   @IsEnum(AiModel)
-  model: AiModel;
+  model?: AiModel; // Optional - auto-detected from API key if not provided
 
   @IsBoolean()
   enabled: boolean;
 
   @IsOptional()
   @IsEnum(AiProvider)
-  provider?: AiProvider; // Auto-detected from model, but can override
+  provider?: AiProvider; // Optional - auto-detected from API key format
 }
 
 /**
@@ -101,23 +102,31 @@ export class AiSettingsMaskedDto extends AiSettingsDto {
   static mask(settings: AiSettingsDto): AiSettingsMaskedDto {
     const masked = JSON.parse(JSON.stringify(settings)) as AiSettingsMaskedDto;
 
+    // Helper function to safely mask API key
+    const maskApiKey = (apiKey: string | undefined): string | undefined => {
+      if (!apiKey || apiKey.length < 4) {
+        return apiKey; // Return as-is if undefined or too short
+      }
+      return '***' + apiKey.slice(-4);
+    };
+
     // Mask global API key
     if (masked.global?.apiKey) {
-      masked.global.apiKey = '***' + masked.global.apiKey.slice(-4);
+      masked.global.apiKey = maskApiKey(masked.global.apiKey);
     }
 
     // Mask module-specific API keys
     if (masked.emailMarketing?.apiKey) {
-      masked.emailMarketing.apiKey = '***' + masked.emailMarketing.apiKey.slice(-4);
+      masked.emailMarketing.apiKey = maskApiKey(masked.emailMarketing.apiKey);
     }
     if (masked.social?.apiKey) {
-      masked.social.apiKey = '***' + masked.social.apiKey.slice(-4);
+      masked.social.apiKey = maskApiKey(masked.social.apiKey);
     }
     if (masked.support?.apiKey) {
-      masked.support.apiKey = '***' + masked.support.apiKey.slice(-4);
+      masked.support.apiKey = maskApiKey(masked.support.apiKey);
     }
     if (masked.analytics?.apiKey) {
-      masked.analytics.apiKey = '***' + masked.analytics.apiKey.slice(-4);
+      masked.analytics.apiKey = maskApiKey(masked.analytics.apiKey);
     }
 
     return masked;

@@ -5,8 +5,8 @@ import { Setting, SettingCategory } from './entities/setting.entity';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
 import { SiteSettingsDto } from './dto/site-settings.dto';
-import { 
-  EmailSettingsDto, 
+import {
+  EmailSettingsDto,
   EmailSettingsMaskedDto,
   EmailProvider,
 } from './dto/email-settings.dto';
@@ -17,6 +17,7 @@ import {
   AiProvider,
   AiConnectionTestDto,
 } from './dto/ai-settings.dto';
+import { ApiKeyDetector } from './utils/api-key-detector';
 
 @Injectable()
 export class SettingsService {
@@ -356,7 +357,7 @@ export class SettingsService {
 
   /**
    * Update AI settings
-   * Automatically encrypts API keys
+   * Automatically encrypts API keys and detects provider from key format
    */
   async updateAiSettings(settingsDto: AiSettingsDto): Promise<void> {
     // Update global settings
@@ -365,8 +366,23 @@ export class SettingsService {
     if (settingsDto.useSingleApiKey && settingsDto.global) {
       if (settingsDto.global.apiKey) {
         await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'global.apiKey', settingsDto.global.apiKey);
+
+        // Auto-detect provider and model from API key
+        const detection = ApiKeyDetector.detect(settingsDto.global.apiKey);
+
+        // Save detected provider
+        await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
+
+        // Use detected default model if no model specified or if model doesn't match provider
+        if (!settingsDto.global.model) {
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', detection.defaultModel);
+          this.logger.log(`Auto-detected provider: ${detection.provider}, default model: ${detection.defaultModel}`);
+        } else {
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
+        }
+      } else if (settingsDto.global.model) {
+        await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
       }
-      await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
     }
 
     // Update Email Marketing settings

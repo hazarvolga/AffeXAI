@@ -34,36 +34,27 @@ export class FaqAiService implements FaqAiInterface {
    */
   async generateFaqAnswer(request: FaqGenerationRequest): Promise<FaqGenerationResponse> {
     const startTime = Date.now();
-    
-    try {
-      // Get AI settings for support module
-      const aiSettings = await this.settingsService.getAiSettings();
-      const supportSettings = aiSettings.support;
-      
-      if (!supportSettings.enabled) {
-        throw new Error('AI support is disabled in settings');
-      }
 
-      // Use global API key if single key mode is enabled
-      const apiKey = aiSettings.useSingleApiKey 
-        ? aiSettings.global?.apiKey 
-        : supportSettings.apiKey;
+    try {
+      // Get AI configuration using centralized settings service methods
+      const apiKey = await this.settingsService.getAiApiKeyForModule('support');
+      const model = await this.settingsService.getAiModelForModule('support');
 
       if (!apiKey) {
         throw new Error('No AI API key configured for FAQ learning');
       }
 
       const prompt = this.buildFaqPrompt(request);
-      
+
       const result = await this.aiService.generateCompletion(apiKey, prompt, {
-        model: supportSettings.model,
+        model,
         temperature: 0.7,
         maxTokens: 1000,
         systemPrompt: 'You are an expert FAQ generator. Create clear, helpful FAQ entries based on conversation patterns.'
       });
 
       const processingTime = Date.now() - startTime;
-      
+
       // Parse AI response (expecting JSON format)
       let parsedResponse;
       try {
@@ -85,8 +76,8 @@ export class FaqAiService implements FaqAiInterface {
         category: parsedResponse.category || 'General',
         processingTime,
         metadata: {
-          aiProvider: this.getProviderFromModel(supportSettings.model),
-          model: supportSettings.model,
+          aiProvider: this.getProviderFromModel(model),
+          model: model,
           processingTime,
           tokensUsed: result.tokensUsed
         }
@@ -102,30 +93,27 @@ export class FaqAiService implements FaqAiInterface {
    */
   async analyzePatterns(request: PatternAnalysisRequest): Promise<PatternAnalysisResponse> {
     const startTime = Date.now();
-    
+
     try {
-      const aiSettings = await this.settingsService.getAiSettings();
-      const supportSettings = aiSettings.support;
-      
-      const apiKey = aiSettings.useSingleApiKey 
-        ? aiSettings.global?.apiKey 
-        : supportSettings.apiKey;
+      // Get AI configuration using centralized settings service methods
+      const apiKey = await this.settingsService.getAiApiKeyForModule('support');
+      const model = await this.settingsService.getAiModelForModule('support');
 
       if (!apiKey) {
         throw new Error('No AI API key configured for pattern analysis');
       }
 
       const prompt = this.buildPatternAnalysisPrompt(request);
-      
+
       const result = await this.aiService.generateCompletion(apiKey, prompt, {
-        model: supportSettings.model,
+        model,
         temperature: 0.3, // Lower temperature for more consistent analysis
         maxTokens: 800,
         systemPrompt: 'You are an expert at analyzing conversation patterns and identifying frequently asked questions.'
       });
 
       const processingTime = Date.now() - startTime;
-      
+
       // Parse AI response
       let parsedResponse;
       try {
@@ -144,8 +132,8 @@ export class FaqAiService implements FaqAiInterface {
         recommendations: parsedResponse.recommendations || [],
         processingTime,
         metadata: {
-          aiProvider: this.getProviderFromModel(supportSettings.model),
-          model: supportSettings.model,
+          aiProvider: this.getProviderFromModel(model),
+          model: model,
           processingTime,
           tokensUsed: result.tokensUsed
         }
@@ -161,28 +149,25 @@ export class FaqAiService implements FaqAiInterface {
    */
   async getProviderStatus(): Promise<ProviderStatus> {
     try {
-      const aiSettings = await this.settingsService.getAiSettings();
-      const supportSettings = aiSettings.support;
-      
-      const apiKey = aiSettings.useSingleApiKey 
-        ? aiSettings.global?.apiKey 
-        : supportSettings.apiKey;
+      // Get AI configuration using centralized settings service methods
+      const apiKey = await this.settingsService.getAiApiKeyForModule('support');
+      const model = await this.settingsService.getAiModelForModule('support');
 
       if (!apiKey) {
         return {
-          provider: this.getProviderFromModel(supportSettings.model),
-          model: supportSettings.model,
+          provider: this.getProviderFromModel(model),
+          model: model,
           available: false
         };
       }
 
       const startTime = Date.now();
-      const isAvailable = await this.aiService.testApiKey(apiKey, supportSettings.model);
+      const isAvailable = await this.aiService.testApiKey(apiKey, model);
       const responseTime = Date.now() - startTime;
 
       return {
-        provider: this.getProviderFromModel(supportSettings.model),
-        model: supportSettings.model,
+        provider: this.getProviderFromModel(model),
+        model: model,
         available: isAvailable,
         responseTime: isAvailable ? responseTime : undefined
       };
@@ -312,6 +297,7 @@ Focus on:
   private getProviderFromModel(model: AiModel): string {
     if (model.startsWith('gpt-')) return 'openai';
     if (model.startsWith('claude-')) return 'anthropic';
+    if (model.startsWith('gemini-')) return 'google';
     return 'unknown';
   }
 }

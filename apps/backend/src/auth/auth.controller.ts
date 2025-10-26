@@ -110,7 +110,7 @@ export class AuthController {
   @Get('verify-email/:token')
   async verifyEmail(@Param('token') token: string) {
     const user = await this.authService.verifyEmail(token);
-    
+
     if (!user) {
       throw new HttpException(
         'Geçersiz veya süresi dolmuş doğrulama linki',
@@ -118,13 +118,70 @@ export class AuthController {
       );
     }
 
+    // CRITICAL: Auto-login after email verification to prevent security vulnerability
+    // User should be redirected to /complete-profile, NOT to /login or /admin
+    const loginPayload = {
+      sub: user.id,
+      email: user.email,
+      tokenVersion: user.tokenVersion || 1,
+    };
+
+    // Generate access token (60 minutes)
+    const accessToken = this.authService['jwtService'].sign(loginPayload, { expiresIn: '60m' });
+
+    // Generate refresh token (7 days)
+    const refreshToken = this.authService['jwtService'].sign(
+      { sub: user.id, type: 'refresh' },
+      { expiresIn: '7d' }
+    );
+
+    // Store refresh token in database
+    const refreshTokenExpires = new Date();
+    refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 7);
+
+    await this.usersService.updateUser(user.id, {
+      refreshToken,
+      refreshTokenExpires,
+    });
+
+    // Fetch full user data with roles for frontend state
+    const fullUser = await this.usersService.findOne(user.id);
+
     return {
       success: true,
-      message: 'Email adresiniz başarıyla doğrulandı! Artık giriş yapabilirsiniz.',
+      message: 'Email adresiniz başarıyla doğrulandı! Profilinizi tamamlayın.',
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: 3600, // 60 minutes in seconds
       user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        id: fullUser.id,
+        email: fullUser.email,
+        firstName: fullUser.firstName,
+        lastName: fullUser.lastName,
+        // Legacy roleId for backward compatibility
+        roleId: fullUser.roleEntity?.name || null,
+        // Multi-role support
+        roles: fullUser.userRoles?.map(ur => ({
+          id: ur.role.id,
+          name: ur.role.name,
+          displayName: ur.role.displayName,
+          isPrimary: ur.isPrimary,
+        })) || [],
+        // Primary role
+        primaryRole: fullUser.userRoles?.find(ur => ur.isPrimary)?.role
+          ? {
+              id: fullUser.userRoles.find(ur => ur.isPrimary).role.id,
+              name: fullUser.userRoles.find(ur => ur.isPrimary).role.name,
+              displayName: fullUser.userRoles.find(ur => ur.isPrimary).role.displayName,
+            }
+          : fullUser.roleEntity
+          ? {
+              id: fullUser.roleEntity.id,
+              name: fullUser.roleEntity.name,
+              displayName: fullUser.roleEntity.displayName,
+            }
+          : null,
+        metadata: fullUser.metadata,
       },
     };
   }

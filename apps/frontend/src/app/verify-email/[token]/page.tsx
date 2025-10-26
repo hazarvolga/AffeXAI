@@ -20,7 +20,7 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const verifyEmail = async () => {
       const token = params.token as string;
-      
+
       if (!token) {
         setError('Doğrulama linki geçersiz');
         setLoading(false);
@@ -29,28 +29,45 @@ export default function VerifyEmailPage() {
 
       try {
         const response = await httpClient.get(`/auth/verify-email/${token}`);
-        
-        // Backend returns { success: true, message: '...', user: {...} }
-        // httpClient.get() already unwraps the response
+
+        // CRITICAL SECURITY FIX: Backend now returns JWT tokens after email verification
+        // This prevents unauthorized access to admin panel and ensures proper flow:
+        // verify-email → auto-login → complete-profile → portal
         if (response && response.success) {
           setSuccess(true);
           setUserEmail(response.user?.email || '');
-          
+
+          // Store authentication tokens
+          if (response.access_token) {
+            localStorage.setItem('access_token', response.access_token);
+          }
+          if (response.refresh_token) {
+            localStorage.setItem('refresh_token', response.refresh_token);
+          }
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+
           toast({
             title: 'Başarılı! 🎉',
             description: response.message || 'Email adresiniz başarıyla doğrulandı!',
           });
+
+          // Auto-redirect to profile completion page after 2 seconds
+          setTimeout(() => {
+            router.push('/complete-profile');
+          }, 2000);
         } else {
           setError(response?.message || 'Doğrulama başarısız');
         }
       } catch (err: any) {
         console.error('Verification error:', err);
         setError(
-          err.response?.data?.message || 
-          err.message || 
+          err.response?.data?.message ||
+          err.message ||
           'Doğrulama sırasında bir hata oluştu'
         );
-        
+
         toast({
           title: 'Hata',
           description: 'Email doğrulama başarısız oldu',
@@ -62,11 +79,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, [params.token, toast]);
-
-  const handleGoToLogin = () => {
-    router.push('/login?verified=true');
-  };
+  }, [params.token, toast, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -111,9 +124,12 @@ export default function VerifyEmailPage() {
                   <strong>{userEmail}</strong> adresi doğrulandı.
                 </p>
               )}
-              <p className="text-sm">
-                Artık hesabınıza giriş yapabilir ve profil bilgilerinizi tamamlayabilirsiniz.
+              <p className="text-sm font-medium text-blue-600">
+                Profil tamamlama sayfasına yönlendiriliyorsunuz...
               </p>
+              <div className="flex justify-center pt-2">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
             </>
           ) : !loading && (
             <div className="space-y-2">
@@ -134,12 +150,8 @@ export default function VerifyEmailPage() {
 
         <CardFooter className="flex flex-col space-y-2">
           {success ? (
-            <Button 
-              onClick={handleGoToLogin}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              Giriş Yap
-            </Button>
+            // Auto-redirect is happening, no button needed
+            null
           ) : !loading && (
             <>
               <Button 

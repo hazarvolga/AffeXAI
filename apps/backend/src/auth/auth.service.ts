@@ -221,7 +221,7 @@ export class AuthService {
    */
   async sendVerificationEmail(userId: string, email: string, firstName: string): Promise<void> {
     const token = await this.createEmailVerificationToken(userId);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:9003';
     const verificationLink = `${baseUrl}/verify-email/${token}`;
 
     try {

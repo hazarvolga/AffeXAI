@@ -31,12 +31,16 @@ export class AuthService {
       return null;
     }
 
+    // CRITICAL: Fetch user with userRoles relation for frontend response
+    // validateUser doesn't load relations, so we need to fetch again with full data
+    const fullUser = await this.usersService.findOne(user.id);
+
     // JWT Payload Strategy: Minimal data to avoid stale role/permission issues
     // Role information is fetched fresh from DB on each request via JWT strategy
     const payload = {
-      sub: user.id,
-      email: user.email,
-      tokenVersion: user.tokenVersion || 1, // For invalidating tokens on role changes
+      sub: fullUser.id,
+      email: fullUser.email,
+      tokenVersion: fullUser.tokenVersion || 1, // For invalidating tokens on role changes
     };
 
     // Generate access token (60 minutes)
@@ -44,7 +48,7 @@ export class AuthService {
 
     // Generate refresh token (7 days)
     const refreshToken = this.jwtService.sign(
-      { sub: user.id, type: 'refresh' },
+      { sub: fullUser.id, type: 'refresh' },
       { expiresIn: '7d' }
     );
 
@@ -52,7 +56,7 @@ export class AuthService {
     const refreshTokenExpires = new Date();
     refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 7);
 
-    await this.usersService.updateUser(user.id, {
+    await this.usersService.updateUser(fullUser.id, {
       refreshToken,
       refreshTokenExpires,
       lastLoginAt: new Date(),
@@ -65,33 +69,35 @@ export class AuthService {
       refresh_token: refreshToken,
       expires_in: 3600, // 60 minutes in seconds
       user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        id: fullUser.id,
+        email: fullUser.email,
+        firstName: fullUser.firstName,
+        lastName: fullUser.lastName,
         // Legacy roleId for backward compatibility
-        roleId: user.roleEntity?.name || null,
+        roleId: fullUser.roleEntity?.name || null,
         // Multi-role support: include all roles with full details
-        roles: user.userRoles?.map(ur => ({
+        roles: fullUser.userRoles?.map(ur => ({
           id: ur.role.id,
           name: ur.role.name,
           displayName: ur.role.displayName,
           isPrimary: ur.isPrimary,
         })) || [],
         // Primary role for quick access
-        primaryRole: user.userRoles?.find(ur => ur.isPrimary)?.role
+        primaryRole: fullUser.userRoles?.find(ur => ur.isPrimary)?.role
           ? {
-              id: user.userRoles.find(ur => ur.isPrimary).role.id,
-              name: user.userRoles.find(ur => ur.isPrimary).role.name,
-              displayName: user.userRoles.find(ur => ur.isPrimary).role.displayName,
+              id: fullUser.userRoles.find(ur => ur.isPrimary).role.id,
+              name: fullUser.userRoles.find(ur => ur.isPrimary).role.name,
+              displayName: fullUser.userRoles.find(ur => ur.isPrimary).role.displayName,
             }
-          : user.roleEntity
+          : fullUser.roleEntity
           ? {
-              id: user.roleEntity.id,
-              name: user.roleEntity.name,
-              displayName: user.roleEntity.displayName,
+              id: fullUser.roleEntity.id,
+              name: fullUser.roleEntity.name,
+              displayName: fullUser.roleEntity.displayName,
             }
           : null,
+        // Include metadata for profile completion checks
+        metadata: fullUser.metadata,
       },
     };
   }

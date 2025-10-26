@@ -116,33 +116,86 @@ export function CollapsiblePortalSidebar({ user }: PortalSidebarProps) {
         return roleNames.some(roleName => hasRole(roleName));
     };
 
+    /**
+     * NEWSLETTER-BASED SIDEBAR FILTERING FOR VIEWER USERS
+     *
+     * Business Logic:
+     * - Customer users: See ALL menu items (full access)
+     * - Viewer users: See menu items based on newsletter preferences
+     *   - productUpdates: true → Show product-related pages (when added)
+     *   - events: true → Show events page
+     *   - promotions: true → Show promotions (when added)
+     *
+     * Newsletter preferences are stored in user.metadata.newsletterPreferences
+     */
+    const checkNewsletterAccess = (link: NavLink): boolean => {
+        // If user has customer role, show everything
+        if (hasRole('customer')) return true;
+
+        // If user is viewer, check newsletter preferences
+        if (hasRole('viewer')) {
+            const newsletterPrefs = user?.metadata?.newsletterPreferences;
+
+            // Events page - show only if user opted for events
+            if (link.href === '/portal/events') {
+                return newsletterPrefs?.events === true;
+            }
+
+            // Newsletter archive - show only if any newsletter preference is selected
+            if (link.href === '/portal/newsletter') {
+                return newsletterPrefs?.productUpdates === true ||
+                       newsletterPrefs?.events === true ||
+                       newsletterPrefs?.promotions === true;
+            }
+
+            // Knowledge Base - show only if user opted for product updates
+            if (link.href === '/portal/kb') {
+                return newsletterPrefs?.productUpdates === true;
+            }
+
+            // Future: Product pages would check productUpdates
+            // Future: Promotions pages would check promotions
+        }
+
+        // Default: show the item (for non-viewer users)
+        return true;
+    };
+
     // Debug logging
     console.log('🔍 PortalSidebar Debug:', {
         user,
         hasRoles: user?.roles?.map((r: any) => r.name),
         primaryRole: user?.primaryRole?.name,
+        newsletterPreferences: user?.metadata?.newsletterPreferences,
         hasCustomer: hasRole('customer'),
         hasStudent: hasRole('student'),
         hasSubscriber: hasRole('subscriber'),
+        hasViewer: hasRole('viewer'),
         hasAdmin: hasRole('admin'),
     });
 
-    // Filter links based on role-based access
+    // Filter links based on role-based access + newsletter preferences
     const navLinks = allNavLinks.filter(link => {
-        // 'all' - everyone can access
-        if (link.access === 'all') return true;
+        // 'all' - everyone can access (but viewer access still filtered by newsletter preferences)
+        if (link.access === 'all') {
+            return checkNewsletterAccess(link);
+        }
 
         // No user = no access
         if (!user) return false;
 
         // Single role access
         if (typeof link.access === 'string') {
-            return hasRole(link.access);
+            const hasRoleAccess = hasRole(link.access);
+            // If role matches, also check newsletter access
+            return hasRoleAccess && checkNewsletterAccess(link);
         }
 
         // Multiple roles access (array) - user needs ANY of these roles
         if (Array.isArray(link.access)) {
-            return hasAnyRole(link.access);
+            const hasRoleAccess = hasAnyRole(link.access);
+            // If role matches, also check newsletter access
+            return hasRoleAccess && checkNewsletterAccess(link);
         }
 
         return false;

@@ -29,10 +29,13 @@ import { KnowledgeSourcesModule } from './modules/knowledge-sources/knowledge-so
 import { CrmModule } from './modules/crm/crm.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LoggingModule } from './common/logging/logging.module';
+import { SystemLogsModule } from './modules/system-logs/system-logs.module';
 
 @Module({
   imports: [
     ConfigModule,
+    LoggingModule, // Add logging module globally
     EventEmitterModule.forRoot({
       // Use this instance across the entire Nest application
       wildcard: false,
@@ -83,6 +86,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ChatModule,
     KnowledgeSourcesModule,
     CrmModule,
+    SystemLogsModule, // Add system logs API
   ],
   controllers: [AppController],
   providers: [AppService],

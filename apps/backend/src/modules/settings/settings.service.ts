@@ -454,6 +454,21 @@ export class SettingsService {
   }
 
   /**
+   * Get AI provider for specific module
+   */
+  async getAiProviderForModule(module: 'emailMarketing' | 'social' | 'support' | 'analytics'): Promise<AiProvider> {
+    const settings = await this.getAiSettings();
+
+    // Use global provider if configured
+    if (settings.useSingleApiKey && settings.global?.provider) {
+      return settings.global.provider;
+    }
+
+    // Use module-specific provider
+    return settings[module]?.provider || AiProvider.OPENAI;
+  }
+
+  /**
    * Helper: Determine provider from model name
    */
   private getProviderFromModel(model: AiModel): AiProvider {

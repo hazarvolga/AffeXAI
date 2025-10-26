@@ -18,6 +18,8 @@ import { TicketAutoTaggingService } from './services/ticket-auto-tagging.service
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { SettingsService } from '../settings/settings.service';
 import { AiService } from '../ai/ai.service';
+import { AppLoggerService } from '../../common/logging/app-logger.service';
+import { LogContext } from '../../common/entities/system-log.entity';
 
 /**
  * Tickets Service
@@ -46,6 +48,7 @@ export class TicketsService {
     private readonly notificationsGateway: TicketNotificationsGateway,
     private readonly settingsService: SettingsService,
     private readonly aiService: AiService,
+    private readonly appLoggerService: AppLoggerService,
   ) {}
 
   /**
@@ -1301,17 +1304,35 @@ export class TicketsService {
    * @param category - The selected category
    */
   async analyzeTicketWithAI(problemDescription: string, category: string) {
+    const startTime = Date.now();
+
     try {
       this.logger.log('🔍 [AI ANALYSIS] Starting ticket analysis...');
 
       // Get AI configuration from settings (using support module config)
       const apiKey = await this.settingsService.getAiApiKeyForModule('support');
       const model = await this.settingsService.getAiModelForModule('support');
+      const provider = await this.settingsService.getAiProviderForModule('support');
 
-      this.logger.log(`🔍 [AI ANALYSIS] Config retrieved: { hasApiKey: ${!!apiKey}, model: ${model} }`);
+      this.logger.log(`🔍 [AI ANALYSIS] Config retrieved: { hasApiKey: ${!!apiKey}, model: ${model}, provider: ${provider} }`);
 
       if (!apiKey) {
         this.logger.error('❌ [AI ANALYSIS] No API key found for support module');
+
+        // Log error to database
+        await this.appLoggerService.logError(
+          LogContext.AI,
+          'AI API key not configured for support module',
+          new Error('Missing AI API key'),
+          {
+            module: 'support',
+            provider,
+            model,
+            category,
+            problemDescriptionPreview: problemDescription.substring(0, 100),
+          },
+        );
+
         throw new Error('AI API key not configured for support module');
       }
 
@@ -1337,6 +1358,16 @@ Respond in Turkish language with JSON format:
         temperature: 0.7,
         maxTokens: 500,
       });
+
+      const duration = Date.now() - startTime;
+
+      // Log successful AI call
+      await this.appLoggerService.logAiCall(
+        provider,
+        model,
+        duration,
+        true,
+      );
 
       // Parse the AI response
       try {
@@ -1371,16 +1402,34 @@ Respond in Turkish language with JSON format:
         };
       }
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const provider = await this.settingsService.getAiProviderForModule('support');
+      const model = await this.settingsService.getAiModelForModule('support');
+
       this.logger.error(`AI ticket analysis failed: ${error.message}`, error.stack);
 
-      // Log detailed error information for debugging
-      this.logger.error(`Error details: ${JSON.stringify({
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        problemDescription: problemDescription.substring(0, 100),
-        category
-      })}`);
+      // Log detailed error to database
+      await this.appLoggerService.logError(
+        LogContext.AI,
+        `AI ticket analysis failed: ${error.message}`,
+        error,
+        {
+          provider,
+          model,
+          category,
+          problemDescriptionPreview: problemDescription.substring(0, 100),
+          duration,
+        },
+      );
+
+      // Log failed AI call
+      await this.appLoggerService.logAiCall(
+        provider,
+        model,
+        duration,
+        false,
+        error.message,
+      );
 
       // Re-throw error to expose it instead of silently returning fallback
       throw new Error(`AI analysis failed: ${error.message}`);

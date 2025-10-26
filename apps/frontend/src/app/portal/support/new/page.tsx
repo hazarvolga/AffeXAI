@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import {
   Card,
   CardContent,
@@ -122,7 +122,7 @@ export default function NewSupportTicketPage() {
     step: 1,
     message: '',
   };
-  const [state, formAction] = useFormState(analyzeSupportTicket, initialState);
+  const [state, formAction] = useActionState(analyzeSupportTicket, initialState);
 
   useEffect(() => {
     loadCategories();

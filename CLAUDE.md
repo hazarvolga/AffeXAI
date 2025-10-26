@@ -9,18 +9,356 @@
 
 ## 📋 Table of Contents
 
-1. [Project Overview](#-project-overview)
-2. [Architecture](#️-architecture)
-3. [Tech Stack](#️-tech-stack)
-4. [Core Features Matrix](#-core-features-matrix)
-5. [Backend Modules Deep Dive](#-backend-modules-deep-dive)
-6. [Frontend Architecture](#-frontend-architecture)
-7. [Database Schema](#-database-schema)
-8. [API Documentation](#-api-documentation)
-9. [Design System](#-design-system)
-10. [Development Guide](#️-development-guide)
-11. [Deployment](#-deployment)
-12. [Roadmap & Planned Features](#-roadmap--planned-features)
+1. [**🔍 AUTOMATED DEBUGGING SYSTEM (CRITICAL)**](#-automated-debugging-system-critical)
+2. [Project Overview](#-project-overview)
+3. [Architecture](#️-architecture)
+4. [Tech Stack](#️-tech-stack)
+5. [Core Features Matrix](#-core-features-matrix)
+6. [Backend Modules Deep Dive](#-backend-modules-deep-dive)
+7. [Frontend Architecture](#-frontend-architecture)
+8. [Database Schema](#-database-schema)
+9. [API Documentation](#-api-documentation)
+10. [Design System](#-design-system)
+11. [Development Guide](#️-development-guide)
+12. [Deployment](#-deployment)
+13. [Roadmap & Planned Features](#-roadmap--planned-features)
+
+---
+
+## 🔍 AUTOMATED DEBUGGING SYSTEM (CRITICAL)
+
+> **⚠️ CRITICAL**: Claude MUST use the automated debugging system instead of asking users to manually check terminals, logs, or run commands.
+
+### System Architecture
+
+The Affexai platform includes a comprehensive error tracking and debugging system that automatically logs all errors, AI calls, and system events to a centralized database.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                 Error Tracking Flow                      │
+└─────────────────────────────────────────────────────────┘
+
+Frontend Error                Backend Error               AI Call
+     │                            │                          │
+     ├─> ErrorBoundary           ├─> AppLoggerService      ├─> AppLoggerService
+     │   (React)                 │   (NestJS)              │   (AI Analysis)
+     │                            │                          │
+     └───────┬────────────────────┴──────────────┬──────────┘
+             │                                    │
+             ▼                                    ▼
+    POST /api/frontend-errors          Direct Database Insert
+             │                                    │
+             └───────────────┬────────────────────┘
+                             ▼
+                    system_logs table
+                             │
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+    Error Logs          AI Calls            System Events
+```
+
+### Backend Error Tracking
+
+**Location**: `apps/backend/src/common/logging/`
+
+**Core Service**: `AppLoggerService`
+
+**Available Methods**:
+```typescript
+// Log errors with full stack traces
+await appLoggerService.logError(
+  LogContext.AI,           // Context: AI, Database, Auth, Ticket, etc.
+  'Error message',
+  error,                   // Error object with stack trace
+  { metadata },            // Additional context
+  userId                   // Optional user ID
+);
+
+// Log AI API calls (automatic timing)
+await appLoggerService.logAiCall(
+  provider,  // 'openai' | 'anthropic' | 'google'
+  model,     // 'gpt-4' | 'claude-3-5-sonnet' | 'gemini-pro'
+  duration,  // ms
+  success,   // boolean
+  errorMessage?
+);
+
+// Log slow database queries
+await appLoggerService.logSlowQuery(
+  query,
+  duration,
+  userId?
+);
+
+// Get recent logs (for debugging)
+const { logs, total } = await appLoggerService.getLogs({
+  level: LogLevel.ERROR,
+  context: LogContext.AI,
+  limit: 50,
+  startDate: new Date('2025-01-01')
+});
+
+// Get error statistics
+const stats = await appLoggerService.getErrorStats();
+// Returns: { totalErrors, errorsByContext, recentErrors }
+```
+
+**Log Contexts**:
+- `LogContext.AI` - AI provider errors, API calls
+- `LogContext.DATABASE` - Database queries, slow queries
+- `LogContext.AUTH` - Authentication failures
+- `LogContext.TICKET` - Ticket system errors
+- `LogContext.EMAIL` - Email sending errors
+- `LogContext.CHAT` - Chat system errors
+- `LogContext.SYSTEM` - General system errors
+
+**Log Levels**:
+- `LogLevel.ERROR` - Critical errors requiring attention
+- `LogLevel.WARN` - Warnings (e.g., slow queries >1s)
+- `LogLevel.INFO` - General information
+- `LogLevel.DEBUG` - Debug information (development only)
+
+### Frontend Error Tracking
+
+**Location**: `apps/frontend/src/services/error-logger.service.ts`
+
+**Global Error Handlers**: Automatically catches:
+- Unhandled promise rejections
+- Global JavaScript errors
+- React component errors (via ErrorBoundary)
+- API call failures (via axios interceptors)
+
+**Usage**:
+```typescript
+import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/error-logger.service';
+
+// Log API error (automatic via axios interceptor)
+// No manual call needed
+
+// Log component error (automatic via ErrorBoundary)
+// No manual call needed
+
+// Manual error logging (if needed)
+errorLogger.logError({
+  message: 'Custom error message',
+  severity: ErrorSeverity.HIGH,
+  category: ErrorCategory.API,
+  metadata: { customData: 'value' }
+});
+```
+
+**Error Boundary Component**:
+```tsx
+import { ErrorBoundary } from '@/components/common/error-boundary';
+
+<ErrorBoundary componentName="TicketForm">
+  <YourComponent />
+</ErrorBoundary>
+```
+
+### Database Schema
+
+**Table**: `system_logs`
+
+```sql
+CREATE TABLE system_logs (
+  id SERIAL PRIMARY KEY,
+  level VARCHAR(10),              -- ERROR, WARN, INFO, DEBUG
+  context VARCHAR(100),            -- AI, Database, Auth, etc.
+  message TEXT,                    -- Error message
+  metadata JSONB,                  -- Additional context
+  stack_trace TEXT,                -- Full stack trace
+  user_id INTEGER,                 -- Associated user
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for performance
+CREATE INDEX idx_system_logs_level ON system_logs(level);
+CREATE INDEX idx_system_logs_context ON system_logs(context);
+CREATE INDEX idx_system_logs_created_at ON system_logs(created_at);
+CREATE INDEX idx_system_logs_user_id ON system_logs(user_id);
+```
+
+### API Endpoints
+
+**Admin Endpoints** (Authentication Required):
+```bash
+# Get logs with filters
+GET /api/system-logs?level=ERROR&context=AI&limit=50
+
+# Get error statistics
+GET /api/system-logs/stats
+
+# Clean old logs (30+ days)
+DELETE /api/system-logs/cleanup?daysToKeep=30
+```
+
+**Public Endpoints** (No Authentication):
+```bash
+# Log frontend errors
+POST /api/frontend-errors
+{
+  "message": "Error message",
+  "severity": "high",
+  "category": "api",
+  "url": "http://localhost:9003/page",
+  "userAgent": "Mozilla/5.0...",
+  "metadata": {}
+}
+```
+
+### Usage Pattern for Claude
+
+**❌ WRONG - DO NOT DO THIS**:
+```
+Claude: "Please check the backend terminal and tell me what error you see"
+Claude: "Can you run this command and send me the output?"
+Claude: "Look at the console logs and tell me what happened"
+```
+
+**✅ CORRECT - AUTOMATED DEBUGGING**:
+```typescript
+// 1. Check system logs automatically
+const { logs } = await appLoggerService.getLogs({
+  level: LogLevel.ERROR,
+  context: LogContext.AI,
+  limit: 10
+});
+
+// 2. Analyze error patterns
+const stats = await appLoggerService.getErrorStats();
+
+// 3. Identify root cause from metadata
+const latestError = logs[0];
+console.log('Error:', latestError.message);
+console.log('Metadata:', latestError.metadata);
+// { provider: 'google', model: 'gemini-pro', duration: 500, success: false }
+
+// 4. Apply fix based on evidence
+// Example: API key invalid → Update settings
+// Example: Slow query → Add database index
+```
+
+### Real-World Example
+
+**Scenario**: Ticket AI analysis returns 500 error
+
+**❌ OLD APPROACH**:
+1. Claude asks user to check terminal
+2. User pastes error logs
+3. Claude analyzes
+4. Back and forth continues...
+
+**✅ NEW APPROACH WITH AUTOMATED DEBUGGING**:
+```typescript
+// 1. Query system logs automatically
+const errorLogs = await appLoggerService.getLogs({
+  level: LogLevel.ERROR,
+  context: LogContext.AI,
+  limit: 5
+});
+
+// 2. Analyze error
+/*
+{
+  message: "AI call failed: API key not valid",
+  metadata: {
+    provider: "google",
+    model: "gemini-1.5-flash",
+    duration: 624,
+    success: false
+  }
+}
+*/
+
+// 3. Identify root cause: Invalid API key for Google provider
+
+// 4. Check settings
+const settings = await settingsService.getAiSettings();
+// useSingleApiKey: true, global.provider: google
+
+// 5. Solution: API key is encrypted but invalid
+// Update with valid key via settings API
+```
+
+### Error Detection Rules
+
+**Automatic Detection**:
+- ✅ API key missing/invalid → Log ERROR + metadata with provider/model
+- ✅ AI model deprecated → Log WARN + suggestion for new model
+- ✅ Database query >1s → Log WARN + query details
+- ✅ 500 errors → Log ERROR + stack trace
+- ✅ Frontend crashes → Log ERROR via ErrorBoundary
+
+**Automated Alerts** (Future):
+- Slack/Email notifications for CRITICAL errors
+- Dashboard widget for recent errors
+- Real-time error streaming (WebSocket)
+
+### Maintenance
+
+**Auto-Cleanup**:
+- Logs older than 30 days are automatically cleaned
+- Manual cleanup: `DELETE /api/system-logs/cleanup?daysToKeep=7`
+
+**Performance**:
+- Indexed columns for fast queries
+- JSONB for flexible metadata storage
+- Async logging (doesn't block main thread)
+
+### Integration Examples
+
+**TicketsService** (Already Integrated):
+```typescript
+async analyzeTicketWithAI(problemDescription: string, category: string) {
+  const startTime = Date.now();
+
+  try {
+    const result = await this.aiService.generateCompletion(...);
+    const duration = Date.now() - startTime;
+
+    // ✅ Log successful AI call
+    await this.appLoggerService.logAiCall(
+      provider,
+      model,
+      duration,
+      true
+    );
+
+    return result;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // ✅ Log error with full context
+    await this.appLoggerService.logError(
+      LogContext.AI,
+      `AI ticket analysis failed: ${error.message}`,
+      error,
+      { provider, model, category, duration }
+    );
+
+    // ✅ Log failed AI call
+    await this.appLoggerService.logAiCall(
+      provider,
+      model,
+      duration,
+      false,
+      error.message
+    );
+
+    throw error;
+  }
+}
+```
+
+### Key Takeaways for Claude
+
+1. **ALWAYS** query `system_logs` table first when debugging
+2. **NEVER** ask users to manually check terminals/logs
+3. **USE** `appLoggerService.getLogs()` to retrieve error history
+4. **ANALYZE** metadata to identify root causes
+5. **APPLY** fixes based on logged evidence
+6. **VERIFY** fixes by checking new logs
 
 ---
 

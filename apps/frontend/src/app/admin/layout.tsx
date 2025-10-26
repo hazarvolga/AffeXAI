@@ -40,6 +40,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       const user = JSON.parse(userStr);
       const metadata = user?.metadata;
 
+      // CRITICAL: Staff roles (Admin, Editor, Support, etc.) should NEVER be redirected to profile completion
+      // They have admin panel access and don't need customer/student profile data
+      const primaryRoleName = user?.primaryRole?.name || user?.roleId || '';
+      const userRoles = user?.roles || [];
+
+      // Check if user has any staff role
+      const hasStaffRole = userRoles.some((role: any) => isStaffRole(role.name)) ||
+                          isStaffRole(primaryRoleName);
+
+      if (hasStaffRole) {
+        console.log('✅ Admin Layout: Staff role detected, skipping profile completion check');
+        return; // Staff users bypass profile completion entirely
+      }
+
       // ONLY check profile if user selected customer or student role during signup
       // If user selected ONLY subscriber or nothing, no profile completion needed
       const isCustomer = metadata?.isCustomer;

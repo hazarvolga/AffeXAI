@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import MediaPicker from '@/components/media/MediaPicker';
 import settingsService from '@/lib/api/settingsService';
+import { DNSConfigurationGuide } from '@/components/admin/dns-configuration-guide';
 
 
 const socialIcons: { [key: string]: React.ElementType } = {
@@ -333,134 +334,125 @@ export default function SiteSettingsPage() {
                                                     </p>
                                                 </div>
 
-                                                <Alert>
-                                                    <AlertCircle className="h-4 w-4" />
-                                                    <AlertTitle>DNS Yapılandırması Gerekli</AlertTitle>
-                                                    <AlertDescription className="mt-2 space-y-4">
-                                                        <p className="text-sm">
-                                                            Email'lerinizin spam'e düşmemesi ve güvenli gönderilmesi için domain'inizde (örn: aluplan.tr) aşağıdaki DNS kayıtlarını eklemeniz gerekir:
-                                                        </p>
-
-                                                        <div className="space-y-3 text-xs">
-                                                            <div className="rounded-md bg-muted p-3">
-                                                                <div className="font-semibold mb-2 flex items-center gap-2">
-                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">SPF</span>
-                                                                    Sender Policy Framework
-                                                                </div>
-                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
-                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
-                                                                    <div><span className="text-muted-foreground">Name:</span> aluplan.tr (veya @)</div>
-                                                                    <div><span className="text-muted-foreground">Value:</span> v=spf1 include:_spf.resend.com ~all</div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="rounded-md bg-muted p-3">
-                                                                <div className="font-semibold mb-2 flex items-center gap-2">
-                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">DKIM</span>
-                                                                    Domain Keys Identified Mail
-                                                                </div>
-                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
-                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
-                                                                    <div><span className="text-muted-foreground">Name:</span> resend._domainkey.aluplan.tr</div>
-                                                                    <div><span className="text-muted-foreground">Value:</span> <span className="text-orange-500">(Resend dashboard'dan alınacak)</span></div>
-                                                                </div>
-                                                                <p className="text-xs text-muted-foreground mt-2">
-                                                                    Değeri almak için: <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Resend Domains</a> → aluplan.tr → DNS Records
-                                                                </p>
-                                                            </div>
-
-                                                            <div className="rounded-md bg-muted p-3">
-                                                                <div className="font-semibold mb-2 flex items-center gap-2">
-                                                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">DMARC</span>
-                                                                    Domain-based Message Authentication
-                                                                </div>
-                                                                <div className="space-y-1 font-mono text-[10px] bg-background p-2 rounded">
-                                                                    <div><span className="text-muted-foreground">Type:</span> TXT</div>
-                                                                    <div><span className="text-muted-foreground">Name:</span> _dmarc.aluplan.tr</div>
-                                                                    <div><span className="text-muted-foreground">Value:</span> v=DMARC1; p=none; rua=mailto:dmarc@aluplan.tr</div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="rounded-md bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 border p-3">
-                                                                <div className="font-semibold mb-2 text-blue-900 dark:text-blue-100">📋 Adımlar:</div>
-                                                                <ol className="space-y-1 text-blue-800 dark:text-blue-200 list-decimal list-inside">
-                                                                    <li>Domain sağlayıcınıza giriş yapın (örn: GoDaddy, Cloudflare, vs.)</li>
-                                                                    <li>DNS yönetim paneline gidin</li>
-                                                                    <li>Yukarıdaki 3 TXT kaydını ekleyin</li>
-                                                                    <li>Değişikliklerin yayılmasını bekleyin (5-60 dakika)</li>
-                                                                    <li>Resend'de domain'i verify edin</li>
-                                                                </ol>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="pt-2 border-t">
-                                                            <Button variant="outline" size="sm" asChild>
-                                                                <a href="https://resend.com/docs/dashboard/domains/introduction" target="_blank" rel="noopener noreferrer">
-                                                                    <Lightbulb className="mr-2 h-3 w-3" />
-                                                                    Resend Domain Setup Dokümantasyonu
-                                                                </a>
-                                                            </Button>
-                                                        </div>
-                                                    </AlertDescription>
-                                                </Alert>
+                                                <DNSConfigurationGuide
+                                                    provider="resend"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                         {selectedEmailService === 'sendgrid' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="sendgrid-api-key">SendGrid API Key</Label>
-                                                <Input id="sendgrid-api-key" placeholder="SG..." icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="sendgrid-api-key">SendGrid API Key</Label>
+                                                    <Input id="sendgrid-api-key" placeholder="SG..." icon={KeyRound}/>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        API key almak için: <a href="https://app.sendgrid.com/settings/api_keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">SendGrid API Keys</a>
+                                                    </p>
+                                                </div>
+
+                                                <DNSConfigurationGuide
+                                                    provider="sendgrid"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                          {selectedEmailService === 'postmark' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="postmark-api-key">Postmark API Key</Label>
-                                                <Input id="postmark-api-key" placeholder="..." icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="postmark-api-key">Postmark API Key</Label>
+                                                    <Input id="postmark-api-key" placeholder="..." icon={KeyRound}/>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        API key almak için: <a href="https://account.postmarkapp.com/api_tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Postmark API Tokens</a>
+                                                    </p>
+                                                </div>
+
+                                                <DNSConfigurationGuide
+                                                    provider="postmark"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                         {selectedEmailService === 'mailgun' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="mailgun-api-key">Mailgun API Key</Label>
-                                                <Input id="mailgun-api-key" placeholder="key-..." icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="mailgun-api-key">Mailgun API Key</Label>
+                                                    <Input id="mailgun-api-key" placeholder="key-..." icon={KeyRound}/>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        API key almak için: <a href="https://app.mailgun.com/app/account/security/api_keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Mailgun API Keys</a>
+                                                    </p>
+                                                </div>
+
+                                                <DNSConfigurationGuide
+                                                    provider="mailgun"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                         {selectedEmailService === 'ses' && (
-                                            <div className="space-y-4">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="ses-access-key">Amazon SES Access Key</Label>
-                                                    <Input id="ses-access-key" placeholder="AKIA..." icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="ses-access-key">Amazon SES Access Key</Label>
+                                                        <Input id="ses-access-key" placeholder="AKIA..." icon={KeyRound}/>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="ses-secret-key">Amazon SES Secret Key</Label>
+                                                        <Input id="ses-secret-key" type="password" icon={KeyRound}/>
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        AWS credentials için: <a href="https://console.aws.amazon.com/iam" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AWS IAM Console</a>
+                                                    </p>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="ses-secret-key">Amazon SES Secret Key</Label>
-                                                    <Input id="ses-secret-key" type="password" icon={KeyRound}/>
-                                                </div>
+
+                                                <DNSConfigurationGuide
+                                                    provider="ses"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                          {selectedEmailService === 'gmail' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="gmail-app-pass">Gmail App Password</Label>
-                                                <Input id="gmail-app-pass" type="password" placeholder="Google Hesabından oluşturulan uygulama şifresi" icon={KeyRound}/>
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="gmail-app-pass">Gmail App Password</Label>
+                                                    <Input id="gmail-app-pass" type="password" placeholder="Google Hesabından oluşturulan uygulama şifresi" icon={KeyRound}/>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Uygulama şifresi için: <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google App Passwords</a> (2FA aktif olmalı)
+                                                    </p>
+                                                </div>
+
+                                                <DNSConfigurationGuide
+                                                    provider="gmail"
+                                                    domain="aluplan.tr"
+                                                />
                                             </div>
                                         )}
                                          {selectedEmailService === 'smtp' && (
-                                             <Card className="bg-secondary/50 p-4">
-                                                <CardHeader className="p-2">
-                                                    <CardTitle>Özel SMTP Ayarları</CardTitle>
-                                                </CardHeader>
-                                                 <CardContent className="p-2 space-y-4">
-                                                    <div className="grid md:grid-cols-2 gap-4">
-                                                        <div className="space-y-2"><Label htmlFor="smtp-host">Host</Label><Input id="smtp-host" placeholder="smtp.example.com"/></div>
-                                                        <div className="space-y-2"><Label htmlFor="smtp-port">Port</Label><Input id="smtp-port" placeholder="587"/></div>
-                                                    </div>
-                                                    <div className="grid md:grid-cols-2 gap-4">
-                                                        <div className="space-y-2"><Label htmlFor="smtp-user">Username</Label><Input id="smtp-user" placeholder="user@example.com"/></div>
-                                                        <div className="space-y-2"><Label htmlFor="smtp-pass">Password</Label><Input id="smtp-pass" type="password"/></div>
-                                                    </div>
-                                                     <div className="grid md:grid-cols-2 gap-4">
-                                                        <div className="space-y-2"><Label htmlFor="smtp-from-name">From Name</Label><Input id="smtp-from-name" defaultValue={effectiveSettings.companyName}/></div>
-                                                        <div className="space-y-2"><Label htmlFor="smtp-from-email">From Email</Label><Input id="smtp-from-email" defaultValue={effectiveSettings.contact?.email}/></div>
-                                                    </div>
-                                                 </CardContent>
-                                             </Card>
+                                            <div className="space-y-6">
+                                                <Card className="bg-secondary/50 p-4">
+                                                    <CardHeader className="p-2">
+                                                        <CardTitle>Özel SMTP Ayarları</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="p-2 space-y-4">
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            <div className="space-y-2"><Label htmlFor="smtp-host">Host</Label><Input id="smtp-host" placeholder="smtp.example.com"/></div>
+                                                            <div className="space-y-2"><Label htmlFor="smtp-port">Port</Label><Input id="smtp-port" placeholder="587"/></div>
+                                                        </div>
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            <div className="space-y-2"><Label htmlFor="smtp-user">Username</Label><Input id="smtp-user" placeholder="user@example.com"/></div>
+                                                            <div className="space-y-2"><Label htmlFor="smtp-pass">Password</Label><Input id="smtp-pass" type="password"/></div>
+                                                        </div>
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            <div className="space-y-2"><Label htmlFor="smtp-from-name">From Name</Label><Input id="smtp-from-name" defaultValue={effectiveSettings.companyName}/></div>
+                                                            <div className="space-y-2"><Label htmlFor="smtp-from-email">From Email</Label><Input id="smtp-from-email" defaultValue={effectiveSettings.contact?.email}/></div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                <DNSConfigurationGuide
+                                                    provider="smtp"
+                                                    domain="aluplan.tr"
+                                                />
+                                            </div>
                                          )}
                                     </div>
                                 </div>

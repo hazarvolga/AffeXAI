@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   MoreHorizontal,
   PlusCircle,
@@ -32,6 +33,7 @@ import {
   XCircle,
   ArrowLeft,
   Loader2,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import {

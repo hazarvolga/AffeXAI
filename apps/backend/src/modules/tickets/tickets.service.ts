@@ -1368,12 +1368,17 @@ Respond in Turkish language with JSON format:
     } catch (error) {
       this.logger.error(`AI ticket analysis failed: ${error.message}`, error.stack);
 
-      // Return a safe fallback response instead of throwing
-      return {
-        summary: 'Destek talebiniz alındı. Ekibimiz inceleyecektir.',
-        priority: 'medium',
-        suggestion: 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
-      };
+      // Log detailed error information for debugging
+      this.logger.error(`Error details: ${JSON.stringify({
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        problemDescription: problemDescription.substring(0, 100),
+        category
+      })}`);
+
+      // Re-throw error to expose it instead of silently returning fallback
+      throw new Error(`AI analysis failed: ${error.message}`);
     }
   }
 }

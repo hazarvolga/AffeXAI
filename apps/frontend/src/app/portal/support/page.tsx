@@ -49,7 +49,7 @@ import { ticketsService, type Ticket, TicketStatus, TicketPriority } from '@/lib
 import { authService } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useTicketNotifications } from '@/hooks/useTicketNotifications';
-import { Wifi, WifiOff, Search, Filter } from 'lucide-react';
+import { Wifi, WifiOff, Filter } from 'lucide-react';
 import {
   Select,
   SelectContent,

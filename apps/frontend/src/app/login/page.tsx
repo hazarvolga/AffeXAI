@@ -38,16 +38,35 @@ export default function LoginPage() {
         description: `Giriş başarılı!`,
       });
 
-      // Redirect based on user roles
-      // Priority: Admin/Editor/Support → Admin Panel
-      //          Customer/Student/Subscriber → User Portal
       const user = result?.user;
-
-      // For now, use roleId from login response (will be replaced by roles array)
-      // Map legacy role names to determine redirect
+      const metadata = user?.metadata;
       const roleId = user?.roleId?.toLowerCase() || '';
 
-      console.log('🔄 Login successful, determining redirect for role:', roleId);
+      console.log('🔄 Login successful, checking profile completion and role:', { roleId, metadata });
+
+      // CRITICAL: Check if profile completion is required BEFORE role-based redirect
+      // This prevents security vulnerability where users bypass /complete-profile
+      const isCustomer = metadata?.isCustomer;
+      const isStudent = metadata?.isStudent;
+      const isSubscriber = metadata?.isSubscriber;
+
+      // Check if profile is incomplete
+      const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
+      const studentIncomplete = isStudent && (!metadata?.schoolName || !metadata?.studentId);
+
+      if (customerIncomplete || studentIncomplete) {
+        console.log('⚠️ Profile incomplete, redirecting to /complete-profile');
+        toast({
+          title: 'Profil Tamamlama',
+          description: 'Lütfen profil bilgilerinizi tamamlayın',
+          variant: 'default',
+        });
+        router.push('/complete-profile');
+        return; // Stop here, don't redirect to admin/portal
+      }
+
+      // Profile is complete, redirect based on role
+      console.log('✅ Profile complete, determining redirect for role:', roleId);
 
       // Admin, Editor, Support → Admin Panel
       if (roleId === 'admin' || roleId === 'editor' || roleId === 'support' || roleId === 'support team') {

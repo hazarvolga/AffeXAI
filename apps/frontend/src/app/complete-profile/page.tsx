@@ -93,7 +93,7 @@ export default function CompleteProfilePage() {
               title: 'Profil zaten tamamlanmış',
               description: 'Portale yönlendiriliyorsunuz...',
             });
-            router.push('/portal');
+            router.push('/portal/dashboard');
             return;
           }
         }
@@ -235,7 +235,7 @@ export default function CompleteProfilePage() {
       });
 
       setTimeout(() => {
-        router.push('/portal');
+        router.push('/portal/dashboard');
       }, 1500);
 
     } catch (error: any) {

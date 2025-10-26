@@ -303,7 +303,7 @@ export class SettingsService {
     const settings = await this.findByCategory(SettingCategory.AI);
 
     const aiSettings: AiSettingsDto = {
-      useSingleApiKey: this.getSettingValue(settings, SettingCategory.AI, 'useSingleApiKey', 'false') === 'true',
+      useSingleApiKey: this.getSettingValue(settings, SettingCategory.AI, 'global.useSingleKey', 'false') === 'true',
       
       emailMarketing: {
         apiKey: (await this.getDecryptedValue('emailMarketing.apiKey', SettingCategory.AI)) || undefined,
@@ -361,7 +361,7 @@ export class SettingsService {
    */
   async updateAiSettings(settingsDto: AiSettingsDto): Promise<void> {
     // Update global settings
-    await this.updateOrCreateSetting(SettingCategory.AI, 'useSingleApiKey', String(settingsDto.useSingleApiKey));
+    await this.updateOrCreateSetting(SettingCategory.AI, 'global.useSingleKey', String(settingsDto.useSingleApiKey));
 
     if (settingsDto.useSingleApiKey && settingsDto.global) {
       if (settingsDto.global.apiKey) {

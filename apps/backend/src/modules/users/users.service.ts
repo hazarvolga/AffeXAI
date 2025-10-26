@@ -291,6 +291,10 @@ export class UsersService {
           undefined, // TODO: Get current admin user ID from request context
         );
 
+        // IMPORTANT: Invalidate all tokens when role changes
+        // This forces user to re-login and get new JWT with updated role
+        await this.invalidateAllTokens(id);
+
         // Remove from DTO to prevent duplicate update
         delete updateUserDto.primaryRoleId;
         delete updateUserDto.additionalRoleIds;
@@ -429,6 +433,10 @@ export class UsersService {
       [], // No additional roles
       true, // Replace existing
     );
+
+    // IMPORTANT: Invalidate all tokens when role changes
+    // This forces user to re-login and get new JWT with updated role
+    await this.invalidateAllTokens(id);
 
     // Clear cache
     await this.cacheService.del(`users:${id}`);
@@ -632,5 +640,28 @@ export class UsersService {
     } catch (error) {
       console.error(`❌ Error assigning role "${roleName}":`, error);
     }
+  }
+
+  /**
+   * Invalidate all active tokens for a user
+   * This forces the user to login again to get a new token
+   * Used when: user role changes, password changes, security breach
+   */
+  async invalidateAllTokens(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`);
+    }
+
+    // Increment tokenVersion - this will invalidate all existing JWTs
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await this.usersRepository.save(user);
+
+    // Clear user cache so next request gets updated tokenVersion
+    await this.cacheService.del(`users:${userId}`);
+    await this.cacheService.del(`users:email:${user.email}`);
+
+    console.log(`🔒 All tokens invalidated for user ${user.email} (tokenVersion: ${user.tokenVersion})`);
   }
 }

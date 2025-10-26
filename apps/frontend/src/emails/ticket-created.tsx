@@ -14,6 +14,7 @@ import {
 import * as React from "react";
 import { siteSettingsData } from "@/lib/site-settings-data";
 import { getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
+import { EmailHeader } from "./components/EmailHeader";
 import { EmailFooter } from "./components/EmailFooter";
 
 interface TicketCreatedEmailProps {
@@ -68,10 +69,13 @@ export const TicketCreatedEmail = ({
       <Preview>{previewText}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header */}
-          <Section style={header}>
-            <Heading style={heading}>{companyName}</Heading>
-          </Section>
+          {/* Header with Logo */}
+          <EmailHeader
+            companyName={companyName}
+            logoUrl={logoUrl}
+            baseUrl={baseUrl}
+            showTagline={false}
+          />
 
           {/* Main Content */}
           <Section style={content}>

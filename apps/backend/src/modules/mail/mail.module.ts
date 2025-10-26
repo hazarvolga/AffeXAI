@@ -4,6 +4,7 @@ import { MailService } from './mail.service';
 import { MailController } from './mail.controller';
 import { ResendWebhookController } from './controllers/resend-webhook.controller';
 import { WebhookService } from './services/webhook.service';
+import { TemplateRendererService } from './template-renderer.service';
 import { EmailSuppression } from './entities/email-suppression.entity';
 import { SettingsModule } from '../settings/settings.module';
 import { EmailMarketingModule } from '../email-marketing/email-marketing.module';
@@ -27,10 +28,12 @@ import { EmailMarketingModule } from '../email-marketing/email-marketing.module'
   providers: [
     MailService,
     WebhookService,
+    TemplateRendererService,
   ],
   exports: [
     MailService,
     WebhookService,
+    TemplateRendererService,
   ],
 })
 export class MailModule {}

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
+import { TemplateRendererService } from './template-renderer.service';
 import { ResendMailAdapter } from './adapters/resend-mail.adapter';
 import {
   IMailService,
@@ -19,7 +20,10 @@ export class MailService implements IMailService {
   private readonly logger = new Logger(MailService.name);
   private adapter: IMailService;
 
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly templateRenderer: TemplateRendererService,
+  ) {}
 
   /**
    * Initialize the mail service with current settings
@@ -75,7 +79,25 @@ export class MailService implements IMailService {
     const settings = await this.settingsService.getEmailSettings();
 
     // Apply channel-specific defaults if not provided
-    const enhancedOptions = await this.applyChannelDefaults(options, settings);
+    let enhancedOptions = await this.applyChannelDefaults(options, settings);
+
+    // If template is specified, render it to HTML
+    if (options.template && !options.html) {
+      try {
+        const html = await this.templateRenderer.renderTemplate(
+          options.template,
+          options.context || {},
+        );
+        enhancedOptions = { ...enhancedOptions, html };
+        this.logger.log(`Template rendered: ${options.template}`);
+      } catch (error) {
+        this.logger.error(
+          `Template rendering failed for ${options.template}: ${error.message}`,
+          error.stack,
+        );
+        // Continue without template - adapter will handle the error
+      }
+    }
 
     // Send via adapter
     const result = await this.adapter.sendMail(enhancedOptions);

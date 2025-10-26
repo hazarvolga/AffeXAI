@@ -66,11 +66,12 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
             const user = JSON.parse(userStr);
             const metadata = user?.metadata;
 
-            // Check if profile completion is required
+            // ONLY check profile if user selected customer or student role during signup
+            // If user selected ONLY subscriber or nothing, no profile completion needed
             const isCustomer = metadata?.isCustomer;
             const isStudent = metadata?.isStudent;
 
-            // Check if profile is incomplete
+            // Only redirect if they ARE customer/student but profile is incomplete
             const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
             const studentIncomplete = isStudent && (!metadata?.schoolName || !metadata?.studentId);
 

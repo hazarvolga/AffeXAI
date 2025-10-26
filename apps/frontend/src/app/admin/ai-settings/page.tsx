@@ -213,6 +213,13 @@ export default function AiSettingsPage() {
     return AI_MODELS_BY_PROVIDER[provider] || [];
   };
 
+  // Helper: Get model info (label and cost) from model value
+  const getModelInfo = (modelValue: string, provider: AiProvider) => {
+    const models = AI_MODELS_BY_PROVIDER[provider] || [];
+    const modelInfo = models.find(m => m.value === modelValue);
+    return modelInfo || { value: modelValue, label: modelValue, cost: 'Unknown' };
+  };
+
   // Helper: Get cost badge color
   const getCostBadgeClass = (cost: string) => {
     switch (cost) {
@@ -455,29 +462,32 @@ export default function AiSettingsPage() {
                     </Select>
                   </div>
 
-                  {/* Model Selection */}
+                  {/* Auto-Detected Model (Read-Only) */}
                   <div className="space-y-2">
-                    <Label htmlFor="global-model">AI Model</Label>
-                    <Select
-                      value={aiSettings.global?.model || 'gpt-4o'}
-                      onValueChange={(value) => updateGlobalSettings({ model: value as AiModel })}
-                    >
-                      <SelectTrigger id="global-model">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableModels(currentGlobalProvider).map((model) => (
-                          <SelectItem key={model.value} value={model.value}>
-                            <div className="flex items-center justify-between w-full gap-2">
-                              <span className="text-sm">{model.label}</span>
-                              <Badge variant="secondary" className={`text-xs ${getCostBadgeClass(model.cost)}`}>
-                                {model.cost}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>AI Model (Otomatik Tespit)</Label>
+                    {globalDetection && globalDetection.isValid ? (
+                      <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-sm">
+                          {getModelInfo(aiSettings.global?.model || globalDetection.defaultModel, currentGlobalProvider).label}
+                        </span>
+                        <Badge variant="secondary" className={`text-xs ${getCostBadgeClass(
+                          getModelInfo(aiSettings.global?.model || globalDetection.defaultModel, currentGlobalProvider).cost
+                        )}`}>
+                          {getModelInfo(aiSettings.global?.model || globalDetection.defaultModel, currentGlobalProvider).cost}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/10">
+                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          API key girildiğinde model otomatik tespit edilecek
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Model, API key formatından otomatik olarak tespit edilir ve uygun varsayılan model atanır.
+                    </p>
                   </div>
 
                   {/* API Key Input with Auto-Detection */}
@@ -615,29 +625,41 @@ export default function AiSettingsPage() {
                       </Select>
                     </div>
 
-                    {/* Model Selection */}
+                    {/* Auto-Detected Model (Read-Only) */}
                     <div className="space-y-2">
-                      <Label htmlFor={`${module.key}-model`}>AI Model</Label>
-                      <Select
-                        value={aiSettings[module.key].model}
-                        onValueChange={(value) => updateModuleSettings(module.key, { model: value as AiModel })}
-                      >
-                        <SelectTrigger id={`${module.key}-model`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getAvailableModels(aiSettings[module.key].provider || 'openai').map((model) => (
-                            <SelectItem key={model.value} value={model.value}>
-                              <div className="flex items-center justify-between w-full gap-2">
-                                <span className="text-sm">{model.label}</span>
-                                <Badge variant="secondary" className={`text-xs ${getCostBadgeClass(model.cost)}`}>
-                                  {model.cost}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>AI Model (Otomatik Tespit)</Label>
+                      {moduleDetections[module.key] && moduleDetections[module.key]?.isValid ? (
+                        <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-sm">
+                            {getModelInfo(
+                              aiSettings[module.key].model || moduleDetections[module.key]?.defaultModel || 'gpt-4o',
+                              aiSettings[module.key].provider || 'openai'
+                            ).label}
+                          </span>
+                          <Badge variant="secondary" className={`text-xs ${getCostBadgeClass(
+                            getModelInfo(
+                              aiSettings[module.key].model || moduleDetections[module.key]?.defaultModel || 'gpt-4o',
+                              aiSettings[module.key].provider || 'openai'
+                            ).cost
+                          )}`}>
+                            {getModelInfo(
+                              aiSettings[module.key].model || moduleDetections[module.key]?.defaultModel || 'gpt-4o',
+                              aiSettings[module.key].provider || 'openai'
+                            ).cost}
+                          </Badge>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/10">
+                          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            API key girildiğinde model otomatik tespit edilecek
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Model, API key formatından otomatik olarak tespit edilir.
+                      </p>
                     </div>
 
                     {/* API Key Input with Auto-Detection */}

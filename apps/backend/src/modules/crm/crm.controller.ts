@@ -16,6 +16,7 @@ import { ImportCrmCustomersDto } from './dto/import-crm-customers.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';
 
 @Controller('crm')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,7 +28,7 @@ export class CrmController {
    * Admin only
    */
   @Get()
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async findAll() {
     const customers = await this.crmService.findAll();
     return {
@@ -44,7 +45,7 @@ export class CrmController {
    * Admin only
    */
   @Get('stats')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getStats() {
     const stats = await this.crmService.getStats();
     return {
@@ -58,7 +59,7 @@ export class CrmController {
    * Admin only
    */
   @Get(':id')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async findOne(@Param('id') id: string) {
     try {
       const customer = await this.crmService.findOne(id);
@@ -76,7 +77,7 @@ export class CrmController {
    * Admin only
    */
   @Post()
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async create(@Body() createDto: CreateCrmCustomerDto) {
     try {
       const customer = await this.crmService.create(createDto);
@@ -98,7 +99,7 @@ export class CrmController {
    * Admin only
    */
   @Post('import')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async bulkImport(@Body() importDto: ImportCrmCustomersDto) {
     try {
       console.log(`📥 Importing ${importDto.customers.length} CRM customers...`);
@@ -123,7 +124,7 @@ export class CrmController {
    * Admin only
    */
   @Put(':id')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async update(
     @Param('id') id: string,
     @Body() updateDto: Partial<CreateCrmCustomerDto>,
@@ -148,7 +149,7 @@ export class CrmController {
    * Admin only
    */
   @Delete(':id')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async remove(@Param('id') id: string) {
     try {
       await this.crmService.remove(id);
@@ -166,7 +167,7 @@ export class CrmController {
    * Admin only
    */
   @Delete(':id/hard')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async hardDelete(@Param('id') id: string) {
     try {
       await this.crmService.hardDelete(id);

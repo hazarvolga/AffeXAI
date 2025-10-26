@@ -65,12 +65,29 @@ export class UsersService {
       });
       
       const savedUser = await this.usersRepository.save(user);
-      
+
       console.log('✓ User created successfully:', savedUser.id);
-      
+
+      // CRITICAL: Create user_roles junction table entry
+      // This is required for multi-role support and proper role loading
+      try {
+        await this.userRolesService.assignRoles(
+          savedUser.id,
+          savedUser.roleId, // Primary role ID
+          [], // No additional roles on signup
+          false, // Don't replace (there are no existing roles)
+          undefined, // No assignedBy for self-registration
+        );
+        console.log('✓ User role assigned in user_roles table');
+      } catch (roleError) {
+        console.error('❌ Error assigning user role:', roleError);
+        // Don't fail user creation, but log the error
+        // The user still has roleId in users table (legacy field)
+      }
+
       // Clear cache
       await this.cacheService.del('users:all');
-      
+
       return savedUser;
     } catch (error) {
       console.error('❌ Error in UsersService.create:', error);

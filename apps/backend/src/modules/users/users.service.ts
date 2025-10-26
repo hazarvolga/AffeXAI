@@ -539,34 +539,57 @@ export class UsersService {
 
   /**
    * Assign a role to user by role name
-   * Only assigns if user doesn't already have the role
+   * CRITICAL: Uses UserRolesService to create proper user_roles junction table entries
+   * This is required for roles to appear in user.roles array on login
    */
   private async assignRoleByName(user: User, roleName: string): Promise<void> {
     try {
       const roles = await this.rolesService.findAll();
       const role = roles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
-      
+
       if (!role) {
         console.warn(`⚠️ Role "${roleName}" not found in database. Skipping role assignment.`);
         return;
       }
 
-      // Check if user already has this role
-      if (user.roleId === role.id) {
-        console.log(`ℹ️ User ${user.email} already has role "${roleName}"`);
+      // Check if user already has this role in user_roles table
+      const existingUserRoles = await this.userRolesService.getUserRoles(user.id);
+      const hasRole = existingUserRoles.some(ur => ur.roleId === role.id);
+
+      if (hasRole) {
+        console.log(`ℹ️ User ${user.email} already has role "${roleName}" in user_roles`);
         return;
       }
 
-      // For now, we'll store additional roles in metadata
-      // In future, we can implement many-to-many relationship for multiple roles
-      if (!user.metadata.additionalRoles) {
-        user.metadata.additionalRoles = [];
+      // CRITICAL: Use UserRolesService to create user_roles entry
+      // This creates the many-to-many relationship in the junction table
+      // Get current roles to preserve them
+      const currentRoleIds = existingUserRoles
+        .filter(ur => !ur.isPrimary) // Only additional roles
+        .map(ur => ur.roleId);
+
+      // Get primary role (if any)
+      const primaryRole = existingUserRoles.find(ur => ur.isPrimary);
+      const primaryRoleId = primaryRole?.roleId || user.roleId;
+
+      if (!primaryRoleId) {
+        console.error(`❌ User ${user.email} has no primary role. Cannot assign additional role.`);
+        return;
       }
 
-      if (!user.metadata.additionalRoles.includes(role.name)) {
-        user.metadata.additionalRoles.push(role.name);
-        console.log(`✅ Assigned role "${roleName}" to user ${user.email}`);
-      }
+      // Add new role to additional roles
+      const newAdditionalRoles = [...currentRoleIds, role.id];
+
+      // Assign roles using UserRolesService
+      await this.userRolesService.assignRoles(
+        user.id,
+        primaryRoleId,
+        newAdditionalRoles,
+        true, // Replace existing
+        undefined, // No assignedBy for profile completion
+      );
+
+      console.log(`✅ Assigned role "${roleName}" to user ${user.email} via user_roles table`);
     } catch (error) {
       console.error(`❌ Error assigning role "${roleName}":`, error);
     }

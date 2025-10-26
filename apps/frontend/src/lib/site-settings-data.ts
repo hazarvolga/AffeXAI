@@ -19,13 +19,13 @@ export type SiteSettings = {
 };
 
 export const siteSettingsData: SiteSettings = {
-    "companyName": "Aluplan Program Sistemleri 2026",
-    "logoUrl": "2490ac80-7114-4662-b4ef-e71684ca4445",
-    "logoDarkUrl": "2adff7db-ce36-42b7-8f85-d9e051a79268",
+    "companyName": "Aluplan Program Sistemleri",
+    "logoUrl": "f3dcbef0-3f9b-45b0-92b0-34973bf13aef",
+    "logoDarkUrl": "https://placehold.co/140x40/171717/f0f0f0?text=Aluplan",
     "contact": {
-        "address": "",
-        "phone": "",
-        "email": "info@aluplan.com.tr"
+        "address": "Örnek Mah. Teknoloji Cad. No:123, Ataşehir/İstanbul",
+        "phone": "+90 216 123 45 67",
+        "email": "info@aluplan.tr"
     },
     "socialMedia": {},
     "seo": {

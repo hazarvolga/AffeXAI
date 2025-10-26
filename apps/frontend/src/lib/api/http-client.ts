@@ -268,7 +268,9 @@ export class HttpClient {
           console.log('🔐 HTTP Client: Added Authorization header');
         } else {
           console.log('🔐 HTTP Client: No token available for request');
-          console.log('🔐 HTTP Client: Debug - localStorage keys:', Object.keys(localStorage));
+          if (typeof window !== 'undefined') {
+            console.log('🔐 HTTP Client: Debug - localStorage keys:', Object.keys(localStorage));
+          }
         }
 
         // Log request

@@ -1,8 +1,9 @@
 'use server';
 
-import { analyzeSupportTicket as analyzeTicketFlow } from '@/ai/flows/support-ticket-analysis';
 import { z } from 'zod';
-import { ticketsService, TicketPriority } from '@/lib/api/ticketsService';
+
+// Type definition for ticket priority (no longer importing from ticketsService)
+type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 const FormSchema = z.object({
   title: z.string().min(10, 'Başlık en az 10 karakter olmalıdır.'),
@@ -55,18 +56,33 @@ export async function analyzeSupportTicket(
       const priority = formData.get('priority') as string;
       const aiSummary = formData.get('summary') as string;
 
-      // Create ticket in backend
-      const ticket = await ticketsService.createTicket({
-        title,
-        description: `${description}\n\n---\n**AI Analiz Özeti:** ${aiSummary}`,
-        priority: priority as TicketPriority,
-        categoryId,
+      // Create ticket in backend using direct fetch (Server Action compatible)
+      // TODO: Get actual userId from session/cookies instead of hardcoded value
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+      const response = await fetch(`${backendUrl}/tickets/public`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description: `${description}\n\n---\n**AI Analiz Özeti:** ${aiSummary}`,
+          priority,
+          categoryId,
+          userId: '96962301-ae83-404b-9697-8ed4a0d8fb2f', // TODO: Replace with actual userId from session
+        }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `Backend API error: ${response.status}`);
+      }
+
+      const ticket = await response.json();
       console.log('✅ Ticket created successfully:', ticket.id);
 
-      return { 
-        step: 2, 
+      return {
+        step: 2,
         message: 'Destek talebiniz başarıyla oluşturuldu!',
         ticketCreated: true,
         ticketId: ticket.id,
@@ -100,19 +116,33 @@ export async function analyzeSupportTicket(
   }
 
   try {
-    // Run AI analysis
-    const result = await analyzeTicketFlow({
-      problemDescription: validatedFields.data.problemDescription,
-      category: validatedFields.data.category,
+    // Call backend API for AI analysis using fetch (Server Action compatible)
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+    const response = await fetch(`${backendUrl}/tickets/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: validatedFields.data.title,
+        problemDescription: validatedFields.data.problemDescription,
+        category: validatedFields.data.category,
+      }),
     });
+
+    if (!response.ok) {
+      throw new Error(`Backend API error: ${response.status}`);
+    }
+
+    const result = await response.json();
 
     return {
       step: 2,
       message: 'Analiz başarılı!',
       originalInput: validatedFields.data,
-      data: result,
+      data: result.data, // Extract data from backend response wrapper
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI analysis failed:', error);
     return {
       step: 1,

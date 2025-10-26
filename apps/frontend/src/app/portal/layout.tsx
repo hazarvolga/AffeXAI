@@ -84,12 +84,20 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
         const hasStaffRole = newUser.roles?.some((r: any) => isStaffRole(r.name));
         const hadStaffRole = oldUser.roles?.some((r: any) => isStaffRole(r.name));
 
-        // SCENARIO 1: Lost all portal roles, only staff roles remain → redirect to admin
-        if (!hasPortalRole && hasStaffRole) {
-            console.log('💡 User lost portal roles, only staff roles remain → redirect to admin');
+        console.log('🔍 Role check:', {
+            hasPortalRole,
+            hasStaffRole,
+            hadStaffRole,
+            newRoles: newUser.roles?.map((r: any) => r.name),
+            oldRoles: oldUser.roles?.map((r: any) => r.name),
+        });
+
+        // SCENARIO 1: Gained staff role (didn't have before) → redirect to admin
+        if (hasStaffRole && !hadStaffRole) {
+            console.log('💡 User gained staff role → redirect to admin');
             toast({
                 title: "Rolünüz Değişti",
-                description: "Artık sadece yönetici rolünüz var. Admin panele yönlendiriliyorsunuz...",
+                description: "Yönetici rolü aldınız. Admin panele yönlendiriliyorsunuz...",
                 variant: "roleChange",
                 duration: 3000,
             });
@@ -98,9 +106,9 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
                 router.push('/admin');
             }, 1500);
         }
-        // SCENARIO 2: Demoted from staff to customer-only → stay in portal (already here)
-        else if (hadStaffRole && !hasStaffRole && hasPortalRole) {
-            console.log('📉 User demoted from staff to customer → staying in portal');
+        // SCENARIO 2: Lost staff role → stay in portal
+        else if (hadStaffRole && !hasStaffRole) {
+            console.log('📉 User lost staff role → staying in portal');
             toast({
                 title: "Rolünüz Güncellendi",
                 description: "Kullanıcı rolünüze geçiş yaptınız. Portal'da kalıyorsunuz.",
@@ -139,7 +147,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
         enabled: !isLoginPage && !authLoading && !!authUser,
         onRoleChange: handleRoleChange,
         onError: handleSyncError,
-        pollInterval: 10 * 1000, // 10 seconds for testing (change to 3 * 60 * 1000 for production)
+        pollInterval: 5 * 1000, // 5 seconds for immediate role change detection
     });
     
     // Check authentication and redirect logic (only on initial load)
@@ -162,21 +170,32 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
         }
 
         // FLEXIBLE MULTI-PANEL ACCESS:
-        // Staff roles can access portal if they also have portal roles
-        // Only redirect if they have NO portal access at all
+        // Staff roles should primarily use admin panel
+        // If user has staff role, redirect to admin panel
         const hasStaffRole = authUser.roles?.some((r: any) => isStaffRole(r.name));
         const hasPortalRole = authUser.roles?.some((r: any) => isPortalRole(r.name));
 
-        // Only redirect to admin if:
-        // 1. User has staff role AND
-        // 2. User has NO portal role AND  
-        // 3. This is NOT a direct navigation (pathname already /portal)
-        const shouldSuggestAdminPanel = hasStaffRole && !hasPortalRole && pathname === '/portal/dashboard';
+        console.log('🔍 Initial load - checking roles:', {
+            hasStaffRole,
+            hasPortalRole,
+            roles: authUser.roles?.map((r: any) => r.name),
+            pathname
+        });
 
-        if (shouldSuggestAdminPanel) {
-            console.log('💡 Staff user without portal roles - suggesting admin panel');
-            // Don't force redirect, just show a suggestion in the UI
-            // They might be trying to access portal features
+        // AUTOMATIC REDIRECT: If user gained staff role, redirect to admin panel
+        if (hasStaffRole && pathname === '/portal/dashboard') {
+            console.log('💡 User has staff role - redirecting to admin panel');
+            toast({
+                title: "Yönetici Rolü Tespit Edildi",
+                description: "Admin panele yönlendiriliyorsunuz...",
+                variant: "default",
+                duration: 2000,
+            });
+
+            setTimeout(() => {
+                router.push('/admin');
+            }, 1000);
+            return; // Don't set loading to false yet
         }
 
         setLoading(false);

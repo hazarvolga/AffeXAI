@@ -280,9 +280,9 @@ export default function IntegratedDemoPage() {
             <div>
               <h4 className="font-medium mb-2">Responsive Breakpoints</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Mobile: < 768px - Tab navigation</li>
+                <li>• Mobile: &lt; 768px - Tab navigation</li>
                 <li>• Tablet: 768px - 1024px - Stacked layout</li>
-                <li>• Desktop: > 1024px - Side-by-side</li>
+                <li>• Desktop: &gt; 1024px - Side-by-side</li>
               </ul>
             </div>
             

@@ -11,30 +11,30 @@
 
 export enum UserRole {
   // System Administration
-  ADMIN = 'Admin',
+  ADMIN = 'admin',
 
   // Content Team
-  CONTENT_EDITOR = 'Content Editor',
+  CONTENT_EDITOR = 'content_editor',
 
   // Marketing Team
-  MARKETING_MANAGER = 'Marketing Manager',
-  SOCIAL_MEDIA_MANAGER = 'Social Media Manager',
+  MARKETING_MANAGER = 'marketing_manager',
+  SOCIAL_MEDIA_MANAGER = 'social_media_manager',
 
   // Operations Team
-  EVENT_COORDINATOR = 'Event Coordinator',
+  EVENT_COORDINATOR = 'event_coordinator',
 
   // Support Team
-  SUPPORT_MANAGER = 'Support Manager',
-  SUPPORT_AGENT = 'Support Agent',
+  SUPPORT_MANAGER = 'support_manager',
+  SUPPORT_AGENT = 'support_agent',
 
   // End Users
-  CUSTOMER = 'Customer',
-  STUDENT = 'Student',
-  SUBSCRIBER = 'Subscriber',
-  VIEWER = 'Viewer',
+  CUSTOMER = 'customer',
+  STUDENT = 'student',
+  SUBSCRIBER = 'subscriber',
+  VIEWER = 'viewer',
 
   // Legacy (Deprecated - will be removed in future)
-  EDITOR = 'Editor', // Use CONTENT_EDITOR instead
+  EDITOR = 'editor', // Use CONTENT_EDITOR instead
 }
 
 // ============================================================================
@@ -554,13 +554,20 @@ export function isStaffRole(roleName: string): boolean {
     'admin',
     'editor', // Legacy
     'content editor',
+    'content_editor',
     'marketing manager',
+    'marketing_manager',
     'social media manager',
+    'social_media_manager',
     'event coordinator',
+    'event_coordinator',
     'support manager',
+    'support_manager',
     'support agent',
+    'support_agent',
     'support',
     'support team',
+    'support_team',
   ];
 
   return staffRoles.includes(roleName.toLowerCase());

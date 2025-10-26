@@ -24,19 +24,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
 
   /**
-   * CRITICAL SECURITY: Check authentication and profile completion
-   * This prevents users from bypassing /complete-profile by manually typing /admin URL
+   * CRITICAL: Profile completion check for non-staff roles
+   * NOTE: Authentication is handled by middleware - this ONLY checks profile completion
+   * Don't redirect if authUser is null - middleware already handles auth, just wait for user data
    */
   useEffect(() => {
     if (isLoginPage) return; // Skip check on login page
-    if (authLoading) return; // Wait for auth to load
 
-    // Check if user is authenticated
-    if (!authUser) {
-      console.log('⚠️ Admin Layout: No user authenticated, redirecting to login');
-      router.push('/admin/login');
-      return;
-    }
+    // Wait for AuthContext to load, or if loading is done but no user, just skip
+    // Middleware has already validated JWT, so if we're here, user IS authenticated
+    if (authLoading || !authUser) return;
 
     const metadata = authUser?.metadata;
 

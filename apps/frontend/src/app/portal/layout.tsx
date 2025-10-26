@@ -48,19 +48,16 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     const isLoginPage = pathname === '/portal/login';
 
     /**
-     * CRITICAL SECURITY: Check authentication and profile completion
-     * This prevents users from bypassing /complete-profile by manually typing /portal URL
+     * CRITICAL: Profile completion check for non-staff roles
+     * NOTE: Authentication is handled by middleware - this ONLY checks profile completion
+     * Don't redirect if currentUser is null - middleware already handles auth, just wait for user data
      */
     useEffect(() => {
         if (isLoginPage) return; // Skip check on login page
-        if (authLoading) return; // Wait for auth to load
 
-        // Check if user is authenticated (using AuthContext user, not localStorage)
-        if (!currentUser) {
-            console.log('⚠️ Portal Layout: No user authenticated, redirecting to login');
-            router.push('/login');
-            return;
-        }
+        // Wait for AuthContext to load, or if loading is done but no user, just skip
+        // Middleware has already validated JWT, so if we're here, user IS authenticated
+        if (authLoading || !currentUser) return;
 
         const metadata = currentUser?.metadata;
 

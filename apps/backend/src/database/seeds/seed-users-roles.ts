@@ -109,6 +109,42 @@ async function seedData() {
             true,
             NOW(),
             NOW()
+        ),
+        -- Marketing Manager Role
+        (
+            'a1b2c3d4-e5f6-4789-abcd-000000000008',
+            'marketing_manager',
+            'Marketing Manager',
+            'Email kampanyaları, bültenler ve pazarlama stratejilerini yönetir.',
+            '["marketing.manage","marketing.campaigns","marketing.subscribers","marketing.templates","marketing.analytics","newsletter.manage"]'::jsonb,
+            true,
+            true,
+            NOW(),
+            NOW()
+        ),
+        -- Support Manager Role
+        (
+            'a1b2c3d4-e5f6-4789-abcd-000000000009',
+            'support_manager',
+            'Support Manager',
+            'Destek ekibini yönetir, raporları görüntüler, SLA ayarlarını yapar.',
+            '["support.view","support.respond","support.assign","support.manage","support.reports","support.settings","support.sla"]'::jsonb,
+            true,
+            true,
+            NOW(),
+            NOW()
+        ),
+        -- Support Agent Role
+        (
+            'a1b2c3d4-e5f6-4789-abcd-000000000010',
+            'support_agent',
+            'Support Agent',
+            'Destek taleplerini yanıtlar ve çözer.',
+            '["support.view","support.respond"]'::jsonb,
+            true,
+            true,
+            NOW(),
+            NOW()
         )
         ON CONFLICT (id) DO NOTHING
       `);

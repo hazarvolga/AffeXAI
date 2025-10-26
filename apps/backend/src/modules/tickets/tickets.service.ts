@@ -1302,11 +1302,16 @@ export class TicketsService {
    */
   async analyzeTicketWithAI(problemDescription: string, category: string) {
     try {
+      this.logger.log('🔍 [AI ANALYSIS] Starting ticket analysis...');
+
       // Get AI configuration from settings (using support module config)
       const apiKey = await this.settingsService.getAiApiKeyForModule('support');
       const model = await this.settingsService.getAiModelForModule('support');
 
+      this.logger.log(`🔍 [AI ANALYSIS] Config retrieved: { hasApiKey: ${!!apiKey}, model: ${model} }`);
+
       if (!apiKey) {
+        this.logger.error('❌ [AI ANALYSIS] No API key found for support module');
         throw new Error('AI API key not configured for support module');
       }
 

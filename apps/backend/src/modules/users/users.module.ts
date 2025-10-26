@@ -15,7 +15,7 @@ import { CrmModule } from '../crm/crm.module';
     TypeOrmModule.forFeature([User, UserRole, Role]),
     SharedModule,
     forwardRef(() => RolesModule),
-    CrmModule,
+    forwardRef(() => CrmModule), // Use forwardRef to avoid circular dependency
   ],
   controllers: [UsersController],
   providers: [UsersService, UserRolesService],

@@ -16,6 +16,8 @@ import { SlaService } from './services/sla.service';
 import { TicketEmailService } from './services/ticket-email.service';
 import { TicketAutoTaggingService } from './services/ticket-auto-tagging.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
+import { SettingsService } from '../settings/settings.service';
+import { AiService } from '../ai/ai.service';
 
 /**
  * Tickets Service
@@ -42,6 +44,8 @@ export class TicketsService {
     private readonly autoTaggingService: TicketAutoTaggingService,
     @Inject(forwardRef(() => TicketNotificationsGateway))
     private readonly notificationsGateway: TicketNotificationsGateway,
+    private readonly settingsService: SettingsService,
+    private readonly aiService: AiService,
   ) {}
 
   /**
@@ -1288,6 +1292,88 @@ export class TicketsService {
       this.logger.log(`Ticket resolved email sent to ${ticket.user.email} for ticket ${ticket.id}`);
     } catch (error) {
       this.logger.error(`Failed to send ticket resolved email: ${error.message}`, error.stack);
+    }
+  }
+
+  /**
+   * Analyze ticket description with AI before creation
+   * @param problemDescription - The user's problem description
+   * @param category - The selected category
+   */
+  async analyzeTicketWithAI(problemDescription: string, category: string) {
+    try {
+      // Get AI configuration from settings (using support module config)
+      const apiKey = await this.settingsService.getAiApiKeyForModule('support');
+      const model = await this.settingsService.getAiModelForModule('support');
+
+      if (!apiKey) {
+        throw new Error('AI API key not configured for support module');
+      }
+
+      // Construct the analysis prompt
+      const prompt = `Analyze the following support ticket and provide:
+1. A concise summary (2-3 sentences)
+2. Suggested priority level (low, medium, high, urgent)
+3. A helpful suggestion or solution for the user
+
+Problem Description: ${problemDescription}
+Category: ${category}
+
+Respond in Turkish language with JSON format:
+{
+  "summary": "brief summary of the issue",
+  "priority": "low|medium|high|urgent",
+  "suggestion": "helpful suggestion or solution"
+}`;
+
+      // Call AI service with the support module's provider/model
+      const result = await this.aiService.generateCompletion(apiKey, prompt, {
+        model,
+        temperature: 0.7,
+        maxTokens: 500,
+      });
+
+      // Parse the AI response
+      try {
+        // Remove markdown code blocks if present
+        let cleanedResponse = result.content.trim();
+        if (cleanedResponse.startsWith('```json')) {
+          cleanedResponse = cleanedResponse.slice(7);
+        }
+        if (cleanedResponse.startsWith('```')) {
+          cleanedResponse = cleanedResponse.slice(3);
+        }
+        if (cleanedResponse.endsWith('```')) {
+          cleanedResponse = cleanedResponse.slice(0, -3);
+        }
+
+        const analysis = JSON.parse(cleanedResponse.trim());
+
+        return {
+          summary: analysis.summary || 'AI analizi tamamlandı.',
+          priority: analysis.priority || 'medium',
+          suggestion: analysis.suggestion || 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
+        };
+      } catch (parseError) {
+        this.logger.error(`Failed to parse AI response: ${parseError.message}`);
+        this.logger.debug(`Raw AI response: ${result.content}`);
+
+        // Return a safe fallback response
+        return {
+          summary: 'Destek talebiniz alındı. Ekibimiz inceleyecektir.',
+          priority: 'medium',
+          suggestion: 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
+        };
+      }
+    } catch (error) {
+      this.logger.error(`AI ticket analysis failed: ${error.message}`, error.stack);
+
+      // Return a safe fallback response instead of throwing
+      return {
+        summary: 'Destek talebiniz alındı. Ekibimiz inceleyecektir.',
+        priority: 'medium',
+        suggestion: 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
+      };
     }
   }
 }

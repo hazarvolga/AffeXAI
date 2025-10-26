@@ -291,9 +291,10 @@ export class UsersService {
           undefined, // TODO: Get current admin user ID from request context
         );
 
-        // IMPORTANT: Invalidate all tokens when role changes
-        // This forces user to re-login and get new JWT with updated role
-        await this.invalidateAllTokens(id);
+        // SMOOTH TRANSITION: Just clear cache - user will get updated role on next request
+        // No token invalidation = seamless role change without logout
+        await this.cacheService.del(`users:${id}`);
+        await this.cacheService.del('users:all');
 
         // Remove from DTO to prevent duplicate update
         delete updateUserDto.primaryRoleId;
@@ -434,11 +435,8 @@ export class UsersService {
       true, // Replace existing
     );
 
-    // IMPORTANT: Invalidate all tokens when role changes
-    // This forces user to re-login and get new JWT with updated role
-    await this.invalidateAllTokens(id);
-
-    // Clear cache
+    // SMOOTH TRANSITION: Just clear cache - user will get updated role on next request
+    // No token invalidation = seamless role change without logout
     await this.cacheService.del(`users:${id}`);
     await this.cacheService.del('users:all');
 

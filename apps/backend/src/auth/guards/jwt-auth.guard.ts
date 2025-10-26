@@ -4,24 +4,39 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UsersService } from '../../modules/users/users.service';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
  * JWT Authentication Guard
  * Validates JWT token from Authorization header
  * Fetches fresh user data with roles from DB on each request
  * Validates tokenVersion to invalidate old tokens on role changes
+ * Skips authentication for endpoints marked with @Public() decorator
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
+    private reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Check if endpoint is marked as public
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      console.log('🔓 JwtAuthGuard: Endpoint is public, skipping authentication');
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     

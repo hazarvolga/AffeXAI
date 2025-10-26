@@ -31,6 +31,7 @@ import { SplitTicketDto } from './dto/split-ticket.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
+import { Public } from '../../auth/decorators/public.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
 
@@ -52,7 +53,7 @@ export class TicketsController {
    */
   @Post()
   @Roles(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.EDITOR)
-  @ApiOperation({ summary: 'Create a new support ticket' })
+  @ApiOperation({ summary: 'Create a new support ticket (authenticated)' })
   @ApiResponse({ status: 201, description: 'Ticket created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -62,6 +63,25 @@ export class TicketsController {
     @CurrentUser('id') userId: string,
   ) {
     return this.ticketsService.create(userId, createTicketDto);
+  }
+
+  /**
+   * Create a new support ticket (public endpoint for anonymous users)
+   * This endpoint allows ticket creation without authentication
+   * userId must be provided in the request body
+   */
+  @Post('public')
+  @Public()
+  @ApiOperation({ summary: 'Create a new support ticket (public - no authentication required)' })
+  @ApiResponse({ status: 201, description: 'Ticket created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data or missing userId' })
+  async createPublic(
+    @Body() createTicketDto: CreateTicketDto & { userId?: string },
+  ) {
+    if (!createTicketDto.userId) {
+      throw new BadRequestException('userId is required for public ticket creation');
+    }
+    return this.ticketsService.create(createTicketDto.userId, createTicketDto);
   }
 
   /**
@@ -275,6 +295,22 @@ export class TicketsController {
       },
       userId,
     );
+  }
+
+  /**
+   * Analyze ticket before creation (AI-powered analysis)
+   * PUBLIC endpoint - No authentication required
+   * Note: This is safe because it only provides AI analysis, no sensitive data
+   */
+  @Post('analyze')
+  @Public() // Mark as public endpoint to bypass JWT auth
+  @ApiOperation({ summary: 'Analyze ticket description with AI before creation (public)' })
+  @ApiResponse({ status: 200, description: 'Analysis completed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  async analyzeTicket(
+    @Body() body: { title: string; problemDescription: string; category: string },
+  ) {
+    return this.ticketsService.analyzeTicketWithAI(body.problemDescription, body.category);
   }
 
 }

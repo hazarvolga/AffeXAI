@@ -47,6 +47,8 @@ import { TicketNotificationsGateway } from './gateways/ticket-notifications.gate
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SettingsModule } from '../settings/settings.module';
+import { AiModule } from '../ai/ai.module';
 
 /**
  * Tickets Module
@@ -82,6 +84,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailModule, // For email notifications
     AuthModule, // For authentication guards
     MediaModule, // For media management
+    SettingsModule, // For AI settings
+    AiModule, // For AI services
     ScheduleModule.forRoot(), // Enable scheduling for automation
   ],
   controllers: [

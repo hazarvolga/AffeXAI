@@ -40,15 +40,37 @@ export default function LoginPage() {
 
       const user = result?.user;
       const metadata = user?.metadata;
-      const roleId = user?.roleId?.toLowerCase() || '';
 
-      console.log('🔄 Login successful, checking profile completion and role:', { roleId, metadata });
+      // Get role name from multiple possible sources
+      const primaryRoleName = user?.primaryRole?.name || user?.roleEntity?.name || '';
+      const userRoles = user?.roles || [];
 
-      // CRITICAL: Check if profile completion is required BEFORE role-based redirect
+      console.log('🔄 Login successful, checking profile completion and role:', {
+        primaryRoleName,
+        roles: userRoles.map((r: any) => r.name),
+        metadata
+      });
+
+      // CRITICAL: Staff roles should bypass profile completion entirely
+      const staffRoles = ['admin', 'editor', 'content editor', 'marketing manager',
+                         'social media manager', 'event coordinator', 'support manager',
+                         'support agent', 'support', 'support team'];
+
+      const hasStaffRole = userRoles.some((role: any) =>
+        staffRoles.includes(role.name?.toLowerCase())
+      ) || staffRoles.includes(primaryRoleName.toLowerCase());
+
+      // Staff users → Admin Panel (NO profile completion check)
+      if (hasStaffRole) {
+        console.log('✅ Staff role detected, redirecting to Admin Panel (bypass profile check)');
+        router.push('/admin');
+        return;
+      }
+
+      // CRITICAL: Check if profile completion is required BEFORE portal redirect
       // This prevents security vulnerability where users bypass /complete-profile
       const isCustomer = metadata?.isCustomer;
       const isStudent = metadata?.isStudent;
-      const isSubscriber = metadata?.isSubscriber;
 
       // Check if profile is incomplete
       const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
@@ -62,27 +84,12 @@ export default function LoginPage() {
           variant: 'default',
         });
         router.push('/complete-profile');
-        return; // Stop here, don't redirect to admin/portal
+        return; // Stop here, don't redirect to portal
       }
 
-      // Profile is complete, redirect based on role
-      console.log('✅ Profile complete, determining redirect for role:', roleId);
-
-      // Admin, Editor, Support → Admin Panel
-      if (roleId === 'admin' || roleId === 'editor' || roleId === 'support' || roleId === 'support team') {
-        console.log('🔄 Redirecting to Admin Panel');
-        router.push('/admin');
-      }
-      // Customer, Student, Subscriber → User Portal
-      else if (roleId === 'customer' || roleId === 'student' || roleId === 'subscriber') {
-        console.log('🔄 Redirecting to User Portal');
-        router.push('/portal/dashboard');
-      }
-      // Viewer or unknown → Admin Panel (default)
-      else {
-        console.log('🔄 Unknown role, redirecting to Admin Panel');
-        router.push('/admin');
-      }
+      // Profile is complete, redirect to portal
+      console.log('✅ Profile complete, redirecting to User Portal');
+      router.push('/portal/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({

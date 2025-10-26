@@ -328,12 +328,16 @@ export default function CompleteProfilePage() {
   const metadata = user?.metadata;
 
   // CRITICAL FIX: If no account type was selected during signup, show all sections
-  // This prevents the "empty profile completion page" bug
+  // If specific types selected, show ONLY those sections
   const hasAnyAccountType = metadata?.isCustomer || metadata?.isStudent || metadata?.isSubscriber;
 
-  const showCustomerSection = metadata?.isCustomer || !hasAnyAccountType;
-  const showStudentSection = metadata?.isStudent || !hasAnyAccountType;
-  const showSubscriberSection = metadata?.isSubscriber || !hasAnyAccountType;
+  // Logic:
+  // - If user selected customer during signup → show ONLY customer section
+  // - If user selected student → show ONLY student section
+  // - If user selected NOTHING → show ALL sections (let them choose)
+  const showCustomerSection = hasAnyAccountType ? metadata?.isCustomer : true;
+  const showStudentSection = hasAnyAccountType ? metadata?.isStudent : true;
+  const showSubscriberSection = hasAnyAccountType ? metadata?.isSubscriber : true;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4">

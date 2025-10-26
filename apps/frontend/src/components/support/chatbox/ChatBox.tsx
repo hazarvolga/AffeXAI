@@ -21,7 +21,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ChatMessage } from './ChatMessage';
+import { ChatMessage as ChatMessageComponent } from './ChatMessage';
 import { FileUploadArea } from './FileUploadArea';
 import { UrlInputArea } from './UrlInputArea';
 import { TypingIndicator } from './TypingIndicator';
@@ -628,7 +628,7 @@ export function ChatBox({
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessageComponent key={message.id} message={message} />
               ))}
               {typingUser && (
                 <TypingIndicator userName={typingUser} />

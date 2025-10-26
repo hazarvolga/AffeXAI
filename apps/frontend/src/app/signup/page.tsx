@@ -69,8 +69,10 @@ export default function SignupPage() {
   const validateEmail = async (email: string) => {
     setEmailValidating(true);
     try {
-      // Step 1: Basic email format validation (syntax check only)
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Step 1: Comprehensive email format validation
+      // RFC 5322 compliant email regex (simplified but robust)
+      const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
+
       if (!emailRegex.test(email)) {
         setEmailValidation({
           isValid: false,
@@ -80,44 +82,106 @@ export default function SignupPage() {
         return;
       }
 
-      // Step 2: Check for common typos
-      const commonTypos: Record<string, string> = {
-        'gmail.con': 'gmail.com',
-        'gmail.co': 'gmail.com',
-        'hotmail.con': 'hotmail.com',
-        'yahoo.con': 'yahoo.com',
-        'outlook.con': 'outlook.com',
-      };
-      
-      const domain = email.split('@')[1];
-      if (domain && commonTypos[domain]) {
+      // Additional validation checks
+      const [localPart, domain] = email.split('@');
+
+      // Check for consecutive dots
+      if (email.includes('..')) {
         setEmailValidation({
           isValid: false,
-          message: `${commonTypos[domain]} mı demek istediniz?`,
-          suggestion: email.replace(domain, commonTypos[domain]),
+          message: 'Email adresinde ardışık nokta kullanılamaz',
         });
         setEmailValidating(false);
         return;
       }
 
-      // Step 3: Check if email already exists (duplicate check)
-      const { exists } = await authService.checkEmailExists(email);
-      
-      if (exists) {
-        setEmailExists(true);
+      // Check if starts or ends with dot
+      if (localPart.startsWith('.') || localPart.endsWith('.')) {
         setEmailValidation({
           isValid: false,
-          message: 'Bu email adresi zaten kayıtlı',
+          message: 'Email adresi nokta ile başlayamaz veya bitemez',
         });
         setEmailValidating(false);
         return;
       }
 
-      // Email is valid and available
-      setEmailValidation({
-        isValid: true,
-        message: 'Email kullanılabilir ✓',
-      });
+      // Check domain has valid TLD (at least 2 characters)
+      const domainParts = domain.split('.');
+      const tld = domainParts[domainParts.length - 1];
+      if (!tld || tld.length < 2) {
+        setEmailValidation({
+          isValid: false,
+          message: 'Geçersiz domain uzantısı',
+        });
+        setEmailValidating(false);
+        return;
+      }
+
+      // Step 2: Advanced backend validation (comprehensive checks)
+      const validationResult = await emailValidationService.validateEmail(email);
+
+      // Check for typo suggestions from backend
+      if (validationResult.checks?.typo?.suggestion) {
+        setEmailValidation({
+          isValid: false,
+          message: `${validationResult.checks.typo.suggestion} mı demek istediniz?`,
+          suggestion: validationResult.checks.typo.suggestion,
+        });
+        setEmailValidating(false);
+        return;
+      }
+
+      // Check if disposable email (temporary email services)
+      if (validationResult.checks?.disposable && !validationResult.checks.disposable.isValid) {
+        setEmailValidation({
+          isValid: false,
+          message: 'Geçici/tek kullanımlık email adresleri kabul edilmiyor',
+        });
+        setEmailValidating(false);
+        return;
+      }
+
+      // Check if email is valid based on all backend checks
+      if (!validationResult.isValid || validationResult.status === 'invalid') {
+        const errorMsg = validationResult.checks?.syntax?.details ||
+                        validationResult.checks?.domain?.details ||
+                        validationResult.checks?.mx?.details ||
+                        'Email adresi doğrulanamadı';
+
+        setEmailValidation({
+          isValid: false,
+          message: errorMsg,
+        });
+        setEmailValidating(false);
+        return;
+      }
+
+      // Check if risky email (low confidence score)
+      if (validationResult.status === 'risky') {
+        setEmailValidation({
+          isValid: true, // Allow but warn
+          message: `⚠️ Email doğrulandı ancak güvenilirlik skoru düşük (%${validationResult.confidence})`,
+        });
+      } else {
+        // Step 3: Check if email already exists (duplicate check)
+        const { exists } = await authService.checkEmailExists(email);
+
+        if (exists) {
+          setEmailExists(true);
+          setEmailValidation({
+            isValid: false,
+            message: 'Bu email adresi zaten kayıtlı',
+          });
+          setEmailValidating(false);
+          return;
+        }
+
+        // Email is valid and available
+        setEmailValidation({
+          isValid: true,
+          message: `✓ Email kullanılabilir (Güvenilirlik: %${validationResult.confidence})`,
+        });
+      }
 
     } catch (error: any) {
       console.error('Email validation error:', error);

@@ -1,9 +1,10 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, MaxLength, IsBoolean, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsStrictEmail } from '../../../common/validators/email.validator';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'User email address', example: 'user@example.com' })
-  @IsEmail()
+  @IsStrictEmail({ message: 'Please provide a valid email address' })
   @IsNotEmpty()
   email: string;
 

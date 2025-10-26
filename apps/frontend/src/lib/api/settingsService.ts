@@ -82,6 +82,15 @@ export interface AiConnectionTestResult {
   model?: AiModel;
 }
 
+export interface ApiKeyDetectionResult {
+  provider: AiProvider;
+  providerName: string;
+  defaultModel: AiModel;
+  isValid: boolean;
+  detectionMethod: 'prefix' | 'unknown';
+  availableModels: AiModel[];
+}
+
 /**
  * Settings Service
  * Handles site settings API operations with unified HTTP client
@@ -114,6 +123,14 @@ class SettingsService {
    */
   async testAiConnection(module: 'emailMarketing' | 'social' | 'support' | 'analytics'): Promise<AiConnectionTestResult> {
     return httpClient.postWrapped<AiConnectionTestResult>(`/settings/ai/test/${module}`, {});
+  }
+
+  /**
+   * Auto-detect AI provider from API key format
+   * Works for both global and module-level API keys
+   */
+  async detectProvider(apiKey: string): Promise<ApiKeyDetectionResult> {
+    return httpClient.postWrapped<ApiKeyDetectionResult>('/settings/ai/detect-provider', { apiKey });
   }
 }
 

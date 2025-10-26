@@ -8,11 +8,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Bot, KeyRound, TestTube2, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Mail, Share2, MessageSquare, BarChart3 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Bot, KeyRound, TestTube2, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Mail, Share2, MessageSquare, BarChart3, Sparkles } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import settingsService, { AiSettings, AiModel, AiModuleSettings, AiProvider } from '@/lib/api/settingsService';
+import settingsService, { AiSettings, AiModel, AiModuleSettings, AiProvider, ApiKeyDetectionResult } from '@/lib/api/settingsService';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // AI Providers
@@ -72,6 +72,13 @@ export default function AiSettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [activeTab, setActiveTab] = useState('global');
   const { toast } = useToast();
+
+  // Auto-detection state
+  const [globalDetection, setGlobalDetection] = useState<ApiKeyDetectionResult | null>(null);
+  const [isDetectingGlobal, setIsDetectingGlobal] = useState(false);
+  const [moduleDetections, setModuleDetections] = useState<Record<string, ApiKeyDetectionResult | null>>({});
+  const [detectingModules, setDetectingModules] = useState<Record<string, boolean>>({});
+  const detectionTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Load AI settings from backend
   useEffect(() => {
@@ -221,6 +228,67 @@ export default function AiSettingsPage() {
   const isApiKeyMasked = (apiKey: string | undefined): boolean => {
     return Boolean(apiKey && apiKey.startsWith('***'));
   };
+
+  // Auto-detect provider from API key (debounced)
+  const detectProviderFromKey = useCallback(async (apiKey: string, scope: 'global' | string) => {
+    if (!apiKey || apiKey.length < 10 || apiKey.startsWith('***')) {
+      // Clear detection if key is too short or masked
+      if (scope === 'global') {
+        setGlobalDetection(null);
+      } else {
+        setModuleDetections(prev => ({ ...prev, [scope]: null }));
+      }
+      return;
+    }
+
+    // Clear previous timeout
+    if (detectionTimeoutRef.current[scope]) {
+      clearTimeout(detectionTimeoutRef.current[scope]);
+    }
+
+    // Set loading state
+    if (scope === 'global') {
+      setIsDetectingGlobal(true);
+    } else {
+      setDetectingModules(prev => ({ ...prev, [scope]: true }));
+    }
+
+    // Debounce detection by 500ms
+    detectionTimeoutRef.current[scope] = setTimeout(async () => {
+      try {
+        const result = await settingsService.detectProvider(apiKey);
+
+        if (scope === 'global') {
+          setGlobalDetection(result);
+          // Auto-populate provider and model
+          if (result.isValid && aiSettings?.global) {
+            updateGlobalSettings({
+              provider: result.provider,
+              model: result.defaultModel,
+            });
+          }
+        } else {
+          setModuleDetections(prev => ({ ...prev, [scope]: result }));
+          // Auto-populate provider and model for module
+          if (result.isValid && aiSettings) {
+            updateModuleSettings(scope as keyof Omit<AiSettings, 'useSingleApiKey' | 'global'>, {
+              provider: result.provider,
+              model: result.defaultModel,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Auto-detection failed:', error);
+        // Silently fail, don't show error to user
+      } finally {
+        if (scope === 'global') {
+          setIsDetectingGlobal(false);
+        } else {
+          setDetectingModules(prev => ({ ...prev, [scope]: false }));
+        }
+      }
+    }, 500);
+  }, [aiSettings]);
 
   // FIX for issue #3: Auto-enable all modules when toggling useSingleApiKey
   const handleToggleSingleApiKey = (checked: boolean) => {
@@ -412,7 +480,7 @@ export default function AiSettingsPage() {
                     </Select>
                   </div>
 
-                  {/* API Key Input */}
+                  {/* API Key Input with Auto-Detection */}
                   {currentGlobalProvider !== 'local' && (
                     <div className="space-y-2">
                       <Label htmlFor="global-api-key" className="flex items-center justify-between">
@@ -438,13 +506,45 @@ export default function AiSettingsPage() {
                           'API Key'
                         }
                         value={aiSettings.global?.apiKey || ''}
-                        onChange={(e) => updateGlobalSettings({ apiKey: e.target.value })}
+                        onChange={(e) => {
+                          const newKey = e.target.value;
+                          updateGlobalSettings({ apiKey: newKey });
+                          // Trigger auto-detection
+                          detectProviderFromKey(newKey, 'global');
+                        }}
                         className="font-mono text-sm"
                       />
+
+                      {/* Auto-detection feedback */}
+                      {isDetectingGlobal && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <span>Sağlayıcı tespit ediliyor...</span>
+                        </div>
+                      )}
+
+                      {globalDetection && !isDetectingGlobal && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant={globalDetection.isValid ? "default" : "destructive"} className="flex items-center gap-1">
+                            {globalDetection.isValid ? (
+                              <>
+                                <Sparkles className="h-3 w-3" />
+                                <span>Tespit edildi: {globalDetection.providerName} - {globalDetection.defaultModel}</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="h-3 w-3" />
+                                <span>Geçersiz API key formatı</span>
+                              </>
+                            )}
+                          </Badge>
+                        </div>
+                      )}
+
                       <p className="text-xs text-muted-foreground">
                         {isApiKeyMasked(aiSettings.global?.apiKey)
                           ? '✓ API key kaydedildi (güvenlik için maskelenmiş)'
-                          : 'API key buraya yazın'}
+                          : 'API key buraya yazın - sağlayıcı otomatik tespit edilecek'}
                       </p>
                     </div>
                   )}
@@ -540,7 +640,7 @@ export default function AiSettingsPage() {
                       </Select>
                     </div>
 
-                    {/* API Key Input */}
+                    {/* API Key Input with Auto-Detection */}
                     {(aiSettings[module.key].provider || 'openai') !== 'local' && (
                       <div className="space-y-2">
                         <Label htmlFor={`${module.key}-api-key`}>API Anahtarı</Label>
@@ -549,13 +649,45 @@ export default function AiSettingsPage() {
                           type="password"
                           placeholder="sk-..."
                           value={aiSettings[module.key].apiKey || ''}
-                          onChange={(e) => updateModuleSettings(module.key, { apiKey: e.target.value })}
+                          onChange={(e) => {
+                            const newKey = e.target.value;
+                            updateModuleSettings(module.key, { apiKey: newKey });
+                            // Trigger auto-detection
+                            detectProviderFromKey(newKey, module.key);
+                          }}
                           className="font-mono text-sm"
                         />
+
+                        {/* Auto-detection feedback */}
+                        {detectingModules[module.key] && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <span>Sağlayıcı tespit ediliyor...</span>
+                          </div>
+                        )}
+
+                        {moduleDetections[module.key] && !detectingModules[module.key] && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant={moduleDetections[module.key]!.isValid ? "default" : "destructive"} className="flex items-center gap-1">
+                              {moduleDetections[module.key]!.isValid ? (
+                                <>
+                                  <Sparkles className="h-3 w-3" />
+                                  <span>Tespit edildi: {moduleDetections[module.key]!.providerName} - {moduleDetections[module.key]!.defaultModel}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span>Geçersiz API key formatı</span>
+                                </>
+                              )}
+                            </Badge>
+                          </div>
+                        )}
+
                         <p className="text-xs text-muted-foreground">
                           {isApiKeyMasked(aiSettings[module.key].apiKey)
                             ? '✓ API key kaydedildi (güvenlik için maskelenmiş)'
-                            : 'API key buraya yazın'}
+                            : 'API key buraya yazın - sağlayıcı otomatik tespit edilecek'}
                         </p>
                       </div>
                     )}

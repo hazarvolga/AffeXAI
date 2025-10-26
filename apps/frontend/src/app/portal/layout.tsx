@@ -75,6 +75,13 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
             return; // Staff users bypass profile completion entirely
         }
 
+        // CRITICAL: Check if profile was already completed by backend
+        // Backend sets metadata.profileCompleted = true after successful profile completion
+        if (metadata?.profileCompleted) {
+            console.log('✅ Portal Layout: Profile already completed, skipping check');
+            return;
+        }
+
         // ONLY check profile if user selected customer or student role during signup
         // If user selected ONLY subscriber or nothing, no profile completion needed
         const isCustomer = metadata?.isCustomer;

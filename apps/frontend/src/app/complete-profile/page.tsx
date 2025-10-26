@@ -165,23 +165,60 @@ export default function CompleteProfilePage() {
     const newErrors: Record<string, string> = {};
     const metadata = user?.metadata;
 
-    // Customer validation
-    if (metadata?.isCustomer) {
-      if (!formData.customerNumber.trim()) {
-        newErrors.customerNumber = 'Müşteri numarası gereklidir';
-      }
-      if (!formData.companyName.trim()) {
-        newErrors.companyName = 'Firma adı gereklidir';
-      }
-    }
+    // CRITICAL FIX: If no account type selected, require at least one section to be filled
+    const hasAnyAccountType = metadata?.isCustomer || metadata?.isStudent || metadata?.isSubscriber;
 
-    // Student validation
-    if (metadata?.isStudent) {
-      if (!formData.schoolName.trim()) {
-        newErrors.schoolName = 'Okul adı gereklidir';
+    if (!hasAnyAccountType) {
+      // User didn't select account type during signup
+      // Check if they filled at least customer OR student section
+      const hasCustomerData = formData.customerNumber.trim() || formData.companyName.trim();
+      const hasStudentData = formData.schoolName.trim() || formData.studentId.trim();
+      const hasSubscriberData = formData.isSubscribedToNewsletter;
+
+      if (!hasCustomerData && !hasStudentData && !hasSubscriberData) {
+        newErrors.general = 'Lütfen en az bir bölümü doldurun (Firma Bilgileri, Öğrenci Bilgileri veya Bülten Tercihleri)';
       }
-      if (!formData.studentId.trim()) {
-        newErrors.studentId = 'Öğrenci numarası gereklidir';
+
+      // If customer data partially filled, require both fields
+      if (hasCustomerData) {
+        if (!formData.customerNumber.trim()) {
+          newErrors.customerNumber = 'Müşteri numarası gereklidir';
+        }
+        if (!formData.companyName.trim()) {
+          newErrors.companyName = 'Firma adı gereklidir';
+        }
+      }
+
+      // If student data partially filled, require both fields
+      if (hasStudentData) {
+        if (!formData.schoolName.trim()) {
+          newErrors.schoolName = 'Okul adı gereklidir';
+        }
+        if (!formData.studentId.trim()) {
+          newErrors.studentId = 'Öğrenci numarası gereklidir';
+        }
+      }
+    } else {
+      // User selected account types during signup - validate those sections
+
+      // Customer validation
+      if (metadata?.isCustomer) {
+        if (!formData.customerNumber.trim()) {
+          newErrors.customerNumber = 'Müşteri numarası gereklidir';
+        }
+        if (!formData.companyName.trim()) {
+          newErrors.companyName = 'Firma adı gereklidir';
+        }
+      }
+
+      // Student validation
+      if (metadata?.isStudent) {
+        if (!formData.schoolName.trim()) {
+          newErrors.schoolName = 'Okul adı gereklidir';
+        }
+        if (!formData.studentId.trim()) {
+          newErrors.studentId = 'Öğrenci numarası gereklidir';
+        }
       }
     }
 
@@ -289,9 +326,14 @@ export default function CompleteProfilePage() {
   }
 
   const metadata = user?.metadata;
-  const showCustomerSection = metadata?.isCustomer;
-  const showStudentSection = metadata?.isStudent;
-  const showSubscriberSection = metadata?.isSubscriber;
+
+  // CRITICAL FIX: If no account type was selected during signup, show all sections
+  // This prevents the "empty profile completion page" bug
+  const hasAnyAccountType = metadata?.isCustomer || metadata?.isStudent || metadata?.isSubscriber;
+
+  const showCustomerSection = metadata?.isCustomer || !hasAnyAccountType;
+  const showStudentSection = metadata?.isStudent || !hasAnyAccountType;
+  const showSubscriberSection = metadata?.isSubscriber || !hasAnyAccountType;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4">
@@ -313,6 +355,13 @@ export default function CompleteProfilePage() {
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-6 pt-6">
+              {/* General Error */}
+              {errors.general && (
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-md">
+                  <p className="text-sm text-destructive font-medium">{errors.general}</p>
+                </div>
+              )}
+
               {/* Customer Section */}
               {showCustomerSection && (
                 <div className="space-y-4">

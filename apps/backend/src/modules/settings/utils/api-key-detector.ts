@@ -30,21 +30,22 @@ export class ApiKeyDetector {
 
     const trimmedKey = apiKey.trim();
 
-    // OpenAI: sk-... or sk-proj-...
-    if (trimmedKey.startsWith('sk-')) {
+    // IMPORTANT: Check more specific prefixes first!
+    // Anthropic: sk-ant-... (must be before generic "sk-" check)
+    if (trimmedKey.startsWith('sk-ant-')) {
       return {
-        provider: AiProvider.OPENAI,
-        defaultModel: AiModel.GPT_4O,
+        provider: AiProvider.ANTHROPIC,
+        defaultModel: AiModel.CLAUDE_3_5_SONNET,
         isValid: trimmedKey.length > 20,
         detectionMethod: 'prefix',
       };
     }
 
-    // Anthropic: sk-ant-...
-    if (trimmedKey.startsWith('sk-ant-')) {
+    // OpenAI: sk-... or sk-proj-... (after more specific checks)
+    if (trimmedKey.startsWith('sk-')) {
       return {
-        provider: AiProvider.ANTHROPIC,
-        defaultModel: AiModel.CLAUDE_3_5_SONNET,
+        provider: AiProvider.OPENAI,
+        defaultModel: AiModel.GPT_4O,
         isValid: trimmedKey.length > 20,
         detectionMethod: 'prefix',
       };

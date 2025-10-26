@@ -71,7 +71,8 @@ export class TicketsController {
    * userId must be provided in the request body
    */
   @Post('public')
-  @Public()
+  @Public() // Mark as public endpoint - bypasses authentication
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new support ticket (public - no authentication required)' })
   @ApiResponse({ status: 201, description: 'Ticket created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data or missing userId' })

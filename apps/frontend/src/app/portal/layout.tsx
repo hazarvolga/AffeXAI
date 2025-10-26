@@ -48,60 +48,55 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     const isLoginPage = pathname === '/portal/login';
 
     /**
-     * CRITICAL SECURITY: Check profile completion before allowing portal access
+     * CRITICAL SECURITY: Check authentication and profile completion
      * This prevents users from bypassing /complete-profile by manually typing /portal URL
      */
     useEffect(() => {
         if (isLoginPage) return; // Skip check on login page
+        if (authLoading) return; // Wait for auth to load
 
-        // Get user from localStorage (set during email verification or login)
-        const userStr = localStorage.getItem('user');
-        if (!userStr) {
-            // No user data, redirect to login
+        // Check if user is authenticated (using AuthContext user, not localStorage)
+        if (!currentUser) {
+            console.log('⚠️ Portal Layout: No user authenticated, redirecting to login');
             router.push('/login');
             return;
         }
 
-        try {
-            const user = JSON.parse(userStr);
-            const metadata = user?.metadata;
+        const metadata = currentUser?.metadata;
 
-            // CRITICAL: Staff roles (Admin, Editor, Support, etc.) should NEVER be redirected to profile completion
-            // They have admin panel access and don't need customer/student profile data
-            const primaryRoleName = user?.primaryRole?.name || user?.roleId || '';
-            const userRoles = user?.roles || [];
+        // CRITICAL: Staff roles (Admin, Editor, Support, etc.) should NEVER be redirected to profile completion
+        // They have admin panel access and don't need customer/student profile data
+        const primaryRoleName = currentUser?.primaryRole?.name || currentUser?.roleId || '';
+        const userRoles = currentUser?.roles || [];
 
-            // Check if user has any staff role
-            const hasStaffRole = userRoles.some((role: any) => isStaffRole(role.name)) ||
-                                isStaffRole(primaryRoleName);
+        // Check if user has any staff role
+        const hasStaffRole = userRoles.some((role: any) => isStaffRole(role.name)) ||
+                            isStaffRole(primaryRoleName);
 
-            if (hasStaffRole) {
-                console.log('✅ Portal Layout: Staff role detected, skipping profile completion check');
-                return; // Staff users bypass profile completion entirely
-            }
-
-            // ONLY check profile if user selected customer or student role during signup
-            // If user selected ONLY subscriber or nothing, no profile completion needed
-            const isCustomer = metadata?.isCustomer;
-            const isStudent = metadata?.isStudent;
-
-            // Only redirect if they ARE customer/student but profile is incomplete
-            const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
-            const studentIncomplete = isStudent && (!metadata?.schoolName || !metadata?.studentId);
-
-            if (customerIncomplete || studentIncomplete) {
-                console.log('⚠️ Portal Layout: Profile incomplete, redirecting to /complete-profile');
-                toast({
-                    title: 'Profil Tamamlama Gerekli',
-                    description: 'Portale erişmek için önce profilinizi tamamlamalısınız',
-                    variant: 'destructive',
-                });
-                router.push('/complete-profile');
-            }
-        } catch (error) {
-            console.error('Error parsing user data:', error);
+        if (hasStaffRole) {
+            console.log('✅ Portal Layout: Staff role detected, skipping profile completion check');
+            return; // Staff users bypass profile completion entirely
         }
-    }, [isLoginPage, router, toast]);
+
+        // ONLY check profile if user selected customer or student role during signup
+        // If user selected ONLY subscriber or nothing, no profile completion needed
+        const isCustomer = metadata?.isCustomer;
+        const isStudent = metadata?.isStudent;
+
+        // Only redirect if they ARE customer/student but profile is incomplete
+        const customerIncomplete = isCustomer && (!metadata?.customerNumber || !metadata?.companyName);
+        const studentIncomplete = isStudent && (!metadata?.schoolName || !metadata?.studentId);
+
+        if (customerIncomplete || studentIncomplete) {
+            console.log('⚠️ Portal Layout: Profile incomplete, redirecting to /complete-profile');
+            toast({
+                title: 'Profil Tamamlama Gerekli',
+                description: 'Portale erişmek için önce profilinizi tamamlamalısınız',
+                variant: 'destructive',
+            });
+            router.push('/complete-profile');
+        }
+    }, [isLoginPage, currentUser, authLoading, router, toast]);
 
     /**
      * Handle role changes detected by useUserSync

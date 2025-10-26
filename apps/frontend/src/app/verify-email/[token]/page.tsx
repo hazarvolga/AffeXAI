@@ -53,9 +53,9 @@ export default function VerifyEmailPage() {
             description: response.message || 'Email adresiniz başarıyla doğrulandı!',
           });
 
-          // Auto-redirect to profile completion page after 2 seconds
+          // Auto-redirect to portal dashboard after 2 seconds
           setTimeout(() => {
-            router.push('/complete-profile');
+            router.push('/portal/dashboard');
           }, 2000);
         } else {
           setError(response?.message || 'Doğrulama başarısız');
@@ -125,7 +125,7 @@ export default function VerifyEmailPage() {
                 </p>
               )}
               <p className="text-sm font-medium text-blue-600">
-                Profil tamamlama sayfasına yönlendiriliyorsunuz...
+                Portal sayfasına yönlendiriliyorsunuz...
               </p>
               <div className="flex justify-center pt-2">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />

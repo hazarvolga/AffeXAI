@@ -149,7 +149,7 @@ export class AuthController {
 
     return {
       success: true,
-      message: 'Email adresiniz başarıyla doğrulandı! Profilinizi tamamlayın.',
+      message: 'Email adresiniz başarıyla doğrulandı! Portal kullanıma hazır.',
       access_token: accessToken,
       refresh_token: refreshToken,
       expires_in: 3600, // 60 minutes in seconds

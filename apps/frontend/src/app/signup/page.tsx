@@ -25,20 +25,19 @@ export default function SignupPage() {
   } | null>(null);
   const [emailExists, setEmailExists] = useState(false);
   
-  // Account type checkboxes
-  const [accountTypes, setAccountTypes] = useState({
-    isCustomer: false,
-    isStudent: false,
-    isSubscriber: false,
+  // Newsletter preferences
+  const [newsletterPreferences, setNewsletterPreferences] = useState({
+    productUpdates: false,
+    events: false,
+    promotions: false,
   });
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    phone: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,19 +227,20 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Prepare user data
+      // Prepare user data - simplified, no account type selection
       const userData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone || undefined,
         // roleId will be automatically assigned to 'viewer' by backend
-        // Store account type selections for profile completion
+        // Store newsletter preferences only
         metadata: {
-          isCustomer: accountTypes.isCustomer,
-          isStudent: accountTypes.isStudent,
-          isSubscriber: accountTypes.isSubscriber,
+          newsletterPreferences: {
+            productUpdates: newsletterPreferences.productUpdates,
+            events: newsletterPreferences.events,
+            promotions: newsletterPreferences.promotions,
+          },
         },
       };
 
@@ -248,18 +248,9 @@ export default function SignupPage() {
       const result = await authService.register(userData);
 
       // Show success message with email verification instructions
-      const accountTypeMessage = [];
-      if (accountTypes.isCustomer) accountTypeMessage.push('müşteri');
-      if (accountTypes.isStudent) accountTypeMessage.push('öğrenci');
-      if (accountTypes.isSubscriber) accountTypeMessage.push('abone');
-      
-      const typesText = accountTypeMessage.length > 0 
-        ? ` (${accountTypeMessage.join(', ')} hesabı)` 
-        : '';
-
       toast({
         title: 'Başarılı! 🎉',
-        description: `Hesabınız oluşturuldu${typesText}. Email adresinize doğrulama linki gönderildi. Email adresinizi onayladıktan sonra giriş yapabilirsiniz.`,
+        description: 'Hesabınız oluşturuldu. Email adresinize doğrulama linki gönderildi. Email adresinizi onayladıktan sonra portal kullanıma hazır olacak.',
       });
 
       // Redirect to login page with registered flag
@@ -377,81 +368,56 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefon</Label>
-              <div className="relative flex items-center">
-                <Phone className="absolute left-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="+90 555 123 4567"
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Account Type Selection - 3 Column Layout */}
+            {/* Newsletter Preferences */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Hesap Türleri</Label>
+              <Label className="text-base font-semibold">Bülten Tercihleri (İsteğe Bağlı)</Label>
               <p className="text-sm text-muted-foreground">
-                Size uygun olan seçenekleri işaretleyin
+                Hangi konularda bilgilendirme almak istersiniz?
               </p>
 
-              <div className="grid grid-cols-3 gap-4">
-                {/* Customer */}
-                <div className="flex items-start space-x-2 rounded-md border p-4 bg-muted/50">
+              <div className="space-y-2">
+                {/* Product Updates */}
+                <div className="flex items-start space-x-2">
                   <Checkbox
-                    id="isCustomer"
-                    checked={accountTypes.isCustomer}
-                    onCheckedChange={(checked) => 
-                      setAccountTypes(prev => ({ ...prev, isCustomer: checked as boolean }))
+                    id="productUpdates"
+                    checked={newsletterPreferences.productUpdates}
+                    onCheckedChange={(checked) =>
+                      setNewsletterPreferences(prev => ({ ...prev, productUpdates: checked as boolean }))
                     }
                   />
-                  <Label htmlFor="isCustomer" className="text-sm font-medium cursor-pointer">
-                    Müşteri
+                  <Label htmlFor="productUpdates" className="text-sm cursor-pointer">
+                    Ürün güncellemeleri ve yenilikler
                   </Label>
                 </div>
 
-                {/* Student */}
-                <div className="flex items-start space-x-2 rounded-md border p-4 bg-muted/50">
+                {/* Events */}
+                <div className="flex items-start space-x-2">
                   <Checkbox
-                    id="isStudent"
-                    checked={accountTypes.isStudent}
-                    onCheckedChange={(checked) => 
-                      setAccountTypes(prev => ({ ...prev, isStudent: checked as boolean }))
+                    id="events"
+                    checked={newsletterPreferences.events}
+                    onCheckedChange={(checked) =>
+                      setNewsletterPreferences(prev => ({ ...prev, events: checked as boolean }))
                     }
                   />
-                  <Label htmlFor="isStudent" className="text-sm font-medium cursor-pointer">
-                    Öğrenci
+                  <Label htmlFor="events" className="text-sm cursor-pointer">
+                    Etkinlikler ve eğitimler
                   </Label>
                 </div>
 
-                {/* Subscriber */}
-                <div className="flex items-start space-x-2 rounded-md border p-4 bg-muted/50">
+                {/* Promotions */}
+                <div className="flex items-start space-x-2">
                   <Checkbox
-                    id="isSubscriber"
-                    checked={accountTypes.isSubscriber}
-                    onCheckedChange={(checked) => 
-                      setAccountTypes(prev => ({ ...prev, isSubscriber: checked as boolean }))
+                    id="promotions"
+                    checked={newsletterPreferences.promotions}
+                    onCheckedChange={(checked) =>
+                      setNewsletterPreferences(prev => ({ ...prev, promotions: checked as boolean }))
                     }
                   />
-                  <Label htmlFor="isSubscriber" className="text-sm font-medium cursor-pointer">
-                    Abone
+                  <Label htmlFor="promotions" className="text-sm cursor-pointer">
+                    Kampanyalar ve özel teklifler
                   </Label>
                 </div>
               </div>
-
-              {/* Information Box - Only when selections made */}
-              {(accountTypes.isCustomer || accountTypes.isStudent || accountTypes.isSubscriber) && (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                  <p className="text-xs text-blue-800">
-                    Email onayından sonra profil bilgilerinizi tamamlamanız gerekecektir.
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Password Fields */}

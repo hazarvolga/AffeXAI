@@ -69,7 +69,7 @@ export async function analyzeSupportTicket(
           description: `${description}\n\n---\n**AI Analiz Özeti:** ${aiSummary}`,
           priority,
           categoryId,
-          userId: '96962301-ae83-404b-9697-8ed4a0d8fb2f', // TODO: Replace with actual userId from session
+          userId: 'ee5f674d-b797-4d85-a3f2-c83ad5d4548c', // FIXED: Real userId from database (hazarvolga@gmail.com)
         }),
       });
 

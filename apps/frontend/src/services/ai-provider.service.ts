@@ -75,7 +75,7 @@ export class AiProviderService {
   /**
    * Switch to a different AI provider
    */
-  static async switchProvider(provider: 'openai' | 'anthropic' | 'google' | 'openrouter'): Promise<{
+  static async switchProvider(provider: 'openai' | 'anthropic' | 'google' | 'deepseek' | 'openrouter'): Promise<{
     success: boolean;
     previousProvider: string;
     currentProvider: string;
@@ -122,7 +122,7 @@ export class AiProviderService {
    * Update provider configuration
    */
   static async updateProviderConfig(
-    provider: 'openai' | 'anthropic' | 'google' | 'openrouter',
+    provider: 'openai' | 'anthropic' | 'google' | 'deepseek' | 'openrouter',
     config: ProviderConfig
   ): Promise<{
     success: boolean;

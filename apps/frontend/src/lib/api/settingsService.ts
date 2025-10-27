@@ -32,11 +32,11 @@ export interface SiteSettings {
 }
 
 // AI Settings Types
-export type AiModel = 
+export type AiModel =
   // OpenAI Models
-  | 'gpt-4' 
-  | 'gpt-4-turbo' 
-  | 'gpt-4o' 
+  | 'gpt-4'
+  | 'gpt-4-turbo'
+  | 'gpt-4o'
   | 'gpt-3.5-turbo'
   // Anthropic Models
   | 'claude-3-5-sonnet-20241022'
@@ -48,6 +48,10 @@ export type AiModel =
   | 'gemini-pro-vision'
   | 'gemini-1.5-pro'
   | 'gemini-1.5-flash'
+  // DeepSeek Models
+  | 'deepseek-chat'
+  | 'deepseek-coder'
+  | 'deepseek-reasoner'
   // OpenRouter Models
   | 'openai/gpt-4'
   | 'anthropic/claude-3.5-sonnet'
@@ -57,7 +61,7 @@ export type AiModel =
   | 'mistral'
   | 'codellama';
 
-export type AiProvider = 'openai' | 'anthropic' | 'google' | 'openrouter' | 'local';
+export type AiProvider = 'openai' | 'anthropic' | 'google' | 'deepseek' | 'openrouter' | 'local';
 
 export interface AiModuleSettings {
   apiKey?: string; // Optional - may use global key

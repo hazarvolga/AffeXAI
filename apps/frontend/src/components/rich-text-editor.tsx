@@ -117,6 +117,7 @@ export function RichTextEditor({
   const popupRef = useRef<any>(null);
 
   const editor = useEditor({
+    immediatelyRender: false, // Fix SSR hydration mismatch
     extensions: [
       StarterKit,
       Mention.configure({

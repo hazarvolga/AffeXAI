@@ -162,9 +162,18 @@ export default function SupportDashboardPage() {
       setLoading(true);
 
       // Fetch tickets using httpClient (with auth)
-      const ticketsResponse = await httpClient.get('/tickets?limit=5&sortBy=createdAt&sortOrder=DESC');
+      // Note: Backend doesn't support limit/sortBy/sortOrder params in TicketFiltersDto
+      const ticketsResponse = await httpClient.get('/tickets');
       const ticketsData = ticketsResponse.data || ticketsResponse;
-      setTickets(ticketsData.data || ticketsData.tickets || ticketsData);
+
+      // Get all tickets and sort/limit on frontend
+      let tickets = ticketsData.data || ticketsData.tickets || ticketsData || [];
+      if (Array.isArray(tickets)) {
+        tickets = tickets
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5);
+      }
+      setTickets(tickets);
 
       // Fetch stats
       const statsResponse = await httpClient.get('/tickets/stats/overview');

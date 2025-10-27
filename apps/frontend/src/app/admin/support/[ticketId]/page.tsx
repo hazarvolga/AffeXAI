@@ -37,7 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Toggle } from '@/components/ui/toggle';
 import { ticketsService, Ticket, TicketStatus, TicketPriority } from '@/lib/api/ticketsService';
-import { usersService, User } from '@/lib/api/usersService';
+import { usersService, type User } from '@/lib/api/usersService';
 import { useToast } from '@/hooks/use-toast';
 
 export default function TicketDetailPage({

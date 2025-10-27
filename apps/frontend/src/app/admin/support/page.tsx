@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { httpClient } from '@/lib/api/http-client';
 import {
   Card,
   CardHeader,
@@ -136,7 +137,7 @@ const getPriorityLabel = (priority: string) => {
 };
 
 const getInitials = (firstName: string, lastName: string) => {
-  return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U';
 };
 
 const formatTime = (hours: number) => {
@@ -160,19 +161,15 @@ export default function SupportDashboardPage() {
     try {
       setLoading(true);
 
-      // Fetch tickets
-      const ticketsResponse = await fetch('/api/tickets?limit=5&sortBy=createdAt&sortOrder=DESC');
-      if (ticketsResponse.ok) {
-        const ticketsData = await ticketsResponse.json();
-        setTickets(ticketsData.tickets || ticketsData);
-      }
+      // Fetch tickets using httpClient (with auth)
+      const ticketsResponse = await httpClient.get('/tickets?limit=5&sortBy=createdAt&sortOrder=DESC');
+      const ticketsData = ticketsResponse.data || ticketsResponse;
+      setTickets(ticketsData.data || ticketsData.tickets || ticketsData);
 
       // Fetch stats
-      const statsResponse = await fetch('/api/tickets/stats');
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
-      }
+      const statsResponse = await httpClient.get('/tickets/stats/overview');
+      const statsData = statsResponse.data || statsResponse;
+      setStats(statsData.data || statsData);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -362,10 +359,10 @@ export default function SupportDashboardPage() {
                         </Avatar>
                         <div>
                           <div>
-                            {ticket.user.firstName} {ticket.user.lastName}
+                            {ticket.user?.firstName || 'Bilinmeyen'} {ticket.user?.lastName || 'Kullanıcı'}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {ticket.user.email}
+                            {ticket.user?.email || 'Email yok'}
                           </div>
                         </div>
                       </div>

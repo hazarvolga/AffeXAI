@@ -20,6 +20,8 @@ import { SettingsService } from '../settings/settings.service';
 import { AiService } from '../ai/ai.service';
 import { AppLoggerService } from '../../common/logging/app-logger.service';
 import { LogContext } from '../../common/entities/system-log.entity';
+import { FaqEnhancedSearchService } from '../faq-learning/services/faq-enhanced-search.service';
+import { KnowledgeBaseService } from './services/knowledge-base.service';
 
 /**
  * Tickets Service
@@ -49,6 +51,8 @@ export class TicketsService {
     private readonly settingsService: SettingsService,
     private readonly aiService: AiService,
     private readonly appLoggerService: AppLoggerService,
+    private readonly faqSearchService: FaqEnhancedSearchService,
+    private readonly knowledgeBaseService: KnowledgeBaseService,
   ) {}
 
   /**
@@ -1300,6 +1304,7 @@ export class TicketsService {
 
   /**
    * Analyze ticket description with AI before creation
+   * Now with context from FAQ Learning, Knowledge Base, and Knowledge Sources
    * @param problemDescription - The user's problem description
    * @param category - The selected category
    */
@@ -1307,7 +1312,7 @@ export class TicketsService {
     const startTime = Date.now();
 
     try {
-      this.logger.log('🔍 [AI ANALYSIS] Starting ticket analysis...');
+      this.logger.log('🔍 [AI ANALYSIS] Starting ticket analysis with knowledge base context...');
 
       // Get AI configuration from settings (using support module config)
       const apiKey = await this.settingsService.getAiApiKeyForModule('support');
@@ -1336,30 +1341,76 @@ export class TicketsService {
         throw new Error('AI API key not configured for support module');
       }
 
-      // Construct the analysis prompt
-      const prompt = `Analyze the following support ticket and provide:
-1. A concise summary (2-3 sentences)
-2. Suggested priority level (low, medium, high, urgent)
-3. A helpful suggestion or solution for the user
+      // Step 1: Gather context from FAQ Learning System and Knowledge Base
+      this.logger.log('📚 [AI ANALYSIS] Gathering context from FAQ and Knowledge Base...');
 
-Problem Description: ${problemDescription}
+      let contextSnippets: string[] = [];
+
+      try {
+        // Search FAQ for relevant entries
+        const faqResults = await this.faqSearchService.search({
+          query: problemDescription,
+          options: {
+            limit: 5,
+            includeFaqs: true,
+            includeArticles: true,
+          },
+        });
+
+        this.logger.log(`📚 [AI ANALYSIS] Found ${faqResults.results.length} relevant FAQ/KB entries`);
+
+        // Extract context from search results
+        contextSnippets = faqResults.results.map((result) => {
+          return `[${result.type.toUpperCase()}] ${result.title}: ${result.snippet}`;
+        });
+      } catch (faqError) {
+        this.logger.warn(`⚠️ [AI ANALYSIS] Failed to fetch FAQ context: ${faqError.message}`);
+        // Continue without FAQ context
+      }
+
+      // Construct the enhanced analysis prompt with context
+      const contextSection = contextSnippets.length > 0
+        ? `\n\nRelevant Knowledge Base Context:\n${contextSnippets.join('\n')}\n`
+        : '\n\nNo specific knowledge base context found for this issue.\n';
+
+      const prompt = `You are an AI support assistant analyzing a customer support ticket. Use the provided knowledge base context to give accurate and helpful responses.
+
+${contextSection}
+
+Customer Problem:
+${problemDescription}
+
 Category: ${category}
 
-Respond in Turkish language with JSON format:
+Based on the customer's problem and the knowledge base context above, analyze the ticket and provide:
+
+1. A concise summary of the issue (2-3 sentences in Turkish)
+2. Suggested priority level based on urgency and impact
+3. A helpful, specific suggestion or solution for the customer (in Turkish)
+
+Respond ONLY with valid JSON in this exact format:
 {
-  "summary": "brief summary of the issue",
+  "summary": "brief summary of the issue in Turkish",
   "priority": "low|medium|high|urgent",
-  "suggestion": "helpful suggestion or solution"
-}`;
+  "suggestion": "specific, helpful suggestion or solution in Turkish based on knowledge base context"
+}
+
+IMPORTANT: Return ONLY the JSON object, no additional text, no markdown formatting, no code blocks.`;
+
+      this.logger.log('🤖 [AI ANALYSIS] Sending request to AI service...');
+      this.logger.debug(`📝 [AI ANALYSIS] Prompt length: ${prompt.length} chars, Context snippets: ${contextSnippets.length}`);
 
       // Call AI service with the support module's provider/model
       const result = await this.aiService.generateCompletion(apiKey, prompt, {
         model,
-        temperature: 0.7,
-        maxTokens: 500,
+        temperature: 0.3, // Lower temperature for more deterministic JSON output
+        maxTokens: 2000, // Increased to prevent truncation (Gemini sometimes cuts off)
       });
 
       const duration = Date.now() - startTime;
+
+      this.logger.log(`✅ [AI ANALYSIS] Received AI response in ${duration}ms`);
+      this.logger.debug(`📄 [AI ANALYSIS] Raw response length: ${result.content.length} chars`);
 
       // Log successful AI call
       await this.appLoggerService.logAiCall(
@@ -1369,21 +1420,62 @@ Respond in Turkish language with JSON format:
         true,
       );
 
-      // Parse the AI response
+      // Parse the AI response with improved error handling
       try {
+        // Log the raw response for debugging
+        this.logger.debug(`🔍 [AI ANALYSIS] Raw AI response: ${result.content.substring(0, 500)}...`);
+
         // Remove markdown code blocks if present
         let cleanedResponse = result.content.trim();
+
+        // Remove ```json prefix
         if (cleanedResponse.startsWith('```json')) {
           cleanedResponse = cleanedResponse.slice(7);
         }
+        // Remove ``` prefix
         if (cleanedResponse.startsWith('```')) {
           cleanedResponse = cleanedResponse.slice(3);
         }
+        // Remove ``` suffix
         if (cleanedResponse.endsWith('```')) {
           cleanedResponse = cleanedResponse.slice(0, -3);
         }
 
-        const analysis = JSON.parse(cleanedResponse.trim());
+        cleanedResponse = cleanedResponse.trim();
+
+        // Validate the cleaned response is not empty
+        if (!cleanedResponse || cleanedResponse.length < 10) {
+          throw new Error('AI returned empty or incomplete response');
+        }
+
+        // Check if response looks truncated (common with Gemini)
+        if (!cleanedResponse.endsWith('}')) {
+          this.logger.warn(`⚠️ [AI ANALYSIS] Response appears truncated, attempting to fix...`);
+          // Try to close unclosed braces
+          const openBraces = (cleanedResponse.match(/{/g) || []).length;
+          const closeBraces = (cleanedResponse.match(/}/g) || []).length;
+          if (openBraces > closeBraces) {
+            cleanedResponse += '}';
+            this.logger.debug(`🔧 [AI ANALYSIS] Added missing closing brace`);
+          }
+          // Try to close unclosed quotes
+          if ((cleanedResponse.match(/"/g) || []).length % 2 !== 0) {
+            cleanedResponse += '"';
+            this.logger.debug(`🔧 [AI ANALYSIS] Added missing closing quote`);
+          }
+        }
+
+        this.logger.debug(`🔍 [AI ANALYSIS] Cleaned response: ${cleanedResponse.substring(0, 300)}...`);
+
+        // Parse JSON
+        const analysis = JSON.parse(cleanedResponse);
+
+        // Validate required fields
+        if (!analysis.summary || !analysis.priority || !analysis.suggestion) {
+          throw new Error('AI response missing required fields');
+        }
+
+        this.logger.log('✅ [AI ANALYSIS] Successfully parsed AI response');
 
         return {
           summary: analysis.summary || 'AI analizi tamamlandı.',
@@ -1391,8 +1483,22 @@ Respond in Turkish language with JSON format:
           suggestion: analysis.suggestion || 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
         };
       } catch (parseError) {
-        this.logger.error(`Failed to parse AI response: ${parseError.message}`);
-        this.logger.debug(`Raw AI response: ${result.content}`);
+        this.logger.error(`❌ [AI ANALYSIS] Failed to parse AI response: ${parseError.message}`);
+        this.logger.error(`📄 [AI ANALYSIS] Problematic response: ${result.content}`);
+
+        // Log parse error to database
+        await this.appLoggerService.logError(
+          LogContext.AI,
+          `Failed to parse AI response: ${parseError.message}`,
+          parseError,
+          {
+            provider,
+            model,
+            rawResponse: result.content.substring(0, 1000),
+            category,
+            problemDescriptionPreview: problemDescription.substring(0, 100),
+          },
+        );
 
         // Return a safe fallback response
         return {
@@ -1403,36 +1509,45 @@ Respond in Turkish language with JSON format:
       }
     } catch (error) {
       const duration = Date.now() - startTime;
-      const provider = await this.settingsService.getAiProviderForModule('support');
-      const model = await this.settingsService.getAiModelForModule('support');
 
-      this.logger.error(`AI ticket analysis failed: ${error.message}`, error.stack);
+      this.logger.error(`❌ [AI ANALYSIS] AI ticket analysis failed: ${error.message}`, error.stack);
 
-      // Log detailed error to database
-      await this.appLoggerService.logError(
-        LogContext.AI,
-        `AI ticket analysis failed: ${error.message}`,
-        error,
-        {
+      try {
+        const provider = await this.settingsService.getAiProviderForModule('support');
+        const model = await this.settingsService.getAiModelForModule('support');
+
+        // Log detailed error to database
+        await this.appLoggerService.logError(
+          LogContext.AI,
+          `AI ticket analysis failed: ${error.message}`,
+          error,
+          {
+            provider,
+            model,
+            category,
+            problemDescriptionPreview: problemDescription.substring(0, 100),
+            duration,
+          },
+        );
+
+        // Log failed AI call
+        await this.appLoggerService.logAiCall(
           provider,
           model,
-          category,
-          problemDescriptionPreview: problemDescription.substring(0, 100),
           duration,
-        },
-      );
+          false,
+          error.message,
+        );
+      } catch (loggingError) {
+        this.logger.error(`Failed to log error: ${loggingError.message}`);
+      }
 
-      // Log failed AI call
-      await this.appLoggerService.logAiCall(
-        provider,
-        model,
-        duration,
-        false,
-        error.message,
-      );
-
-      // Re-throw error to expose it instead of silently returning fallback
-      throw new Error(`AI analysis failed: ${error.message}`);
+      // Return fallback instead of throwing to prevent blocking ticket creation
+      return {
+        summary: 'Destek talebiniz alındı. Ekibimiz inceleyecektir.',
+        priority: 'medium',
+        suggestion: 'Destek ekibimiz en kısa sürede size yardımcı olacaktır.',
+      };
     }
   }
 }

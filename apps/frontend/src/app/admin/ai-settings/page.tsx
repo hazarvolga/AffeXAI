@@ -284,11 +284,21 @@ export default function AiSettingsPage() {
         } else {
           setModuleDetections(prev => ({ ...prev, [scope]: result }));
           // Auto-populate provider and model for module
+          // BUT: If useSingleApiKey is enabled, update global settings instead!
           if (result.isValid && aiSettings) {
-            updateModuleSettings(scope as keyof Omit<AiSettings, 'useSingleApiKey' | 'global'>, {
-              provider: result.provider,
-              model: result.defaultModel,
-            });
+            if (aiSettings.useSingleApiKey) {
+              // When single API key mode is enabled, update global settings
+              updateGlobalSettings({
+                provider: result.provider,
+                model: result.defaultModel,
+              });
+            } else {
+              // When single API key mode is disabled, update module-specific settings
+              updateModuleSettings(scope as keyof Omit<AiSettings, 'useSingleApiKey' | 'global'>, {
+                provider: result.provider,
+                model: result.defaultModel,
+              });
+            }
           }
         }
       } catch (error) {

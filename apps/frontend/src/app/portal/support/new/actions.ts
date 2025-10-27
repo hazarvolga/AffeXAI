@@ -35,6 +35,8 @@ export async function analyzeSupportTicket(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  console.log('🔍 Server Action called! Action:', formData.get('action'));
+  console.log('📋 FormData keys:', Array.from(formData.keys()));
 
   const action = formData.get('action');
 
@@ -49,6 +51,11 @@ export async function analyzeSupportTicket(
 
   // Step 2: Create ticket in backend
   if (action === 'create_ticket') {
+    console.log('✅ Creating ticket with data:', {
+      title: formData.get('title'),
+      category: formData.get('category'),
+      priority: formData.get('priority')
+    });
     try {
       const subject = formData.get('title') as string;  // Backend expects 'subject' field
       const description = formData.get('problemDescription') as string;
@@ -78,14 +85,15 @@ export async function analyzeSupportTicket(
         throw new Error(errorData.message || `Backend API error: ${response.status}`);
       }
 
-      const ticket = await response.json();
-      console.log('✅ Ticket created successfully:', ticket.id);
+      const result = await response.json();
+      const ticketId = result.data?.id || result.id; // Handle both response formats
+      console.log('✅ Ticket created successfully:', ticketId);
 
       return {
         step: 2,
         message: 'Destek talebiniz başarıyla oluşturuldu!',
         ticketCreated: true,
-        ticketId: ticket.id,
+        ticketId: ticketId,
         originalInput: prevState.originalInput,
         data: prevState.data,
       };

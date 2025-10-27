@@ -392,33 +392,50 @@ export default function NewSupportTicketPage() {
               </Card>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
+              <div className="flex gap-2">
+                {/* Back button form */}
                 <form action={formAction}>
-                    {/* Hidden fields to pass data to the next step */}
-                    <input type="hidden" name="title" value={state.originalInput?.title} />
-                    <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
-                    <input type="hidden" name="category" value={state.originalInput?.category} />
-                    <input type="hidden" name="priority" value={state.originalInput?.priority} />
-                    <input type="hidden" name="summary" value={state.data.summary} />
-                    <input type="hidden" name="aiPriority" value={state.data.priority} />
-                    <div className="flex gap-2">
-                      <Button variant="outline" type="submit" name="action" value="back">
-                          Geri Dön ve Düzenle
-                      </Button>
-                      <Button type="submit" name="action" value="create_ticket" disabled={state.creating}>
-                          {state.creating ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Oluşturuluyor...
-                            </>
-                          ) : (
-                            <>
-                              <ClipboardCheck className="mr-2 h-4 w-4" />
-                              Destek Talebi Oluştur
-                            </>
-                          )}
-                      </Button>
-                    </div>
+                  <input type="hidden" name="action" value="back" />
+                  <input type="hidden" name="title" value={state.originalInput?.title} />
+                  <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
+                  <input type="hidden" name="category" value={state.originalInput?.category} />
+                  <input type="hidden" name="priority" value={state.originalInput?.priority} />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                  >
+                    Geri Dön ve Düzenle
+                  </button>
                 </form>
+
+                {/* Create ticket button form */}
+                <form action={formAction}>
+                  <input type="hidden" name="action" value="create_ticket" />
+                  <input type="hidden" name="title" value={state.originalInput?.title} />
+                  <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
+                  <input type="hidden" name="category" value={state.originalInput?.category} />
+                  <input type="hidden" name="priority" value={state.originalInput?.priority} />
+                  <input type="hidden" name="summary" value={state.data.summary} />
+                  <input type="hidden" name="aiPriority" value={state.data.priority} />
+                  <button
+                    type="submit"
+                    disabled={state.creating}
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  >
+                    {state.creating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Oluşturuluyor...
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardCheck className="mr-2 h-4 w-4" />
+                        Destek Talebi Oluştur
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </CardFooter>
           </div>
         )}
@@ -780,33 +797,50 @@ export default function NewSupportTicketPage() {
                       </Card>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
+                      <div className="flex gap-2">
+                        {/* Back button form */}
                         <form action={formAction}>
-                            {/* Hidden fields to pass data to the next step */}
-                            <input type="hidden" name="title" value={state.originalInput?.title} />
-                            <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
-                            <input type="hidden" name="category" value={state.originalInput?.category} />
-                            <input type="hidden" name="priority" value={state.originalInput?.priority} />
-                            <input type="hidden" name="summary" value={state.data.summary} />
-                            <input type="hidden" name="aiPriority" value={state.data.priority} />
-                            <div className="flex gap-2">
-                              <Button variant="outline" type="submit" name="action" value="back" size="sm">
-                                  Geri Dön
-                              </Button>
-                              <Button type="submit" name="action" value="create_ticket" disabled={state.creating} size="sm">
-                                  {state.creating ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                      Oluşturuluyor...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <ClipboardCheck className="mr-2 h-3 w-3" />
-                                      Talebi Oluştur
-                                    </>
-                                  )}
-                              </Button>
-                            </div>
+                          <input type="hidden" name="action" value="back" />
+                          <input type="hidden" name="title" value={state.originalInput?.title} />
+                          <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
+                          <input type="hidden" name="category" value={state.originalInput?.category} />
+                          <input type="hidden" name="priority" value={state.originalInput?.priority} />
+                          <button
+                            type="submit"
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                          >
+                            Geri Dön
+                          </button>
                         </form>
+
+                        {/* Create ticket button form */}
+                        <form action={formAction}>
+                          <input type="hidden" name="action" value="create_ticket" />
+                          <input type="hidden" name="title" value={state.originalInput?.title} />
+                          <input type="hidden" name="problemDescription" value={state.originalInput?.problemDescription} />
+                          <input type="hidden" name="category" value={state.originalInput?.category} />
+                          <input type="hidden" name="priority" value={state.originalInput?.priority} />
+                          <input type="hidden" name="summary" value={state.data.summary} />
+                          <input type="hidden" name="aiPriority" value={state.data.priority} />
+                          <button
+                            type="submit"
+                            disabled={state.creating}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
+                          >
+                            {state.creating ? (
+                              <>
+                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                Oluşturuluyor...
+                              </>
+                            ) : (
+                              <>
+                                <ClipboardCheck className="mr-2 h-3 w-3" />
+                                Talebi Oluştur
+                              </>
+                            )}
+                          </button>
+                        </form>
+                      </div>
                     </CardFooter>
                   </div>
                 )}

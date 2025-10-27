@@ -195,14 +195,16 @@ export default function TicketDetailPage({
 
     try {
       setAssigningTicket(true);
+      // Convert "unassigned" to null
+      const actualAssignedId = assignedToId === 'unassigned' ? null : assignedToId;
       const updatedTicket = await ticketsService.assignTicket(ticket.id, {
-        assignedToId: assignedToId || null as any
+        assignedToId: actualAssignedId as any
       });
       setTicket(updatedTicket);
 
       toast({
         title: "Atama güncellendi",
-        description: assignedToId
+        description: actualAssignedId
           ? "Talep başarıyla atandı."
           : "Talep ataması kaldırıldı.",
       });
@@ -393,7 +395,7 @@ export default function TicketDetailPage({
             <div className="space-y-2">
               <Label>Atanan Kişi</Label>
               <Select
-                value={ticket.assignedToId || ''}
+                value={ticket.assignedToId || 'unassigned'}
                 onValueChange={handleAssignTicket}
                 disabled={assigningTicket}
               >
@@ -401,7 +403,7 @@ export default function TicketDetailPage({
                   <SelectValue placeholder="Atanmamış" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Atanmamış</SelectItem>
+                  <SelectItem value="unassigned">Atanmamış</SelectItem>
                   {supportUsers.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.firstName} {user.lastName} ({user.email})

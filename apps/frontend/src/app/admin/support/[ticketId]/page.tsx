@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Toggle } from '@/components/ui/toggle';
 import { ticketsService, Ticket, TicketStatus, TicketPriority } from '@/lib/api/ticketsService';
+import { usersService, User } from '@/lib/api/usersService';
 import { useToast } from '@/hooks/use-toast';
 
 export default function TicketDetailPage({
@@ -57,13 +58,18 @@ export default function TicketDetailPage({
   const [attachments, setAttachments] = useState<{id: string, name: string, size: number, type: string}[]>([]);
   const [isInternalNote, setIsInternalNote] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [supportUsers, setSupportUsers] = useState<User[]>([]);
+  const [assigningTicket, setAssigningTicket] = useState(false);
+  const [updatingPriority, setUpdatingPriority] = useState(false);
   const hasFetchedTicket = useRef(false);
+  const hasFetchedUsers = useRef(false);
 
+  // Fetch ticket data
   useEffect(() => {
     // Prevent multiple fetches
     if (hasFetchedTicket.current) return;
     hasFetchedTicket.current = true;
-    
+
     const fetchTicket = async () => {
       try {
         setLoading(true);
@@ -80,6 +86,32 @@ export default function TicketDetailPage({
 
     fetchTicket();
   }, [ticketId]);
+
+  // Fetch support team users
+  useEffect(() => {
+    if (hasFetchedUsers.current) return;
+    hasFetchedUsers.current = true;
+
+    const fetchSupportUsers = async () => {
+      try {
+        const response = await usersService.getUsersList();
+        const users = response.data || [];
+
+        // Filter for support team members (admin, support_manager, support_agent)
+        const supportTeam = users.filter(user =>
+          user.roles?.some(role =>
+            ['admin', 'support_manager', 'support_agent', 'support_team'].includes(role.name)
+          )
+        );
+
+        setSupportUsers(supportTeam);
+      } catch (error) {
+        console.error('Failed to fetch support users:', error);
+      }
+    };
+
+    fetchSupportUsers();
+  }, []);
 
   const handleAddMessage = async () => {
     if (!messageContent.trim() || !ticket) return;
@@ -117,7 +149,7 @@ export default function TicketDetailPage({
       setUpdatingStatus(true);
       const updatedTicket = await ticketsService.updateTicketStatus(ticket.id, { status });
       setTicket(updatedTicket);
-      
+
       toast({
         title: "Durum güncellendi",
         description: "Talep durumu başarıyla güncellendi.",
@@ -131,6 +163,58 @@ export default function TicketDetailPage({
       });
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handlePriorityChange = async (priority: TicketPriority) => {
+    if (!ticket) return;
+
+    try {
+      setUpdatingPriority(true);
+      const updatedTicket = await ticketsService.updateTicket(ticket.id, { priority });
+      setTicket(updatedTicket);
+
+      toast({
+        title: "Öncelik güncellendi",
+        description: "Talep önceliği başarıyla güncellendi.",
+      });
+    } catch (err: any) {
+      console.error('Error updating priority:', err);
+      toast({
+        title: "Hata",
+        description: "Öncelik güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingPriority(false);
+    }
+  };
+
+  const handleAssignTicket = async (assignedToId: string) => {
+    if (!ticket) return;
+
+    try {
+      setAssigningTicket(true);
+      const updatedTicket = await ticketsService.assignTicket(ticket.id, {
+        assignedToId: assignedToId || null as any
+      });
+      setTicket(updatedTicket);
+
+      toast({
+        title: "Atama güncellendi",
+        description: assignedToId
+          ? "Talep başarıyla atandı."
+          : "Talep ataması kaldırıldı.",
+      });
+    } catch (err: any) {
+      console.error('Error assigning ticket:', err);
+      toast({
+        title: "Hata",
+        description: "Atama yapılırken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setAssigningTicket(false);
     }
   };
 
@@ -288,11 +372,10 @@ export default function TicketDetailPage({
             </div>
             <div className="space-y-2">
               <Label>Öncelik</Label>
-              <Select 
-                value={ticket.priority} 
-                onValueChange={(priority) => {
-                  // In a real app, you would update the ticket priority here
-                }}
+              <Select
+                value={ticket.priority}
+                onValueChange={(priority) => handlePriorityChange(priority as TicketPriority)}
+                disabled={updatingPriority}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -307,22 +390,24 @@ export default function TicketDetailPage({
             </div>
             <div className="space-y-2">
               <Label>Atanan Kişi</Label>
-              <Select 
-                value={ticket.assignedToId || ''} 
-                onValueChange={(assignedToId) => {
-                  // In a real app, you would assign the ticket here
-                }}
+              <Select
+                value={ticket.assignedToId || ''}
+                onValueChange={handleAssignTicket}
+                disabled={assigningTicket}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Atanmamış" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="usr-001">Ahmet Yılmaz (Admin)</SelectItem>
-                  <SelectItem value="usr-002">Zeynep Kaya (Destek)</SelectItem>
+                  <SelectItem value="">Atanmamış</SelectItem>
+                  {supportUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName} ({user.email})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full">Değişiklikleri Kaydet</Button>
           </CardContent>
         </Card>
         <Card>

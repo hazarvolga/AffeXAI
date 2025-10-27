@@ -362,6 +362,53 @@ export class TicketsService {
 
     const savedMessage = await this.messageRepository.save(message);
 
+    // Auto-update ticket status based on who is messaging (only for non-internal messages)
+    if (!dto.isInternal) {
+      const isCustomerMessage = userId === ticket.userId;
+      let newStatus: string | null = null;
+
+      if (isCustomerMessage) {
+        // Customer sent a message
+        if (ticket.status === 'new') {
+          // First customer message: new -> open
+          newStatus = 'open';
+        } else if (ticket.status === 'in_progress') {
+          // Customer replied to support: in_progress -> open (awaiting support)
+          newStatus = 'open';
+        }
+        // If already 'open', 'resolved', or 'closed', don't change
+      } else {
+        // Support/Agent sent a message
+        if (ticket.status === 'new' || ticket.status === 'open') {
+          // Support replied: new/open -> in_progress
+          newStatus = 'in_progress';
+        }
+        // If already 'in_progress', 'resolved', or 'closed', don't change
+      }
+
+      // Update ticket status if needed
+      if (newStatus && newStatus !== ticket.status) {
+        await this.ticketRepository.update(ticketId, {
+          status: newStatus as any,
+          updatedAt: new Date(),
+        });
+
+        // Create audit log for status change
+        await this.createAuditLog(
+          ticketId,
+          userId,
+          'status_updated',
+          'ticket',
+          ticketId,
+          ticket.status,
+          newStatus,
+          `Status automatically changed from ${ticket.status} to ${newStatus} due to new message`,
+        );
+
+        this.logger.log(`🔄 Ticket ${ticketId} status auto-updated: ${ticket.status} -> ${newStatus}`);
+      }
+    }
+
     // Create audit log for message
     await this.createAuditLog(
       ticketId,

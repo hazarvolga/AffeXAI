@@ -12,14 +12,17 @@ export enum TicketPriority {
 
 /**
  * Ticket Status Enum
+ * Must match backend enum exactly
  */
 export enum TicketStatus {
+  NEW = 'new',
   OPEN = 'open',
-  IN_PROGRESS = 'in_progress',
-  WAITING_CUSTOMER = 'waiting_customer',
+  PENDING_CUSTOMER = 'pending_customer',
+  PENDING_INTERNAL = 'pending_internal',
   PENDING_THIRD_PARTY = 'pending_third_party',
   RESOLVED = 'resolved',
-  CLOSED = 'closed'
+  CLOSED = 'closed',
+  CANCELLED = 'cancelled'
 }
 
 /**
@@ -354,12 +357,14 @@ class TicketsService extends BaseApiService<Ticket, CreateTicketDto, UpdateTicke
    */
   getStatusLabel(status: TicketStatus): string {
     const labels = {
+      [TicketStatus.NEW]: 'Yeni',
       [TicketStatus.OPEN]: 'Açık',
-      [TicketStatus.IN_PROGRESS]: 'İşleniyor',
-      [TicketStatus.WAITING_CUSTOMER]: 'Müşteri Bekliyor',
+      [TicketStatus.PENDING_CUSTOMER]: 'Müşteri Bekliyor',
+      [TicketStatus.PENDING_INTERNAL]: 'İç Ekip Bekliyor',
       [TicketStatus.PENDING_THIRD_PARTY]: 'Üçüncü Taraf Bekliyor',
       [TicketStatus.RESOLVED]: 'Çözüldü',
-      [TicketStatus.CLOSED]: 'Kapalı'
+      [TicketStatus.CLOSED]: 'Kapalı',
+      [TicketStatus.CANCELLED]: 'İptal Edildi'
     };
     return labels[status] || status;
   }
@@ -382,12 +387,14 @@ class TicketsService extends BaseApiService<Ticket, CreateTicketDto, UpdateTicke
    */
   getStatusColor(status: TicketStatus): string {
     const colors = {
+      [TicketStatus.NEW]: 'text-sky-600 bg-sky-50',
       [TicketStatus.OPEN]: 'text-blue-600 bg-blue-50',
-      [TicketStatus.IN_PROGRESS]: 'text-purple-600 bg-purple-50',
-      [TicketStatus.WAITING_CUSTOMER]: 'text-yellow-600 bg-yellow-50',
+      [TicketStatus.PENDING_CUSTOMER]: 'text-yellow-600 bg-yellow-50',
+      [TicketStatus.PENDING_INTERNAL]: 'text-purple-600 bg-purple-50',
       [TicketStatus.PENDING_THIRD_PARTY]: 'text-orange-600 bg-orange-50',
       [TicketStatus.RESOLVED]: 'text-green-600 bg-green-50',
-      [TicketStatus.CLOSED]: 'text-gray-600 bg-gray-50'
+      [TicketStatus.CLOSED]: 'text-gray-600 bg-gray-50',
+      [TicketStatus.CANCELLED]: 'text-red-600 bg-red-50'
     };
     return colors[status] || 'text-gray-600 bg-gray-50';
   }

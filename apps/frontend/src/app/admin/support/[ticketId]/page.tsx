@@ -352,8 +352,8 @@ export default function TicketDetailPage({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Durum</Label>
-              <Select 
-                value={ticket.status} 
+              <Select
+                value={ticket.status}
                 onValueChange={handleStatusChange}
                 disabled={updatingStatus}
               >
@@ -361,12 +361,14 @@ export default function TicketDetailPage({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={TicketStatus.NEW}>Yeni</SelectItem>
                   <SelectItem value={TicketStatus.OPEN}>Açık</SelectItem>
-                  <SelectItem value={TicketStatus.IN_PROGRESS}>İşlemde</SelectItem>
-                  <SelectItem value={TicketStatus.WAITING_CUSTOMER}>Müşteri Bekliyor</SelectItem>
+                  <SelectItem value={TicketStatus.PENDING_CUSTOMER}>Müşteri Bekliyor</SelectItem>
+                  <SelectItem value={TicketStatus.PENDING_INTERNAL}>İç Ekip Bekliyor</SelectItem>
                   <SelectItem value={TicketStatus.PENDING_THIRD_PARTY}>Üçüncü Taraf Bekliyor</SelectItem>
                   <SelectItem value={TicketStatus.RESOLVED}>Çözüldü</SelectItem>
                   <SelectItem value={TicketStatus.CLOSED}>Kapalı</SelectItem>
+                  <SelectItem value={TicketStatus.CANCELLED}>İptal Edildi</SelectItem>
                 </SelectContent>
               </Select>
             </div>

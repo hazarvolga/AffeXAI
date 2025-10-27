@@ -52,7 +52,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.VIEWER)
+  @Roles(UserRole.ADMIN, UserRole.VIEWER, UserRole.SUPPORT, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
   @ApiOperation({ summary: 'Get all users with filters and pagination' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   findAll(@Query() filterDto: FilterUsersDto) {

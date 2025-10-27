@@ -372,18 +372,19 @@ export class TicketsService {
         if (ticket.status === 'new') {
           // First customer message: new -> open
           newStatus = 'open';
-        } else if (ticket.status === 'in_progress') {
-          // Customer replied to support: in_progress -> open (awaiting support)
+        } else if (ticket.status === 'pending_customer' || ticket.status === 'pending_internal' || ticket.status === 'pending_third_party') {
+          // Customer replied while ticket was pending: pending_* -> open (customer responded)
           newStatus = 'open';
         }
         // If already 'open', 'resolved', or 'closed', don't change
       } else {
-        // Support/Agent sent a message
-        if (ticket.status === 'new' || ticket.status === 'open') {
-          // Support replied: new/open -> in_progress
-          newStatus = 'in_progress';
+        // Support/Agent sent a message - ticket stays 'open' (support actively working)
+        if (ticket.status === 'new') {
+          // Support starts working on new ticket: new -> open
+          newStatus = 'open';
         }
-        // If already 'in_progress', 'resolved', or 'closed', don't change
+        // If already 'open', support can manually change to pending_customer/pending_internal/etc
+        // If 'resolved' or 'closed', don't auto-change (manual control needed)
       }
 
       // Update ticket status if needed

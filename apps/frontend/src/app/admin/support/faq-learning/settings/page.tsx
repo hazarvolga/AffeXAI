@@ -85,7 +85,7 @@ export default function ConfigurationManagementPage() {
   const [saveProgress, setSaveProgress] = useState(0);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'offline'>('good');
   const { toast } = useToast();
 
@@ -133,7 +133,7 @@ export default function ConfigurationManagementPage() {
 
     // Connection quality detection
     const checkConnectionQuality = async () => {
-      if (!navigator.onLine) {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setConnectionQuality('offline');
         return;
       }

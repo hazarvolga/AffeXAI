@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { notFound, useSearchParams } from "next/navigation";
 import { render } from "@react-email/components";
 import templatesService from "@/lib/api/templatesService";
@@ -40,7 +40,7 @@ import { NpsSurveyEmail } from "@/emails/survey-nps";
 import { ThankYouEmail } from "@/emails/thank-you";
 import { TestSocialLinksEmail } from "@/emails/test-social-links";
 
-export default function EmailPreviewPage({ params }: { params: Promise<{ templateId: string }> }) {
+function EmailPreviewContent({ params }: { params: Promise<{ templateId: string }> }) {
   // Unwrap the params promise using React.use()
   const unwrappedParams = use(params);
   const { templateId } = unwrappedParams;
@@ -353,5 +353,20 @@ export default function EmailPreviewPage({ params }: { params: Promise<{ templat
         />
       </div>
     </div>
+  );
+}
+
+export default function EmailPreviewPage({ params }: { params: Promise<{ templateId: string }> }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Şablon yükleniyor...</p>
+        </div>
+      </div>
+    }>
+      <EmailPreviewContent params={params} />
+    </Suspense>
   );
 }

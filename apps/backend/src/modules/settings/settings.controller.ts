@@ -86,6 +86,12 @@ export class SettingsController {
 
   @Patch('ai')
   async updateAiSettings(@Body() aiSettingsDto: AiSettingsDto): Promise<{ message: string }> {
+    // TEMPORARY DEBUG: Log the incoming API key
+    if (aiSettingsDto.global?.apiKey) {
+      const key = aiSettingsDto.global.apiKey;
+      console.log(`🔍 [DEBUG] Received API Key: ${key.substring(0, 20)}... (length: ${key.length})`);
+    }
+    
     await this.settingsService.updateAiSettings(aiSettingsDto);
     return { message: 'AI settings updated successfully' };
   }

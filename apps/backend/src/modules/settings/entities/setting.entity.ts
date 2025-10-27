@@ -46,6 +46,19 @@ export class Setting {
   @Column({ type: 'boolean', default: false, name: 'is_encrypted' })
   isEncrypted: boolean;
 
+  // KEK/DEK Pattern fields (added in migration 1738032000000)
+  @Column({ type: 'text', nullable: true, name: 'encrypted_dek' })
+  encryptedDek: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'provider' })
+  provider: string;
+
+  @Column({ type: 'timestamp', nullable: true, name: 'dek_created_at' })
+  dekCreatedAt: Date;
+
+  @Column({ type: 'integer', default: 0, name: 'dek_rotation_count' })
+  dekRotationCount: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

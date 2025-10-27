@@ -18,6 +18,7 @@ import {
   AiConnectionTestDto,
 } from './dto/ai-settings.dto';
 import { ApiKeyDetector } from './utils/api-key-detector';
+import { KeyManagementService } from '../../shared/services/key-management.service';
 
 @Injectable()
 export class SettingsService {
@@ -26,6 +27,7 @@ export class SettingsService {
   constructor(
     @InjectRepository(Setting)
     private settingsRepository: Repository<Setting>,
+    private keyManagementService: KeyManagementService,
   ) {}
 
   async create(createSettingDto: CreateSettingDto): Promise<Setting> {
@@ -360,11 +362,20 @@ export class SettingsService {
    * Automatically encrypts API keys and detects provider from key format
    */
   async updateAiSettings(settingsDto: AiSettingsDto): Promise<void> {
+    this.logger.log(`🔧 updateAiSettings called with: ${JSON.stringify({
+      useSingleApiKey: settingsDto.useSingleApiKey,
+      hasGlobalApiKey: !!settingsDto.global?.apiKey,
+      globalApiKeyPreview: settingsDto.global?.apiKey?.substring(0, 10) + '...',
+      globalApiKeyLength: settingsDto.global?.apiKey?.length
+    })}`);
+
     // Update global settings
     await this.updateOrCreateSetting(SettingCategory.AI, 'global.useSingleKey', String(settingsDto.useSingleApiKey));
 
     if (settingsDto.useSingleApiKey && settingsDto.global) {
-      if (settingsDto.global.apiKey) {
+      // Only update API key if it's not masked (doesn't start with ***)
+      if (settingsDto.global.apiKey && !settingsDto.global.apiKey.startsWith('***')) {
+        this.logger.log(`💾 Saving global API key: length=${settingsDto.global.apiKey.length}, preview=${settingsDto.global.apiKey.substring(0, 10)}...`);
         await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'global.apiKey', settingsDto.global.apiKey);
 
         // Auto-detect provider and model from API key
@@ -381,39 +392,194 @@ export class SettingsService {
           await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
         }
       } else if (settingsDto.global.model) {
+        // Update model even if API key is masked
         await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
       }
     }
 
     // Update Email Marketing settings
-    if (settingsDto.emailMarketing.apiKey) {
+    if (settingsDto.emailMarketing.apiKey && !settingsDto.emailMarketing.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'emailMarketing.apiKey', settingsDto.emailMarketing.apiKey);
     }
     await this.updateOrCreateSetting(SettingCategory.AI, 'emailMarketing.model', settingsDto.emailMarketing.model);
     await this.updateOrCreateSetting(SettingCategory.AI, 'emailMarketing.enabled', String(settingsDto.emailMarketing.enabled));
 
     // Update Social Media settings
-    if (settingsDto.social.apiKey) {
+    if (settingsDto.social.apiKey && !settingsDto.social.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'social.apiKey', settingsDto.social.apiKey);
     }
     await this.updateOrCreateSetting(SettingCategory.AI, 'social.model', settingsDto.social.model);
     await this.updateOrCreateSetting(SettingCategory.AI, 'social.enabled', String(settingsDto.social.enabled));
 
     // Update Support settings
-    if (settingsDto.support.apiKey) {
+    if (settingsDto.support.apiKey && !settingsDto.support.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'support.apiKey', settingsDto.support.apiKey);
     }
     await this.updateOrCreateSetting(SettingCategory.AI, 'support.model', settingsDto.support.model);
     await this.updateOrCreateSetting(SettingCategory.AI, 'support.enabled', String(settingsDto.support.enabled));
 
     // Update Analytics settings
-    if (settingsDto.analytics.apiKey) {
+    if (settingsDto.analytics.apiKey && !settingsDto.analytics.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'analytics.apiKey', settingsDto.analytics.apiKey);
     }
     await this.updateOrCreateSetting(SettingCategory.AI, 'analytics.model', settingsDto.analytics.model);
     await this.updateOrCreateSetting(SettingCategory.AI, 'analytics.enabled', String(settingsDto.analytics.enabled));
 
     this.logger.log('AI settings updated successfully');
+  }
+
+
+  /**
+   * Update AI settings using KEK/DEK pattern (Phase 2 implementation)
+   * This is the NEW recommended method that uses Data Encryption Keys per provider
+   */
+  async updateAiSettingsWithKEKDEK(settingsDto: AiSettingsDto): Promise<void> {
+    this.logger.log(`🔐 updateAiSettingsWithKEKDEK called (KEK/DEK pattern)`);
+
+    // Update global settings
+    await this.updateOrCreateSetting(SettingCategory.AI, 'global.useSingleKey', String(settingsDto.useSingleApiKey));
+
+    if (settingsDto.useSingleApiKey && settingsDto.global) {
+      // Only update API key if it's not masked
+      if (settingsDto.global.apiKey && !settingsDto.global.apiKey.startsWith('***')) {
+        this.logger.log(`🔐 Encrypting global API key with KEK/DEK pattern`);
+        
+        // Encrypt using KEK/DEK pattern
+        const { encryptedApiKey, encryptedDek } = await this.keyManagementService.encryptApiKey(
+          settingsDto.global.apiKey,
+          'global'
+        );
+
+        // Save encrypted API key
+        const setting = await this.findByKeyAndCategory('global.apiKey', SettingCategory.AI);
+        if (setting) {
+          setting.value = encryptedApiKey;
+          setting.isEncrypted = true;
+          setting.encryptedDek = encryptedDek;
+          setting.provider = 'global';
+          setting.dekCreatedAt = new Date();
+          setting.dekRotationCount = (setting.dekRotationCount || 0);
+          await this.settingsRepository.save(setting);
+        } else {
+          const newSetting = this.settingsRepository.create({
+            category: SettingCategory.AI,
+            key: 'global.apiKey',
+            value: encryptedApiKey,
+            isEncrypted: true,
+            encryptedDek,
+            provider: 'global',
+            dekCreatedAt: new Date(),
+            dekRotationCount: 0,
+          });
+          await this.settingsRepository.save(newSetting);
+        }
+
+        // Auto-detect provider and model
+        const detection = ApiKeyDetector.detect(settingsDto.global.apiKey);
+        await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
+        
+        if (!settingsDto.global.model) {
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', detection.defaultModel);
+          this.logger.log(`Auto-detected provider: ${detection.provider}, model: ${detection.defaultModel}`);
+        } else {
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
+        }
+      } else if (settingsDto.global.model) {
+        await this.updateOrCreateSetting(SettingCategory.AI, 'global.model', settingsDto.global.model);
+      }
+    }
+
+    // Update module settings with KEK/DEK pattern
+    const modules: Array<'emailMarketing' | 'social' | 'support' | 'analytics'> = [
+      'emailMarketing',
+      'social', 
+      'support',
+      'analytics'
+    ];
+
+    for (const module of modules) {
+      const moduleSettings = settingsDto[module];
+      
+      if (moduleSettings.apiKey && !moduleSettings.apiKey.startsWith('***')) {
+        this.logger.log(`🔐 Encrypting ${module} API key with KEK/DEK pattern`);
+        
+        const { encryptedApiKey, encryptedDek } = await this.keyManagementService.encryptApiKey(
+          moduleSettings.apiKey,
+          module
+        );
+
+        const setting = await this.findByKeyAndCategory(`${module}.apiKey`, SettingCategory.AI);
+        if (setting) {
+          setting.value = encryptedApiKey;
+          setting.isEncrypted = true;
+          setting.encryptedDek = encryptedDek;
+          setting.provider = module;
+          setting.dekCreatedAt = new Date();
+          setting.dekRotationCount = (setting.dekRotationCount || 0);
+          await this.settingsRepository.save(setting);
+        } else {
+          const newSetting = this.settingsRepository.create({
+            category: SettingCategory.AI,
+            key: `${module}.apiKey`,
+            value: encryptedApiKey,
+            isEncrypted: true,
+            encryptedDek,
+            provider: module,
+            dekCreatedAt: new Date(),
+            dekRotationCount: 0,
+          });
+          await this.settingsRepository.save(newSetting);
+        }
+      }
+
+      await this.updateOrCreateSetting(SettingCategory.AI, `${module}.model`, moduleSettings.model);
+      await this.updateOrCreateSetting(SettingCategory.AI, `${module}.enabled`, String(moduleSettings.enabled));
+    }
+
+    this.logger.log('✅ AI settings updated with KEK/DEK pattern successfully');
+  }
+
+  /**
+   * Rotate DEK for a provider (key rotation)
+   */
+  async rotateDEKForProvider(provider: 'openai' | 'anthropic' | 'google' | 'global'): Promise<void> {
+    this.logger.log(`🔄 Rotating DEK for provider: ${provider}`);
+
+    // Find the setting for this provider
+    const setting = await this.settingsRepository.findOne({
+      where: {
+        category: SettingCategory.AI,
+        provider,
+        isEncrypted: true
+      }
+    });
+
+    if (!setting || !setting.encryptedDek) {
+      throw new Error(`No encrypted DEK found for provider: ${provider}`);
+    }
+
+    // Decrypt the API key with the old DEK
+    const apiKey = await this.keyManagementService.decryptApiKey(
+      setting.value,
+      setting.encryptedDek,
+      provider
+    );
+
+    // Rotate the DEK (generates new DEK)
+    const rotation = await this.keyManagementService.rotateDEK(provider);
+
+    // Re-encrypt the API key with the new DEK
+    const encryptedApiKey = this.keyManagementService.encryptWithDEK(apiKey, rotation.newDek);
+
+    // Update the setting
+    setting.value = encryptedApiKey;
+    setting.encryptedDek = rotation.newEncryptedDek;
+    setting.dekCreatedAt = new Date();
+    setting.dekRotationCount = (setting.dekRotationCount || 0) + 1;
+
+    await this.settingsRepository.save(setting);
+
+    this.logger.log(`✅ DEK rotated for ${provider}. Rotation count: ${setting.dekRotationCount}`);
   }
 
   /**
@@ -431,7 +597,10 @@ export class SettingsService {
 
     // Use global key if configured
     if (settings.useSingleApiKey && settings.global?.apiKey) {
-      return settings.global.apiKey;
+      const key = settings.global.apiKey;
+      // TEMPORARY DEBUG: Log key format (first 20 chars)
+      console.log(`🔍 [DEBUG] Decrypted API Key format: ${key.substring(0, 20)}... (length: ${key.length})`);
+      return key;
     }
 
     // Use module-specific key

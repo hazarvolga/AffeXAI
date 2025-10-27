@@ -31,6 +31,7 @@ import {
   Tag,
   Send,
   MessageSquare,
+  CheckCircle2,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { httpClient } from '@/lib/api/http-client';
@@ -421,22 +422,56 @@ export default function TicketDetailPage({
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm font-medium mb-1">Durum</p>
-                <Select
-                  value={ticket.status}
-                  onValueChange={(value) => updateStatusMutation.mutate(value)}
-                  disabled={updateStatusMutation.isPending}
+                <Badge variant={statusBadge.variant} className="text-sm">
+                  {statusBadge.label}
+                </Badge>
+              </div>
+
+              {/* Çözüldü Onayla Button - Only show when status is resolved */}
+              {ticket.status === 'resolved' && (
+                <div>
+                  <Button
+                    onClick={() => updateStatusMutation.mutate('closed')}
+                    disabled={updateStatusMutation.isPending}
+                    className="w-full"
+                    variant="default"
+                  >
+                    {updateStatusMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Kapatılıyor...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Çözüldü Onayla
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Sorun çözüldüyse bu butona tıklayarak talebi kapatabilirsiniz.
+                  </p>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Live Chat Launcher */}
+              <div>
+                <Button
+                  onClick={() => {
+                    // Navigate to chatbox with ticket context
+                    router.push(`/portal/support/chatbox-demo?ticketId=${ticket.id}&subject=${encodeURIComponent(ticket.subject)}&description=${encodeURIComponent(ticket.description)}`);
+                  }}
+                  className="w-full"
+                  variant="outline"
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">Yeni</SelectItem>
-                    <SelectItem value="open">Açık</SelectItem>
-                    <SelectItem value="in_progress">İşlemde</SelectItem>
-                    <SelectItem value="resolved">Çözüldü</SelectItem>
-                    <SelectItem value="closed">Kapatıldı</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Canlı Destek
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Anlık yardım almak için canlı destek sohbetine bağlanın.
+                </p>
               </div>
 
               <Separator />

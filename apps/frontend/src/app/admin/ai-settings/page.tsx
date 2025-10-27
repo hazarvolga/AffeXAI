@@ -470,10 +470,31 @@ export default function AiSettingsPage() {
                     </Select>
                   </div>
 
-                  {/* Auto-Detected Model (Read-Only) */}
+                  {/* Model Selection - Manual for OpenRouter, Auto-detect for others */}
                   <div className="space-y-2">
-                    <Label>AI Model (Otomatik Tespit)</Label>
-                    {globalDetection && globalDetection.isValid ? (
+                    <Label htmlFor="global-model">
+                      AI Model {currentGlobalProvider === 'openrouter' ? '(Manuel Giriş)' : '(Otomatik Tespit)'}
+                    </Label>
+
+                    {currentGlobalProvider === 'openrouter' ? (
+                      // Manual input for OpenRouter (e.g., deepseek/deepseek-chat-v3.1:free)
+                      <div className="space-y-2">
+                        <Input
+                          id="global-model"
+                          type="text"
+                          placeholder="örn: deepseek/deepseek-chat-v3.1:free"
+                          value={aiSettings.global?.model || ''}
+                          onChange={(e) => {
+                            updateGlobalSettings({ model: e.target.value as AiModel });
+                          }}
+                          className="font-mono text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          OpenRouter için tam model adını girin (örn: deepseek/deepseek-chat-v3.1:free, meta-llama/llama-3.1-8b-instruct:free)
+                        </p>
+                      </div>
+                    ) : globalDetection && globalDetection.isValid ? (
+                      // Auto-detected model display (Read-Only)
                       <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
                         <Sparkles className="h-4 w-4 text-primary" />
                         <span className="font-medium text-sm">
@@ -493,9 +514,12 @@ export default function AiSettingsPage() {
                         </span>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      Model, API key formatından otomatik olarak tespit edilir ve uygun varsayılan model atanır.
-                    </p>
+
+                    {currentGlobalProvider !== 'openrouter' && (
+                      <p className="text-xs text-muted-foreground">
+                        Model, API key formatından otomatik olarak tespit edilir ve uygun varsayılan model atanır.
+                      </p>
+                    )}
                   </div>
 
                   {/* API Key Input with Auto-Detection */}
@@ -634,10 +658,31 @@ export default function AiSettingsPage() {
                       </Select>
                     </div>
 
-                    {/* Auto-Detected Model (Read-Only) */}
+                    {/* Model Selection - Manual for OpenRouter, Auto-detect for others */}
                     <div className="space-y-2">
-                      <Label>AI Model (Otomatik Tespit)</Label>
-                      {moduleDetections[module.key] && moduleDetections[module.key]?.isValid ? (
+                      <Label htmlFor={`${module.key}-model`}>
+                        AI Model {(aiSettings[module.key].provider || 'openai') === 'openrouter' ? '(Manuel Giriş)' : '(Otomatik Tespit)'}
+                      </Label>
+
+                      {(aiSettings[module.key].provider || 'openai') === 'openrouter' ? (
+                        // Manual input for OpenRouter
+                        <div className="space-y-2">
+                          <Input
+                            id={`${module.key}-model`}
+                            type="text"
+                            placeholder="örn: deepseek/deepseek-chat-v3.1:free"
+                            value={aiSettings[module.key].model || ''}
+                            onChange={(e) => {
+                              updateModuleSettings(module.key, { model: e.target.value as AiModel });
+                            }}
+                            className="font-mono text-sm"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            OpenRouter için tam model adını girin (örn: deepseek/deepseek-chat-v3.1:free)
+                          </p>
+                        </div>
+                      ) : moduleDetections[module.key] && moduleDetections[module.key]?.isValid ? (
+                        // Auto-detected model display (Read-Only)
                         <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
                           <Sparkles className="h-4 w-4 text-primary" />
                           <span className="font-medium text-sm">
@@ -666,9 +711,12 @@ export default function AiSettingsPage() {
                           </span>
                         </div>
                       )}
-                      <p className="text-xs text-muted-foreground">
-                        Model, API key formatından otomatik olarak tespit edilir.
-                      </p>
+
+                      {(aiSettings[module.key].provider || 'openai') !== 'openrouter' && (
+                        <p className="text-xs text-muted-foreground">
+                          Model, API key formatından otomatik olarak tespit edilir.
+                        </p>
+                      )}
                     </div>
 
                     {/* API Key Input with Auto-Detection */}

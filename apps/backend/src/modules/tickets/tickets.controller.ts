@@ -132,10 +132,12 @@ export class TicketsController {
 
   /**
    * Update ticket status
-   * Available to: ADMIN and EDITOR roles only
+   * Available to:
+   * - ADMIN and EDITOR: Can set any status
+   * - CUSTOMER: Can only set their own tickets to 'resolved' or 'cancelled'
    */
   @Patch(':id/status')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.CUSTOMER)
   @ApiOperation({ summary: 'Update ticket status' })
   @ApiParam({ name: 'id', description: 'Ticket UUID' })
   @ApiResponse({ status: 200, description: 'Status updated successfully' })
@@ -144,9 +146,28 @@ export class TicketsController {
   async updateStatus(
     @Param('id') id: string,
     @Body() updateStatusDto: UpdateStatusDto,
-    @CurrentUser('id') userId: string,
+    @CurrentUser() user: any,
   ) {
-    return this.ticketsService.updateStatus(id, updateStatusDto.status, userId);
+    // Get ticket to check ownership
+    const ticket = await this.ticketsService.findOne(id);
+
+    // Customers have restricted permissions
+    if (user.roleEntity?.name === UserRole.CUSTOMER) {
+      // Customers can only update their own tickets
+      if (ticket.userId !== user.id) {
+        throw new ForbiddenException('You can only update your own tickets');
+      }
+
+      // Customers can only set status to 'resolved' or 'cancelled'
+      const allowedStatuses = ['resolved', 'cancelled', 'closed'];
+      if (!allowedStatuses.includes(updateStatusDto.status)) {
+        throw new ForbiddenException(
+          'Customers can only mark tickets as resolved, cancelled, or closed'
+        );
+      }
+    }
+
+    return this.ticketsService.updateStatus(id, updateStatusDto.status, user.id);
   }
 
   /**

@@ -456,11 +456,68 @@ export default function TicketDetailPage({
 
               <Separator />
 
+              {/* Mark as Resolved Button - Show for all open tickets */}
+              {ticket.status !== 'resolved' && ticket.status !== 'closed' && ticket.status !== 'cancelled' && (
+                <div>
+                  <Button
+                    onClick={() => updateStatusMutation.mutate('resolved')}
+                    disabled={updateStatusMutation.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    variant="default"
+                  >
+                    {updateStatusMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        İşleniyor...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Çözüldü Olarak İşaretle
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Sorununuz çözüldüyse bu butona tıklayarak destek ekibine bildirebilirsiniz.
+                  </p>
+                </div>
+              )}
+
+              {/* Cancel Ticket Button */}
+              {ticket.status !== 'cancelled' && ticket.status !== 'closed' && (
+                <div>
+                  <Button
+                    onClick={() => updateStatusMutation.mutate('cancelled')}
+                    disabled={updateStatusMutation.isPending}
+                    className="w-full"
+                    variant="destructive"
+                  >
+                    {updateStatusMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        İptal ediliyor...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        İptal Et
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Artık yardıma ihtiyacınız yoksa talebi iptal edebilirsiniz.
+                  </p>
+                </div>
+              )}
+
+              <Separator />
+
               {/* Live Chat Launcher */}
               <div>
                 <Button
                   onClick={() => {
-                    // Navigate to chatbox with ticket context
+                    // TODO: Navigate to functional chat page when implemented
+                    // For now, navigate to chat demo page
                     router.push(`/portal/support/chatbox-demo?ticketId=${ticket.id}&subject=${encodeURIComponent(ticket.subject)}&description=${encodeURIComponent(ticket.description)}`);
                   }}
                   className="w-full"

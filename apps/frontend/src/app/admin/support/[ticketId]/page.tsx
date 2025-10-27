@@ -361,34 +361,34 @@ export default function TicketDetailPage({
               <div className="flex items-center gap-2">
                 <Badge
                   variant={
-                    ticket.status === TicketStatus.NEW ? 'default' :
-                    ticket.status === TicketStatus.OPEN ? 'secondary' :
-                    ticket.status === TicketStatus.PENDING_CUSTOMER ? 'outline' :
-                    ticket.status === TicketStatus.PENDING_INTERNAL ? 'outline' :
-                    ticket.status === TicketStatus.PENDING_THIRD_PARTY ? 'outline' :
-                    ticket.status === TicketStatus.RESOLVED ? 'default' :
-                    ticket.status === TicketStatus.CLOSED ? 'secondary' :
+                    ticket.status === 'new' ? 'default' :
+                    ticket.status === 'open' ? 'secondary' :
+                    ticket.status === 'pending_customer' ? 'outline' :
+                    ticket.status === 'pending_internal' ? 'outline' :
+                    ticket.status === 'pending_third_party' ? 'outline' :
+                    ticket.status === 'resolved' ? 'default' :
+                    ticket.status === 'closed' ? 'secondary' :
                     'destructive'
                   }
                   className={
-                    ticket.status === TicketStatus.NEW ? 'bg-blue-500' :
-                    ticket.status === TicketStatus.OPEN ? 'bg-green-500' :
-                    ticket.status === TicketStatus.PENDING_CUSTOMER ? 'bg-yellow-500' :
-                    ticket.status === TicketStatus.PENDING_INTERNAL ? 'bg-orange-500' :
-                    ticket.status === TicketStatus.PENDING_THIRD_PARTY ? 'bg-purple-500' :
-                    ticket.status === TicketStatus.RESOLVED ? 'bg-emerald-500' :
-                    ticket.status === TicketStatus.CLOSED ? 'bg-gray-500' :
+                    ticket.status === 'new' ? 'bg-blue-500' :
+                    ticket.status === 'open' ? 'bg-green-500' :
+                    ticket.status === 'pending_customer' ? 'bg-yellow-500' :
+                    ticket.status === 'pending_internal' ? 'bg-orange-500' :
+                    ticket.status === 'pending_third_party' ? 'bg-purple-500' :
+                    ticket.status === 'resolved' ? 'bg-emerald-500' :
+                    ticket.status === 'closed' ? 'bg-gray-500' :
                     'bg-red-500'
                   }
                 >
-                  {ticket.status === TicketStatus.NEW && 'Yeni'}
-                  {ticket.status === TicketStatus.OPEN && 'Açık'}
-                  {ticket.status === TicketStatus.PENDING_CUSTOMER && 'Müşteri Yanıtı Bekleniyor'}
-                  {ticket.status === TicketStatus.PENDING_INTERNAL && 'İç Ekip Bekleniyor'}
-                  {ticket.status === TicketStatus.PENDING_THIRD_PARTY && 'Üçüncü Taraf Bekleniyor'}
-                  {ticket.status === TicketStatus.RESOLVED && 'Çözüldü'}
-                  {ticket.status === TicketStatus.CLOSED && 'Kapalı'}
-                  {ticket.status === TicketStatus.CANCELLED && 'İptal Edildi'}
+                  {ticket.status === 'new' && 'Yeni'}
+                  {ticket.status === 'open' && 'Açık'}
+                  {ticket.status === 'pending_customer' && 'Müşteri Yanıtı Bekleniyor'}
+                  {ticket.status === 'pending_internal' && 'İç Ekip Bekleniyor'}
+                  {ticket.status === 'pending_third_party' && 'Üçüncü Taraf Bekleniyor'}
+                  {ticket.status === 'resolved' && 'Çözüldü'}
+                  {ticket.status === 'closed' && 'Kapalı'}
+                  {ticket.status === 'cancelled' && 'İptal Edildi'}
                 </Badge>
               </div>
             </div>

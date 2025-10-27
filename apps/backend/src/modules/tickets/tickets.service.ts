@@ -401,8 +401,8 @@ export class TicketsService {
           'status_updated',
           'ticket',
           ticketId,
-          ticket.status,
-          newStatus,
+          { status: ticket.status },
+          { status: newStatus },
           `Status automatically changed from ${ticket.status} to ${newStatus} due to new message`,
         );
 

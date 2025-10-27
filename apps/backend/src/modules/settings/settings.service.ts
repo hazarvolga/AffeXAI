@@ -365,14 +365,19 @@ export class SettingsService {
     this.logger.log(`🔧 updateAiSettings called with: ${JSON.stringify({
       useSingleApiKey: settingsDto.useSingleApiKey,
       hasGlobalApiKey: !!settingsDto.global?.apiKey,
-      globalApiKeyPreview: settingsDto.global?.apiKey?.substring(0, 10) + '...',
-      globalApiKeyLength: settingsDto.global?.apiKey?.length
+      globalProvider: settingsDto.global?.provider,
+      globalModel: settingsDto.global?.model,
     })}`);
 
     // Update global settings
     await this.updateOrCreateSetting(SettingCategory.AI, 'global.useSingleKey', String(settingsDto.useSingleApiKey));
 
     if (settingsDto.useSingleApiKey && settingsDto.global) {
+      // Save provider if explicitly provided (even without API key)
+      if (settingsDto.global.provider) {
+        await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', settingsDto.global.provider);
+      }
+
       // Only update API key if it's not masked (doesn't start with ***)
       if (settingsDto.global.apiKey && !settingsDto.global.apiKey.startsWith('***')) {
         this.logger.log(`💾 Saving global API key: length=${settingsDto.global.apiKey.length}, preview=${settingsDto.global.apiKey.substring(0, 10)}...`);
@@ -381,7 +386,7 @@ export class SettingsService {
         // Auto-detect provider and model from API key
         const detection = ApiKeyDetector.detect(settingsDto.global.apiKey);
 
-        // Save detected provider
+        // Save detected provider (overrides manual selection for safety)
         await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
 
         // Use detected default model if no model specified or if model doesn't match provider
@@ -398,6 +403,9 @@ export class SettingsService {
     }
 
     // Update Email Marketing settings
+    if (settingsDto.emailMarketing.provider) {
+      await this.updateOrCreateSetting(SettingCategory.AI, 'emailMarketing.provider', settingsDto.emailMarketing.provider);
+    }
     if (settingsDto.emailMarketing.apiKey && !settingsDto.emailMarketing.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'emailMarketing.apiKey', settingsDto.emailMarketing.apiKey);
     }
@@ -405,6 +413,9 @@ export class SettingsService {
     await this.updateOrCreateSetting(SettingCategory.AI, 'emailMarketing.enabled', String(settingsDto.emailMarketing.enabled));
 
     // Update Social Media settings
+    if (settingsDto.social.provider) {
+      await this.updateOrCreateSetting(SettingCategory.AI, 'social.provider', settingsDto.social.provider);
+    }
     if (settingsDto.social.apiKey && !settingsDto.social.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'social.apiKey', settingsDto.social.apiKey);
     }
@@ -412,6 +423,9 @@ export class SettingsService {
     await this.updateOrCreateSetting(SettingCategory.AI, 'social.enabled', String(settingsDto.social.enabled));
 
     // Update Support settings
+    if (settingsDto.support.provider) {
+      await this.updateOrCreateSetting(SettingCategory.AI, 'support.provider', settingsDto.support.provider);
+    }
     if (settingsDto.support.apiKey && !settingsDto.support.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'support.apiKey', settingsDto.support.apiKey);
     }
@@ -419,13 +433,16 @@ export class SettingsService {
     await this.updateOrCreateSetting(SettingCategory.AI, 'support.enabled', String(settingsDto.support.enabled));
 
     // Update Analytics settings
+    if (settingsDto.analytics.provider) {
+      await this.updateOrCreateSetting(SettingCategory.AI, 'analytics.provider', settingsDto.analytics.provider);
+    }
     if (settingsDto.analytics.apiKey && !settingsDto.analytics.apiKey.startsWith('***')) {
       await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'analytics.apiKey', settingsDto.analytics.apiKey);
     }
     await this.updateOrCreateSetting(SettingCategory.AI, 'analytics.model', settingsDto.analytics.model);
     await this.updateOrCreateSetting(SettingCategory.AI, 'analytics.enabled', String(settingsDto.analytics.enabled));
 
-    this.logger.log('AI settings updated successfully');
+    this.logger.log('✅ AI settings updated successfully');
   }
 
 

@@ -32,6 +32,10 @@ import {
   Paperclip,
   Eye,
   EyeOff,
+  Users,
+  Building,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { RichTextEditor } from '@/components/rich-text-editor';
@@ -354,25 +358,115 @@ export default function TicketDetailPage({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Durum</Label>
-              <Select
-                value={ticket.status}
-                onValueChange={handleStatusChange}
-                disabled={updatingStatus}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TicketStatus.NEW}>Yeni</SelectItem>
-                  <SelectItem value={TicketStatus.OPEN}>Açık</SelectItem>
-                  <SelectItem value={TicketStatus.PENDING_CUSTOMER}>Müşteri Bekliyor</SelectItem>
-                  <SelectItem value={TicketStatus.PENDING_INTERNAL}>İç Ekip Bekliyor</SelectItem>
-                  <SelectItem value={TicketStatus.PENDING_THIRD_PARTY}>Üçüncü Taraf Bekliyor</SelectItem>
-                  <SelectItem value={TicketStatus.RESOLVED}>Çözüldü</SelectItem>
-                  <SelectItem value={TicketStatus.CLOSED}>Kapalı</SelectItem>
-                  <SelectItem value={TicketStatus.CANCELLED}>İptal Edildi</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={
+                    ticket.status === TicketStatus.NEW ? 'default' :
+                    ticket.status === TicketStatus.OPEN ? 'secondary' :
+                    ticket.status === TicketStatus.PENDING_CUSTOMER ? 'outline' :
+                    ticket.status === TicketStatus.PENDING_INTERNAL ? 'outline' :
+                    ticket.status === TicketStatus.PENDING_THIRD_PARTY ? 'outline' :
+                    ticket.status === TicketStatus.RESOLVED ? 'default' :
+                    ticket.status === TicketStatus.CLOSED ? 'secondary' :
+                    'destructive'
+                  }
+                  className={
+                    ticket.status === TicketStatus.NEW ? 'bg-blue-500' :
+                    ticket.status === TicketStatus.OPEN ? 'bg-green-500' :
+                    ticket.status === TicketStatus.PENDING_CUSTOMER ? 'bg-yellow-500' :
+                    ticket.status === TicketStatus.PENDING_INTERNAL ? 'bg-orange-500' :
+                    ticket.status === TicketStatus.PENDING_THIRD_PARTY ? 'bg-purple-500' :
+                    ticket.status === TicketStatus.RESOLVED ? 'bg-emerald-500' :
+                    ticket.status === TicketStatus.CLOSED ? 'bg-gray-500' :
+                    'bg-red-500'
+                  }
+                >
+                  {ticket.status === TicketStatus.NEW && 'Yeni'}
+                  {ticket.status === TicketStatus.OPEN && 'Açık'}
+                  {ticket.status === TicketStatus.PENDING_CUSTOMER && 'Müşteri Yanıtı Bekleniyor'}
+                  {ticket.status === TicketStatus.PENDING_INTERNAL && 'İç Ekip Bekleniyor'}
+                  {ticket.status === TicketStatus.PENDING_THIRD_PARTY && 'Üçüncü Taraf Bekleniyor'}
+                  {ticket.status === TicketStatus.RESOLVED && 'Çözüldü'}
+                  {ticket.status === TicketStatus.CLOSED && 'Kapalı'}
+                  {ticket.status === TicketStatus.CANCELLED && 'İptal Edildi'}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <Label>Hızlı İşlemler</Label>
+              <div className="flex flex-col gap-2">
+                {/* Mark as Pending Customer */}
+                {ticket.status !== TicketStatus.PENDING_CUSTOMER && ticket.status !== TicketStatus.RESOLVED && ticket.status !== TicketStatus.CLOSED && ticket.status !== TicketStatus.CANCELLED && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleStatusChange(TicketStatus.PENDING_CUSTOMER)}
+                    disabled={updatingStatus}
+                    className="justify-start"
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    Müşteri Yanıtı Bekle
+                  </Button>
+                )}
+
+                {/* Mark as Pending Internal */}
+                {ticket.status !== TicketStatus.PENDING_INTERNAL && ticket.status !== TicketStatus.RESOLVED && ticket.status !== TicketStatus.CLOSED && ticket.status !== TicketStatus.CANCELLED && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleStatusChange(TicketStatus.PENDING_INTERNAL)}
+                    disabled={updatingStatus}
+                    className="justify-start"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    İç Ekip Bekle
+                  </Button>
+                )}
+
+                {/* Mark as Pending Third Party */}
+                {ticket.status !== TicketStatus.PENDING_THIRD_PARTY && ticket.status !== TicketStatus.RESOLVED && ticket.status !== TicketStatus.CLOSED && ticket.status !== TicketStatus.CANCELLED && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleStatusChange(TicketStatus.PENDING_THIRD_PARTY)}
+                    disabled={updatingStatus}
+                    className="justify-start"
+                  >
+                    <Building className="h-4 w-4 mr-2" />
+                    Üçüncü Taraf Bekle
+                  </Button>
+                )}
+
+                {/* Mark as Resolved */}
+                {ticket.status !== TicketStatus.RESOLVED && ticket.status !== TicketStatus.CLOSED && ticket.status !== TicketStatus.CANCELLED && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleStatusChange(TicketStatus.RESOLVED)}
+                    disabled={updatingStatus}
+                    className="justify-start bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Çözüldü Olarak İşaretle
+                  </Button>
+                )}
+
+                {/* Cancel Ticket */}
+                {ticket.status !== TicketStatus.CANCELLED && ticket.status !== TicketStatus.CLOSED && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleStatusChange(TicketStatus.CANCELLED)}
+                    disabled={updatingStatus}
+                    className="justify-start"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    İptal Et
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Öncelik</Label>

@@ -3,7 +3,7 @@ import { LearnedFaqEntry } from '../entities/learned-faq-entry.entity';
 import { LearningPattern } from '../entities/learning-pattern.entity';
 import { FaqLearningConfig } from '../entities/faq-learning-config.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
-import { ChatSession } from '../../tickets/entities/chat-session.entity';
+import { ChatSession } from '../../chat/entities/chat-session.entity';
 export interface LearningEffectivenessMetrics {
     totalFaqsGenerated: number;
     publishedFaqs: number;

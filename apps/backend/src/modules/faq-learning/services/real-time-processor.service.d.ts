@@ -2,8 +2,8 @@ import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FaqLearningService } from './faq-learning.service';
 import { ChatFaqIntegrationService } from './chat-faq-integration.service';
-import { ChatMessage } from '../../tickets/entities/chat-message.entity';
-import { ChatSession } from '../../tickets/entities/chat-session.entity';
+import { ChatMessage } from '../../chat/entities/chat-message.entity';
+import { ChatSession } from '../../chat/entities/chat-session.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
 import { FaqLearningConfig } from '../entities/faq-learning-config.entity';
 export interface RealTimeProcessingConfig {

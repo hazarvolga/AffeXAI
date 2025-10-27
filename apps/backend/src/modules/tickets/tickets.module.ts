@@ -3,8 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Ticket } from './entities/ticket.entity';
 import { TicketMessage } from './entities/ticket-message.entity';
 import { TicketCategory } from './entities/ticket-category.entity';
-import { ChatSession } from './entities/chat-session.entity';
-import { ChatMessage } from './entities/chat-message.entity';
+// Import chat entities from chat module to avoid duplicates
+import { ChatSession } from '../chat/entities/chat-session.entity';
+import { ChatMessage } from '../chat/entities/chat-message.entity';
 import { TicketAssignmentRule } from './entities/ticket-assignment-rule.entity';
 import { TicketEscalationRule } from './entities/ticket-escalation-rule.entity';
 import { TicketAuditLog } from './entities/ticket-audit-log.entity';
@@ -49,6 +50,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SettingsModule } from '../settings/settings.module';
 import { AiModule } from '../ai/ai.module';
+import { FaqLearningModule } from '../faq-learning/faq-learning.module';
 
 /**
  * Tickets Module
@@ -86,6 +88,7 @@ import { AiModule } from '../ai/ai.module';
     MediaModule, // For media management
     SettingsModule, // For AI settings
     AiModule, // For AI services
+    FaqLearningModule, // For FAQ and Knowledge Base search
     ScheduleModule.forRoot(), // Enable scheduling for automation
   ],
   controllers: [

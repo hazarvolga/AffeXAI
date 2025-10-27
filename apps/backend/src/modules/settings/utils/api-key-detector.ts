@@ -41,8 +41,12 @@ export class ApiKeyDetector {
       };
     }
 
+    // DeepSeek: Usually starts with 'sk-' but we can't distinguish from OpenAI by prefix alone
+    // So we'll check OpenRouter first (sk-or-v1-), then assume OpenAI for generic sk-
+    // Users should select DeepSeek provider manually or use OpenRouter
+
     // OpenAI: sk-... or sk-proj-... (after more specific checks)
-    if (trimmedKey.startsWith('sk-')) {
+    if (trimmedKey.startsWith('sk-proj-') || trimmedKey.startsWith('sk-')) {
       return {
         provider: AiProvider.OPENAI,
         defaultModel: AiModel.GPT_4O,

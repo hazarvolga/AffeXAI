@@ -262,16 +262,24 @@ export class SettingsService {
   /**
    * Helper: Update or create setting with automatic encryption
    */
-  private async updateOrCreateSettingEncrypted(category: SettingCategory, key: string, plainValue: string): Promise<void> {
+  private async updateOrCreateSettingEncrypted(category: SettingCategory, key: string, plainValue: string, providerName?: string): Promise<void> {
     const existingSetting = await this.findByKeyAndCategory(key, category);
     
     if (existingSetting) {
       // Update with encryption
       existingSetting.setEncryptedValue(plainValue);
+      if (providerName) {
+        existingSetting.provider = providerName;
+      }
       await this.settingsRepository.save(existingSetting);
     } else {
       // Create new with encryption
-      const newSetting = this.settingsRepository.create({ category, key, value: '' });
+      const newSetting = this.settingsRepository.create({ 
+        category, 
+        key, 
+        value: '',
+        provider: providerName || null
+      });
       newSetting.setEncryptedValue(plainValue);
       await this.settingsRepository.save(newSetting);
     }
@@ -381,11 +389,14 @@ export class SettingsService {
       // Only update API key if it's not masked (doesn't start with ***)
       if (settingsDto.global.apiKey && !settingsDto.global.apiKey.startsWith('***')) {
         this.logger.log(`💾 Saving global API key: length=${settingsDto.global.apiKey.length}, preview=${settingsDto.global.apiKey.substring(0, 10)}...`);
-        await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'global.apiKey', settingsDto.global.apiKey);
-
-        // Auto-detect provider and model from API key
+        
+        // Auto-detect provider from API key
         const detection = ApiKeyDetector.detect(settingsDto.global.apiKey);
-
+        this.logger.log(`🔍 Auto-detected provider: ${detection.provider}, model: ${detection.defaultModel}`);
+        
+        // Save encrypted API key WITH provider name for KEK/DEK
+        await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'global.apiKey', settingsDto.global.apiKey, 'global');
+        
         // Save detected provider (overrides manual selection for safety)
         await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
 

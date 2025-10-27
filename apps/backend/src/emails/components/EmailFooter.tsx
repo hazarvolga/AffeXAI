@@ -20,6 +20,7 @@ interface EmailFooterProps {
     [key: string]: string;
   };
   showUnsubscribeLink?: boolean;
+  unsubscribeToken?: string;
   baseUrl: string;
   locale?: 'tr' | 'en';
 }
@@ -29,6 +30,7 @@ export const EmailFooter = ({
   contactInfo,
   socialMediaLinks,
   showUnsubscribeLink = true,
+  unsubscribeToken,
   baseUrl,
   locale = 'tr',
 }: EmailFooterProps) => {
@@ -86,7 +88,13 @@ export const EmailFooter = ({
         {/* Unsubscribe Link */}
         {showUnsubscribeLink && (
           <Text style={footerText}>
-            <Link href={`${baseUrl}/unsubscribe`} style={footerLink}>
+            <Link
+              href={unsubscribeToken
+                ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}`
+                : `${baseUrl}/preferences`
+              }
+              style={footerLink}
+            >
               {t.unsubscribe}
             </Link>
           </Text>

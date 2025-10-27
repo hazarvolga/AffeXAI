@@ -75,42 +75,42 @@ export class TemplateRendererService {
    * Map template name to file path
    */
   private getTemplatePath(templateName: string): string {
-    // Templates are in the frontend emails directory
-    const frontendPath = '../../../frontend/src/emails';
+    // Templates are now in the backend src/emails directory
+    const emailsPath = '../../emails';
 
     // Map template names to actual file paths
     const templateMap: Record<string, string> = {
       // Ticket templates
-      'ticket-created': `${frontendPath}/ticket-created`,
-      'ticket-assigned': `${frontendPath}/ticket-assigned`,
-      'ticket-new-message': `${frontendPath}/ticket-new-message`,
-      'ticket-resolved': `${frontendPath}/ticket-resolved`,
-      'ticket-escalated': `${frontendPath}/ticket-escalated`,
-      'csat-survey': `${frontendPath}/csat-survey`,
-      'sla-breach-alert': `${frontendPath}/sla-breach-alert`,
-      'sla-approaching-alert': `${frontendPath}/sla-approaching-alert`,
+      'ticket-created': `${emailsPath}/ticket-created`,
+      'ticket-assigned': `${emailsPath}/ticket-assigned`,
+      'ticket-new-message': `${emailsPath}/ticket-new-message`,
+      'ticket-resolved': `${emailsPath}/ticket-resolved`,
+      'ticket-escalated': `${emailsPath}/ticket-escalated`,
+      'csat-survey': `${emailsPath}/csat-survey`,
+      'sla-breach-alert': `${emailsPath}/sla-breach-alert`,
+      'sla-approaching-alert': `${emailsPath}/sla-approaching-alert`,
 
       // Certificate templates
-      'certificate-issued': `${frontendPath}/certificate-issued`,
-      'certificate-reminder': `${frontendPath}/certificate-reminder`,
+      'certificate-issued': `${emailsPath}/certificate-issued`,
+      'certificate-reminder': `${emailsPath}/certificate-reminder`,
 
       // Event templates
-      'event-registration-confirmation': `${frontendPath}/event-registration-confirmation`,
-      'event-reminder': `${frontendPath}/event-reminder`,
-      'event-cancelled': `${frontendPath}/event-cancelled`,
+      'event-registration-confirmation': `${emailsPath}/event-registration-confirmation`,
+      'event-reminder': `${emailsPath}/event-reminder`,
+      'event-cancelled': `${emailsPath}/event-cancelled`,
 
       // Auth templates
-      'welcome': `${frontendPath}/welcome`,
-      'email-verification': `${frontendPath}/email-verification`,
-      'password-reset': `${frontendPath}/password-reset`,
-      'password-changed': `${frontendPath}/password-changed`,
+      'welcome': `${emailsPath}/welcome`,
+      'email-verification': `${emailsPath}/email-verification`,
+      'password-reset': `${emailsPath}/password-reset`,
+      'password-changed': `${emailsPath}/password-changed`,
 
       // Email marketing templates
-      'campaign': `${frontendPath}/campaign`,
-      'newsletter': `${frontendPath}/newsletter`,
+      'campaign': `${emailsPath}/campaign`,
+      'newsletter': `${emailsPath}/newsletter`,
     };
 
-    return templateMap[templateName] || `${frontendPath}/${templateName}`;
+    return templateMap[templateName] || `${emailsPath}/${templateName}`;
   }
 
   /**

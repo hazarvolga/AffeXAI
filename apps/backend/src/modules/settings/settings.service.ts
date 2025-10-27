@@ -389,16 +389,28 @@ export class SettingsService {
       // Only update API key if it's not masked (doesn't start with ***)
       if (settingsDto.global.apiKey && !settingsDto.global.apiKey.startsWith('***')) {
         this.logger.log(`💾 Saving global API key: length=${settingsDto.global.apiKey.length}, preview=${settingsDto.global.apiKey.substring(0, 10)}...`);
-        
+
         // Auto-detect provider from API key
         const detection = ApiKeyDetector.detect(settingsDto.global.apiKey);
         this.logger.log(`🔍 Auto-detected provider: ${detection.provider}, model: ${detection.defaultModel}`);
-        
+
         // Save encrypted API key WITH provider name for KEK/DEK
         await this.updateOrCreateSettingEncrypted(SettingCategory.AI, 'global.apiKey', settingsDto.global.apiKey, 'global');
-        
-        // Save detected provider (overrides manual selection for safety)
-        await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
+
+        // IMPORTANT: Respect manual provider selection for DeepSeek/undetectable providers
+        // Only override if user didn't explicitly select a provider OR if manual selection matches detection
+        const manualProvider = settingsDto.global.provider;
+        const shouldUseManual = manualProvider && (manualProvider === 'deepseek' || manualProvider === 'openrouter' || manualProvider === 'local');
+
+        if (shouldUseManual) {
+          // Keep manual selection for DeepSeek, OpenRouter, and Local models
+          this.logger.log(`⚠️  Manual provider "${manualProvider}" preserved (not overridden by auto-detection)`);
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', manualProvider);
+        } else {
+          // Use auto-detected provider (OpenAI, Anthropic, Google)
+          this.logger.log(`✅ Auto-detected provider "${detection.provider}" applied`);
+          await this.updateOrCreateSetting(SettingCategory.AI, 'global.provider', detection.provider);
+        }
 
         // Use detected default model if no model specified or if model doesn't match provider
         if (!settingsDto.global.model) {

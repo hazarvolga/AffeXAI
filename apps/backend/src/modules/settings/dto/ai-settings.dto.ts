@@ -8,6 +8,7 @@ export enum AiProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GOOGLE = 'google',
+  DEEPSEEK = 'deepseek',
   OPENROUTER = 'openrouter',
   LOCAL = 'local',
 }
@@ -35,7 +36,12 @@ export enum AiModel {
   GEMINI_1_5_FLASH = 'gemini-1.5-flash',
   GEMINI_2_5_PRO = 'gemini-2.5-pro',
   GEMINI_2_5_FLASH = 'gemini-2.5-flash',
-  
+
+  // DeepSeek Models
+  DEEPSEEK_CHAT = 'deepseek-chat',
+  DEEPSEEK_CODER = 'deepseek-coder',
+  DEEPSEEK_REASONER = 'deepseek-reasoner',
+
   // OpenRouter Models (Popular ones)
   OPENROUTER_GPT_4 = 'openai/gpt-4',
   OPENROUTER_CLAUDE_3_5_SONNET = 'anthropic/claude-3.5-sonnet',

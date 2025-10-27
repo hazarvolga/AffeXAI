@@ -18,7 +18,7 @@ import {
   AiConnectionTestDto,
 } from './dto/ai-settings.dto';
 import { ApiKeyDetector } from './utils/api-key-detector';
-import { KeyManagementService } from '../../shared/services/key-management.service';
+import { KeyManagementService, AiProviderType } from '../../shared/services/key-management.service';
 
 @Injectable()
 export class SettingsService {
@@ -542,7 +542,7 @@ export class SettingsService {
   /**
    * Rotate DEK for a provider (key rotation)
    */
-  async rotateDEKForProvider(provider: 'openai' | 'anthropic' | 'google' | 'global'): Promise<void> {
+  async rotateDEKForProvider(provider: AiProviderType): Promise<void> {
     this.logger.log(`🔄 Rotating DEK for provider: ${provider}`);
 
     // Find the setting for this provider

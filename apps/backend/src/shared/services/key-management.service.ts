@@ -10,8 +10,20 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypt
  * - Benefits: Easy key rotation (only re-encrypt DEKs), provider isolation
  */
 
+// AI Provider types
+export type AiProviderType =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'deepseek'
+  | 'global'
+  | 'emailMarketing'
+  | 'social'
+  | 'support'
+  | 'analytics';
+
 interface DataEncryptionKey {
-  provider: 'openai' | 'anthropic' | 'google' | 'global';
+  provider: AiProviderType;
   dek: string; // Base64 encoded DEK
   encryptedDek: string; // DEK encrypted with KEK
   createdAt: Date;
@@ -64,7 +76,7 @@ export class KeyManagementService {
   /**
    * Generate a new random DEK for a provider
    */
-  generateDEK(provider: 'openai' | 'anthropic' | 'google' | 'global'): string {
+  generateDEK(provider: AiProviderType): string {
     const dek = randomBytes(KeyManagementService.KEY_LENGTH);
     const dekBase64 = dek.toString('base64');
     
@@ -183,7 +195,7 @@ export class KeyManagementService {
    * Get or create a cached DEK for a provider
    */
   async getDEKForProvider(
-    provider: 'openai' | 'anthropic' | 'google' | 'global',
+    provider: AiProviderType,
     encryptedDek?: string
   ): Promise<string> {
     // Check cache first
@@ -223,7 +235,7 @@ export class KeyManagementService {
   /**
    * Rotate a DEK for a provider (re-encrypt all data with new DEK)
    */
-  async rotateDEK(provider: 'openai' | 'anthropic' | 'google' | 'global'): Promise<{
+  async rotateDEK(provider: AiProviderType): Promise<{
     oldEncryptedDek: string;
     newDek: string;
     newEncryptedDek: string;
@@ -256,7 +268,7 @@ export class KeyManagementService {
   /**
    * Clear DEK cache (useful for testing or after rotation)
    */
-  clearDEKCache(provider?: 'openai' | 'anthropic' | 'google' | 'global'): void {
+  clearDEKCache(provider?: AiProviderType): void {
     if (provider) {
       this.dekCache.delete(provider);
       this.logger.log(`Cleared DEK cache for provider: ${provider}`);
@@ -274,7 +286,7 @@ export class KeyManagementService {
    */
   async encryptApiKey(
     apiKey: string,
-    provider: 'openai' | 'anthropic' | 'google' | 'global'
+    provider: AiProviderType
   ): Promise<{ encryptedApiKey: string; encryptedDek: string }> {
     // Generate new DEK
     const dek = this.generateDEK(provider);
@@ -298,7 +310,7 @@ export class KeyManagementService {
   async decryptApiKey(
     encryptedApiKey: string,
     encryptedDek: string,
-    provider: 'openai' | 'anthropic' | 'google' | 'global'
+    provider: AiProviderType
   ): Promise<string> {
     // Get DEK (from cache or decrypt)
     const dek = await this.getDEKForProvider(provider, encryptedDek);

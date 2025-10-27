@@ -109,6 +109,8 @@ export class ApiKeyDetector {
         return 'Anthropic';
       case AiProvider.GOOGLE:
         return 'Google AI';
+      case AiProvider.DEEPSEEK:
+        return 'DeepSeek';
       case AiProvider.OPENROUTER:
         return 'OpenRouter';
       case AiProvider.LOCAL:
@@ -147,6 +149,13 @@ export class ApiKeyDetector {
           AiModel.GEMINI_1_5_PRO,   // Previous generation (powerful)
           AiModel.GEMINI_PRO,        // Legacy (deprecated but still works)
           AiModel.GEMINI_PRO_VISION, // Legacy vision model
+        ];
+
+      case AiProvider.DEEPSEEK:
+        return [
+          AiModel.DEEPSEEK_CHAT,      // General chat model
+          AiModel.DEEPSEEK_CODER,     // Specialized for coding
+          AiModel.DEEPSEEK_REASONER,  // Advanced reasoning model
         ];
 
       case AiProvider.OPENROUTER:

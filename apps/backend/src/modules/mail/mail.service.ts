@@ -74,9 +74,15 @@ export class MailService implements IMailService {
    * Send a single email with automatic provider routing
    */
   async sendMail(options: SendMailOptions): Promise<SendMailResult> {
+    this.logger.log(`[EMAIL DEBUG] MailService.sendMail called`);
+    const toEmail = Array.isArray(options.to) ? options.to[0]?.email : options.to.email;
+    this.logger.log(`[EMAIL DEBUG] To: ${toEmail}, Subject: ${options.subject}`);
+
     await this.ensureInitialized();
+    this.logger.log(`[EMAIL DEBUG] Adapter initialized: ${this.adapter ? 'YES' : 'NO'}`);
 
     const settings = await this.settingsService.getEmailSettings();
+    this.logger.log(`[EMAIL DEBUG] Email settings provider: ${settings.provider}`);
 
     // Apply channel-specific defaults if not provided
     let enhancedOptions = await this.applyChannelDefaults(options, settings);
@@ -100,7 +106,9 @@ export class MailService implements IMailService {
     }
 
     // Send via adapter
+    this.logger.log(`[EMAIL DEBUG] Calling adapter.sendMail...`);
     const result = await this.adapter.sendMail(enhancedOptions);
+    this.logger.log(`[EMAIL DEBUG] Adapter response received: ${JSON.stringify(result)}`);
 
     // Log the result
     if (result.success) {

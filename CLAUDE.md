@@ -1937,6 +1937,7 @@ GOOGLE_GENAI_API_KEY=...
 **Root Level**:
 ```bash
 npm run dev          # Start backend + frontend
+npm run cleanup      # Clean zombie processes (IMPORTANT!)
 npm run build        # Build all packages
 npm run docker:up    # Start Docker services
 npm run docker:down  # Stop Docker services
@@ -1944,7 +1945,12 @@ npm run docker:down  # Stop Docker services
 
 **Backend** (`cd apps/backend`):
 ```bash
-npm run start:dev    # Start with hot reload (port 3001)
+# Development (Recommended - Auto-cleanup)
+npm run dev          # Start with auto process cleanup (port 9006)
+npm run cleanup      # Clean zombie NestJS processes manually
+
+# Alternative (Manual)
+npm run start:dev    # Start with hot reload (port 9006) - may leave zombies
 npm run build        # Build for production
 npm run start:prod   # Start production server
 npm run lint         # Run ESLint
@@ -2235,11 +2241,33 @@ npm run typeorm:migration:revert
 
 ### Troubleshooting
 
+**🚨 Zombie Processes (MOST COMMON)**:
+```bash
+# Quick fix - Run cleanup script
+npm run cleanup                  # From root
+cd apps/backend && npm run cleanup  # Or from backend
+
+# Manual fix
+ps aux | grep "nest start" | grep -v grep | awk '{print $2}' | xargs kill -9
+lsof -ti:9006 | xargs kill -9
+
+# Prevention - Use auto-cleanup script
+cd apps/backend && npm run dev  # Instead of npm run start:dev
+```
+
 **Backend won't start**:
+- **First step**: Run `npm run cleanup` to kill zombie processes
 - Check PostgreSQL is running
 - Check Redis is running
 - Verify `.env` variables
 - Run migrations
+- Check port 9006 is not in use: `lsof -i :9006`
+
+**Port already in use**:
+```bash
+# Find and kill process on port 9006
+lsof -ti:9006 | xargs kill -9
+```
 
 **Frontend won't start**:
 - Check Node.js version (≥18)
@@ -2247,7 +2275,7 @@ npm run typeorm:migration:revert
 - Reinstall dependencies
 
 **WebSocket not connecting**:
-- Check backend is running (port 3001)
+- Check backend is running (port 9006)
 - Verify CORS settings
 - Check `NEXT_PUBLIC_SOCKET_URL`
 

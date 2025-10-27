@@ -26,8 +26,13 @@ export class TicketEmailService {
     customer: User,
   ): Promise<void> {
     try {
+      this.logger.log(`[EMAIL DEBUG] sendTicketCreatedEmail called for ticket ${ticket.id}`);
+      this.logger.log(`[EMAIL DEBUG] Customer email: ${customer.email}`);
+      this.logger.log(`[EMAIL DEBUG] Base URL: ${this.baseUrl}`);
+
       const ticketUrl = `${this.baseUrl}/portal/support/${ticket.id}`;
 
+      this.logger.log(`[EMAIL DEBUG] Calling mailService.sendMail...`);
       await this.mailService.sendMail({
         to: { email: customer.email, name: `${customer.firstName} ${customer.lastName}` },
         subject: `Ticket Created: ${ticket.subject}`,

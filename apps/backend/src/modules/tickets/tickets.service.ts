@@ -128,11 +128,17 @@ export class TicketsService {
     );
 
     // Send email notification using TicketEmailService
+    this.logger.log(`[EMAIL DEBUG] Starting email notification for ticket ${savedTicket.id}`);
     const ticketWithRelations = await this.findOne(savedTicket.id);
     const customer = await this.userRepository.findOne({ where: { id: userId } });
+    this.logger.log(`[EMAIL DEBUG] Customer found: ${customer ? customer.email : 'null'}`);
 
     if (customer) {
+      this.logger.log(`[EMAIL DEBUG] Calling sendTicketCreatedEmail for ${customer.email}`);
       await this.ticketEmailService.sendTicketCreatedEmail(ticketWithRelations, customer);
+      this.logger.log(`[EMAIL DEBUG] sendTicketCreatedEmail completed`);
+    } else {
+      this.logger.warn(`[EMAIL DEBUG] No customer found for userId: ${userId}`);
     }
 
     // Send real-time notification via WebSocket

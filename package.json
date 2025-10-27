@@ -9,8 +9,10 @@
   "scripts": {
     "start": "./start-dev.sh",
     "stop": "./stop-dev.sh",
+    "cleanup": "cd apps/backend && npm run cleanup",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd apps/backend && npm run start:dev",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "dev:backend:watch": "cd apps/backend && npm run start:dev",
     "dev:frontend": "cd apps/frontend && npm run dev",
     "build": "npm run build:shared && npm run build:backend && npm run build:frontend",
     "build:shared": "cd packages/shared-types && npm run build",

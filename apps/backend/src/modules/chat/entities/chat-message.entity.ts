@@ -43,6 +43,13 @@ export class ChatMessage extends BaseEntity {
   })
   messageType: ChatMessageType;
 
+  // FAQ Learning fields
+  @Column({ type: 'boolean', nullable: true, default: null })
+  isHelpful: boolean; // User feedback for FAQ learning
+
+  @Column({ type: 'float', nullable: true, default: null })
+  confidenceScore: number; // AI confidence score for FAQ learning
+
   @Column('jsonb', { default: {} })
   metadata: {
     aiModel?: string;

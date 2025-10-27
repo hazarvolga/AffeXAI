@@ -650,6 +650,9 @@ export class SettingsService {
     if (model.startsWith('gemini-') || model.includes('google/')) {
       return AiProvider.GOOGLE;
     }
+    if (model.startsWith('deepseek-')) {
+      return AiProvider.DEEPSEEK;
+    }
     if (model.includes('/') && !model.startsWith('gpt-') && !model.startsWith('claude-')) {
       return AiProvider.OPENROUTER;
     }

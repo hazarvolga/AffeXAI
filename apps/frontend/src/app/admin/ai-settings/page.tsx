@@ -20,6 +20,7 @@ const AI_PROVIDERS = [
   { value: 'openai' as AiProvider, label: 'OpenAI', icon: '🤖', description: 'GPT models from OpenAI' },
   { value: 'anthropic' as AiProvider, label: 'Anthropic', icon: '🧠', description: 'Claude models from Anthropic' },
   { value: 'google' as AiProvider, label: 'Google', icon: '🔍', description: 'Gemini models from Google' },
+  { value: 'deepseek' as AiProvider, label: 'DeepSeek', icon: '🔬', description: 'DeepSeek AI models' },
   { value: 'openrouter' as AiProvider, label: 'OpenRouter', icon: '🌐', description: 'Access to multiple models via OpenRouter' },
   { value: 'local' as AiProvider, label: 'Local AI', icon: '🏠', description: 'Local models via Ollama' },
 ];
@@ -43,6 +44,11 @@ const AI_MODELS_BY_PROVIDER: Record<AiProvider, Array<{ value: AiModel; label: s
     { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash (Fast)', cost: 'Low' },
     { value: 'gemini-pro', label: 'Gemini Pro', cost: 'Medium' },
     { value: 'gemini-pro-vision', label: 'Gemini Pro Vision', cost: 'Medium' },
+  ],
+  deepseek: [
+    { value: 'deepseek-chat', label: 'DeepSeek Chat', cost: 'Low', recommended: true },
+    { value: 'deepseek-coder', label: 'DeepSeek Coder', cost: 'Low' },
+    { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner', cost: 'Medium' },
   ],
   openrouter: [
     { value: 'openai/gpt-4', label: 'GPT-4 via OpenRouter', cost: 'High', recommended: true },
@@ -203,6 +209,7 @@ export default function AiSettingsPage() {
     if (model.startsWith('gpt-')) return 'openai';
     if (model.startsWith('claude-')) return 'anthropic';
     if (model.startsWith('gemini-')) return 'google';
+    if (model.startsWith('deepseek-')) return 'deepseek';
     if (model.includes('/')) return 'openrouter';
     if (['llama3.1', 'mistral', 'codellama'].includes(model)) return 'local';
     return 'openai';
@@ -365,6 +372,7 @@ export default function AiSettingsPage() {
               <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">🤖 OpenAI API Keys</a>
               <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" className="underline">🧠 Anthropic API Keys</a>
               <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline">🔍 Google AI API Keys</a>
+              <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer" className="underline">🔬 DeepSeek API Keys</a>
               <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">🌐 OpenRouter API Keys</a>
             </div>
             <p className="text-xs text-muted-foreground">API anahtarları veritabanında şifreli olarak saklanır.</p>
@@ -512,6 +520,7 @@ export default function AiSettingsPage() {
                           currentGlobalProvider === 'openai' ? 'sk-proj-...' :
                           currentGlobalProvider === 'anthropic' ? 'sk-ant-...' :
                           currentGlobalProvider === 'google' ? 'AIza...' :
+                          currentGlobalProvider === 'deepseek' ? 'sk-...' :
                           currentGlobalProvider === 'openrouter' ? 'sk-or-...' :
                           'API Key'
                         }

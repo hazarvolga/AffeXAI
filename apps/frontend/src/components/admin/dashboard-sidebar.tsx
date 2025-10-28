@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database, Mail } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -23,6 +23,7 @@ const emailMarketingLinks = [
     { href: "/admin/email-marketing", label: "Genel Bakış" },
     { href: "/admin/email-marketing/campaigns", label: "Kampanyalar" },
     { href: "/admin/email-marketing/templates", label: "Şablonlar" },
+    { href: "/admin/email-marketing/email-templates", label: "Email Şablonları", icon: Mail },
     { href: "/admin/email-marketing/subscribers", label: "Aboneler" },
     { href: "/admin/email-marketing/analytics", label: "Analytics" },
     { href: "/admin/email-marketing/automations", label: "Otomasyonlar" },
@@ -33,6 +34,7 @@ const supportLinks = [
     { href: "/admin/support", label: "Ticket Listesi", icon: LifeBuoy },
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
+    { href: "/admin/support/email-templates", label: "Email Şablonları", icon: Mail },
     { href: "/admin/support/knowledge-base", label: "Bilgi Bankası", icon: BookOpen },
     { href: "/admin/support/macros", label: "Makro Yönetimi", icon: Wand2 },
     { href: "/admin/support/ai-insights", label: "AI Insights", icon: Brain },
@@ -125,15 +127,17 @@ export function DashboardSidebar() {
                                     <nav className="grid gap-1">
                                     {emailMarketingLinks.map(link => {
                                         const isActive = pathname === link.href;
+                                        const Icon = link.icon;
                                         return (
                                             <Link
                                                 key={link.href}
                                                 href={link.href}
                                                 className={cn(
-                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                     isActive && "bg-muted text-primary"
                                                 )}
                                             >
+                                                {Icon && <Icon className="h-3 w-3" />}
                                                 {link.label}
                                             </Link>
                                         )

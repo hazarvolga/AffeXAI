@@ -22,6 +22,12 @@ interface TicketCreatedEmailProps {
   priority?: string;
   customerName?: string;
   ticketUrl?: string;
+  // New fields for support team
+  isAssignedUser?: boolean;
+  isSupportManager?: boolean;
+  customerEmail?: string;
+  categoryName?: string;
+  ticketDescription?: string;
   siteSettings?: {
     companyName: string;
     logoUrl: string;
@@ -52,6 +58,11 @@ export const TicketCreatedEmail = ({
   priority = "medium",
   customerName = "Değerli Müşterimiz",
   ticketUrl = `${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83`,
+  isAssignedUser = false,
+  isSupportManager = false,
+  customerEmail = "",
+  categoryName = "",
+  ticketDescription = "",
   siteSettings,
 }: TicketCreatedEmailProps) => {
   const companyName = siteSettings?.companyName || 'Aluplan';
@@ -62,8 +73,13 @@ export const TicketCreatedEmail = ({
     address: ''
   };
   const socialMediaLinks = siteSettings?.socialMedia || {};
-  
-  const previewText = `Destek talebiniz oluşturuldu: ${subject}`;
+
+  // Determine if this is for support team
+  const isSupportTeam = isAssignedUser || isSupportManager;
+
+  const previewText = isSupportTeam
+    ? `Yeni Destek Talebi: ${subject}`
+    : `Destek talebiniz oluşturuldu: ${subject}`;
 
   return (
     <Html>
@@ -81,45 +97,94 @@ export const TicketCreatedEmail = ({
 
           {/* Main Content */}
           <Section style={content}>
-            <Heading style={h1}>Destek Talebiniz Alındı</Heading>
-            
-            <Text style={text}>
-              Merhaba {customerName},
-            </Text>
-            
-            <Text style={text}>
-              Destek talebiniz başarıyla oluşturuldu ve ekibimiz en kısa sürede size dönüş yapacaktır.
-            </Text>
+            {isSupportTeam ? (
+              <>
+                <Heading style={h1}>
+                  {isAssignedUser ? '🎯 Size Yeni Bir Destek Talebi Atandı' : '📢 Yeni Destek Talebi Geldi'}
+                </Heading>
+
+                <Text style={text}>
+                  Merhaba {customerName},
+                </Text>
+
+                <Text style={text}>
+                  {isAssignedUser
+                    ? 'Size yeni bir destek talebi atandı. Lütfen müşteriye en kısa sürede geri dönüş yapın.'
+                    : 'Sistemde yeni bir destek talebi oluşturuldu. Aşağıda talebin detaylarını bulabilirsiniz.'}
+                </Text>
+
+                {/* Customer Info for Support Team */}
+                <Section style={customerInfoBox}>
+                  <Text style={ticketLabel}>👤 Müşteri Bilgileri:</Text>
+                  <Text style={ticketValue}>{customerName}</Text>
+                  {customerEmail && (
+                    <Text style={customerEmailText}>📧 {customerEmail}</Text>
+                  )}
+                </Section>
+              </>
+            ) : (
+              <>
+                <Heading style={h1}>Destek Talebiniz Alındı</Heading>
+
+                <Text style={text}>
+                  Merhaba {customerName},
+                </Text>
+
+                <Text style={text}>
+                  Destek talebiniz başarıyla oluşturuldu ve ekibimiz en kısa sürede size dönüş yapacaktır.
+                </Text>
+              </>
+            )}
 
             {/* Ticket Details Box */}
             <Section style={ticketBox}>
               <Text style={ticketLabel}>Talep Numarası:</Text>
               <Text style={ticketValue}>{ticketNumber}</Text>
-              
+
               <Hr style={ticketDivider} />
-              
+
+              {isSupportTeam && categoryName && (
+                <>
+                  <Text style={ticketLabel}>📁 Kategori:</Text>
+                  <Text style={ticketValue}>{categoryName}</Text>
+                  <Hr style={ticketDivider} />
+                </>
+              )}
+
               <Text style={ticketLabel}>Konu:</Text>
               <Text style={ticketValue}>{subject}</Text>
-              
+
               <Hr style={ticketDivider} />
-              
+
               <Text style={ticketLabel}>Öncelik:</Text>
               <Text style={ticketValue}>{priorityLabels[priority] || priority}</Text>
+
+              {isSupportTeam && ticketDescription && (
+                <>
+                  <Hr style={ticketDivider} />
+                  <Text style={ticketLabel}>📝 Sorun Detayı:</Text>
+                  <Text style={descriptionText}>{ticketDescription}</Text>
+                </>
+              )}
             </Section>
 
             <Text style={text}>
-              Talebinizin detaylarını görüntülemek ve mesajlaşmak için aşağıdaki butona tıklayabilirsiniz:
+              {isSupportTeam
+                ? 'Talebin tüm detaylarını görüntülemek ve müşteriye yanıt vermek için:'
+                : 'Talebinizin detaylarını görüntülemek ve mesajlaşmak için aşağıdaki butona tıklayabilirsiniz:'}
             </Text>
 
             <Section style={buttonContainer}>
               <Button style={button} href={ticketUrl}>
-                Talebi Görüntüle
+                {isSupportTeam ? '🎫 Talebi Görüntüle ve Yanıtla' : 'Talebi Görüntüle'}
               </Button>
             </Section>
 
-            <Text style={helpText}>
-              Ortalama yanıt süresi: {priority === 'urgent' ? '1-2 saat' : priority === 'high' ? '4-6 saat' : '24 saat'}
-            </Text>
+            {!isSupportTeam && (
+              <Text style={helpText}>
+                Ortalama yanıt süresi: {priority === 'urgent' ? '1-2 saat' : priority === 'high' ? '4-6 saat' : '24 saat'}
+              </Text>
+            )}
 
             <Hr style={hr} />
 
@@ -135,6 +200,7 @@ export const TicketCreatedEmail = ({
             companyName={companyName}
             contactInfo={contactInfo}
             socialMediaLinks={socialMediaLinks}
+            baseUrl={baseUrl}
           />
         </Container>
       </Body>
@@ -252,4 +318,27 @@ const footer = {
   fontSize: "14px",
   lineHeight: "1.6",
   textAlign: "center" as const,
+};
+
+const customerInfoBox = {
+  backgroundColor: "#eff6ff",
+  borderLeft: "4px solid #1e40af",
+  borderRadius: "8px",
+  padding: "16px 20px",
+  marginTop: "20px",
+  marginBottom: "20px",
+};
+
+const customerEmailText = {
+  color: "#475569",
+  fontSize: "14px",
+  margin: "8px 0 0 0",
+};
+
+const descriptionText = {
+  color: "#1e293b",
+  fontSize: "15px",
+  lineHeight: "1.6",
+  margin: "8px 0 0 0",
+  whiteSpace: "pre-wrap" as const,
 };

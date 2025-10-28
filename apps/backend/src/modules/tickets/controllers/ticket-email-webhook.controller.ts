@@ -146,6 +146,44 @@ export class TicketEmailWebhookController {
   }
 
   /**
+   * Resend Inbound Webhook
+   * https://resend.com/docs/api-reference/emails/webhooks
+   */
+  @Post('resend')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend inbound email webhook' })
+  @ApiResponse({ status: 200, description: 'Email processed successfully' })
+  async handleResendWebhook(@Body() payload: any): Promise<{ success: boolean; ticketId?: string }> {
+    try {
+      this.logger.log('Received Resend webhook');
+
+      const parsedEmail: ParsedEmail = {
+        from: payload.from,
+        fromName: payload.from_name,
+        to: payload.to,
+        subject: payload.subject,
+        textBody: payload.text || payload.body_text,
+        htmlBody: payload.html || payload.body_html,
+        messageId: payload.message_id || payload.headers?.['message-id'],
+        inReplyTo: payload.headers?.['in-reply-to'],
+        references: payload.headers?.references?.split(' '),
+        receivedAt: new Date(),
+        attachments: payload.attachments || [],
+      };
+
+      const ticket = await this.emailParserService.processInboundEmail(parsedEmail);
+
+      return {
+        success: true,
+        ticketId: ticket.id,
+      };
+    } catch (error) {
+      this.logger.error(`Resend webhook error: ${error.message}`, error.stack);
+      return { success: false };
+    }
+  }
+
+  /**
    * Generic webhook for custom email forwarding
    */
   @Post('generic')

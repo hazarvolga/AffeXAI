@@ -5,25 +5,24 @@ import {
   Head,
   Hr,
   Html,
-  Link,
-  Preview,
   Section,
   Text,
   Heading,
+  Preview,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
+import { EmailHeader } from "../../mail/components/EmailHeader";
 import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface TicketNewMessageEmailProps {
   ticketId?: string;
-  ticketNumber?: string;
+  displayNumber?: string;
   subject?: string;
-  authorName?: string;
+  recipientName?: string;
+  senderName?: string;
   messageContent?: string;
-  isFromSupport?: boolean;
   ticketUrl?: string;
+  isCustomer?: boolean;
   siteSettings?: {
     companyName: string;
     logoUrl: string;
@@ -42,22 +41,25 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:9002";
 
 export const TicketNewMessageEmail = ({
   ticketId = "07a6cc03-5ed9-483e-b26c-da0f3c4a4b83",
-  ticketNumber = "#12345",
+  displayNumber = "SUP-00001",
   subject = "Test Destek Talebi",
-  authorName = "Destek Ekibi",
-  messageContent = "Merhaba, sorununuz için gerekli incelemeleri yapıyoruz. Detaylı bilgi için size en kısa sürede dönüş yapacağız.",
-  isFromSupport = true,
-  ticketUrl = `${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83`,
+  recipientName = "Değerli Kullanıcı",
+  senderName = "Destek Ekibi",
+  messageContent = "Test mesaj içeriği",
+  ticketUrl = \`\${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83\`,
+  isCustomer = true,
   siteSettings,
 }: TicketNewMessageEmailProps) => {
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || siteSettingsData.logoUrl || `${baseUrl}/logo.png`;
-  const contactInfo = siteSettings?.contact || getContactInfo();
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || \`\${baseUrl}/logo.png\`;
+  const contactInfo = siteSettings?.contact || {
+    email: 'destek@aluplan.tr',
+    phone: '',
+    address: ''
+  };
   const socialMediaLinks = siteSettings?.socialMedia || {};
-  
-  const previewText = isFromSupport 
-    ? `Destek ekibinden yeni mesaj: ${messageContent.substring(0, 50)}...`
-    : `Yeni mesaj: ${messageContent.substring(0, 50)}...`;
+
+  const previewText = \`\${senderName} tarafından yeni mesaj: \${messageContent.substring(0, 100)}...\`;
 
   return (
     <Html>
@@ -65,64 +67,71 @@ export const TicketNewMessageEmail = ({
       <Preview>{previewText}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header */}
-          <Section style={header}>
-            <Heading style={heading}>{companyName}</Heading>
-          </Section>
+          <EmailHeader
+            companyName={companyName}
+            logoUrl={logoUrl}
+            baseUrl={baseUrl}
+            showTagline={false}
+          />
 
-          {/* Main Content */}
           <Section style={content}>
             <Heading style={h1}>
-              {isFromSupport ? 'Destek Ekibinden Yeni Mesaj' : 'Talebinize Yeni Mesaj'}
+              💬 {displayNumber} - Yeni Mesaj
             </Heading>
-            
+
             <Text style={text}>
-              <strong>{ticketNumber}</strong> numaralı destek talebinize yeni bir mesaj eklendi.
+              Merhaba {recipientName},
             </Text>
 
-            {/* Ticket Info */}
-            <Section style={infoBox}>
-              <Text style={infoLabel}>Konu:</Text>
-              <Text style={infoValue}>{subject}</Text>
-              
-              <Hr style={infoDivider} />
-              
-              <Text style={infoLabel}>Gönderen:</Text>
-              <Text style={infoValue}>{authorName}</Text>
+            <Text style={text}>
+              <strong>{senderName}</strong> tarafından talebinize yeni bir mesaj eklendi:
+            </Text>
+
+            <Section style={ticketInfoBox}>
+              <Text style={ticketLabel}>📋 Talep:</Text>
+              <Text style={ticketValue}>{displayNumber} - {subject}</Text>
             </Section>
 
-            {/* Message Content */}
             <Section style={messageBox}>
-              <Text style={messageLabel}>Mesaj:</Text>
-              <Text style={messageContent}>{messageContent}</Text>
+              <Text style={messageSender}>
+                👤 {senderName}
+              </Text>
+              <Hr style={messageDivider} />
+              <Text style={messageText}>
+                {messageContent}
+              </Text>
             </Section>
 
             <Text style={text}>
-              {isFromSupport 
-                ? 'Yanıtlamak için aşağıdaki butona tıklayın:'
-                : 'Mesajı görüntülemek için aşağıdaki butona tıklayın:'}
+              Mesajı görüntülemek ve yanıt vermek için:
             </Text>
 
             <Section style={buttonContainer}>
               <Button style={button} href={ticketUrl}>
-                {isFromSupport ? 'Yanıtla' : 'Mesajı Görüntüle'}
+                💬 Mesajı Görüntüle ve Yanıtla
               </Button>
             </Section>
+
+            {isCustomer && (
+              <Text style={helpText}>
+                💡 Destek ekibimiz size en kısa sürede yanıt verecektir.
+              </Text>
+            )}
 
             <Hr style={hr} />
 
             <Text style={footer}>
               Bu e-posta {companyName} destek sistemi tarafından otomatik olarak gönderilmiştir.
               <br />
-              Talep numaranızı her zaman belirtiniz: {ticketNumber}
+              Talep numarası: {displayNumber}
             </Text>
           </Section>
 
-          {/* Footer */}
           <EmailFooter
             companyName={companyName}
             contactInfo={contactInfo}
             socialMediaLinks={socialMediaLinks}
+            baseUrl={baseUrl}
           />
         </Container>
       </Body>
@@ -132,7 +141,6 @@ export const TicketNewMessageEmail = ({
 
 export default TicketNewMessageEmail;
 
-// Styles
 const main = {
   backgroundColor: "#f6f9fc",
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
@@ -143,19 +151,6 @@ const container = {
   margin: "0 auto",
   padding: "20px 0 48px",
   marginBottom: "64px",
-};
-
-const header = {
-  padding: "32px 24px",
-  backgroundColor: "#1e40af",
-  textAlign: "center" as const,
-};
-
-const heading = {
-  color: "#ffffff",
-  fontSize: "28px",
-  fontWeight: "700",
-  margin: "0",
 };
 
 const content = {
@@ -177,55 +172,56 @@ const text = {
   marginBottom: "16px",
 };
 
-const infoBox = {
-  backgroundColor: "#f1f5f9",
+const ticketInfoBox = {
+  backgroundColor: "#f8fafc",
+  border: "1px solid #e2e8f0",
   borderRadius: "8px",
-  padding: "20px",
+  padding: "16px",
   marginTop: "20px",
   marginBottom: "20px",
 };
 
-const infoLabel = {
+const ticketLabel = {
   color: "#64748b",
-  fontSize: "14px",
+  fontSize: "13px",
   fontWeight: "500",
   margin: "0 0 4px 0",
+  textTransform: "uppercase" as const,
 };
 
-const infoValue = {
+const ticketValue = {
   color: "#1e293b",
-  fontSize: "16px",
+  fontSize: "15px",
   fontWeight: "600",
-  margin: "0 0 16px 0",
-};
-
-const infoDivider = {
-  borderColor: "#cbd5e1",
-  margin: "12px 0",
+  margin: "0",
 };
 
 const messageBox = {
   backgroundColor: "#ffffff",
   border: "2px solid #e2e8f0",
+  borderLeft: "4px solid #1e40af",
   borderRadius: "8px",
-  padding: "24px",
+  padding: "20px",
   marginTop: "24px",
   marginBottom: "24px",
 };
 
-const messageLabel = {
-  color: "#64748b",
+const messageSender = {
+  color: "#1e40af",
   fontSize: "14px",
   fontWeight: "600",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
-  marginBottom: "12px",
+  margin: "0 0 8px 0",
 };
 
-const messageContent = {
+const messageDivider = {
+  borderColor: "#e2e8f0",
+  margin: "12px 0",
+};
+
+const messageText = {
   color: "#1e293b",
-  fontSize: "16px",
-  lineHeight: "1.8",
+  fontSize: "15px",
+  lineHeight: "1.6",
   margin: "0",
   whiteSpace: "pre-wrap" as const,
 };
@@ -246,6 +242,14 @@ const button = {
   textAlign: "center" as const,
   display: "inline-block",
   padding: "14px 32px",
+};
+
+const helpText = {
+  color: "#64748b",
+  fontSize: "14px",
+  textAlign: "center" as const,
+  fontStyle: "italic",
+  marginTop: "24px",
 };
 
 const hr = {

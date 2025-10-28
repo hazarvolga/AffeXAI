@@ -202,8 +202,8 @@ export class TicketEmailService {
         : `${this.baseUrl}/portal/support/${ticket.id}`;
 
       const subject = isCustomerMessage
-        ? `New Customer Message: ${ticket.subject}`
-        : `New Response: ${ticket.subject}`;
+        ? `Yeni Müşteri Mesajı - ${ticket.displayNumber}: ${ticket.subject}`
+        : `Yeni Yanıt - ${ticket.displayNumber}: ${ticket.subject}`;
 
       // Generate threading headers for message replies
       const originalMessageId = `<ticket-${ticket.id}-created-${ticket.createdAt.getTime()}@affexai.com>`;
@@ -212,12 +212,15 @@ export class TicketEmailService {
       // Reply-To address for email threading
       const ticketReplyAddress = `ticket-${ticket.id}@affexai.com`;
 
+      // Get site settings for email template
+      const siteSettings = await this.settingsService.getSiteSettings();
+
       await this.mailService.sendMail({
         to: { email: recipient.email, name: `${recipient.firstName} ${recipient.lastName}` },
         subject,
         template: 'ticket-new-message',
         channel: MailChannel.TRANSACTIONAL,
-        replyTo: { email: ticketReplyAddress, name: `Ticket #${ticket.id}` },
+        replyTo: { email: ticketReplyAddress, name: `Ticket ${ticket.displayNumber}` },
         headers: {
           'Message-ID': newMessageId,
           'In-Reply-To': originalMessageId,
@@ -226,12 +229,13 @@ export class TicketEmailService {
         },
         context: {
           recipientName: `${recipient.firstName} ${recipient.lastName}` || recipient.email,
-          ticketId: ticket.id,
-          ticketSubject: ticket.subject,
+          senderName: message.author ? `${message.author.firstName} ${message.author.lastName}` : 'Destek Ekibi',
+          displayNumber: ticket.displayNumber,
+          subject: ticket.subject,
           messageContent: message.content,
-          messageAuthor: message.author ? `${message.author.firstName} ${message.author.lastName}` : 'Support Team',
-          isCustomerMessage,
           ticketUrl,
+          isCustomer: !isCustomerMessage, // Recipient is customer if message was sent by support
+          siteSettings,
         },
       });
 

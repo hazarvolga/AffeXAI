@@ -23,6 +23,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "src/app"
+    "src/app",
+    "src/modules/email-marketing/templates/_archive_legacy_tsx_templates"
   ]
 }

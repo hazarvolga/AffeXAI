@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { TemplateService } from '../template.service';
 import { TemplateFileService } from './template-file.service';
 import { MjmlRendererService } from './mjml-renderer.service';
+import { BlockRendererService } from './block-renderer.service';
 import {
   UnifiedTemplate,
   TemplateSource,
@@ -35,6 +36,7 @@ export class UnifiedTemplateService {
     private readonly templateService: TemplateService,
     private readonly templateFileService: TemplateFileService,
     private readonly mjmlRenderer: MjmlRendererService,
+    private readonly blockRenderer: BlockRendererService,
   ) {}
 
   /**
@@ -109,6 +111,44 @@ export class UnifiedTemplateService {
         source: TemplateSource.FILE,
       };
     }
+  }
+
+  /**
+   * Render Email Builder template (block-based structure)
+   *
+   * @param identifier - Template UUID or name
+   * @param options - Render options with data
+   * @returns Rendered HTML using BlockRendererService
+   */
+  async renderEmailBuilderTemplate(
+    identifier: string,
+    options: TemplateRenderOptions = {},
+  ): Promise<TemplateRenderResult> {
+    const template = await this.getTemplate(identifier);
+    const { data = {}, interpolate = true } = options;
+
+    // Email Builder templates have structure property with rows/columns/blocks
+    if (template.structure) {
+      this.logger.debug(`Rendering Email Builder template: ${identifier}`);
+
+      try {
+        const html = await this.blockRenderer.renderToHtml(template.structure);
+        const finalHtml = interpolate
+          ? this.interpolateVariables(html, data)
+          : html;
+
+        return {
+          html: finalHtml,
+          source: template.source,
+        };
+      } catch (error) {
+        this.logger.error(`Failed to render Email Builder template: ${error.message}`);
+        throw error;
+      }
+    }
+
+    // Fallback to regular render if no structure
+    return this.renderTemplate(identifier, options);
   }
 
   /**

@@ -28,7 +28,8 @@
     "seed:certificates": "ts-node src/modules/certificates/seeds/seed-templates.ts",
     "seed:users": "ts-node src/database/seeds/seed-users-roles.ts",
     "seed:tickets": "ts-node src/database/seeds/seed-tickets.ts",
-    "seed:email-builder": "ts-node src/scripts/seed-email-builder-templates.ts"
+    "seed:email-builder": "ts-node src/scripts/seed-email-builder-templates.ts",
+    "update:empty-templates": "tsx src/scripts/update-empty-templates.ts"
   },
   "dependencies": {
     "@affexai/shared-types": "file:../../types-shared",

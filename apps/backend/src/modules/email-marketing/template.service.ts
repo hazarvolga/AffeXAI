@@ -34,6 +34,14 @@ export class TemplateService {
     return template;
   }
 
+  async findByName(name: string): Promise<EmailTemplate> {
+    const template = await this.templatesRepository.findOne({ where: { name } });
+    if (!template) {
+      throw new NotFoundException(`Template with name ${name} not found`);
+    }
+    return template;
+  }
+
   async update(id: string, updateTemplateDto: UpdateEmailTemplateDto): Promise<EmailTemplate> {
     const template = await this.findOne(id);
     Object.assign(template, updateTemplateDto);

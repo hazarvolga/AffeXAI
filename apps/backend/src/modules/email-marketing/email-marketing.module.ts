@@ -27,6 +27,7 @@ import { TemplateController } from './template.controller';
 import { TemplateFileService } from './services/template-file.service';
 import { TemplatePreviewService } from './services/template-preview.service';
 import { MjmlRendererService } from './services/mjml-renderer.service';
+import { UnifiedTemplateService } from './services/unified-template.service';
 import { EmailValidationService } from './services/email-validation.service';
 import { AdvancedEmailValidationService } from './services/advanced-email-validation.service';
 import { IpReputationService } from './services/ip-reputation.service';
@@ -175,6 +176,7 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
     TemplateFileService,
     TemplatePreviewService,
     MjmlRendererService,
+    UnifiedTemplateService,
     EmailValidationService,
     AdvancedEmailValidationService,
     IpReputationService,
@@ -217,6 +219,7 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
     TemplateService,
     TemplateFileService,
     TemplatePreviewService,
+    UnifiedTemplateService,
     EmailValidationService, 
     AdvancedEmailValidationService,
     IpReputationService,

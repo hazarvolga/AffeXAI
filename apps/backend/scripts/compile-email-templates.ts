@@ -101,9 +101,12 @@ async function compileTemplate(templatePath: string): Promise<CompileResult> {
 
     // Render template to HTML with sample context
     const sampleContext = getSampleContext(templateName);
-    const html = await render(React.createElement(TemplateComponent, sampleContext), {
+    let html = await render(React.createElement(TemplateComponent, sampleContext), {
       pretty: true, // Pretty-print HTML for debugging
     });
+
+    // Convert static HTML to Handlebars template by replacing sample values
+    html = convertToHandlebarsTemplate(html, sampleContext, templateName);
 
     // Write HTML to BOTH dist/templates/ AND src/templates/ (for watch mode)
     const outputPath = path.join(TEMPLATES_DIST_DIR, `${templateName}.html`);
@@ -243,6 +246,66 @@ function getSampleContext(templateName: string): Record<string, any> {
     ...baseContext,
     ...(specificContexts[templateName] || {}),
   };
+}
+
+/**
+ * Convert static HTML to Handlebars template by replacing sample values with placeholders
+ */
+function convertToHandlebarsTemplate(
+  html: string,
+  sampleContext: Record<string, any>,
+  templateName: string,
+): string {
+  let handlebarsHtml = html;
+
+  // Define replacement mappings for ticket-created template
+  const replacements: Record<string, string> = {
+    // Company name
+    'Affexai': '{{siteSettings.companyName}}',
+
+    // Customer name
+    'John Doe': '{{customerName}}',
+
+    // Ticket number - CRITICAL FIX
+    '#12345': '{{ticketNumber}}',
+
+    // Subject
+    'Test Destek Talebi': '{{subject}}',
+
+    // Priority (Turkish)
+    'Orta': '{{priorityTurkish}}',
+
+    // Contact info
+    '123 Main St, Istanbul, Turkey': '{{siteSettings.contact.address}}',
+    'support@affexai.com': '{{siteSettings.contact.email}}',
+    '+90 212 123 45 67': '{{siteSettings.contact.phone}}',
+
+    // Social media (these are in URLs, need careful replacement)
+    'https://facebook.com/affexai': '{{siteSettings.socialMedia.facebook}}',
+    'https://twitter.com/affexai': '{{siteSettings.socialMedia.twitter}}',
+    'https://linkedin.com/company/affexai': '{{siteSettings.socialMedia.linkedin}}',
+  };
+
+  // Apply replacements
+  for (const [sampleValue, handlebarsPlaceholder] of Object.entries(replacements)) {
+    // Use global replacement to replace ALL occurrences
+    handlebarsHtml = handlebarsHtml.replace(new RegExp(escapeRegex(sampleValue), 'g'), handlebarsPlaceholder);
+  }
+
+  // Add helper for priority translation (Handlebars helper will be needed)
+  handlebarsHtml = handlebarsHtml.replace(
+    /{{priorityTurkish}}/g,
+    '{{#if (eq priority "low")}}Düşük{{else if (eq priority "medium")}}Orta{{else if (eq priority "high")}}Yüksek{{else if (eq priority "urgent")}}Acil{{else}}{{priority}}{{/if}}'
+  );
+
+  return handlebarsHtml;
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

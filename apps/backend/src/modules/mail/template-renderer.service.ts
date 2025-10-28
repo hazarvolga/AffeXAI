@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as Handlebars from 'handlebars';
 
 /**
  * Template Renderer Service
@@ -31,12 +32,27 @@ export class TemplateRendererService {
     // Templates are pre-compiled at build time to dist/templates/
     this.templatesDir = path.join(__dirname, '../../templates');
     this.logger.log(`📧 Template directory: ${this.templatesDir}`);
+
+    // Register Handlebars helpers
+    this.registerHandlebarsHelpers();
   }
 
   /**
-   * Render a pre-compiled HTML template
+   * Register custom Handlebars helpers
+   */
+  private registerHandlebarsHelpers(): void {
+    // Helper for equality check
+    Handlebars.registerHelper('eq', function(a, b) {
+      return a === b;
+    });
+
+    this.logger.log('✅ Handlebars helpers registered');
+  }
+
+  /**
+   * Render a pre-compiled HTML template with Handlebars
    * @param templateName - Name of the template (e.g., 'ticket-created')
-   * @param context - Variables (currently unused - templates are static)
+   * @param context - Variables to inject into template
    */
   async renderTemplate(
     templateName: string,
@@ -44,15 +60,22 @@ export class TemplateRendererService {
   ): Promise<string> {
     try {
       this.logger.log(`📧 Loading template: ${templateName}`);
+      this.logger.log(`📋 Context keys: ${Object.keys(context).join(', ')}`);
 
-      // Load pre-compiled HTML template (already rendered with React Email)
-      const html = await this.loadTemplate(templateName);
+      // Load pre-compiled HTML template (Handlebars template)
+      const templateSource = await this.loadTemplate(templateName);
 
-      this.logger.log(`✅ Template loaded successfully: ${templateName}`);
+      // Compile Handlebars template
+      const template = Handlebars.compile(templateSource);
+
+      // Render with context
+      const html = template(context);
+
+      this.logger.log(`✅ Template rendered successfully: ${templateName}`);
       return html;
     } catch (error) {
       this.logger.error(
-        `❌ Failed to load template ${templateName}: ${error.message}`,
+        `❌ Failed to render template ${templateName}: ${error.message}`,
         error.stack,
       );
       throw error;

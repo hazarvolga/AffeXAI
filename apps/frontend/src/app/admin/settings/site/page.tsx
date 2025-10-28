@@ -195,10 +195,9 @@ export default function SiteSettingsPage() {
             </div>
             <form action={formAction}>
                  <Tabs defaultValue="company">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="company">Company</TabsTrigger>
                         <TabsTrigger value="email">Email Settings</TabsTrigger>
-                        <TabsTrigger value="social">Social Media</TabsTrigger>
                         <TabsTrigger value="analytics">Analytics</TabsTrigger>
                     </TabsList>
                     <TabsContent value="company" className="mt-6">
@@ -272,6 +271,53 @@ export default function SiteSettingsPage() {
                                     <div className="md:col-span-2 space-y-2">
                                         <Label htmlFor="address">Adres</Label>
                                         <Textarea id="address" name="address" defaultValue={effectiveSettings.contact?.address || ''} />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Sosyal Medya Hesapları</CardTitle>
+                                    <CardDescription>Kullanıcıların sitenizde göreceği sosyal medya linklerini yönetin.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {Object.entries(dynamicSocials).map(([platform, url]) => {
+                                        const Icon = socialIcons[platform] || Link2;
+                                        return (
+                                            <div key={platform} className="flex items-center gap-2">
+                                                <div className="relative flex-grow flex items-center">
+                                                    <Icon className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                                                    <Input
+                                                        id={`social-${platform}`}
+                                                        name={`social-${platform}`}
+                                                        defaultValue={url || ''}
+                                                        className="pl-10"
+                                                        placeholder={`${platform.charAt(0).toUpperCase() + platform.slice(1)} URL`}
+                                                    />
+                                                </div>
+                                                <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemoveSocialLink(platform)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                    <span className="sr-only">{platform} hesabını sil</span>
+                                                </Button>
+                                            </div>
+                                        )
+                                    })}
+                                    <div className="flex items-center gap-2 pt-4 border-t">
+                                        <Select value={newSocialPlatform} onValueChange={setNewSocialPlatform}>
+                                            <SelectTrigger className="flex-grow">
+                                                <SelectValue placeholder="Eklemek için bir platform seçin..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availablePlatforms.map(platform => (
+                                                    <SelectItem key={platform} value={platform}>
+                                                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button type="button" onClick={handleAddSocialLink} disabled={!newSocialPlatform}>
+                                            <PlusCircle className="mr-2 h-4 w-4"/> Ekle
+                                        </Button>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -492,76 +538,6 @@ export default function SiteSettingsPage() {
                                 </Button>
                             </CardFooter>
                         </Card>
-                    </TabsContent>
-                    <TabsContent value="social" className="mt-6">
-                        <div className="space-y-8">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Sosyal Medya Hesapları</CardTitle>
-                                    <CardDescription>Kullanıcıların sitenizde göreceği sosyal medya linklerini yönetin.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {Object.entries(dynamicSocials).map(([platform, url]) => {
-                                        const Icon = socialIcons[platform] || Link2;
-                                        return (
-                                            <div key={platform} className="flex items-center gap-2">
-                                                <div className="relative flex-grow flex items-center">
-                                                    <Icon className="absolute left-3 h-4 w-4 text-muted-foreground" />
-                                                    <Input 
-                                                        id={`social-${platform}`} 
-                                                        name={`social-${platform}`}
-                                                        defaultValue={url || ''}
-                                                        className="pl-10"
-                                                        placeholder={`${platform.charAt(0).toUpperCase() + platform.slice(1)} URL`}
-                                                    />
-                                                </div>
-                                                <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemoveSocialLink(platform)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                    <span className="sr-only">{platform} hesabını sil</span>
-                                                </Button>
-                                            </div>
-                                        )
-                                    })}
-                                    <div className="flex items-center gap-2 pt-4 border-t">
-                                        <Select value={newSocialPlatform} onValueChange={setNewSocialPlatform}>
-                                            <SelectTrigger className="flex-grow">
-                                                <SelectValue placeholder="Eklemek için bir platform seçin..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availablePlatforms.map(platform => (
-                                                    <SelectItem key={platform} value={platform}>
-                                                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Button type="button" onClick={handleAddSocialLink} disabled={!newSocialPlatform}>
-                                            <PlusCircle className="mr-2 h-4 w-4"/> Ekle
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                 <CardHeader>
-                                    <CardTitle>1. Varsayılan Platform</CardTitle>
-                                    <CardDescription>Yeni AI önerilen gönderiler varsayılan olarak bu platforma hazırlanır.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Select defaultValue="twitter">
-                                        <SelectTrigger className="w-full md:w-1/2">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="twitter">Twitter</SelectItem>
-                                            <SelectItem value="linkedin">LinkedIn</SelectItem>
-                                            <SelectItem value="instagram">Instagram</SelectItem>
-                                            <SelectItem value="facebook">Facebook</SelectItem>
-                                            <SelectItem value="tiktok">TikTok</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </CardContent>
-                            </Card>
-                        </div>
                     </TabsContent>
                     <TabsContent value="analytics" className="mt-6">
                         <Card>

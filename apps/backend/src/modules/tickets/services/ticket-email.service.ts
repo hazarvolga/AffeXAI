@@ -32,21 +32,22 @@ export class TicketEmailService {
 
       const ticketUrl = `${this.baseUrl}/portal/support/${ticket.id}`;
 
+      // Note: siteSettings are automatically injected by template-renderer.service.ts
+      // No need to pass them here - they will be fetched from database at render time
+
       this.logger.log(`[EMAIL DEBUG] Calling mailService.sendMail...`);
       await this.mailService.sendMail({
         to: { email: customer.email, name: `${customer.firstName} ${customer.lastName}` },
-        subject: `Ticket Created: ${ticket.subject}`,
+        subject: `Destek Talebi Oluşturuldu: ${ticket.subject}`,
         template: 'ticket-created',
         channel: MailChannel.TRANSACTIONAL,
         context: {
           customerName: `${customer.firstName} ${customer.lastName}` || customer.email,
           ticketId: ticket.id,
-          ticketSubject: ticket.subject,
-          ticketDescription: ticket.description,
-          ticketPriority: ticket.priority,
-          ticketStatus: ticket.status,
+          ticketNumber: `#${ticket.id.slice(0, 8).toUpperCase()}`,
+          subject: ticket.subject,
+          priority: ticket.priority,
           ticketUrl,
-          supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
         },
       });
 

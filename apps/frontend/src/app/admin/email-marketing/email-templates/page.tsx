@@ -16,6 +16,17 @@ interface EmailTemplate {
 }
 
 const emailMarketingTemplates: EmailTemplate[] = [
+  // Welcome & Onboarding
+  {
+    name: "welcome-email",
+    displayName: "Hoş Geldiniz",
+    description: "Yeni kullanıcılara hoş geldin emaili",
+    category: "Welcome",
+    variables: ["userName", "userEmail", "loginUrl", "gettingStartedUrl", "supportUrl"],
+    usedBy: ["UserService.sendWelcomeEmail()"]
+  },
+
+  // E-commerce
   {
     name: "abandoned-cart",
     displayName: "Terk Edilmiş Sepet",
@@ -24,6 +35,8 @@ const emailMarketingTemplates: EmailTemplate[] = [
     variables: ["userName", "cartItems", "totalAmount", "cartUrl", "expiryDate"],
     usedBy: ["EmailCampaignService.sendAbandonedCartEmail()"]
   },
+
+  // Promotional
   {
     name: "flash-sale",
     displayName: "Flaş İndirim",
@@ -33,6 +46,16 @@ const emailMarketingTemplates: EmailTemplate[] = [
     usedBy: ["EmailCampaignService.sendFlashSaleEmail()"]
   },
   {
+    name: "seasonal-campaign",
+    displayName: "Mevsimsel Kampanya",
+    description: "Mevsimsel ve özel gün kampanyaları",
+    category: "Promotion",
+    variables: ["userName", "season", "campaignName", "offers", "validUntil", "campaignUrl"],
+    usedBy: ["EmailCampaignService.sendSeasonalCampaign()"]
+  },
+
+  // Engagement & Retention
+  {
     name: "loyalty-program",
     displayName: "Sadakat Programı",
     description: "Sadakat programı bilgilendirmesi ve ödüller",
@@ -41,6 +64,32 @@ const emailMarketingTemplates: EmailTemplate[] = [
     usedBy: ["LoyaltyService.sendProgramEmail()"]
   },
   {
+    name: "re-engagement",
+    displayName: "Yeniden Aktivasyon",
+    description: "Pasif kullanıcıları yeniden aktif etme emaili",
+    category: "Engagement",
+    variables: ["userName", "daysSinceLastLogin", "lastActivityDate", "specialOfferCode", "returnUrl", "feedbackUrl"],
+    usedBy: ["EngagementService.sendReEngagementEmail()"]
+  },
+  {
+    name: "win-back",
+    displayName: "Geri Kazanım",
+    description: "Kayıp müşterileri geri kazanma kampanyası",
+    category: "Retention",
+    variables: ["userName", "monthsSinceLastPurchase", "lastPurchaseDate", "specialDiscountPercent", "discountCode", "returnUrl"],
+    usedBy: ["RetentionService.sendWinBackEmail()"]
+  },
+  {
+    name: "referral-program",
+    displayName: "Tavsiye Programı",
+    description: "Arkadaş tavsiye programı emaili",
+    category: "Referral",
+    variables: ["userName", "referralCode", "referralUrl", "referrerReward", "friendReward", "currentReferrals"],
+    usedBy: ["ReferralService.sendReferralInvite()"]
+  },
+
+  // Content & Newsletter
+  {
     name: "monthly-newsletter",
     displayName: "Aylık Bülten",
     description: "Aylık haber bülteni ve güncellemeler",
@@ -48,6 +97,8 @@ const emailMarketingTemplates: EmailTemplate[] = [
     variables: ["userName", "month", "highlights", "articles", "events", "unsubscribeUrl"],
     usedBy: ["NewsletterService.sendMonthlyNewsletter()"]
   },
+
+  // Product
   {
     name: "product-launch",
     displayName: "Ürün Lansmanı",
@@ -64,24 +115,49 @@ const emailMarketingTemplates: EmailTemplate[] = [
     variables: ["userName", "recommendations", "categoryName", "reason", "shopUrl"],
     usedBy: ["RecommendationService.sendRecommendations()"]
   },
+
+  // Special Occasions
   {
-    name: "seasonal-campaign",
-    displayName: "Mevsimsel Kampanya",
-    description: "Mevsimsel ve özel gün kampanyaları",
-    category: "Campaign",
-    variables: ["userName", "season", "campaignName", "offers", "validUntil", "campaignUrl"],
-    usedBy: ["EmailCampaignService.sendSeasonalCampaign()"]
+    name: "birthday-special",
+    displayName: "Doğum Günü Özel",
+    description: "Doğum günü indirimi ve özel hediye",
+    category: "Special",
+    variables: ["userName", "birthdayDate", "giftCode", "discountPercent", "expiryDays", "shopUrl"],
+    usedBy: ["SpecialOccasionService.sendBirthdayEmail()"]
+  },
+
+  // E-commerce Alerts
+  {
+    name: "price-drop-alert",
+    displayName: "Fiyat Düşüş Bildirimi",
+    description: "İzlenen üründe fiyat düşüşü bildirimi",
+    category: "Alert",
+    variables: ["userName", "productName", "productImage", "oldPrice", "newPrice", "savings", "savingsPercent", "productUrl", "expiryDate"],
+    usedBy: ["PriceAlertService.sendPriceDropEmail()"]
+  },
+  {
+    name: "back-in-stock",
+    displayName: "Stok Geri Geldi",
+    description: "Tükenen ürün tekrar stokta bildirimi",
+    category: "Alert",
+    variables: ["userName", "productName", "productImage", "price", "productUrl", "stockQuantity", "waitlistPosition"],
+    usedBy: ["StockAlertService.sendBackInStockEmail()"]
   },
 ];
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
+    "Welcome": "bg-green-500",
     "E-commerce": "bg-indigo-500",
     "Promotion": "bg-pink-500",
     "Loyalty": "bg-amber-500",
+    "Engagement": "bg-purple-500",
+    "Retention": "bg-red-500",
+    "Referral": "bg-blue-500",
     "Newsletter": "bg-cyan-500",
     "Product": "bg-emerald-500",
-    "Campaign": "bg-violet-500",
+    "Special": "bg-fuchsia-500",
+    "Alert": "bg-orange-500",
   };
   return colors[category] || "bg-gray-500";
 };
@@ -94,7 +170,7 @@ export default function EmailMarketingTemplatesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Email Marketing Şablonları</h1>
           <p className="text-muted-foreground mt-2">
-            Email marketing kampanyaları için kullanılan {emailMarketingTemplates.length} email şablonu
+            Email marketing kampanyaları için kullanılan {emailMarketingTemplates.length} email şablonu (Hedef: 20+ şablon)
           </p>
         </div>
         <Button variant="outline" asChild>

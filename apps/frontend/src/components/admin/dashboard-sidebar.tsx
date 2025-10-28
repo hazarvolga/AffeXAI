@@ -31,6 +31,7 @@ const emailMarketingLinks = [
     { href: "/admin/email-marketing", label: "Genel Bakış" },
     { href: "/admin/email-marketing/campaigns", label: "Kampanyalar" },
     { href: "/admin/email-marketing/templates", label: "Şablonlar" },
+    { href: "/admin/email-marketing/templates/builder", label: "Email Builder", icon: Palette },
     { href: "/admin/email-marketing/email-templates", label: "Email Şablonları", icon: Mail },
     { href: "/admin/email-marketing/subscribers", label: "Aboneler" },
     { href: "/admin/email-marketing/analytics", label: "Analytics" },

@@ -13,6 +13,7 @@ import { Subscriber } from './entities/subscriber.entity';
 import { Segment } from './entities/segment.entity';
 import { Group } from './entities/group.entity';
 import { EmailTemplate } from './entities/email-template.entity';
+import { EmailBlockLibrary } from './entities/email-block-library.entity';
 import { EmailCampaignService } from './email-campaign.service';
 import { EmailCampaignController } from './email-campaign.controller';
 import { SubscriberService } from './subscriber.service';
@@ -25,6 +26,7 @@ import { TemplateService } from './template.service';
 import { TemplateController } from './template.controller';
 import { TemplateFileService } from './services/template-file.service';
 import { TemplatePreviewService } from './services/template-preview.service';
+import { MjmlRendererService } from './services/mjml-renderer.service';
 import { EmailValidationService } from './services/email-validation.service';
 import { AdvancedEmailValidationService } from './services/advanced-email-validation.service';
 import { IpReputationService } from './services/ip-reputation.service';
@@ -100,6 +102,7 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
       Segment,
       Group,
       EmailTemplate,
+      EmailBlockLibrary,
       EmailAutomation,
       AutomationTrigger,
       AutomationExecution,
@@ -171,6 +174,7 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
     TemplateService,
     TemplateFileService,
     TemplatePreviewService,
+    MjmlRendererService,
     EmailValidationService,
     AdvancedEmailValidationService,
     IpReputationService,

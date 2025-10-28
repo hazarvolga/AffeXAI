@@ -38,6 +38,46 @@ export class EmailTemplate extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
+  // Email Builder columns (JSON-first architecture)
+  @Column({ type: 'jsonb', nullable: true })
+  structure: {
+    rows: Array<{
+      id: string;
+      type: string;
+      columns: Array<{
+        id: string;
+        width: string;
+        blocks: Array<{
+          id: string;
+          type: string;
+          properties: Record<string, any>;
+          styles: Record<string, any>;
+        }>;
+      }>;
+      settings: Record<string, any>;
+    }>;
+    settings: {
+      backgroundColor?: string;
+      contentWidth?: string;
+      fonts?: string[];
+    };
+  };
+
+  @Column({ type: 'text', nullable: true })
+  compiledHtml: string;
+
+  @Column({ type: 'text', nullable: true })
+  compiledMjml: string;
+
+  @Column({ type: 'int', default: 1 })
+  version: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  createdFrom: string; // 'scratch' | 'cloned' | 'starter-template-name'
+
+  @Column({ type: 'boolean', default: true })
+  isEditable: boolean;
+
   @CreateDateColumn()
   declare createdAt: Date;
 

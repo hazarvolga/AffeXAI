@@ -37,6 +37,7 @@ import { ChatUrlCache } from '../modules/chat/entities/chat-url-cache.entity';
 import { CompanyKnowledgeSource } from '../modules/knowledge-sources/entities/company-knowledge-source.entity';
 // Email Marketing - Missing entities
 import { EmailTemplate } from '../modules/email-marketing/entities/email-template.entity';
+import { EmailBlockLibrary } from '../modules/email-marketing/entities/email-block-library.entity';
 import { EmailOpenHistory } from '../modules/email-marketing/entities/email-open-history.entity';
 import { CustomField } from '../modules/email-marketing/entities/custom-field.entity';
 import { ConsentRecord } from '../modules/email-marketing/entities/consent-record.entity';
@@ -100,6 +101,7 @@ export const AppDataSource = new DataSource({
     EmailCampaignVariant,
     EmailLog,
     EmailTemplate,
+    EmailBlockLibrary,
     EmailOpenHistory,
     Group,
     Segment,

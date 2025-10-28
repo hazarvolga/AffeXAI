@@ -80,6 +80,8 @@
     "html-to-text": "^9.0.5",
     "ioredis": "^5.8.0",
     "mammoth": "^1.11.0",
+    "mjml": "^4.16.1",
+    "mjml-react": "^2.0.8",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.9",
     "openai": "^6.3.0",

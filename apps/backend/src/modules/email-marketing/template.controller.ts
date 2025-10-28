@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, NotFoundException, Q
 import { TemplateService } from './template.service';
 import { CreateEmailTemplateDto } from './dto/create-template.dto';
 import { UpdateEmailTemplateDto } from './dto/update-template.dto';
+import { CloneTemplateDto } from './dto/clone-template.dto';
 import { EmailTemplate } from './entities/email-template.entity';
 import { TemplatePreviewService } from './services/template-preview.service';
 
@@ -59,5 +60,20 @@ export class TemplateController {
     } catch (error) {
       throw new NotFoundException(`Could not preview template ${id}`);
     }
+  }
+
+  @Post(':id/clone')
+  async cloneTemplate(
+    @Param('id') id: string,
+    @Body() cloneDto: CloneTemplateDto,
+  ): Promise<EmailTemplate> {
+    return this.templateService.cloneTemplate(id, cloneDto);
+  }
+
+  @Get(':id/render')
+  async renderTemplate(
+    @Param('id') id: string,
+  ): Promise<{ html: string; mjml: string }> {
+    return this.templateService.renderTemplate(id);
   }
 }

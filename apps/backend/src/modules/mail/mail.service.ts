@@ -90,18 +90,19 @@ export class MailService implements IMailService {
     // If template is specified, render it to HTML
     if (options.template && !options.html) {
       try {
+        this.logger.log(`📧 Rendering template: ${options.template}`);
         const html = await this.templateRenderer.renderTemplate(
           options.template,
           options.context || {},
         );
         enhancedOptions = { ...enhancedOptions, html };
-        this.logger.log(`Template rendered: ${options.template}`);
+        this.logger.log(`✅ Template rendered: ${options.template}`);
       } catch (error) {
         this.logger.error(
-          `Template rendering failed for ${options.template}: ${error.message}`,
+          `❌ Template rendering failed for ${options.template}: ${error.message}`,
           error.stack,
         );
-        // Continue without template - adapter will handle the error
+        throw error; // Don't continue without template - fail fast
       }
     }
 

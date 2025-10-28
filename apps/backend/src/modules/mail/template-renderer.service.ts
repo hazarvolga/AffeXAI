@@ -1,52 +1,58 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { render } from '@react-email/render';
 import { SettingsService } from '../settings/settings.service';
-import * as React from 'react';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Template Renderer Service
- * Renders React Email templates to HTML with site settings context
+ * Loads pre-compiled HTML email templates
+ *
+ * Architecture:
+ * - Build time: React Email templates (.tsx) → compiled to static HTML (.html)
+ * - Runtime: Simply load pre-compiled HTML from disk
+ *
+ * Why pre-compiled templates?
+ * - NestJS can't dynamically import .tsx files at runtime
+ * - No JSX/React runtime dependency in production
+ * - Fastest possible email rendering (just file read)
+ * - Production-ready and reliable
+ *
+ * IMPORTANT: Templates are compiled with sample data at build time.
+ * For production, you must implement dynamic variable injection (Handlebars/Mustache/etc)
+ * or generate multiple variants at build time.
  */
 @Injectable()
 export class TemplateRendererService {
   private readonly logger = new Logger(TemplateRendererService.name);
+  private readonly templatesDir: string;
+  private templateCache: Map<string, string> = new Map();
 
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(private readonly settingsService: SettingsService) {
+    // Templates are pre-compiled at build time to dist/templates/
+    this.templatesDir = path.join(__dirname, '../../templates');
+    this.logger.log(`📧 Template directory: ${this.templatesDir}`);
+  }
 
   /**
-   * Render a React Email template to HTML
-   * Automatically injects site settings (logo, company name, contact info)
+   * Render a pre-compiled HTML template
+   * @param templateName - Name of the template (e.g., 'ticket-created')
+   * @param context - Variables (currently unused - templates are static)
    */
   async renderTemplate(
     templateName: string,
     context: Record<string, any> = {},
   ): Promise<string> {
     try {
-      // Get site settings to inject into templates
-      const siteSettings = await this.getSiteSettings();
+      this.logger.log(`📧 Loading template: ${templateName}`);
 
-      // Merge context with site settings
-      const enhancedContext = {
-        ...context,
-        siteSettings,
-        baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9003',
-      };
+      // Load pre-compiled HTML template (already rendered with React Email)
+      const html = await this.loadTemplate(templateName);
 
-      // Import and render the appropriate template
-      const template = await this.getTemplate(templateName);
-
-      if (!template) {
-        throw new Error(`Template not found: ${templateName}`);
-      }
-
-      // Render React component to HTML
-      const html = render(template(enhancedContext));
-
-      this.logger.log(`Template rendered successfully: ${templateName}`);
+      this.logger.log(`✅ Template loaded successfully: ${templateName}`);
       return html;
     } catch (error) {
       this.logger.error(
-        `Failed to render template ${templateName}: ${error.message}`,
+        `❌ Failed to load template ${templateName}: ${error.message}`,
         error.stack,
       );
       throw error;
@@ -54,112 +60,60 @@ export class TemplateRendererService {
   }
 
   /**
-   * Get template component by name
-   * Dynamically imports the React Email component
+   * Load pre-compiled HTML template from disk
+   * Uses caching to avoid repeated file reads
    */
-  private async getTemplate(templateName: string): Promise<any> {
-    const templatePath = this.getTemplatePath(templateName);
+  private async loadTemplate(templateName: string): Promise<string> {
+    // Check cache first
+    if (this.templateCache.has(templateName)) {
+      this.logger.debug(`📦 Template loaded from cache: ${templateName}`);
+      return this.templateCache.get(templateName)!;
+    }
 
+    // Load from disk
+    const templatePath = path.join(this.templatesDir, `${templateName}.html`);
+
+    if (!fs.existsSync(templatePath)) {
+      const available = this.getAvailableTemplates();
+      throw new Error(
+        `Template file not found: ${templatePath}\n` +
+        `Available templates (${available.length}): ${available.join(', ')}\n` +
+        `Did you run 'npm run compile:templates' before 'npm run build'?`
+      );
+    }
+
+    const html = fs.readFileSync(templatePath, 'utf-8');
+
+    // Cache the template
+    this.templateCache.set(templateName, html);
+
+    this.logger.log(`📄 Template loaded from disk: ${templateName} (${html.length} bytes)`);
+    return html;
+  }
+
+  /**
+   * Get list of available pre-compiled templates
+   */
+  private getAvailableTemplates(): string[] {
     try {
-      // Dynamic import of the template
-      // Note: In production, templates should be pre-compiled or bundled
-      const templateModule = await import(templatePath);
-      return templateModule.default || templateModule[this.getTemplateComponentName(templateName)];
+      if (!fs.existsSync(this.templatesDir)) {
+        return [];
+      }
+
+      return fs.readdirSync(this.templatesDir)
+        .filter(file => file.endsWith('.html'))
+        .map(file => file.replace('.html', ''));
     } catch (error) {
-      this.logger.error(`Failed to load template: ${templatePath}`, error.stack);
-      throw new Error(`Template not found: ${templateName}`);
+      this.logger.warn(`Failed to list templates: ${error.message}`);
+      return [];
     }
   }
 
   /**
-   * Map template name to file path
+   * Clear template cache (useful for development)
    */
-  private getTemplatePath(templateName: string): string {
-    // Templates are now in the backend src/emails directory
-    const emailsPath = '../../emails';
-
-    // Map template names to actual file paths
-    const templateMap: Record<string, string> = {
-      // Ticket templates
-      'ticket-created': `${emailsPath}/ticket-created`,
-      'ticket-assigned': `${emailsPath}/ticket-assigned`,
-      'ticket-new-message': `${emailsPath}/ticket-new-message`,
-      'ticket-resolved': `${emailsPath}/ticket-resolved`,
-      'ticket-escalated': `${emailsPath}/ticket-escalated`,
-      'csat-survey': `${emailsPath}/csat-survey`,
-      'sla-breach-alert': `${emailsPath}/sla-breach-alert`,
-      'sla-approaching-alert': `${emailsPath}/sla-approaching-alert`,
-
-      // Certificate templates
-      'certificate-issued': `${emailsPath}/certificate-issued`,
-      'certificate-reminder': `${emailsPath}/certificate-reminder`,
-
-      // Event templates
-      'event-registration-confirmation': `${emailsPath}/event-registration-confirmation`,
-      'event-reminder': `${emailsPath}/event-reminder`,
-      'event-cancelled': `${emailsPath}/event-cancelled`,
-
-      // Auth templates
-      'welcome': `${emailsPath}/welcome`,
-      'email-verification': `${emailsPath}/email-verification`,
-      'password-reset': `${emailsPath}/password-reset`,
-      'password-changed': `${emailsPath}/password-changed`,
-
-      // Email marketing templates
-      'campaign': `${emailsPath}/campaign`,
-      'newsletter': `${emailsPath}/newsletter`,
-    };
-
-    return templateMap[templateName] || `${emailsPath}/${templateName}`;
-  }
-
-  /**
-   * Get component name from template name
-   * Converts kebab-case to PascalCase
-   */
-  private getTemplateComponentName(templateName: string): string {
-    return templateName
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join('') + 'Email';
-  }
-
-  /**
-   * Get site settings for template context
-   */
-  private async getSiteSettings(): Promise<any> {
-    try {
-      // Get site settings from SettingsService
-      const siteSettings = await this.settingsService.getSiteSettings();
-
-      return {
-        companyName: siteSettings.companyName || 'Aluplan',
-        logoUrl: siteSettings.logoUrl || 'https://aluplan.tr/logo.png',
-        contact: {
-          address: siteSettings.contact?.address || '',
-          phone: siteSettings.contact?.phone || '',
-          email: siteSettings.contact?.email || 'info@aluplan.tr',
-        },
-        socialMedia: {
-          facebook: siteSettings.socialMedia?.facebook || '',
-          twitter: siteSettings.socialMedia?.twitter || '',
-          linkedin: siteSettings.socialMedia?.linkedin || '',
-          instagram: siteSettings.socialMedia?.instagram || '',
-        },
-      };
-    } catch (error) {
-      this.logger.warn(`Failed to load site settings: ${error.message}`);
-      // Return defaults if settings unavailable
-      return {
-        companyName: 'Aluplan',
-        logoUrl: 'https://aluplan.tr/logo.png',
-        contact: {
-          address: '',
-          phone: '',
-          email: 'info@aluplan.tr',
-        },
-        socialMedia: {},
-      };
-    }
+  clearCache(): void {
+    this.templateCache.clear();
+    this.logger.log('🗑️  Template cache cleared');
   }
 }

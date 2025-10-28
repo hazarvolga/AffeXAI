@@ -50,11 +50,12 @@ export interface CloneTemplateDto {
 
 export const EmailTemplatesService = {
   /**
-   * Get all templates (DB + file-based)
+   * Get all templates (Database-only architecture)
    */
-  async getTemplates(): Promise<{ dbTemplates: EmailTemplate[]; fileTemplates: any[]; total: number }> {
+  async getTemplates(): Promise<EmailTemplate[]> {
     const response = await httpClient.get('/email-templates');
-    return response.data;
+    // API returns { success: true, data: [...] } format
+    return response.data?.data || response.data;
   },
 
   /**
@@ -105,20 +106,10 @@ export const EmailTemplatesService = {
   },
 
   /**
-   * Preview template
+   * Preview template (Database-only)
    */
-  async previewTemplate(id: string, type: 'file' | 'db' = 'file'): Promise<{ content: string }> {
-    const response = await httpClient.get(`/email-templates/${id}/preview`, {
-      params: { type },
-    });
-    return response.data;
-  },
-
-  /**
-   * Create template from file
-   */
-  async createFromFile(fileTemplateName: string, name?: string): Promise<EmailTemplate> {
-    const response = await httpClient.post(`/email-templates/from-file/${fileTemplateName}`, { name });
+  async previewTemplate(id: string): Promise<{ content: string }> {
+    const response = await httpClient.get(`/email-templates/${id}/preview`);
     return response.data;
   },
 };

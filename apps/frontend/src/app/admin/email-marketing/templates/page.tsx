@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, LayoutTemplate, PlusCircle, Eye, Pen, Copy, Palette, Wand2, Filter, Database, FileText } from 'lucide-react';
+import { ArrowLeft, LayoutTemplate, PlusCircle, Eye, Pen, Palette, Wand2 } from 'lucide-react';
 import Link from 'next/link';
-import templatesService, { TemplateResponse } from '@/lib/api/templatesService';
+import templatesService from '@/lib/api/templatesService';
+import { EmailTemplate } from '@affexai/shared-types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Image from "next/image";
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Design System entegreli template'ler listesi
 const designSystemTemplates = [
@@ -21,13 +21,10 @@ const designSystemTemplates = [
   'newsletter'
 ];
 
-type FilterType = 'all' | 'database' | 'file';
-
 export default function TemplatesManagementPage() {
-  const [templates, setTemplates] = useState<TemplateResponse | null>(null);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FilterType>('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,18 +43,6 @@ export default function TemplatesManagementPage() {
 
     fetchData();
   }, []);
-
-  const handleCreateFromTemplate = async (fileTemplateName: string, templateName: string) => {
-    try {
-      await templatesService.createTemplateFromFile(fileTemplateName, templateName);
-      // Refresh the template list
-      const data = await templatesService.getAllTemplates();
-      setTemplates(data);
-    } catch (err) {
-      console.error('Error creating template from file:', err);
-      alert('Şablon oluşturulurken bir hata oluştu.');
-    }
-  };
 
   if (loading) {
     return (
@@ -101,42 +86,20 @@ export default function TemplatesManagementPage() {
     );
   }
 
-  // Combine db and file templates for display
-  const allTemplates = templates ? [
-    ...templates.dbTemplates.map(template => ({
-      id: template.id,
-      name: template.name,
-      description: template.description || 'Veritabanı şablonu',
-      thumbnailUrl: template.thumbnailUrl || '/placeholders/template-default.png',
-      createdAt: template.createdAt,
-      type: 'db' as const,
-      templateType: template.type,
-      isCustom: template.type === 'custom',
-      hasDesignSystem: designSystemTemplates.includes(template.id)
-    })),
-    ...templates.fileTemplates.map(template => ({
-      id: template.id,
-      name: template.name,
-      description: 'Hazır şablon (TSX)',
-      thumbnailUrl: '/placeholders/template-default.png',
-      createdAt: new Date().toISOString(),
-      type: 'file' as const,
-      templateType: 'file_based',
-      isCustom: false,
-      hasDesignSystem: designSystemTemplates.includes(template.id)
-    }))
-  ] : [];
+  // All templates are from database now (Database-Only Architecture)
+  const allTemplates = templates.map(template => ({
+    id: template.id,
+    name: template.name,
+    description: template.description || 'Database template',
+    thumbnailUrl: template.thumbnailUrl || '/placeholders/template-default.png',
+    createdAt: template.createdAt,
+    type: 'db' as const,
+    templateType: template.type,
+    isCustom: template.type === 'custom',
+    hasDesignSystem: designSystemTemplates.includes(template.id)
+  }));
 
-  // Apply filter
-  const filteredTemplates = allTemplates.filter(template => {
-    if (filter === 'all') return true;
-    if (filter === 'database') return template.type === 'db';
-    if (filter === 'file') return template.type === 'file';
-    return true;
-  });
-
-  const dbCount = templates?.dbTemplates.length || 0;
-  const fileCount = templates?.fileTemplates.length || 0;
+  const totalCount = templates.length;
 
   return (
     <div className="space-y-8">
@@ -167,7 +130,7 @@ export default function TemplatesManagementPage() {
               <div>
                 <CardTitle>Şablonlar</CardTitle>
                 <CardDescription>
-                  Mevcut e-posta şablonlarınızı görüntüleyin ve yönetin. Toplam {templates?.total || 0} şablon.
+                  Mevcut e-posta şablonlarınızı görüntüleyin ve yönetin. Toplam {totalCount} şablon.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -180,50 +143,24 @@ export default function TemplatesManagementPage() {
                 </Badge>
               </div>
             </div>
-
-            {/* Filter Tabs */}
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-3">
-                <TabsTrigger value="all" className="gap-2">
-                  <Filter className="h-4 w-4" />
-                  Tümü ({allTemplates.length})
-                </TabsTrigger>
-                <TabsTrigger value="database" className="gap-2">
-                  <Database className="h-4 w-4" />
-                  Database ({dbCount})
-                </TabsTrigger>
-                <TabsTrigger value="file" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Dosyalar ({fileCount})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
         </CardHeader>
         <CardContent>
-          {filteredTemplates.length === 0 ? (
+          {allTemplates.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <LayoutTemplate className="h-12 w-12 text-muted-foreground" />
               <div className="text-center">
-                <h3 className="text-lg font-semibold">
-                  {filter === 'all' ? 'Henüz Şablon Oluşturulmadı' :
-                   filter === 'database' ? 'Henüz Database Şablonu Yok' :
-                   'Henüz Dosya Şablonu Yok'}
-                </h3>
+                <h3 className="text-lg font-semibold">Henüz Şablon Oluşturulmadı</h3>
                 <p className="text-muted-foreground">
-                  {filter === 'all' ? 'Yeni şablonlar oluşturarak e-posta gönderimlerinizi kolaylaştırın.' :
-                   filter === 'database' ? 'Email Builder ile yeni şablon oluşturun.' :
-                   'TSX dosyaları templates klasörüne ekleyin.'}
+                  Email Builder ile yeni şablonlar oluşturarak e-posta gönderimlerinizi kolaylaştırın.
                 </p>
               </div>
-              {filter !== 'file' && (
-                <Button asChild>
-                  <Link href="/admin/email-marketing/templates/builder">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Email Builder ile Oluştur
-                  </Link>
-                </Button>
-              )}
+              <Button asChild>
+                <Link href="/admin/email-marketing/templates/builder">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Email Builder ile Oluştur
+                </Link>
+              </Button>
             </div>
           ) : (
             <Table>
@@ -238,7 +175,7 @@ export default function TemplatesManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTemplates.map((template) => (
+                {allTemplates.map((template) => (
                   <TableRow key={`${template.type}-${template.id}`}>
                     <TableCell>
                       <Image 
@@ -280,27 +217,16 @@ export default function TemplatesManagementPage() {
                     <TableCell>{new Date(template.createdAt).toLocaleDateString('tr-TR')}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" className="mr-2" asChild>
-                        <Link href={`/admin/email-marketing/templates/${template.id}/preview?type=${template.type}`}>
+                        <Link href={`/admin/email-marketing/templates/${template.id}/preview`}>
                           <Eye className="mr-2 h-4 w-4" /> Önizle
                         </Link>
                       </Button>
-                      
-                      {template.type === 'file' ? (
-                        <Button 
-                          variant="secondary" 
-                          size="sm" 
-                          onClick={() => handleCreateFromTemplate(template.id, template.name)}
-                          className="mr-2"
-                        >
-                          <Copy className="mr-2 h-4 w-4" /> Kullan
-                        </Button>
-                      ) : (
-                        <Button variant="secondary" size="sm" asChild>
-                          <Link href={`/admin/email-marketing/templates/${template.id}/edit`}>
-                            <Pen className="mr-2 h-4 w-4" /> Düzenle
-                          </Link>
-                        </Button>
-                      )}
+
+                      <Button variant="secondary" size="sm" asChild>
+                        <Link href={`/admin/email-marketing/templates/${template.id}/edit`}>
+                          <Pen className="mr-2 h-4 w-4" /> Düzenle
+                        </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

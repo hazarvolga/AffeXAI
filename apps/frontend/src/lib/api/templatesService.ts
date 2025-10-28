@@ -13,20 +13,8 @@ export type {
   UpdateTemplateDto,
 };
 
-export interface FileTemplate {
-  id: string;
-  name: string;
-  fileName: string;
-}
-
-export interface TemplateResponse {
-  dbTemplates: EmailTemplate[];
-  fileTemplates: FileTemplate[];
-  total: number;
-}
-
 /**
- * Email Templates Service
+ * Email Templates Service (Database-Only Architecture)
  * Handles email template operations extending BaseApiService
  */
 class TemplatesService extends BaseApiService<EmailTemplate, CreateTemplateDto, UpdateTemplateDto> {
@@ -35,32 +23,17 @@ class TemplatesService extends BaseApiService<EmailTemplate, CreateTemplateDto, 
   }
 
   /**
-   * Get all templates (override to return custom response type)
+   * Get all templates from database
    */
   async getAll(): Promise<EmailTemplate[]> {
-    const response = await httpClient.getWrapped<TemplateResponse>(this.endpoint);
-    // Return dbTemplates for compatibility with BaseApiService
-    return response.dbTemplates;
+    return httpClient.getWrapped<EmailTemplate[]>(this.endpoint);
   }
 
   /**
-   * Get all templates with file templates included
+   * Get all templates (alias for getAll for backwards compatibility)
    */
-  async getAllTemplates(): Promise<TemplateResponse> {
-    return httpClient.getWrapped<TemplateResponse>(this.endpoint);
-  }
-
-  /**
-   * Create template from file
-   */
-  async createTemplateFromFile(
-    fileTemplateName: string,
-    name?: string,
-  ): Promise<EmailTemplate> {
-    return httpClient.postWrapped<EmailTemplate>(
-      `${this.endpoint}/from-file/${fileTemplateName}`,
-      { name },
-    );
+  async getAllTemplates(): Promise<EmailTemplate[]> {
+    return this.getAll();
   }
 }
 

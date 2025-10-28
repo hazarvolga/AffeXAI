@@ -29,9 +29,10 @@ export class TemplateRendererService {
   private templateCache: Map<string, string> = new Map();
 
   constructor(private readonly settingsService: SettingsService) {
-    // Templates are pre-compiled at build time to dist/templates/
+    // Templates are now organized by module
+    // Legacy path for backward compatibility
     this.templatesDir = path.join(__dirname, '../../templates');
-    this.logger.log(`📧 Template directory: ${this.templatesDir}`);
+    this.logger.log(`📧 Template directory (legacy): ${this.templatesDir}`);
 
     // Register Handlebars helpers
     this.registerHandlebarsHelpers();
@@ -83,6 +84,34 @@ export class TemplateRendererService {
   }
 
   /**
+   * Resolve template path based on module
+   * ticket-created → dist/modules/tickets/templates/ticket-created.html
+   * email-verification → dist/modules/mail/templates/email-verification.html
+   * abandoned-cart → dist/modules/email-marketing/templates/abandoned-cart.html
+   */
+  private resolveTemplatePath(templateName: string): string {
+    const basePath = path.join(__dirname, '../..');
+
+    // Ticket templates
+    if (templateName.startsWith('ticket-') || templateName.startsWith('csat-') || templateName.startsWith('sla-')) {
+      return path.join(basePath, 'modules/tickets/templates', `${templateName}.html`);
+    }
+
+    // Marketing templates
+    if (templateName.match(/abandoned-cart|flash-sale|loyalty|newsletter|product-|seasonal/)) {
+      return path.join(basePath, 'modules/email-marketing/templates', `${templateName}.html`);
+    }
+
+    // Mail (transactional) templates
+    if (templateName.match(/email-verification|password-reset|welcome|order-|invoice/)) {
+      return path.join(basePath, 'modules/mail/templates', `${templateName}.html`);
+    }
+
+    // Fallback to legacy location
+    return path.join(this.templatesDir, `${templateName}.html`);
+  }
+
+  /**
    * Load pre-compiled HTML template from disk
    * Uses caching to avoid repeated file reads
    */
@@ -93,13 +122,14 @@ export class TemplateRendererService {
       return this.templateCache.get(templateName)!;
     }
 
-    // Load from disk
-    const templatePath = path.join(this.templatesDir, `${templateName}.html`);
+    // Resolve template path based on module
+    const templatePath = this.resolveTemplatePath(templateName);
 
     if (!fs.existsSync(templatePath)) {
       const available = this.getAvailableTemplates();
       throw new Error(
         `Template file not found: ${templatePath}\n` +
+        `Template name: ${templateName}\n` +
         `Available templates (${available.length}): ${available.join(', ')}\n` +
         `Did you run 'npm run compile:templates' before 'npm run build'?`
       );
@@ -110,7 +140,7 @@ export class TemplateRendererService {
     // Cache the template
     this.templateCache.set(templateName, html);
 
-    this.logger.log(`📄 Template loaded from disk: ${templateName} (${html.length} bytes)`);
+    this.logger.log(`📄 Template loaded: ${templateName} (${html.length} bytes) from ${templatePath}`);
     return html;
   }
 

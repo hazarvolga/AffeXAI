@@ -1,35 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { TemplateFileService } from './template-file.service';
 import { EmailTemplate } from '../entities/email-template.entity';
 import { SiteSettingsDto } from '../../settings/dto/site-settings.dto';
 import { SettingsService } from '../../settings/settings.service';
 
+/**
+ * Service for previewing email templates with site settings injected
+ * Database-only architecture - all templates are stored in the database
+ */
 @Injectable()
 export class TemplatePreviewService {
   constructor(
-    private readonly templateFileService: TemplateFileService,
     private readonly settingsService: SettingsService,
   ) {}
 
-  async previewTemplate(
-    templateId: string,
-    templateType: 'file' | 'db' = 'file',
-  ): Promise<string> {
-    let templateContent: string;
-
-    if (templateType === 'file') {
-      // Load template from file
-      templateContent = await this.templateFileService.getTemplateFileContent(
-        `${templateId}.tsx`,
-      );
-    } else {
-      // Load template from database
-      // This would require a different approach to fetch from DB
-      templateContent = ''; // Placeholder
-    }
-
+  /**
+   * Preview template with site settings injected
+   * @param template EmailTemplate entity from database
+   * @returns Processed HTML content with site settings injected
+   */
+  async previewTemplate(template: EmailTemplate): Promise<string> {
     // Get site settings
     const siteSettings = await this.settingsService.getSiteSettings();
+
+    // Use compiledHtml if available, otherwise use content
+    const templateContent = template.compiledHtml || template.content || '';
 
     // Inject site settings into template
     return this.injectSiteSettings(templateContent, siteSettings);

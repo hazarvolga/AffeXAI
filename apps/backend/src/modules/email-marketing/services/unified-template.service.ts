@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { TemplateService } from '../template.service';
-import { TemplateFileService } from './template-file.service';
 import { MjmlRendererService } from './mjml-renderer.service';
 import { BlockRendererService } from './block-renderer.service';
 import {
@@ -15,18 +14,18 @@ import { EmailTemplate } from '../entities/email-template.entity';
  * UnifiedTemplateService
  *
  * Single entry point for all email template operations.
- * Supports both database-based (JSON/MJML) and file-based (HTML) templates
- * with automatic detection and unified interface.
+ * **Database-only architecture** (Phase 4: File-based templates removed)
  *
  * Strategy:
- * 1. UUID pattern → Database lookup
- * 2. Name lookup → Database (if exists)
- * 3. Fallback → File-based templates
+ * 1. UUID pattern → Database lookup by ID
+ * 2. Name lookup → Database lookup by name
  *
- * This approach ensures:
- * - Zero breaking changes (existing file-based templates work)
- * - Future-proof (new templates use database)
- * - Clean interface (single point of entry)
+ * All templates are now stored in database with MJML-compatible structures.
+ * This ensures:
+ * - Single source of truth (database)
+ * - Universal preview capability (all templates)
+ * - Email Builder editing (all templates)
+ * - Consistent user experience
  */
 @Injectable()
 export class UnifiedTemplateService {
@@ -34,48 +33,42 @@ export class UnifiedTemplateService {
 
   constructor(
     private readonly templateService: TemplateService,
-    private readonly templateFileService: TemplateFileService,
     private readonly mjmlRenderer: MjmlRendererService,
     private readonly blockRenderer: BlockRendererService,
   ) {}
 
   /**
-   * Get template with auto-detection
+   * Get template from database
    *
-   * @param identifier - UUID (database) or name (database/file)
+   * @param identifier - UUID or template name
    * @returns Unified template object
    */
   async getTemplate(identifier: string): Promise<UnifiedTemplate> {
     this.logger.debug(`Getting template: ${identifier}`);
 
-    // Strategy 1: UUID pattern → Database
+    // Strategy 1: UUID pattern → Database lookup by ID
     if (this.isUUID(identifier)) {
       return this.getFromDatabase(identifier);
     }
 
-    // Strategy 2: Try database by name
-    try {
-      const dbTemplate = await this.templateService.findByName(identifier);
-      if (dbTemplate) {
-        this.logger.debug(`Template found in database: ${identifier}`);
-        return this.mapToUnified(dbTemplate, TemplateSource.DATABASE);
-      }
-    } catch (error) {
-      this.logger.debug(
-        `Template not found in database, trying file-based: ${identifier}`,
+    // Strategy 2: Name → Database lookup by name
+    const dbTemplate = await this.templateService.findByName(identifier);
+    if (!dbTemplate) {
+      throw new NotFoundException(
+        `Template not found with identifier: ${identifier}`,
       );
     }
 
-    // Strategy 3: Fallback to file-based
-    return this.getFromFile(identifier);
+    this.logger.debug(`Template found in database: ${identifier}`);
+    return this.mapToUnified(dbTemplate, TemplateSource.DATABASE);
   }
 
   /**
-   * Render template with unified interface
+   * Render template to HTML
    *
    * @param identifier - Template UUID or name
    * @param options - Render options with data
-   * @returns Rendered HTML
+   * @returns Rendered HTML with MJML
    */
   async renderTemplate(
     identifier: string,
@@ -84,9 +77,9 @@ export class UnifiedTemplateService {
     const template = await this.getTemplate(identifier);
     const { data = {}, interpolate = true } = options;
 
-    if (template.source === TemplateSource.DATABASE && template.structure) {
-      // Modern: JSON → MJML → HTML
-      this.logger.debug(`Rendering database template with MJML: ${identifier}`);
+    if (template.structure) {
+      // Email Builder structure → MJML → HTML
+      this.logger.debug(`Rendering template with MJML: ${identifier}`);
       const { mjml, html } = this.mjmlRenderer.renderEmail(template.structure);
 
       const finalHtml = interpolate
@@ -98,18 +91,21 @@ export class UnifiedTemplateService {
         mjml,
         source: TemplateSource.DATABASE,
       };
-    } else {
-      // Legacy: HTML → Direct
-      this.logger.debug(`Rendering file-based template: ${identifier}`);
-      const content = template.compiledHtml || template.content || '';
+    } else if (template.content) {
+      // Legacy HTML content (old custom templates)
+      this.logger.debug(`Rendering legacy HTML template: ${identifier}`);
       const finalHtml = interpolate
-        ? this.interpolateVariables(content, data)
-        : content;
+        ? this.interpolateVariables(template.content, data)
+        : template.content;
 
       return {
         html: finalHtml,
-        source: TemplateSource.FILE,
+        source: TemplateSource.DATABASE,
       };
+    } else {
+      throw new Error(
+        `Template ${identifier} has neither structure nor content`,
+      );
     }
   }
 
@@ -165,30 +161,6 @@ export class UnifiedTemplateService {
     }
   }
 
-  /**
-   * Get template from file system
-   */
-  private async getFromFile(name: string): Promise<UnifiedTemplate> {
-    try {
-      // TemplateFileService returns raw TSX content, not compiled HTML
-      // For now, we'll use the filename with .tsx extension
-      const filename = name.endsWith('.tsx') ? name : `${name}.tsx`;
-      const content = await this.templateFileService.getTemplateFileContent(filename);
-
-      return {
-        id: name.replace('.tsx', ''),
-        name: name.replace('.tsx', ''),
-        source: TemplateSource.FILE,
-        content,
-        isActive: true,
-        isEditable: false,
-      };
-    } catch (error) {
-      throw new NotFoundException(
-        `Template not found in database or files: ${name}`,
-      );
-    }
-  }
 
   /**
    * Map database entity to unified template
@@ -241,29 +213,13 @@ export class UnifiedTemplateService {
   }
 
   /**
-   * List all available templates (database + file)
+   * List all available templates (database-only)
    */
-  async listAllTemplates(): Promise<{
-    database: UnifiedTemplate[];
-    files: UnifiedTemplate[];
-  }> {
-    const [dbTemplates, fileTemplates] = await Promise.all([
-      this.templateService.findAll(),
-      this.templateFileService.getAllTemplateFiles(),
-    ]);
-
-    return {
-      database: dbTemplates.map((t) =>
-        this.mapToUnified(t, TemplateSource.DATABASE),
-      ),
-      files: fileTemplates.map((f) => ({
-        id: f.id,
-        name: f.name,
-        source: TemplateSource.FILE,
-        isActive: true,
-        isEditable: false,
-      })),
-    };
+  async listAllTemplates(): Promise<UnifiedTemplate[]> {
+    const dbTemplates = await this.templateService.findAll();
+    return dbTemplates.map((t) =>
+      this.mapToUnified(t, TemplateSource.DATABASE),
+    );
   }
 
   /**
@@ -279,18 +235,10 @@ export class UnifiedTemplateService {
   }
 
   /**
-   * Get template source type without loading full template
+   * Get template source type (always DATABASE now)
    */
   async getTemplateSource(identifier: string): Promise<TemplateSource> {
-    if (this.isUUID(identifier)) {
-      return TemplateSource.DATABASE;
-    }
-
-    try {
-      await this.templateService.findByName(identifier);
-      return TemplateSource.DATABASE;
-    } catch {
-      return TemplateSource.FILE;
-    }
+    // All templates are now in database
+    return TemplateSource.DATABASE;
   }
 }

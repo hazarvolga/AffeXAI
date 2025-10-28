@@ -24,7 +24,6 @@ import { GroupService } from './group.service';
 import { GroupController } from './group.controller';
 import { TemplateService } from './template.service';
 import { TemplateController } from './template.controller';
-import { TemplateFileService } from './services/template-file.service';
 import { TemplatePreviewService } from './services/template-preview.service';
 import { MjmlRendererService } from './services/mjml-renderer.service';
 import { UnifiedTemplateService } from './services/unified-template.service';
@@ -174,7 +173,6 @@ import { BlockRendererService } from './services/block-renderer.service';
     SegmentService,
     GroupService,
     TemplateService,
-    TemplateFileService,
     TemplatePreviewService,
     MjmlRendererService,
     UnifiedTemplateService,
@@ -219,7 +217,6 @@ import { BlockRendererService } from './services/block-renderer.service';
     SegmentService,
     GroupService,
     TemplateService,
-    TemplateFileService,
     TemplatePreviewService,
     UnifiedTemplateService,
     EmailValidationService, 

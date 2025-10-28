@@ -5,7 +5,6 @@ import { EmailTemplate, TemplateType } from './entities/email-template.entity';
 import { CreateEmailTemplateDto } from './dto/create-template.dto';
 import { UpdateEmailTemplateDto } from './dto/update-template.dto';
 import { CloneTemplateDto } from './dto/clone-template.dto';
-import { TemplateFileService } from './services/template-file.service';
 import { MjmlRendererService } from './services/mjml-renderer.service';
 
 @Injectable()
@@ -13,7 +12,6 @@ export class TemplateService {
   constructor(
     @InjectRepository(EmailTemplate)
     private templatesRepository: Repository<EmailTemplate>,
-    private readonly templateFileService: TemplateFileService,
     private readonly mjmlRendererService: MjmlRendererService,
   ) {}
 
@@ -53,49 +51,10 @@ export class TemplateService {
     await this.templatesRepository.remove(template);
   }
 
-  async getTemplatesWithFiles(): Promise<{ 
-    dbTemplates: EmailTemplate[]; 
-    fileTemplates: any[]; 
-    total: number 
-  }> {
-    const dbTemplates = await this.findAll();
-    const fileTemplates = await this.templateFileService.getAllTemplateFiles();
-    
-    return {
-      dbTemplates,
-      fileTemplates,
-      total: dbTemplates.length + fileTemplates.length,
-    };
-  }
-
-  async createFromExistingFile(
-    fileTemplateName: string,
-    customName?: string,
-  ): Promise<EmailTemplate> {
-    try {
-      const content = await this.templateFileService.getTemplateFileContent(
-        `${fileTemplateName}.tsx`,
-      );
-      
-      const createDto: CreateEmailTemplateDto = {
-        name: customName || this.formatTemplateName(fileTemplateName),
-        content,
-        type: TemplateType.CUSTOM,
-        fileTemplateName,
-        isActive: true,
-      };
-      
-      return this.create(createDto);
-    } catch (error) {
-      throw new NotFoundException(
-        `Could not create template from file ${fileTemplateName}`,
-      );
-    }
-  }
 
   /**
-   * Clone an existing template (file-based or DB)
-   * Converts file-based templates to editable JSON structure
+   * Clone an existing database template
+   * Creates a new editable copy with optional name customization
    */
   async cloneTemplate(
     id: string,
@@ -115,10 +74,10 @@ export class TemplateService {
       type: TemplateType.CUSTOM,
       isActive: true,
       isEditable: makeEditable,
-      createdFrom: originalTemplate.fileTemplateName || 'cloned',
+      createdFrom: 'cloned',
       version: 1,
 
-      // Copy structure if exists, otherwise create basic structure from HTML
+      // Copy structure if exists, otherwise create basic structure from HTML content
       structure: originalTemplate.structure || this.htmlToStructure(originalTemplate.content),
 
       // Copy or generate compiled versions
@@ -208,13 +167,5 @@ export class TemplateService {
 
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private formatTemplateName(templateId: string): string {
-    // Convert kebab-case to readable format
-    return templateId
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
   }
 }

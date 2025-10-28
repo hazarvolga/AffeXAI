@@ -22,21 +22,13 @@ export class TemplateController {
   }
 
   @Get()
-  async findAll() {
-    return this.templateService.getTemplatesWithFiles();
+  async findAll(): Promise<EmailTemplate[]> {
+    return this.templateService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<EmailTemplate> {
     return this.templateService.findOne(id);
-  }
-
-  @Post('from-file/:fileTemplateName')
-  createFromFile(
-    @Param('fileTemplateName') fileTemplateName: string,
-    @Body('name') name?: string,
-  ): Promise<EmailTemplate> {
-    return this.templateService.createFromExistingFile(fileTemplateName, name);
   }
 
   @Patch(':id')
@@ -55,10 +47,10 @@ export class TemplateController {
   @Get(':id/preview')
   async previewTemplate(
     @Param('id') id: string,
-    @Query('type') type: 'file' | 'db' = 'file',
   ): Promise<{ content: string }> {
     try {
-      const content = await this.templatePreviewService.previewTemplate(id, type);
+      const template = await this.templateService.findOne(id);
+      const content = await this.templatePreviewService.previewTemplate(template);
       return { content };
     } catch (error) {
       throw new NotFoundException(`Could not preview template ${id}`);
@@ -93,19 +85,9 @@ export class TemplateController {
   @Get('unified/:id/preview-html')
   async getUnifiedTemplatePreview(@Param('id') id: string): Promise<{ html: string }> {
     try {
-      const template = await this.unifiedTemplateService.getTemplate(id);
-
-      // For now, return simple HTML
-      // Will be enhanced with proper rendering in Phase 2
-      if (template.source === TemplateSource.FILE) {
-        const content = await this.templatePreviewService.previewTemplate(id, 'file');
-        return { html: content };
-      } else {
-        // Database template - return structure as JSON for now
-        return {
-          html: `<pre>${JSON.stringify(template.content || template.structure, null, 2)}</pre>`
-        };
-      }
+      const dbTemplate = await this.templateService.findOne(id);
+      const content = await this.templatePreviewService.previewTemplate(dbTemplate);
+      return { html: content };
     } catch (error) {
       throw new NotFoundException(`Could not preview template ${id}: ${error.message}`);
     }

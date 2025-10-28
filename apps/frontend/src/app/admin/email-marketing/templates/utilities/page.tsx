@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { generateSmartStructure } from '@/lib/email-template-designer';
 
 const DEFAULT_EMAIL_BUILDER_STRUCTURE = {
   rows: [
@@ -184,7 +185,10 @@ export default function TemplateUtilitiesPage() {
       const response = await fetch('http://localhost:9006/api/email-templates');
       if (!response.ok) throw new Error('Failed to fetch templates');
 
-      const templates = await response.json();
+      const data = await response.json();
+
+      // Handle both array and paginated response
+      const templates = Array.isArray(data) ? data : (data.data || []);
 
       // Filter empty templates (no structure or empty structure)
       const emptyTemplates = templates.filter((t: any) =>
@@ -196,18 +200,27 @@ export default function TemplateUtilitiesPage() {
 
       let updated = 0;
 
-      // Update each empty template
+      // Update each empty template with SMART structure
       for (const template of emptyTemplates) {
         try {
+          // Generate context-aware structure based on template name
+          const smartStructure = generateSmartStructure({
+            name: template.name,
+            type: template.type,
+            description: template.description,
+          });
+
+          console.log(`🎨 Generating smart design for: ${template.name}`);
+
           const updateResponse = await fetch(
             `http://localhost:9006/api/email-templates/${template.id}`,
             {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                structure: DEFAULT_EMAIL_BUILDER_STRUCTURE,
+                structure: smartStructure,
                 type: 'custom',
-                variables: ['subject', 'content'],
+                variables: ['subject', 'content', 'profileUrl', 'resetUrl', 'shopUrl'],
               }),
             }
           );

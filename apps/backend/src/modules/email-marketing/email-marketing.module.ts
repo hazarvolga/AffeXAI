@@ -92,6 +92,7 @@ import { PredictiveAnalyticsService } from './services/predictive-analytics.serv
 import { PredictiveAnalyticsController } from './controllers/predictive-analytics.controller';
 import { OptInOutService } from './services/opt-in-out.service';
 import { OptInOutController } from './controllers/opt-in-out.controller';
+import { BlockRendererService } from './services/block-renderer.service';
 
 @Module({
   imports: [
@@ -209,6 +210,7 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
     StatsService,
     SendTimeOptimizationService,
     PredictiveAnalyticsService,
+    BlockRendererService,
   ],
   exports: [
     BullModule,
@@ -232,7 +234,8 @@ import { OptInOutController } from './controllers/opt-in-out.controller';
     EnhancedFileSecurityService,
     CustomFieldService,
     GdprComplianceService,
-    BulkOperationsComplianceService
+    BulkOperationsComplianceService,
+    BlockRendererService
   ],
 })
 export class EmailMarketingModule {}

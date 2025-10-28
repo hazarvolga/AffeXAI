@@ -270,8 +270,10 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            const data = await response.json();
-            setEmailHtml(data.html);
+            const result = await response.json();
+            // Handle wrapped response format: { success, data: { html }, meta }
+            const html = result.data?.html || result.html;
+            setEmailHtml(html);
           } catch (apiError) {
             console.error('Unified template API error:', apiError);
             // Fallback to file-based template if DB template not found

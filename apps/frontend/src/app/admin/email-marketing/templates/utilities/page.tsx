@@ -187,8 +187,19 @@ export default function TemplateUtilitiesPage() {
 
       const data = await response.json();
 
-      // Handle both array and paginated response
-      const templates = Array.isArray(data) ? data : (data.data || []);
+      // Handle API response format: { success: true, data: { dbTemplates: [], fileTemplates: [] } }
+      let templates = [];
+      if (Array.isArray(data)) {
+        templates = data;
+      } else if (data.data) {
+        // Unified template API format
+        templates = [
+          ...(data.data.dbTemplates || []),
+          ...(data.data.fileTemplates || [])
+        ];
+      } else if (data.data && Array.isArray(data.data)) {
+        templates = data.data;
+      }
 
       // Filter empty templates (no structure or empty structure)
       const emptyTemplates = templates.filter((t: any) =>

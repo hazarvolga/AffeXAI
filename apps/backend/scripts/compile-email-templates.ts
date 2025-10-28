@@ -29,6 +29,7 @@ const __dirname = path.dirname(__filename);
 
 const TEMPLATES_SRC_DIR = path.join(__dirname, '../src/emails');
 const TEMPLATES_DIST_DIR = path.join(__dirname, '../dist/templates');
+const TEMPLATES_SRC_HTML_DIR = path.join(TEMPLATES_SRC_DIR); // Also save to src/emails/ for watch mode
 const COMPONENTS_DIR = path.join(TEMPLATES_SRC_DIR, 'components');
 
 interface CompileResult {
@@ -104,11 +105,14 @@ async function compileTemplate(templatePath: string): Promise<CompileResult> {
       pretty: true, // Pretty-print HTML for debugging
     });
 
-    // Write HTML to dist/templates/
+    // Write HTML to BOTH dist/templates/ AND src/emails/ (for watch mode)
     const outputPath = path.join(TEMPLATES_DIST_DIR, `${templateName}.html`);
-    fs.writeFileSync(outputPath, html, 'utf-8');
+    const srcHtmlPath = path.join(TEMPLATES_SRC_HTML_DIR, `${templateName}.html`);
 
-    console.log(`✅ Compiled: ${templateName} → ${path.relative(process.cwd(), outputPath)}`);
+    fs.writeFileSync(outputPath, html, 'utf-8');
+    fs.writeFileSync(srcHtmlPath, html, 'utf-8'); // Also save to src/emails/
+
+    console.log(`✅ Compiled: ${templateName} → dist/templates/ticket-created.html`);
 
     return {
       templateName,

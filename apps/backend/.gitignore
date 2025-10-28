@@ -19,6 +19,9 @@
 # Dist directory
 dist/
 
+# Compiled email templates (generated from .tsx files)
+src/emails/**/*.html
+
 # Node modules
 node_modules/
 

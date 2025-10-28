@@ -4,6 +4,7 @@ import { Ticket } from '../entities/ticket.entity';
 import { TicketMessage } from '../entities/ticket-message.entity';
 import { User } from '../../users/entities/user.entity';
 import { MailChannel } from '../../mail/interfaces/mail-service.interface';
+import { SettingsService } from '../../settings/settings.service';
 
 /**
  * Ticket Email Service
@@ -14,7 +15,10 @@ export class TicketEmailService {
   private readonly logger = new Logger(TicketEmailService.name);
   private readonly baseUrl: string;
 
-  constructor(private readonly mailService: MailService) {
+  constructor(
+    private readonly mailService: MailService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
   }
 
@@ -36,6 +40,9 @@ export class TicketEmailService {
 
       const customerTicketUrl = `${this.baseUrl}/portal/support/${ticket.id}`;
       const adminTicketUrl = `${this.baseUrl}/admin/support/${ticket.id}`;
+
+      // Fetch site settings for email branding
+      const siteSettings = await this.settingsService.getSiteSettings();
 
       // Generate email threading headers for proper conversation threading
       const messageId = `<ticket-${ticket.id}-created-${Date.now()}@affexai.com>`;
@@ -62,6 +69,7 @@ export class TicketEmailService {
           ticketUrl: customerTicketUrl,
           isAssignedUser: false,
           isSupportManager: false,
+          siteSettings,
         },
       });
       this.logger.log(`✅ Ticket created email sent to customer: ${customer.email}`);
@@ -91,6 +99,7 @@ export class TicketEmailService {
             customerEmail: customer.email,
             categoryName: ticket.category?.name || '',
             ticketDescription: ticket.description,
+            siteSettings,
           },
         });
         this.logger.log(`✅ Ticket created email sent to assigned user: ${assignedUser.email}`);
@@ -128,6 +137,7 @@ export class TicketEmailService {
               customerEmail: customer.email,
               categoryName: ticket.category?.name || '',
               ticketDescription: ticket.description,
+              siteSettings,
             },
           });
           this.logger.log(`✅ Ticket created email sent to support manager: ${manager.email}`);

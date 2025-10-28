@@ -12,8 +12,6 @@ import {
   Heading,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
 import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface FlashSaleEmailProps {
@@ -50,9 +48,9 @@ export const FlashSaleEmail = ({
   siteSettings,
 }: FlashSaleEmailProps) => {
   // Use dynamic site settings if provided, otherwise fallback to static data
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || siteSettingsData.logoUrl || `${baseUrl}/logo.png`;
-  const contactInfo = siteSettings?.contact || getContactInfo();
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
+  const contactInfo = siteSettings?.contact || { email: 'destek@aluplan.tr', phone: '', address: '' };
   const socialMediaLinks = siteSettings?.socialMedia || {};
   
   const previewText = `Hızlı Davran! %${discountPercentage} İndirim İçin Son Saatler!`;

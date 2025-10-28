@@ -12,8 +12,6 @@ import {
   Heading,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
 import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface TicketAssignedEmailProps {
@@ -50,9 +48,13 @@ export const TicketAssignedEmail = ({
   ticketUrl = `${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83`,
   siteSettings,
 }: TicketAssignedEmailProps) => {
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || siteSettingsData.logoUrl || `${baseUrl}/logo.png`;
-  const contactInfo = siteSettings?.contact || getContactInfo();
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
+  const contactInfo = siteSettings?.contact || {
+    email: 'destek@aluplan.tr',
+    phone: '',
+    address: ''
+  };
   const socialMediaLinks = siteSettings?.socialMedia || {};
   
   const previewText = `Talebiniz ${assignedToName} tarafından üstlenildi`;
@@ -116,6 +118,7 @@ export const TicketAssignedEmail = ({
             companyName={companyName}
             contactInfo={contactInfo}
             socialMediaLinks={socialMediaLinks}
+            baseUrl={baseUrl}
           />
         </Container>
       </Body>

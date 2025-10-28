@@ -46,12 +46,12 @@ export const TicketNewMessageEmail = ({
   recipientName = "Değerli Kullanıcı",
   senderName = "Destek Ekibi",
   messageContent = "Test mesaj içeriği",
-  ticketUrl = \`\${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83\`,
+  ticketUrl = `${baseUrl}/portal/support/tickets/07a6cc03-5ed9-483e-b26c-da0f3c4a4b83`,
   isCustomer = true,
   siteSettings,
 }: TicketNewMessageEmailProps) => {
   const companyName = siteSettings?.companyName || 'Aluplan';
-  const logoUrl = siteSettings?.logoUrl || \`\${baseUrl}/logo.png\`;
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
   const contactInfo = siteSettings?.contact || {
     email: 'destek@aluplan.tr',
     phone: '',
@@ -59,7 +59,7 @@ export const TicketNewMessageEmail = ({
   };
   const socialMediaLinks = siteSettings?.socialMedia || {};
 
-  const previewText = \`\${senderName} tarafından yeni mesaj: \${messageContent.substring(0, 100)}...\`;
+  const previewText = `${senderName} tarafından yeni mesaj: ${messageContent.substring(0, 100)}...`;
 
   return (
     <Html>

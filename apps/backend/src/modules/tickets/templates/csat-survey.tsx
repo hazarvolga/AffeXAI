@@ -10,7 +10,7 @@ import {
   Text,
   Hr,
 } from '@react-email/components';
-import { EmailFooter } from './components/EmailFooter';
+import { EmailFooter } from '../../mail/components/EmailFooter';
 
 interface CSATSurveyEmailProps {
   customerName: string;
@@ -124,9 +124,10 @@ export const CSATSurveyEmail: React.FC<CSATSurveyEmailProps> = ({
 
           {/* Footer */}
           <EmailFooter
-            siteName={siteSettings.siteName}
-            siteUrl={siteSettings.siteUrl}
-            supportEmail={siteSettings.supportEmail}
+            companyName={siteSettings.siteName}
+            contactInfo={{ email: siteSettings.supportEmail, phone: '', address: '' }}
+            socialMediaLinks={{}}
+            baseUrl={siteSettings.siteUrl}
           />
         </Container>
       </Body>

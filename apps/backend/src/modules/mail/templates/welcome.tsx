@@ -14,9 +14,6 @@ import {
   Column,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getLogoUrl } from "@/lib/utils/siteSettings";
-import { getSocialMediaLinks, getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
 import { EmailFooter } from "../components/EmailFooter";
 
 interface WelcomeEmailProps {
@@ -43,10 +40,10 @@ export const WelcomeEmail = ({
   siteSettings,
 }: WelcomeEmailProps) => {
   // Use dynamic site settings if provided, otherwise fallback to static data
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || getLogoUrl();
-  const contactInfo = siteSettings?.contact || getContactInfo();
-  const socialMediaLinks = siteSettings?.socialMedia || getSocialMediaLinks();
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
+  const contactInfo = siteSettings?.contact || { email: 'destek@aluplan.tr', phone: '', address: '' };
+  const socialMediaLinks = siteSettings?.socialMedia || {};
   
   const previewText = `${companyName}'e hoş geldiniz!`;
 

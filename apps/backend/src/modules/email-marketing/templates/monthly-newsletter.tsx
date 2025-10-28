@@ -15,8 +15,6 @@ import {
   Row,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getSocialMediaLinks, getCompanyName, getContactInfo } from "@/lib/server/siteSettings";
 import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface MonthlyNewsletterProps {
@@ -67,10 +65,10 @@ export const MonthlyNewsletterEmail = ({
   siteSettings,
 }: MonthlyNewsletterProps) => {
   // Use dynamic site settings if provided, otherwise fallback to static data
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || siteSettingsData.logoUrl || `${baseUrl}/logo.png`;
-  const contactInfo = siteSettings?.contact || getContactInfo();
-  const socialMediaLinks = siteSettings?.socialMedia || getSocialMediaLinks();
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
+  const contactInfo = siteSettings?.contact || { email: 'destek@aluplan.tr', phone: '', address: '' };
+  const socialMediaLinks = siteSettings?.socialMedia || {};
   
   const previewText = `Aluplan Digital'den haberler: ${mainStory.title}`;
 

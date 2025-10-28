@@ -13,8 +13,6 @@ import {
   Column,
 } from "@react-email/components";
 import * as React from "react";
-import { siteSettingsData } from "@/lib/site-settings-data";
-import { getCompanyName } from "@/lib/server/siteSettings";
 import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface ProductLaunchEmailProps {
@@ -57,8 +55,8 @@ export const ProductLaunchEmail = ({
   siteSettings,
 }: ProductLaunchEmailProps) => {
   // Use dynamic site settings if provided, otherwise fallback to static data
-  const companyName = siteSettings?.companyName || getCompanyName();
-  const logoUrl = siteSettings?.logoUrl || siteSettingsData.logoUrl || `${baseUrl}/logo.png`;
+  const companyName = siteSettings?.companyName || 'Aluplan';
+  const logoUrl = siteSettings?.logoUrl || `${baseUrl}/logo.png`;
   const contactInfo = siteSettings?.contact || { address: '', phone: '', email: '' };
   const socialMediaLinks = siteSettings?.socialMedia || {};
   

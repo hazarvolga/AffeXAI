@@ -195,17 +195,9 @@ export default function TemplatesManagementPage() {
                     <TableCell className="text-muted-foreground">{template.description}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        {template.type === 'db' ? (
-                          <Badge variant="default" className="bg-blue-600">
-                            <Database className="w-3 h-3 mr-1" />
-                            Database
-                          </Badge>
-                        ) : (
-                          <Badge variant="default" className="bg-green-600">
-                            <FileText className="w-3 h-3 mr-1" />
-                            TSX File
-                          </Badge>
-                        )}
+                        <Badge variant="default" className="bg-blue-600">
+                          Database
+                        </Badge>
                         {template.hasDesignSystem && (
                           <Badge variant="outline" className="text-xs border-orange-500 text-orange-600">
                             <Palette className="w-3 h-3 mr-1" />

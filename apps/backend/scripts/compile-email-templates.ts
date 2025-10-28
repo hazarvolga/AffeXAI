@@ -149,29 +149,30 @@ function getComponentName(templateName: string): string {
 /**
  * Get sample context for template rendering
  * This ensures templates compile without runtime errors
- *
- * NOTE: These are sample values for compilation.
- * Real site settings will be injected at runtime by template-renderer.service.ts
  */
 function getSampleContext(templateName: string): Record<string, any> {
   // Base context shared by all templates
   const baseContext = {
     siteSettings: {
-      companyName: 'Aluplan Program Sistemleri',
-      siteName: 'AffexAi',
-      logoUrl: 'http://localhost:9003/api/media/logo-dark.png',
-      logoDarkUrl: 'http://localhost:9003/api/media/logo-dark.png',
+      companyName: 'Affexai',
+      siteName: 'Affexai',
+      logoUrl: 'https://example.com/logo.png',
       primaryColor: '#ff7f1e',
-      contactEmail: 'destek@aluplan.tr',
+      contactEmail: 'support@affexai.com',
       contact: {
-        address: 'İstanbul, Türkiye',
-        phone: '+90 212 XXX XX XX',
-        email: 'destek@aluplan.tr',
+        address: '123 Main St, Istanbul, Turkey',
+        phone: '+90 212 123 45 67',
+        email: 'support@affexai.com',
       },
       socialMedia: {
-        facebook: 'https://facebook.com/aluplan',
-        twitter: 'https://twitter.com/aluplan',
-        linkedin: 'https://linkedin.com/company/aluplan',
+        facebook: 'https://facebook.com/affexai',
+        twitter: 'https://twitter.com/affexai',
+        linkedin: 'https://linkedin.com/company/affexai',
+      },
+      socialLinks: {
+        facebook: 'https://facebook.com/affexai',
+        twitter: 'https://twitter.com/affexai',
+        linkedin: 'https://linkedin.com/company/affexai',
       },
     },
     baseUrl: 'http://localhost:9003',

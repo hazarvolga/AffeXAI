@@ -6,10 +6,12 @@ import { TicketMessage } from './entities/ticket-message.entity';
 import { TicketCategory } from './entities/ticket-category.entity';
 import { TicketAuditLog } from './entities/ticket-audit-log.entity';
 import { User } from '../users/entities/user.entity';
+import { Role } from '../roles/entities/role.entity';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { TicketFiltersDto } from './dto/ticket-filters.dto';
 import { AddMessageDto } from './dto/add-message.dto';
 import { TicketStatus } from './enums/ticket-status.enum';
+import { UserRole } from '../users/enums/user-role.enum';
 import { MailService } from '../mail/mail.service';
 import { MailChannel, MailPriority } from '../mail/interfaces/mail-service.interface';
 import { SlaService } from './services/sla.service';
@@ -42,6 +44,8 @@ export class TicketsService {
     private readonly auditLogRepository: Repository<TicketAuditLog>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
     private readonly mailService: MailService,
     private readonly slaService: SlaService,
     private readonly ticketEmailService: TicketEmailService,
@@ -54,6 +58,29 @@ export class TicketsService {
     private readonly faqSearchService: FaqEnhancedSearchService,
     private readonly knowledgeBaseService: KnowledgeBaseService,
   ) {}
+
+  /**
+   * Get all users with Support Manager role
+   * @private
+   */
+  private async getSupportManagers(): Promise<User[]> {
+    try {
+      const supportManagerRole = await this.roleRepository.findOne({
+        where: { name: UserRole.SUPPORT_MANAGER },
+        relations: ['users'],
+      });
+
+      if (!supportManagerRole || !supportManagerRole.users) {
+        this.logger.warn('No support manager role found or no users assigned');
+        return [];
+      }
+
+      return supportManagerRole.users;
+    } catch (error) {
+      this.logger.error(`Failed to get support managers: ${error.message}`);
+      return [];
+    }
+  }
 
   /**
    * Create a new support ticket
@@ -135,7 +162,20 @@ export class TicketsService {
 
     if (customer) {
       this.logger.log(`[EMAIL DEBUG] Calling sendTicketCreatedEmail for ${customer.email}`);
-      await this.ticketEmailService.sendTicketCreatedEmail(ticketWithRelations, customer);
+
+      // Get assigned user if ticket is assigned
+      const assignedUser = ticketWithRelations.assignedTo;
+
+      // Get all support managers
+      const supportManagers = await this.getSupportManagers();
+
+      // Send emails to all recipients (customer, assigned user, support managers)
+      await this.ticketEmailService.sendTicketCreatedEmail(
+        ticketWithRelations,
+        customer,
+        assignedUser,
+        supportManagers,
+      );
       this.logger.log(`[EMAIL DEBUG] sendTicketCreatedEmail completed`);
     } else {
       this.logger.warn(`[EMAIL DEBUG] No customer found for userId: ${userId}`);
@@ -440,17 +480,46 @@ export class TicketsService {
 
       // Check if message author is customer or support
       const isCustomerMessage = userId === ticket.userId;
-      const recipient = isCustomerMessage
-        ? ticket.assignedTo || await this.userRepository.findOne({ where: { id: ticket.userId } })
-        : await this.userRepository.findOne({ where: { id: ticket.userId } });
 
-      if (messageWithAuthor && recipient) {
-        await this.ticketEmailService.sendNewMessageEmail(
-          ticket,
-          messageWithAuthor,
-          recipient,
-          isCustomerMessage,
-        );
+      if (messageWithAuthor) {
+        // If customer sends message, notify assigned user + all support managers
+        if (isCustomerMessage) {
+          // Notify assigned user if exists
+          if (ticket.assignedTo) {
+            await this.ticketEmailService.sendNewMessageEmail(
+              ticket,
+              messageWithAuthor,
+              ticket.assignedTo,
+              isCustomerMessage,
+            );
+          }
+
+          // Notify all support managers
+          const supportManagers = await this.getSupportManagers();
+          for (const manager of supportManagers) {
+            // Skip if manager is the assigned user (already notified)
+            if (ticket.assignedTo && manager.id === ticket.assignedTo.id) {
+              continue;
+            }
+            await this.ticketEmailService.sendNewMessageEmail(
+              ticket,
+              messageWithAuthor,
+              manager,
+              isCustomerMessage,
+            );
+          }
+        } else {
+          // If support sends message, notify customer
+          const customer = await this.userRepository.findOne({ where: { id: ticket.userId } });
+          if (customer) {
+            await this.ticketEmailService.sendNewMessageEmail(
+              ticket,
+              messageWithAuthor,
+              customer,
+              isCustomerMessage,
+            );
+          }
+        }
       }
     }
 

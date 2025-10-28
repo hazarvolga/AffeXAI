@@ -20,38 +20,114 @@ export class TicketEmailService {
 
   /**
    * Send email when a new ticket is created
+   * Sends to: Customer, Assigned User (if any), Support Managers
    */
   async sendTicketCreatedEmail(
     ticket: Ticket,
     customer: User,
+    assignedUser?: User,
+    supportManagers?: User[],
   ): Promise<void> {
     try {
       this.logger.log(`[EMAIL DEBUG] sendTicketCreatedEmail called for ticket ${ticket.id}`);
       this.logger.log(`[EMAIL DEBUG] Customer email: ${customer.email}`);
-      this.logger.log(`[EMAIL DEBUG] Base URL: ${this.baseUrl}`);
+      this.logger.log(`[EMAIL DEBUG] Assigned user: ${assignedUser ? assignedUser.email : 'none'}`);
+      this.logger.log(`[EMAIL DEBUG] Support managers count: ${supportManagers?.length || 0}`);
 
-      const ticketUrl = `${this.baseUrl}/portal/support/${ticket.id}`;
+      const customerTicketUrl = `${this.baseUrl}/portal/support/${ticket.id}`;
+      const adminTicketUrl = `${this.baseUrl}/admin/support/${ticket.id}`;
 
-      // Note: siteSettings are automatically injected by template-renderer.service.ts
-      // No need to pass them here - they will be fetched from database at render time
+      // Generate email threading headers for proper conversation threading
+      const messageId = `<ticket-${ticket.id}-created-${Date.now()}@affexai.com>`;
 
-      this.logger.log(`[EMAIL DEBUG] Calling mailService.sendMail...`);
+      // 1. Send to Customer
+      this.logger.log(`[EMAIL DEBUG] Sending email to customer: ${customer.email}`);
       await this.mailService.sendMail({
         to: { email: customer.email, name: `${customer.firstName} ${customer.lastName}` },
-        subject: `Destek Talebi Oluşturuldu: ${ticket.subject}`,
+        subject: `Ticket Created: ${ticket.subject}`,
         template: 'ticket-created',
         channel: MailChannel.TRANSACTIONAL,
+        headers: {
+          'Message-ID': messageId,
+          'X-Ticket-ID': ticket.id.toString(),
+        },
         context: {
           customerName: `${customer.firstName} ${customer.lastName}` || customer.email,
           ticketId: ticket.id,
-          ticketNumber: `#${ticket.id.slice(0, 8).toUpperCase()}`,
-          subject: ticket.subject,
-          priority: ticket.priority,
-          ticketUrl,
+          ticketSubject: ticket.subject,
+          ticketDescription: ticket.description,
+          ticketPriority: ticket.priority,
+          ticketStatus: ticket.status,
+          ticketUrl: customerTicketUrl,
+          supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
         },
       });
+      this.logger.log(`✅ Ticket created email sent to customer: ${customer.email}`);
 
-      this.logger.log(`Ticket created email sent to ${customer.email}`);
+      // 2. Send to Assigned User (if any)
+      if (assignedUser) {
+        this.logger.log(`[EMAIL DEBUG] Sending email to assigned user: ${assignedUser.email}`);
+        await this.mailService.sendMail({
+          to: { email: assignedUser.email, name: `${assignedUser.firstName} ${assignedUser.lastName}` },
+          subject: `New Ticket Assigned: ${ticket.subject}`,
+          template: 'ticket-created',
+          channel: MailChannel.TRANSACTIONAL,
+          headers: {
+            'Message-ID': messageId,
+            'X-Ticket-ID': ticket.id.toString(),
+          },
+          context: {
+            customerName: `${assignedUser.firstName} ${assignedUser.lastName}`,
+            ticketId: ticket.id,
+            ticketSubject: ticket.subject,
+            ticketDescription: ticket.description,
+            ticketPriority: ticket.priority,
+            ticketStatus: ticket.status,
+            ticketUrl: adminTicketUrl,
+            supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+            isAssignedUser: true,
+          },
+        });
+        this.logger.log(`✅ Ticket created email sent to assigned user: ${assignedUser.email}`);
+      }
+
+      // 3. Send to Support Managers
+      if (supportManagers && supportManagers.length > 0) {
+        this.logger.log(`[EMAIL DEBUG] Sending emails to ${supportManagers.length} support managers`);
+        for (const manager of supportManagers) {
+          // Skip if manager is also the assigned user (avoid duplicate)
+          if (assignedUser && manager.id === assignedUser.id) {
+            this.logger.log(`[EMAIL DEBUG] Skipping manager ${manager.email} (already assigned)`);
+            continue;
+          }
+
+          await this.mailService.sendMail({
+            to: { email: manager.email, name: `${manager.firstName} ${manager.lastName}` },
+            subject: `New Ticket Created: ${ticket.subject}`,
+            template: 'ticket-created',
+            channel: MailChannel.TRANSACTIONAL,
+            headers: {
+              'Message-ID': messageId,
+              'X-Ticket-ID': ticket.id.toString(),
+            },
+            context: {
+              customerName: `${manager.firstName} ${manager.lastName}`,
+              ticketId: ticket.id,
+              ticketSubject: ticket.subject,
+              ticketDescription: ticket.description,
+              ticketPriority: ticket.priority,
+              ticketStatus: ticket.status,
+              ticketUrl: adminTicketUrl,
+              supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+              isSupportManager: true,
+              customerEmail: customer.email,
+            },
+          });
+          this.logger.log(`✅ Ticket created email sent to support manager: ${manager.email}`);
+        }
+      }
+
+      this.logger.log(`✅ All ticket created emails sent successfully for ticket ${ticket.id}`);
     } catch (error) {
       this.logger.error(
         `Failed to send ticket created email: ${error.message}`,
@@ -114,11 +190,21 @@ export class TicketEmailService {
         ? `New Customer Message: ${ticket.subject}`
         : `New Response: ${ticket.subject}`;
 
+      // Generate threading headers for message replies
+      const originalMessageId = `<ticket-${ticket.id}-created-${ticket.createdAt.getTime()}@affexai.com>`;
+      const newMessageId = `<ticket-${ticket.id}-message-${message.id}-${Date.now()}@affexai.com>`;
+
       await this.mailService.sendMail({
         to: { email: recipient.email, name: `${recipient.firstName} ${recipient.lastName}` },
         subject,
         template: 'ticket-new-message',
         channel: MailChannel.TRANSACTIONAL,
+        headers: {
+          'Message-ID': newMessageId,
+          'In-Reply-To': originalMessageId,
+          'References': originalMessageId,
+          'X-Ticket-ID': ticket.id.toString(),
+        },
         context: {
           recipientName: `${recipient.firstName} ${recipient.lastName}` || recipient.email,
           ticketId: ticket.id,

@@ -172,10 +172,10 @@ export class TicketsController {
 
   /**
    * Assign ticket to a support agent
-   * Available to: ADMIN and EDITOR roles only
+   * Available to: ADMIN, EDITOR, and SUPPORT_MANAGER roles
    */
   @Patch(':id/assign')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Assign ticket to a support agent' })
   @ApiParam({ name: 'id', description: 'Ticket UUID' })
   @ApiResponse({ status: 200, description: 'Ticket assigned successfully' })

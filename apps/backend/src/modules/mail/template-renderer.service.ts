@@ -1,80 +1,58 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
-import { render } from '@react-email/render';
-import * as React from 'react';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Template Renderer Service
- * Renders React Email templates with dynamic site settings
+ * Loads pre-compiled HTML email templates
  *
  * Architecture:
- * - Runtime: Import React Email .tsx components and render with @react-email/render
- * - Site settings fetched from database and passed as props
- * - Each template render is fresh with current database values
+ * - Build time: React Email templates (.tsx) → compiled to static HTML (.html)
+ * - Runtime: Simply load pre-compiled HTML from disk
  *
- * Why runtime rendering?
- * - Dynamic site settings (company name, logo, social media, etc.)
- * - No need for variable substitution (Handlebars/Mustache)
- * - Templates are React components that accept props
- * - Always up-to-date with current settings
+ * Why pre-compiled templates?
+ * - NestJS can't dynamically import .tsx files at runtime
+ * - No JSX/React runtime dependency in production
+ * - Fastest possible email rendering (just file read)
+ * - Production-ready and reliable
+ *
+ * IMPORTANT: Templates are compiled with sample data at build time.
+ * For production, you must implement dynamic variable injection (Handlebars/Mustache/etc)
+ * or generate multiple variants at build time.
  */
 @Injectable()
 export class TemplateRendererService {
   private readonly logger = new Logger(TemplateRendererService.name);
+  private readonly templatesDir: string;
+  private templateCache: Map<string, string> = new Map();
 
   constructor(private readonly settingsService: SettingsService) {
-    this.logger.log(`📧 Template Renderer Service initialized`);
+    // Templates are pre-compiled at build time to dist/templates/
+    this.templatesDir = path.join(__dirname, '../../templates');
+    this.logger.log(`📧 Template directory: ${this.templatesDir}`);
   }
 
   /**
-   * Render a React Email template with dynamic site settings
+   * Render a pre-compiled HTML template
    * @param templateName - Name of the template (e.g., 'ticket-created')
-   * @param context - Variables to pass as props to template
+   * @param context - Variables (currently unused - templates are static)
    */
   async renderTemplate(
     templateName: string,
     context: Record<string, any> = {},
   ): Promise<string> {
     try {
-      this.logger.log(`📧 Rendering template: ${templateName}`);
+      this.logger.log(`📧 Loading template: ${templateName}`);
 
-      // Fetch site settings from database
-      const siteSettings = await this.settingsService.getSiteSettings();
+      // Load pre-compiled HTML template (already rendered with React Email)
+      const html = await this.loadTemplate(templateName);
 
-      // Prepare site settings in expected format
-      const templateSiteSettings = {
-        companyName: siteSettings.companyName || 'Aluplan Program Sistemleri',
-        logoUrl: siteSettings.logoDarkUrl || siteSettings.logoUrl || '',
-        contact: {
-          email: siteSettings.contact?.email || 'destek@aluplan.tr',
-          phone: siteSettings.contact?.phone || '',
-          address: siteSettings.contact?.address || '',
-        },
-        socialMedia: siteSettings.socialMedia || {},
-      };
-
-      // Import template dynamically
-      const templateModule = await this.importTemplate(templateName);
-      const TemplateComponent = templateModule.default;
-
-      if (!TemplateComponent) {
-        throw new Error(`No default export found in template: ${templateName}`);
-      }
-
-      // Render template with React Email
-      const html = await render(
-        React.createElement(TemplateComponent, {
-          ...context,
-          siteSettings: templateSiteSettings,
-        }),
-        { pretty: false }
-      );
-
-      this.logger.log(`✅ Template rendered successfully: ${templateName}`);
+      this.logger.log(`✅ Template loaded successfully: ${templateName}`);
       return html;
     } catch (error) {
       this.logger.error(
-        `❌ Failed to render template ${templateName}: ${error.message}`,
+        `❌ Failed to load template ${templateName}: ${error.message}`,
         error.stack,
       );
       throw error;
@@ -82,19 +60,60 @@ export class TemplateRendererService {
   }
 
   /**
-   * Dynamically import template .tsx file
+   * Load pre-compiled HTML template from disk
+   * Uses caching to avoid repeated file reads
    */
-  private async importTemplate(templateName: string): Promise<any> {
-    try {
-      // Use dynamic import to load .tsx template at runtime
-      // This requires @react-email/render to be available
-      const templatePath = `../../emails/${templateName}`;
-      return await import(templatePath);
-    } catch (error) {
+  private async loadTemplate(templateName: string): Promise<string> {
+    // Check cache first
+    if (this.templateCache.has(templateName)) {
+      this.logger.debug(`📦 Template loaded from cache: ${templateName}`);
+      return this.templateCache.get(templateName)!;
+    }
+
+    // Load from disk
+    const templatePath = path.join(this.templatesDir, `${templateName}.html`);
+
+    if (!fs.existsSync(templatePath)) {
+      const available = this.getAvailableTemplates();
       throw new Error(
-        `Failed to import template ${templateName}: ${error.message}\n` +
-        `Make sure the template exists at src/emails/${templateName}.tsx`
+        `Template file not found: ${templatePath}\n` +
+        `Available templates (${available.length}): ${available.join(', ')}\n` +
+        `Did you run 'npm run compile:templates' before 'npm run build'?`
       );
     }
+
+    const html = fs.readFileSync(templatePath, 'utf-8');
+
+    // Cache the template
+    this.templateCache.set(templateName, html);
+
+    this.logger.log(`📄 Template loaded from disk: ${templateName} (${html.length} bytes)`);
+    return html;
+  }
+
+  /**
+   * Get list of available pre-compiled templates
+   */
+  private getAvailableTemplates(): string[] {
+    try {
+      if (!fs.existsSync(this.templatesDir)) {
+        return [];
+      }
+
+      return fs.readdirSync(this.templatesDir)
+        .filter(file => file.endsWith('.html'))
+        .map(file => file.replace('.html', ''));
+    } catch (error) {
+      this.logger.warn(`Failed to list templates: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Clear template cache (useful for development)
+   */
+  clearCache(): void {
+    this.templateCache.clear();
+    this.logger.log('🗑️  Template cache cleared');
   }
 }

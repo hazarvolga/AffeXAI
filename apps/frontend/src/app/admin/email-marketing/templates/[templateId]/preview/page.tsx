@@ -45,9 +45,11 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
   const unwrappedParams = use(params);
   const { templateId } = unwrappedParams;
   const searchParams = useSearchParams();
-  const templateType = searchParams.get('type') || 'file';
+  // Database-Only Architecture: default to 'db' (was 'file' before migration)
+  const templateType = searchParams.get('type') || 'db';
   
   const [emailHtml, setEmailHtml] = useState<string>('');
+  const [templateName, setTemplateName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedTemplate = useRef(false);
@@ -257,6 +259,10 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
         } else {
           // For database templates, use UnifiedTemplateService
           try {
+            // Fetch template metadata first
+            const templateResponse = await templatesService.getById(templateId);
+            setTemplateName(templateResponse.name || templateId);
+
             // NEW: Unified template API call
             const response = await fetch(`http://localhost:9006/api/email-templates/unified/${templateId}/preview-html`);
 
@@ -347,8 +353,8 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
               Şablonlara Geri Dön
             </Link>
           </Button>
-          <div className="text-sm text-gray-500">
-            Şablon Önizleme: {templateId}
+          <div className="text-sm font-medium text-gray-700">
+            {templateName || 'Şablon Önizleme'}
           </div>
         </div>
       </div>

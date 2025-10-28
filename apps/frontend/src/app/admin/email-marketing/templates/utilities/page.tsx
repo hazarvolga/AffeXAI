@@ -192,20 +192,21 @@ export default function TemplateUtilitiesPage() {
       if (Array.isArray(data)) {
         templates = data;
       } else if (data.data) {
-        // Unified template API format
-        templates = [
-          ...(data.data.dbTemplates || []),
-          ...(data.data.fileTemplates || [])
-        ];
+        // ONLY use dbTemplates - fileTemplates are read-only!
+        templates = data.data.dbTemplates || [];
       } else if (data.data && Array.isArray(data.data)) {
         templates = data.data;
       }
+
+      console.log(`📊 Total database templates: ${templates.length}`);
 
       // Filter empty templates (no structure or empty structure)
       const emptyTemplates = templates.filter((t: any) =>
         !t.structure ||
         (typeof t.structure === 'object' && Object.keys(t.structure).length === 0)
       );
+
+      console.log(`📦 Empty templates to update: ${emptyTemplates.length}`);
 
       console.log(`Found ${emptyTemplates.length} empty templates`);
 
@@ -240,7 +241,12 @@ export default function TemplateUtilitiesPage() {
             updated++;
             console.log(`✅ Updated: ${template.name}`);
           } else {
-            console.error(`❌ Failed to update: ${template.name}`);
+            const errorData = await updateResponse.json().catch(() => ({}));
+            console.error(`❌ Failed to update: ${template.name}`, {
+              status: updateResponse.status,
+              statusText: updateResponse.statusText,
+              error: errorData
+            });
           }
         } catch (error) {
           console.error(`❌ Error updating ${template.name}:`, error);

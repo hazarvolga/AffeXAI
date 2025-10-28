@@ -12,7 +12,6 @@ import { Permission } from "@/lib/permissions/constants";
 const navLinks = [
     { href: "/admin", label: "Genel Bakış", icon: Home, permission: null }, // Everyone can see dashboard
     { href: "/admin/crm", label: "CRM Yönetimi", icon: Database, permission: null }, // Admin only (will check in component)
-    { href: "/admin/events", label: "Etkinlikler", icon: Calendar, permission: Permission.EVENTS_VIEW },
     { href: "/admin/social-media", label: "Sosyal Medya", icon: Share2, permission: Permission.SOCIAL_MEDIA_VIEW },
     { href: "/admin/notifications", label: "Bildirimler", icon: Bell, permission: Permission.NOTIFICATIONS_VIEW },
     { href: "/admin/logs", label: "Aktivite Kayıtları", icon: LineChart, permission: Permission.LOGS_VIEW },
@@ -21,6 +20,11 @@ const navLinks = [
 const certificatesLinks = [
     { href: "/admin/certificates", label: "Sertifika Listesi", icon: Award },
     { href: "/admin/certificates/email-templates", label: "Email Şablonları", icon: Mail },
+];
+
+const eventsLinks = [
+    { href: "/admin/events", label: "Etkinlik Listesi", icon: Calendar },
+    { href: "/admin/events/email-templates", label: "Email Şablonları", icon: Mail },
 ];
 
 const emailMarketingLinks = [
@@ -45,8 +49,9 @@ const supportLinks = [
 ];
 
 const userManagementLinks = [
-    { href: "/admin/users", label: "Kullanıcı Listesi"},
-    { href: "/admin/users/roles", label: "Roller ve İzinler"},
+    { href: "/admin/users", label: "Kullanıcı Listesi", icon: Users },
+    { href: "/admin/users/roles", label: "Roller ve İzinler", icon: ShieldCheck },
+    { href: "/admin/users/email-templates", label: "Email Şablonları", icon: Mail },
 ]
 
 const settingsLinks = [
@@ -222,6 +227,42 @@ export function DashboardSidebar() {
                             </AccordionItem>
                              )}
 
+                             {/* Events - Permission: EVENTS_VIEW */}
+                             {hasPermission(Permission.EVENTS_VIEW) && (
+                             <AccordionItem value="events" className="border-none">
+                                <AccordionTrigger className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
+                                    pathname.startsWith('/admin/events') && "bg-muted text-primary"
+                                )}>
+                                    <div className="flex items-center gap-3">
+                                        <Calendar className="h-4 w-4" />
+                                        Etkinlikler
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-8 pt-1">
+                                    <nav className="grid gap-1">
+                                    {eventsLinks.map(link => {
+                                        const isActive = pathname === link.href;
+                                        const Icon = link.icon;
+                                        return (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                className={cn(
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                    isActive && "bg-muted text-primary"
+                                                )}
+                                            >
+                                                <Icon className="h-3 w-3" />
+                                                {link.label}
+                                            </Link>
+                                        )
+                                    })}
+                                    </nav>
+                                </AccordionContent>
+                            </AccordionItem>
+                             )}
+
                              {/* User Management - Permission: USERS_VIEW */}
                              {hasPermission(Permission.USERS_VIEW) && (
                              <AccordionItem value="user-management" className="border-none">
@@ -238,15 +279,17 @@ export function DashboardSidebar() {
                                     <nav className="grid gap-1">
                                     {userManagementLinks.map(link => {
                                         const isActive = pathname === link.href;
+                                        const Icon = link.icon;
                                         return (
                                             <Link
                                                 key={link.href}
                                                 href={link.href}
                                                 className={cn(
-                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                     isActive && "bg-muted text-primary"
                                                 )}
                                             >
+                                                {Icon && <Icon className="h-3 w-3" />}
                                                 {link.label}
                                             </Link>
                                         )

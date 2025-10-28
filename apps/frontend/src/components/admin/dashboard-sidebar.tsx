@@ -13,10 +13,14 @@ const navLinks = [
     { href: "/admin", label: "Genel Bakış", icon: Home, permission: null }, // Everyone can see dashboard
     { href: "/admin/crm", label: "CRM Yönetimi", icon: Database, permission: null }, // Admin only (will check in component)
     { href: "/admin/events", label: "Etkinlikler", icon: Calendar, permission: Permission.EVENTS_VIEW },
-    { href: "/admin/certificates", label: "Sertifikalar", icon: Award, permission: Permission.CERTIFICATES_VIEW },
     { href: "/admin/social-media", label: "Sosyal Medya", icon: Share2, permission: Permission.SOCIAL_MEDIA_VIEW },
     { href: "/admin/notifications", label: "Bildirimler", icon: Bell, permission: Permission.NOTIFICATIONS_VIEW },
     { href: "/admin/logs", label: "Aktivite Kayıtları", icon: LineChart, permission: Permission.LOGS_VIEW },
+];
+
+const certificatesLinks = [
+    { href: "/admin/certificates", label: "Sertifika Listesi", icon: Award },
+    { href: "/admin/certificates/email-templates", label: "Email Şablonları", icon: Mail },
 ];
 
 const emailMarketingLinks = [
@@ -173,6 +177,42 @@ export function DashboardSidebar() {
                                                 )}
                                             >
                                                 <link.icon className="h-3 w-3" />
+                                                {link.label}
+                                            </Link>
+                                        )
+                                    })}
+                                    </nav>
+                                </AccordionContent>
+                            </AccordionItem>
+                             )}
+
+                             {/* Certificates - Permission: CERTIFICATES_VIEW */}
+                             {hasPermission(Permission.CERTIFICATES_VIEW) && (
+                             <AccordionItem value="certificates" className="border-none">
+                                <AccordionTrigger className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
+                                    pathname.startsWith('/admin/certificates') && "bg-muted text-primary"
+                                )}>
+                                    <div className="flex items-center gap-3">
+                                        <Award className="h-4 w-4" />
+                                        Sertifikalar
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-8 pt-1">
+                                    <nav className="grid gap-1">
+                                    {certificatesLinks.map(link => {
+                                        const isActive = pathname === link.href;
+                                        const Icon = link.icon;
+                                        return (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                className={cn(
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                    isActive && "bg-muted text-primary"
+                                                )}
+                                            >
+                                                <Icon className="h-3 w-3" />
                                                 {link.label}
                                             </Link>
                                         )

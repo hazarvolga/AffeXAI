@@ -38,7 +38,7 @@ export class AddTicketDisplayNumber1730141000000 implements MigrationInterface {
       WITH numbered_tickets AS (
         SELECT
           id,
-          'SUP-' || LPAD(ROW_NUMBER() OVER (ORDER BY created_at)::TEXT, 5, '0') AS display_num
+          'SUP-' || LPAD(ROW_NUMBER() OVER (ORDER BY "createdAt")::TEXT, 5, '0') AS display_num
         FROM tickets
         WHERE display_number IS NULL
       )

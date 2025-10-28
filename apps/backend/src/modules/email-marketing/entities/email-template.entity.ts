@@ -13,7 +13,7 @@ export class EmailTemplate extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   content: string;
 
   @Column({ nullable: true })

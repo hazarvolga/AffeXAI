@@ -226,11 +226,6 @@ export default function TemplatesManagementPage() {
                                 Modern
                               </Badge>
                             )}
-                            {template.isCustom && (
-                              <Badge variant="secondary" className="text-xs shrink-0">
-                                Özel
-                              </Badge>
-                            )}
                           </div>
                           <p className="text-xs text-muted-foreground md:hidden truncate">
                             {template.description}

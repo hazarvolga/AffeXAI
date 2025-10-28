@@ -255,14 +255,19 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
 
           setEmailHtml(html);
         } else {
-          // For database templates, fetch from API
+          // For database templates, use UnifiedTemplateService
           try {
-            // Note: In a real implementation, you would have a preview endpoint
-            // For now, we'll use a placeholder
-            const response = await templatesService.getTemplateById(templateId);
-            // In a real implementation, you would render the template content
-            setEmailHtml(`<div>Özel şablon önizlemesi: ${response.name}</div>`);
+            // NEW: Unified template API call
+            const response = await fetch(`http://localhost:9006/api/email-templates/unified/${templateId}/preview-html`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setEmailHtml(data.html);
           } catch (apiError) {
+            console.error('Unified template API error:', apiError);
             // Fallback to file-based template if DB template not found
             let html = '';
             const templateComponents: Record<string, React.ComponentType<any>> = {
@@ -295,14 +300,18 @@ function EmailPreviewContent({ params }: { params: Promise<{ templateId: string 
               'thank-you': ThankYouEmail,
               'test-social-links': TestSocialLinksEmail, // Add our test template
             };
-            
+
             const Component = templateComponents[templateId];
             if (Component) {
               html = render(<Component siteSettings={siteSettings} />);
             } else {
-              html = `<div>Şablon bulunamadı: ${templateId}</div>`;
+              html = `<div class="p-8 text-center">
+                <h2 class="text-xl font-semibold text-red-600 mb-2">Şablon Bulunamadı</h2>
+                <p class="text-gray-600">Template ID: ${templateId}</p>
+                <p class="text-sm text-gray-500 mt-4">Bu şablon database'de veya dosya sisteminde bulunamadı.</p>
+              </div>`;
             }
-            
+
             setEmailHtml(html);
           }
         }

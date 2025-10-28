@@ -5,12 +5,15 @@ import { UpdateEmailTemplateDto } from './dto/update-template.dto';
 import { CloneTemplateDto } from './dto/clone-template.dto';
 import { EmailTemplate } from './entities/email-template.entity';
 import { TemplatePreviewService } from './services/template-preview.service';
+import { UnifiedTemplateService } from './services/unified-template.service';
+import { TemplateSource } from './types/unified-template.types';
 
 @Controller('email-templates')
 export class TemplateController {
   constructor(
     private readonly templateService: TemplateService,
     private readonly templatePreviewService: TemplatePreviewService,
+    private readonly unifiedTemplateService: UnifiedTemplateService,
   ) {}
 
   @Post()
@@ -75,5 +78,41 @@ export class TemplateController {
     @Param('id') id: string,
   ): Promise<{ html: string; mjml: string }> {
     return this.templateService.renderTemplate(id);
+  }
+
+  // NEW: Unified template endpoints
+  @Get('unified/:id')
+  async getUnifiedTemplate(@Param('id') id: string) {
+    try {
+      return await this.unifiedTemplateService.getTemplate(id);
+    } catch (error) {
+      throw new NotFoundException(`Template not found: ${id}`);
+    }
+  }
+
+  @Get('unified/:id/preview-html')
+  async getUnifiedTemplatePreview(@Param('id') id: string): Promise<{ html: string }> {
+    try {
+      const template = await this.unifiedTemplateService.getTemplate(id);
+
+      // For now, return simple HTML
+      // Will be enhanced with proper rendering in Phase 2
+      if (template.source === TemplateSource.FILE) {
+        const content = await this.templatePreviewService.previewTemplate(id, 'file');
+        return { html: content };
+      } else {
+        // Database template - return structure as JSON for now
+        return {
+          html: `<pre>${JSON.stringify(template.content || template.structure, null, 2)}</pre>`
+        };
+      }
+    } catch (error) {
+      throw new NotFoundException(`Could not preview template ${id}: ${error.message}`);
+    }
+  }
+
+  @Get('unified/all')
+  async getAllUnifiedTemplates() {
+    return this.unifiedTemplateService.listAllTemplates();
   }
 }

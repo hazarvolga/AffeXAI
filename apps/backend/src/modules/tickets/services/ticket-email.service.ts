@@ -50,12 +50,12 @@ export class TicketEmailService {
       // Reply-To address for email threading (support team can reply directly)
       const ticketReplyAddress = `ticket-${ticket.id}@affexai.com`;
 
-      // 1. Send to Customer
+      // 1. Send to Customer (using customer-specific template)
       this.logger.log(`[EMAIL DEBUG] Sending email to customer: ${customer.email}`);
       await this.mailService.sendMail({
         to: { email: customer.email, name: `${customer.firstName} ${customer.lastName}` },
-        subject: `Ticket Created: ${ticket.subject}`,
-        template: 'ticket-created',
+        subject: `Destek Talebiniz Oluşturuldu: ${ticket.subject}`,
+        template: 'ticket-created-customer',
         channel: MailChannel.TRANSACTIONAL,
         headers: {
           'Message-ID': messageId,
@@ -67,20 +67,18 @@ export class TicketEmailService {
           subject: ticket.subject,
           priority: ticket.priority,
           ticketUrl: customerTicketUrl,
-          isAssignedUser: false,
-          isSupportManager: false,
           siteSettings,
         },
       });
       this.logger.log(`✅ Ticket created email sent to customer: ${customer.email}`);
 
-      // 2. Send to Assigned User (if any)
+      // 2. Send to Assigned User (using support-specific template)
       if (assignedUser) {
         this.logger.log(`[EMAIL DEBUG] Sending email to assigned user: ${assignedUser.email}`);
         await this.mailService.sendMail({
           to: { email: assignedUser.email, name: `${assignedUser.firstName} ${assignedUser.lastName}` },
-          subject: `New Ticket Assigned: ${ticket.subject}`,
-          template: 'ticket-created',
+          subject: `Yeni Destek Talebi Atandı: ${ticket.subject}`,
+          template: 'ticket-created-support',
           channel: MailChannel.TRANSACTIONAL,
           replyTo: { email: ticketReplyAddress, name: `Ticket ${ticket.displayNumber}` },
           headers: {
@@ -89,13 +87,13 @@ export class TicketEmailService {
             'References': messageId,
           },
           context: {
-            customerName: `${assignedUser.firstName} ${assignedUser.lastName}`,
+            supportUserName: `${assignedUser.firstName} ${assignedUser.lastName}`,
             displayNumber: ticket.displayNumber,
             subject: ticket.subject,
             priority: ticket.priority,
             ticketUrl: adminTicketUrl,
             isAssignedUser: true,
-            isSupportManager: false,
+            customerName: `${customer.firstName} ${customer.lastName}`,
             customerEmail: customer.email,
             categoryName: ticket.category?.name || '',
             ticketDescription: ticket.description,
@@ -117,8 +115,8 @@ export class TicketEmailService {
 
           await this.mailService.sendMail({
             to: { email: manager.email, name: `${manager.firstName} ${manager.lastName}` },
-            subject: `New Ticket Created: ${ticket.subject}`,
-            template: 'ticket-created',
+            subject: `Yeni Destek Talebi: ${ticket.subject}`,
+            template: 'ticket-created-support',
             channel: MailChannel.TRANSACTIONAL,
             replyTo: { email: ticketReplyAddress, name: `Ticket ${ticket.displayNumber}` },
             headers: {
@@ -127,13 +125,13 @@ export class TicketEmailService {
               'References': messageId,
             },
             context: {
-              customerName: `${manager.firstName} ${manager.lastName}`,
+              supportUserName: `${manager.firstName} ${manager.lastName}`,
               displayNumber: ticket.displayNumber,
               subject: ticket.subject,
               priority: ticket.priority,
               ticketUrl: adminTicketUrl,
               isAssignedUser: false,
-              isSupportManager: true,
+              customerName: `${customer.firstName} ${customer.lastName}`,
               customerEmail: customer.email,
               categoryName: ticket.category?.name || '',
               ticketDescription: ticket.description,

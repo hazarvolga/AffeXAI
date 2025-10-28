@@ -143,6 +143,62 @@ const emailMarketingTemplates: EmailTemplate[] = [
     variables: ["userName", "productName", "productImage", "price", "productUrl", "stockQuantity", "waitlistPosition"],
     usedBy: ["StockAlertService.sendBackInStockEmail()"]
   },
+
+  // Content & Newsletter
+  {
+    name: "weekly-digest",
+    displayName: "Haftalık Özet",
+    description: "Haftalık içerik özeti ve güncellemeler",
+    category: "Content",
+    variables: ["userName", "weekNumber", "weekDate", "topArticles", "upcomingEvents", "newsUrl"],
+    usedBy: ["NewsletterService.sendWeeklyDigest()"]
+  },
+
+  // E-commerce Advanced
+  {
+    name: "cross-sell",
+    displayName: "Çapraz Satış",
+    description: "Satın alınan ürünle ilgili tamamlayıcı ürün önerileri",
+    category: "E-commerce",
+    variables: ["userName", "purchasedProduct", "recommendations", "shopUrl"],
+    usedBy: ["RecommendationService.sendCrossSellEmail()"]
+  },
+  {
+    name: "upsell",
+    displayName: "Yukarı Satış",
+    description: "Premium plan/ürün yükseltme teklifi",
+    category: "Upsell",
+    variables: ["userName", "currentPlan", "upgradePlan", "currentPrice", "upgradePrice", "savingsPercent", "features", "upgradeUrl"],
+    usedBy: ["UpsellService.sendUpgradeEmail()"]
+  },
+
+  // Product Updates
+  {
+    name: "new-feature-announcement",
+    displayName: "Yeni Özellik Duyurusu",
+    description: "Yeni özellik lansmanı bildirimi",
+    category: "Product Update",
+    variables: ["userName", "featureName", "featureDescription", "featureImage", "benefits", "demoUrl", "docsUrl", "releaseDate"],
+    usedBy: ["ProductService.sendFeatureAnnouncement()"]
+  },
+  {
+    name: "product-update",
+    displayName: "Ürün Güncellemesi",
+    description: "Platform versiyon güncellemeleri ve changelog",
+    category: "Product Update",
+    variables: ["userName", "version", "releaseDate", "updateType", "newFeatures", "improvements", "bugFixes", "changelogUrl"],
+    usedBy: ["ProductService.sendUpdateEmail()"]
+  },
+
+  // Feedback & Survey
+  {
+    name: "survey-feedback",
+    displayName: "Anket & Geri Bildirim",
+    description: "Müşteri memnuniyet anketi daveti",
+    category: "Survey",
+    variables: ["userName", "surveyTitle", "surveyDescription", "estimatedTime", "incentive", "surveyUrl", "expiryDate"],
+    usedBy: ["SurveyService.sendSurveyInvitation()"]
+  },
 ];
 
 const getCategoryColor = (category: string) => {
@@ -158,6 +214,10 @@ const getCategoryColor = (category: string) => {
     "Product": "bg-emerald-500",
     "Special": "bg-fuchsia-500",
     "Alert": "bg-orange-500",
+    "Content": "bg-teal-500",
+    "Upsell": "bg-violet-500",
+    "Product Update": "bg-sky-500",
+    "Survey": "bg-lime-500",
   };
   return colors[category] || "bg-gray-500";
 };
@@ -170,7 +230,7 @@ export default function EmailMarketingTemplatesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Email Marketing Şablonları</h1>
           <p className="text-muted-foreground mt-2">
-            Email marketing kampanyaları için kullanılan {emailMarketingTemplates.length} email şablonu (Hedef: 20+ şablon)
+            Email marketing kampanyaları için kullanılan {emailMarketingTemplates.length} email şablonu ✅ <span className="text-green-600 font-semibold">(Hedef Tamamlandı!)</span>
           </p>
         </div>
         <Button variant="outline" asChild>

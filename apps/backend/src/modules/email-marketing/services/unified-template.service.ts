@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { TemplateService } from './template.service';
+import { TemplateService } from '../template.service';
 import { TemplateFileService } from './template-file.service';
 import { MjmlRendererService } from './mjml-renderer.service';
 import {
@@ -130,14 +130,16 @@ export class UnifiedTemplateService {
    */
   private async getFromFile(name: string): Promise<UnifiedTemplate> {
     try {
-      const fileTemplate = await this.templateFileService.loadTemplate(name);
+      // TemplateFileService returns raw TSX content, not compiled HTML
+      // For now, we'll use the filename with .tsx extension
+      const filename = name.endsWith('.tsx') ? name : `${name}.tsx`;
+      const content = await this.templateFileService.getTemplateFileContent(filename);
 
       return {
-        id: name,
-        name,
+        id: name.replace('.tsx', ''),
+        name: name.replace('.tsx', ''),
         source: TemplateSource.FILE,
-        content: fileTemplate.html,
-        variables: fileTemplate.variables,
+        content,
         isActive: true,
         isEditable: false,
       };
@@ -207,7 +209,7 @@ export class UnifiedTemplateService {
   }> {
     const [dbTemplates, fileTemplates] = await Promise.all([
       this.templateService.findAll(),
-      this.templateFileService.listTemplates(),
+      this.templateFileService.getAllTemplateFiles(),
     ]);
 
     return {
@@ -215,11 +217,9 @@ export class UnifiedTemplateService {
         this.mapToUnified(t, TemplateSource.DATABASE),
       ),
       files: fileTemplates.map((f) => ({
-        id: f.name,
+        id: f.id,
         name: f.name,
         source: TemplateSource.FILE,
-        content: f.html,
-        variables: f.variables,
         isActive: true,
         isEditable: false,
       })),

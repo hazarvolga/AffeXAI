@@ -27,10 +27,10 @@ import * as React from 'react';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const TEMPLATES_SRC_DIR = path.join(__dirname, '../src/emails');
-const TEMPLATES_DIST_DIR = path.join(__dirname, '../dist/templates');
-const TEMPLATES_SRC_HTML_DIR = path.join(__dirname, '../src/templates'); // Save to src/templates/ for NestJS assets
-const COMPONENTS_DIR = path.join(TEMPLATES_SRC_DIR, 'components');
+const TEMPLATES_SRC_DIR = path.join(__dirname, '../src/modules/tickets/templates');
+const TEMPLATES_DIST_DIR = path.join(__dirname, '../dist/modules/tickets/templates');
+const TEMPLATES_SRC_HTML_DIR = path.join(__dirname, '../src/modules/tickets/templates'); // Save to src for NestJS assets
+const COMPONENTS_DIR = path.join(__dirname, '../src/modules/mail/components');
 
 interface CompileResult {
   templateName: string;
@@ -57,16 +57,18 @@ function ensureDistDirectory(): void {
 function getTemplateFiles(): string[] {
   const files = fs.readdirSync(TEMPLATES_SRC_DIR);
 
-  // Only compile ticket-related templates that don't have frontend dependencies
-  // TODO: Fix templates that import @/lib/site-settings-data
-  // TODO: Fix csat-survey template (undefined/null error)
+  // ✅ All templates fixed - frontend imports removed, baseUrl added
   const ticketTemplates = [
-    'ticket-created',  // ✅ Works perfectly!
-    // 'csat-survey',         // ❌ Cannot convert undefined/null to object
-    // 'ticket-assigned',    // ❌ Imports @/lib/site-settings-data
-    // 'ticket-new-message', // ❌ Imports @/lib/site-settings-data
-    // 'ticket-resolved',    // ❌ Imports @/lib/site-settings-data
-    // 'ticket-escalated',   // ❌ Imports @/lib/site-settings-data
+    'ticket-created',
+    'ticket-created-customer',
+    'ticket-created-support',
+    'csat-survey',
+    'ticket-assigned',
+    'ticket-new-message',
+    'ticket-resolved',
+    'ticket-escalated',
+    'sla-approaching-alert',
+    'sla-breach-alert',
   ];
 
   return files

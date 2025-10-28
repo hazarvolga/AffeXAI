@@ -213,13 +213,14 @@ export interface EmailTemplate {
 export interface CreateTemplateDto {
   name: string;
   description?: string;
-  content: string;
+  content?: string; // Optional: Email Builder templates use structure instead
   thumbnailUrl?: string;
   isDefault?: boolean;
   type?: TemplateType | string;
   fileTemplateName?: string;
   variables?: Record<string, any>;
   isActive?: boolean;
+  structure?: any; // Email Builder structure (JSONB)
 }
 
 export interface UpdateTemplateDto {
@@ -232,6 +233,7 @@ export interface UpdateTemplateDto {
   fileTemplateName?: string;
   variables?: Record<string, any>;
   isActive?: boolean;
+  structure?: any; // Email Builder structure (JSONB)
 }
 
 // ============================================================================

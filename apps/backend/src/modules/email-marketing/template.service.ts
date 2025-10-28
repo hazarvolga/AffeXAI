@@ -91,7 +91,7 @@ export class TemplateService {
 
     // If original has JSON structure, render it
     if (clonedTemplate.structure && makeEditable) {
-      const { mjml, html } = this.mjmlRendererService.renderEmail(
+      const { mjml, html } = await this.mjmlRendererService.renderEmail(
         clonedTemplate.structure,
       );
       clonedTemplate.compiledMjml = mjml;
@@ -152,7 +152,7 @@ export class TemplateService {
       };
     }
 
-    const { mjml, html } = this.mjmlRendererService.renderEmail(
+    const { mjml, html } = await this.mjmlRendererService.renderEmail(
       template.structure,
     );
 

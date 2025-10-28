@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import mjml2html from 'mjml';
+import { SettingsService } from '../../settings/settings.service';
+import { SiteSettingsDto } from '../../settings/dto/site-settings.dto';
 
 export interface EmailStructure {
   rows: Array<{
@@ -27,6 +30,44 @@ export interface EmailStructure {
 @Injectable()
 export class MjmlRendererService {
   private readonly logger = new Logger(MjmlRendererService.name);
+
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  /**
+   * Build base URL dynamically from environment variables
+   * This ensures URLs work in development, staging, and production
+   */
+  private getBaseUrl(): string {
+    const protocol = this.configService.get<string>('APP_PROTOCOL') || 'http';
+    const host = this.configService.get<string>('APP_HOST') || 'localhost';
+    const port = this.configService.get<string>('PORT') || '9006';
+
+    // In production, port might be omitted (e.g., https://api.affexai.com)
+    // In development, include port (e.g., http://localhost:9006)
+    if (port && (host === 'localhost' || host === '127.0.0.1')) {
+      return `${protocol}://${host}:${port}`;
+    }
+
+    return `${protocol}://${host}`;
+  }
+
+  /**
+   * Build frontend URL for user-facing links (unsubscribe, etc.)
+   */
+  private getFrontendUrl(): string {
+    const frontendProtocol = this.configService.get<string>('FRONTEND_PROTOCOL') || 'http';
+    const frontendHost = this.configService.get<string>('FRONTEND_HOST') || 'localhost';
+    const frontendPort = this.configService.get<string>('FRONTEND_PORT') || '9003';
+
+    if (frontendPort && (frontendHost === 'localhost' || frontendHost === '127.0.0.1')) {
+      return `${frontendProtocol}://${frontendHost}:${frontendPort}`;
+    }
+
+    return `${frontendProtocol}://${frontendHost}`;
+  }
 
   /**
    * Convert JSON email structure to MJML markup
@@ -70,13 +111,29 @@ export class MjmlRendererService {
 
   /**
    * Full pipeline: JSON structure → MJML → HTML
+   * Automatically injects header and footer with site settings
    */
-  renderEmail(structure: EmailStructure): {
+  async renderEmail(structure: EmailStructure, options: { skipHeaderFooter?: boolean } = {}): Promise<{
     mjml: string;
     html: string;
     errors: any[];
-  } {
-    const mjml = this.structureToMjml(structure);
+  }> {
+    // Get site settings for header/footer
+    const siteSettings = await this.settingsService.getSiteSettings();
+
+    // Clone structure to avoid mutating original
+    const enhancedStructure = { ...structure, rows: [...structure.rows] };
+
+    // Add header and footer if not skipped
+    if (!options.skipHeaderFooter) {
+      // Prepend header
+      enhancedStructure.rows.unshift(this.createHeaderRow(siteSettings));
+
+      // Append footer
+      enhancedStructure.rows.push(this.createFooterRow(siteSettings));
+    }
+
+    const mjml = this.structureToMjml(enhancedStructure);
     const { html, errors } = this.mjmlToHtml(mjml);
 
     return { mjml, html, errors };
@@ -197,23 +254,27 @@ export class MjmlRendererService {
       'font-size': styles.fontSize || '24px',
       'font-weight': styles.fontWeight || 'bold',
       'color': styles.color || '#333333',
-      'align': props.align || 'left',
+      'align': styles.textAlign || props.align || 'left',
       'padding': styles.padding || '10px 0',
     });
 
-    return `<mj-text ${attrs}>${props.text || ''}</mj-text>`;
+    // Support both 'content' (Email Builder) and 'text' (legacy)
+    const text = props.content || props.text || '';
+    return `<mj-text ${attrs}>${text}</mj-text>`;
   }
 
   private renderText(props: Record<string, any>, styles: Record<string, any>): string {
     const attrs = this.buildAttributes({
       'font-size': styles.fontSize || '14px',
       'color': styles.color || '#333333',
-      'align': props.align || 'left',
+      'align': styles.textAlign || props.align || 'left',
       'padding': styles.padding || '10px 0',
       'line-height': styles.lineHeight || '1.6',
     });
 
-    return `<mj-text ${attrs}>${props.text || ''}</mj-text>`;
+    // Support both 'content' (Email Builder) and 'text' (legacy)
+    const text = props.content || props.text || '';
+    return `<mj-text ${attrs}>${text}</mj-text>`;
   }
 
   private renderButton(props: Record<string, any>, styles: Record<string, any>): string {
@@ -224,11 +285,13 @@ export class MjmlRendererService {
       'font-weight': styles.fontWeight || 'bold',
       'border-radius': styles.borderRadius || '4px',
       'padding': styles.padding || '12px 24px',
-      'align': props.align || 'left',
-      'href': props.href || '#',
+      'align': styles.textAlign || props.align || 'center',
+      'href': props.href || props.url || '#',
     });
 
-    return `<mj-button ${attrs}>${props.text || 'Click here'}</mj-button>`;
+    // Support both 'content' (Email Builder) and 'text' (legacy)
+    const text = props.content || props.text || 'Click here';
+    return `<mj-button ${attrs}>${text}</mj-button>`;
   }
 
   private renderImage(props: Record<string, any>, styles: Record<string, any>): string {
@@ -273,5 +336,198 @@ export class MjmlRendererService {
     return Object.entries(attrs)
       .filter(([_, value]) => value !== undefined && value !== null)
       .map(([key, value]) => `${key}="${value}"`);
+  }
+
+  /**
+   * Create email header row with logo and company name
+   */
+  private createHeaderRow(siteSettings: SiteSettingsDto): EmailStructure['rows'][0] {
+    // Build full URL for logo using environment-based base URL
+    const baseUrl = this.getBaseUrl();
+    const logoUrl = siteSettings.logoUrl
+      ? `${baseUrl}/uploads/${siteSettings.logoUrl}`
+      : 'https://via.placeholder.com/200x60?text=Logo';
+
+    return {
+      id: 'header-row',
+      type: 'section',
+      columns: [
+        {
+          id: 'header-col',
+          width: '100%',
+          blocks: [
+            // Logo
+            {
+              id: 'header-logo',
+              type: 'image',
+              properties: {
+                src: logoUrl,
+                alt: siteSettings.companyName || 'Company Logo',
+                href: '#',
+              },
+              styles: {
+                width: '200px',
+                padding: '20px 0 10px 0',
+              },
+            },
+          ],
+        },
+      ],
+      settings: {
+        backgroundColor: '#ffffff',
+        padding: '20px 0',
+      },
+    };
+  }
+
+  /**
+   * Create email footer row with contact info and social links
+   */
+  private createFooterRow(siteSettings: SiteSettingsDto): EmailStructure['rows'][0] {
+    const footerBlocks: EmailStructure['rows'][0]['columns'][0]['blocks'] = [];
+
+    // Divider
+    footerBlocks.push({
+      id: 'footer-divider',
+      type: 'divider',
+      properties: {},
+      styles: {
+        borderColor: '#e2e8f0',
+        borderWidth: '1px',
+        padding: '20px 0',
+      },
+    });
+
+    // Company name
+    if (siteSettings.companyName) {
+      footerBlocks.push({
+        id: 'footer-company',
+        type: 'text',
+        properties: {
+          content: `<strong>${siteSettings.companyName}</strong>`,
+        },
+        styles: {
+          fontSize: '14px',
+          color: '#1a202c',
+          textAlign: 'center',
+          padding: '10px 0 5px 0',
+        },
+      });
+    }
+
+    // Contact info
+    const contactParts: string[] = [];
+    if (siteSettings.contact?.address) {
+      contactParts.push(siteSettings.contact.address);
+    }
+    if (siteSettings.contact?.phone) {
+      contactParts.push(`Tel: ${siteSettings.contact.phone}`);
+    }
+    if (siteSettings.contact?.email) {
+      contactParts.push(`Email: ${siteSettings.contact.email}`);
+    }
+
+    if (contactParts.length > 0) {
+      footerBlocks.push({
+        id: 'footer-contact',
+        type: 'text',
+        properties: {
+          content: contactParts.join(' | '),
+        },
+        styles: {
+          fontSize: '12px',
+          color: '#64748b',
+          textAlign: 'center',
+          padding: '5px 0',
+          lineHeight: '1.5',
+        },
+      });
+    }
+
+    // Social media icons with links
+    if (siteSettings.socialMedia && Object.keys(siteSettings.socialMedia).length > 0) {
+      const socialIcons: string[] = [];
+
+      if (siteSettings.socialMedia.facebook) {
+        socialIcons.push(`
+          <a href="${siteSettings.socialMedia.facebook}" target="_blank" style="text-decoration: none; margin: 0 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/145/145802.png" alt="Facebook" width="32" height="32" style="display: inline-block;" />
+          </a>
+        `);
+      }
+      if (siteSettings.socialMedia.twitter) {
+        socialIcons.push(`
+          <a href="${siteSettings.socialMedia.twitter}" target="_blank" style="text-decoration: none; margin: 0 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" width="32" height="32" style="display: inline-block;" />
+          </a>
+        `);
+      }
+      if (siteSettings.socialMedia.linkedin) {
+        socialIcons.push(`
+          <a href="${siteSettings.socialMedia.linkedin}" target="_blank" style="text-decoration: none; margin: 0 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png" alt="LinkedIn" width="32" height="32" style="display: inline-block;" />
+          </a>
+        `);
+      }
+      if (siteSettings.socialMedia.instagram) {
+        socialIcons.push(`
+          <a href="${siteSettings.socialMedia.instagram}" target="_blank" style="text-decoration: none; margin: 0 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" width="32" height="32" style="display: inline-block;" />
+          </a>
+        `);
+      }
+      if (siteSettings.socialMedia.youtube) {
+        socialIcons.push(`
+          <a href="${siteSettings.socialMedia.youtube}" target="_blank" style="text-decoration: none; margin: 0 8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" width="32" height="32" style="display: inline-block;" />
+          </a>
+        `);
+      }
+
+      if (socialIcons.length > 0) {
+        footerBlocks.push({
+          id: 'footer-social',
+          type: 'text',
+          properties: {
+            content: `<div style="text-align: center;">${socialIcons.join('')}</div>`,
+          },
+          styles: {
+            padding: '15px 0',
+          },
+        });
+      }
+    }
+
+    // Unsubscribe link - token will be injected during actual email sending
+    const frontendUrl = this.getFrontendUrl();
+    footerBlocks.push({
+      id: 'footer-unsubscribe',
+      type: 'text',
+      properties: {
+        content: `<a href="${frontendUrl}/unsubscribe?token={{unsubscribeToken}}" style="color: #94a3b8; text-decoration: underline;">Abonelikten Çık / Unsubscribe</a>`,
+      },
+      styles: {
+        fontSize: '11px',
+        color: '#94a3b8',
+        textAlign: 'center',
+        padding: '10px 0 20px 0',
+      },
+    });
+
+    return {
+      id: 'footer-row',
+      type: 'section',
+      columns: [
+        {
+          id: 'footer-col',
+          width: '100%',
+          blocks: footerBlocks,
+        },
+      ],
+      settings: {
+        backgroundColor: '#f8fafc',
+        padding: '0 20px',
+      },
+    };
   }
 }

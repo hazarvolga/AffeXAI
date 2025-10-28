@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EmailTemplate } from '../entities/email-template.entity';
 import { SiteSettingsDto } from '../../settings/dto/site-settings.dto';
 import { SettingsService } from '../../settings/settings.service';
+import { MjmlRendererService } from './mjml-renderer.service';
 
 /**
  * Service for previewing email templates with site settings injected
@@ -11,6 +12,7 @@ import { SettingsService } from '../../settings/settings.service';
 export class TemplatePreviewService {
   constructor(
     private readonly settingsService: SettingsService,
+    private readonly mjmlRenderer: MjmlRendererService,
   ) {}
 
   /**
@@ -19,14 +21,20 @@ export class TemplatePreviewService {
    * @returns Processed HTML content with site settings injected
    */
   async previewTemplate(template: EmailTemplate): Promise<string> {
-    // Get site settings
+    // Get site settings for placeholder replacement
     const siteSettings = await this.settingsService.getSiteSettings();
 
-    // Use compiledHtml if available, otherwise use content
-    const templateContent = template.compiledHtml || template.content || '';
+    // If template has Email Builder structure, render with MJML (includes dynamic header/footer)
+    if (template.structure) {
+      const { html } = await this.mjmlRenderer.renderEmail(template.structure);
+      // Replace placeholders in the rendered HTML
+      return this.replacePlaceholders(html, siteSettings);
+    }
 
-    // Inject site settings into template
-    return this.injectSiteSettings(templateContent, siteSettings);
+    // Fallback: Legacy HTML templates (use compiledHtml or content)
+    const templateContent = template.compiledHtml || template.content || '';
+    const htmlWithSettings = this.injectSiteSettings(templateContent, siteSettings);
+    return this.replacePlaceholders(htmlWithSettings, siteSettings);
   }
 
   private injectSiteSettings(
@@ -77,5 +85,36 @@ export class TemplatePreviewService {
     );
 
     return processedContent;
+  }
+
+  /**
+   * Replace common email placeholders with preview data
+   */
+  private replacePlaceholders(html: string, siteSettings: SiteSettingsDto): string {
+    let result = html;
+
+    // Replace common template placeholders with sample data for preview
+    const placeholders = {
+      '{{companyName}}': siteSettings.companyName || 'Your Company',
+      '{{content}}': '<p style="margin: 20px 0; line-height: 1.6;">This is preview content. In actual emails, this will be replaced with the campaign content or event details.</p>',
+      '{{eventName}}': 'Sample Event Name',
+      '{{eventDate}}': 'January 15, 2025',
+      '{{eventTime}}': '14:00',
+      '{{eventLocation}}': 'Online Webinar',
+      '{{userName}}': 'Preview User',
+      '{{userEmail}}': 'preview@example.com',
+      '{{unsubscribeUrl}}': '#unsubscribe',
+      '{{year}}': new Date().getFullYear().toString(),
+      '{{address}}': siteSettings.contact?.address || 'Company Address',
+      '{{phone}}': siteSettings.contact?.phone || '+90 XXX XXX XX XX',
+      '{{email}}': siteSettings.contact?.email || 'info@company.com',
+    };
+
+    // Replace all placeholders
+    Object.entries(placeholders).forEach(([placeholder, value]) => {
+      result = result.replace(new RegExp(placeholder, 'g'), value);
+    });
+
+    return result;
   }
 }

@@ -78,9 +78,9 @@ export class UnifiedTemplateService {
     const { data = {}, interpolate = true } = options;
 
     if (template.structure) {
-      // Email Builder structure → MJML → HTML
+      // Email Builder structure → MJML → HTML (with header/footer)
       this.logger.debug(`Rendering template with MJML: ${identifier}`);
-      const { mjml, html } = this.mjmlRenderer.renderEmail(template.structure);
+      const { mjml, html } = await this.mjmlRenderer.renderEmail(template.structure);
 
       const finalHtml = interpolate
         ? this.interpolateVariables(html, data)

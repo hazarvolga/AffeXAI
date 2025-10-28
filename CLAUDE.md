@@ -2,8 +2,8 @@
 
 > **Enterprise Customer Portal & AI-Powered Support Platform**
 > **Architecture**: NestJS Backend + Next.js 15 Frontend (Monorepo)
-> **Last Updated**: 2025-10-25
-> **Version**: 1.0.0
+> **Last Updated**: 2025-10-28
+> **Version**: 1.0.1
 
 ---
 
@@ -578,6 +578,116 @@ affexai-monorepo/
 - 15+ Controllers
 - 5 BullMQ Queues (email, automation, import, export, validation)
 - 18 Database entities
+
+#### 📧 Dynamic Email Headers & Footers
+
+**Status**: ✅ Production (Updated: 2025-10-28)
+
+**Overview**: Email templates automatically inject dynamic headers and footers from site settings at runtime, ensuring all emails have consistent branding without manual updates.
+
+**Key Features**:
+- **Dynamic Logo**: Automatically pulls company logo from site settings
+- **Contact Information**: Company name, address, phone, email from settings
+- **Social Media Icons**: Clickable icons (Facebook, Twitter, LinkedIn, Instagram, YouTube) with brand colors
+- **Unsubscribe Link**: Bilingual (TR/EN) unsubscribe with token placeholder
+- **Environment-Based URLs**: Automatic URL construction for development/staging/production
+
+**Implementation Details**:
+
+**Location**: [apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts](apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts)
+
+**Architecture**:
+```
+Email Template → MjmlRendererService.renderEmail()
+                 ↓
+   1. Fetch Site Settings (SettingsService)
+   2. Build Environment URLs (getBaseUrl, getFrontendUrl)
+   3. Create Header Row (logo, company name)
+   4. Inject Email Content
+   5. Create Footer Row (contact, social, unsubscribe)
+                 ↓
+   MJML → HTML with dynamic header/footer
+```
+
+**URL Construction** ([mjml-renderer.service.ts:43-70](apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts#L43-L70)):
+```typescript
+// Backend API URL (for logo, media)
+getBaseUrl(): string {
+  // Development: http://localhost:9006
+  // Production: https://api.affexai.com (no port)
+}
+
+// Frontend URL (for unsubscribe, user links)
+getFrontendUrl(): string {
+  // Development: http://localhost:9003
+  // Production: https://affexai.com (no port)
+}
+```
+
+**Header Components** ([mjml-renderer.service.ts:344-349](apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts#L344-L349)):
+- Logo: `${baseUrl}/uploads/${siteSettings.logoUrl}` (200px width)
+- White background, centered alignment
+- Fallback placeholder if logo missing
+
+**Footer Components** ([mjml-renderer.service.ts:348-493](apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts#L348-L493)):
+- Divider line (1px, gray)
+- Company name (bold, centered)
+- Contact info (pipe-separated: Address | Tel | Email)
+- Social media icons (32x32, Flaticon CDN, clickable)
+- Unsubscribe link (bilingual, token placeholder)
+
+**Social Media Icons**:
+| Platform | Icon URL | Size |
+|----------|----------|------|
+| Facebook | https://cdn-icons-png.flaticon.com/512/145/145802.png | 32x32 |
+| Twitter | https://cdn-icons-png.flaticon.com/512/733/733579.png | 32x32 |
+| LinkedIn | https://cdn-icons-png.flaticon.com/512/145/145807.png | 32x32 |
+| Instagram | https://cdn-icons-png.flaticon.com/512/2111/2111463.png | 32x32 |
+| YouTube | https://cdn-icons-png.flaticon.com/512/1384/1384060.png | 32x32 |
+
+**Environment Variables** (Optional - defaults provided):
+
+```env
+# Backend URL Configuration
+APP_PROTOCOL=http          # Production: https
+APP_HOST=localhost          # Production: api.affexai.com
+PORT=9006                   # Current backend port
+
+# Frontend URL Configuration
+FRONTEND_PROTOCOL=http      # Production: https
+FRONTEND_HOST=localhost     # Production: affexai.com
+FRONTEND_PORT=9003          # Current frontend port
+```
+
+**Deployment Benefits**:
+- ✅ **No Code Changes**: Update `.env` only for different environments
+- ✅ **Automatic Port Handling**: Localhost includes port, production excludes it
+- ✅ **Consistent Branding**: One place to update logo/contact (site settings)
+- ✅ **Multi-Environment**: Same code works in dev/staging/production
+
+**Example URLs**:
+
+Development:
+```
+Logo: http://localhost:9006/uploads/f3dcbef0-3f9b-45b0-92b0-34973bf13aef
+Unsubscribe: http://localhost:9003/unsubscribe?token={{unsubscribeToken}}
+```
+
+Production (with environment variables):
+```
+Logo: https://api.affexai.com/uploads/f3dcbef0-3f9b-45b0-92b0-34973bf13aef
+Unsubscribe: https://affexai.com/unsubscribe?token={{unsubscribeToken}}
+```
+
+**Related Files**:
+- MjmlRendererService: [apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts](apps/backend/src/modules/email-marketing/services/mjml-renderer.service.ts)
+- TemplatePreviewService: [apps/backend/src/modules/email-marketing/services/template-preview.service.ts](apps/backend/src/modules/email-marketing/services/template-preview.service.ts)
+- UnifiedTemplateService: [apps/backend/src/modules/email-marketing/services/unified-template.service.ts](apps/backend/src/modules/email-marketing/services/unified-template.service.ts)
+- SettingsService: [apps/backend/src/modules/settings/settings.service.ts](apps/backend/src/modules/settings/settings.service.ts)
+
+**Testing**:
+- Preview: `GET /api/email-marketing/templates/:id/preview`
+- Send test: `POST /api/email-marketing/campaigns/:id/test`
 
 ### 3. 🎓 Certificate Management
 

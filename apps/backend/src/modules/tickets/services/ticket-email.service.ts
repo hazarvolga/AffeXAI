@@ -63,7 +63,7 @@ export class TicketEmailService {
         },
         context: {
           customerName: `${customer.firstName} ${customer.lastName}` || customer.email,
-          ticketNumber: `#${ticket.id}`,
+          displayNumber: ticket.displayNumber,
           subject: ticket.subject,
           priority: ticket.priority,
           ticketUrl: customerTicketUrl,
@@ -82,7 +82,7 @@ export class TicketEmailService {
           subject: `New Ticket Assigned: ${ticket.subject}`,
           template: 'ticket-created',
           channel: MailChannel.TRANSACTIONAL,
-          replyTo: { email: ticketReplyAddress, name: `Ticket #${ticket.id}` },
+          replyTo: { email: ticketReplyAddress, name: `Ticket ${ticket.displayNumber}` },
           headers: {
             'Message-ID': messageId,
             'X-Ticket-ID': ticket.id.toString(),
@@ -90,7 +90,7 @@ export class TicketEmailService {
           },
           context: {
             customerName: `${assignedUser.firstName} ${assignedUser.lastName}`,
-            ticketNumber: `#${ticket.id}`,
+            displayNumber: ticket.displayNumber,
             subject: ticket.subject,
             priority: ticket.priority,
             ticketUrl: adminTicketUrl,
@@ -120,7 +120,7 @@ export class TicketEmailService {
             subject: `New Ticket Created: ${ticket.subject}`,
             template: 'ticket-created',
             channel: MailChannel.TRANSACTIONAL,
-            replyTo: { email: ticketReplyAddress, name: `Ticket #${ticket.id}` },
+            replyTo: { email: ticketReplyAddress, name: `Ticket ${ticket.displayNumber}` },
             headers: {
               'Message-ID': messageId,
               'X-Ticket-ID': ticket.id.toString(),
@@ -128,7 +128,7 @@ export class TicketEmailService {
             },
             context: {
               customerName: `${manager.firstName} ${manager.lastName}`,
-              ticketNumber: `#${ticket.id}`,
+              displayNumber: ticket.displayNumber,
               subject: ticket.subject,
               priority: ticket.priority,
               ticketUrl: adminTicketUrl,

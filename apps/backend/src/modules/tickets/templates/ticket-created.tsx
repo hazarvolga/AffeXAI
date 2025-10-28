@@ -17,7 +17,8 @@ import { EmailFooter } from "../../mail/components/EmailFooter";
 
 interface TicketCreatedEmailProps {
   ticketId?: string;
-  ticketNumber?: string;
+  ticketNumber?: string; // Deprecated: use displayNumber
+  displayNumber?: string; // Human-readable number (SUP-00001)
   subject?: string;
   priority?: string;
   customerName?: string;
@@ -53,7 +54,8 @@ const priorityLabels: Record<string, string> = {
 
 export const TicketCreatedEmail = ({
   ticketId = "07a6cc03-5ed9-483e-b26c-da0f3c4a4b83",
-  ticketNumber = "#12345",
+  ticketNumber = "#12345", // Deprecated: use displayNumber
+  displayNumber = "SUP-00001",
   subject = "Test Destek Talebi",
   priority = "medium",
   customerName = "Değerli Müşterimiz",
@@ -73,6 +75,9 @@ export const TicketCreatedEmail = ({
     address: ''
   };
   const socialMediaLinks = siteSettings?.socialMedia || {};
+
+  // Use displayNumber if available, fallback to ticketNumber for backward compatibility
+  const ticketDisplayNumber = displayNumber || ticketNumber;
 
   // Determine if this is for support team
   const isSupportTeam = isAssignedUser || isSupportManager;
@@ -139,7 +144,7 @@ export const TicketCreatedEmail = ({
             {/* Ticket Details Box */}
             <Section style={ticketBox}>
               <Text style={ticketLabel}>Talep Numarası:</Text>
-              <Text style={ticketValue}>{ticketNumber}</Text>
+              <Text style={ticketValue}>{ticketDisplayNumber}</Text>
 
               <Hr style={ticketDivider} />
 
@@ -191,7 +196,7 @@ export const TicketCreatedEmail = ({
             <Text style={footer}>
               Bu e-posta {companyName} destek sistemi tarafından otomatik olarak gönderilmiştir.
               <br />
-              Talep numaranızı her zaman belirtiniz: {ticketNumber}
+              Talep numaranızı her zaman belirtiniz: {ticketDisplayNumber}
             </Text>
           </Section>
 

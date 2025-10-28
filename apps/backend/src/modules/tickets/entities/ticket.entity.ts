@@ -23,6 +23,9 @@ export class Ticket {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar', length: 20, unique: true })
+  displayNumber: string; // Human-readable ticket number (e.g., SUP-00001)
+
   @Column({ type: 'varchar', length: 255 })
   subject: string;
 

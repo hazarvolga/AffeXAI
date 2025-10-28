@@ -60,6 +60,29 @@ export class TicketsService {
   ) {}
 
   /**
+   * Generate next display number for ticket (SUP-00001 format)
+   * Uses PostgreSQL sequence for auto-increment
+   * @private
+   */
+  private async generateDisplayNumber(): Promise<string> {
+    try {
+      const result = await this.ticketRepository.query(
+        `SELECT nextval('ticket_display_number_seq') as next_val`
+      );
+      const nextNumber = result[0].next_val;
+      const displayNumber = `SUP-${String(nextNumber).padStart(5, '0')}`;
+
+      this.logger.log(`Generated ticket display number: ${displayNumber}`);
+      return displayNumber;
+    } catch (error) {
+      this.logger.error(`Failed to generate display number: ${error.message}`);
+      // Fallback: use timestamp-based number
+      const fallbackNumber = Date.now().toString().slice(-5);
+      return `SUP-${fallbackNumber}`;
+    }
+  }
+
+  /**
    * Get all users with Support Manager role
    * @private
    */
@@ -88,10 +111,14 @@ export class TicketsService {
    * @param dto - Ticket creation data
    */
   async create(userId: string, dto: CreateTicketDto): Promise<Ticket> {
+    // Generate display number (SUP-00001 format)
+    const displayNumber = await this.generateDisplayNumber();
+
     // Create the ticket
     const ticket = this.ticketRepository.create({
       ...dto,
       userId,
+      displayNumber,
       status: TicketStatus.NEW,
     });
 

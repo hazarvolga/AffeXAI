@@ -8,7 +8,8 @@ export class TemplateFileService {
   private readonly templatesPath: string;
 
   constructor() {
-    this.templatesPath = join(process.cwd(), '..', '..', 'src', 'emails');
+    // Point to email-marketing templates directory
+    this.templatesPath = join(process.cwd(), 'src', 'modules', 'email-marketing', 'templates');
   }
 
   async getAllTemplateFiles(): Promise<{ id: string; name: string; fileName: string }[]> {

@@ -326,10 +326,265 @@ function BlockRenderer({ block }: { block: Block }) {
     case 'spacer':
       return <div style={{ height: block.styles.height || '20px' }} />;
 
+    // NEW BLOCKS: Interactive
+    case 'countdown':
+      return (
+        <div className="p-4 bg-orange-50 border-2 border-orange-200 rounded text-center">
+          <div className="text-sm font-semibold text-orange-700 mb-2">
+            {block.properties.title || '⏱️ Geri Sayım'}
+          </div>
+          <div className="flex justify-center gap-4">
+            {['7', '12', '35', '42'].map((num, i) => (
+              <div key={i} className="bg-white rounded p-2 min-w-[50px]">
+                <div className="text-2xl font-bold text-orange-600">{num}</div>
+                <div className="text-xs text-gray-500">
+                  {['Gün', 'Saat', 'Dak', 'San'][i]}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-gray-600 mt-2">
+            {block.properties.endDate || 'Bitiş tarihi: Ayarlanmadı'}
+          </div>
+        </div>
+      );
+
+    case 'rating':
+      return (
+        <div className="p-4 text-center">
+          <div className="flex justify-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star} className="text-2xl text-yellow-400">★</span>
+            ))}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            {block.properties.label || '5/5 Müşteri Memnuniyeti'}
+          </p>
+        </div>
+      );
+
+    case 'progress_bar':
+      return (
+        <div className="p-4">
+          <div className="mb-2 text-sm text-gray-700">
+            {block.properties.label || 'İlerleme'}
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div
+              className="bg-blue-600 h-4 rounded-full"
+              style={{ width: `${block.properties.percentage || 70}%` }}
+            />
+          </div>
+          <div className="mt-1 text-xs text-gray-600 text-right">
+            {block.properties.percentage || 70}%
+          </div>
+        </div>
+      );
+
+    // NEW BLOCKS: Columns
+    case 'one_column':
+    case 'two_column':
+    case 'three_column':
+      const colCount = block.type === 'one_column' ? 1 : block.type === 'two_column' ? 2 : 3;
+      return (
+        <div className={`grid grid-cols-${colCount} gap-4 p-4 border-2 border-dashed border-gray-300 rounded`}>
+          {Array.from({ length: colCount }).map((_, i) => (
+            <div key={i} className="bg-gray-50 p-4 rounded text-center text-sm text-gray-500">
+              Sütun {i + 1}
+            </div>
+          ))}
+        </div>
+      );
+
+    // NEW BLOCKS: Content
+    case 'list':
+      const items = block.properties.items || ['Liste öğesi 1', 'Liste öğesi 2', 'Liste öğesi 3'];
+      return (
+        <ul className="list-disc list-inside space-y-1" style={{ color: block.styles.color || '#333' }}>
+          {items.map((item: string, i: number) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      );
+
+    case 'quote':
+      return (
+        <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-700">
+          "{block.properties.text || 'Alıntı metni buraya gelecek'}"
+          <footer className="text-sm text-gray-500 mt-2">
+            — {block.properties.author || 'Yazar'}
+          </footer>
+        </blockquote>
+      );
+
+    // NEW BLOCKS: Media
+    case 'image_text':
+      return (
+        <div className="grid grid-cols-2 gap-4">
+          <img
+            src={block.properties.src || 'https://via.placeholder.com/300x200'}
+            alt={block.properties.alt || 'Resim'}
+            className="w-full rounded"
+          />
+          <div>
+            <h3 className="font-semibold mb-2">{block.properties.title || 'Başlık'}</h3>
+            <p className="text-sm text-gray-600">{block.properties.text || 'Açıklama metni...'}</p>
+          </div>
+        </div>
+      );
+
+    case 'video':
+      return (
+        <div className="p-4 bg-black rounded text-center">
+          <div className="text-white text-4xl mb-2">▶</div>
+          <div className="text-white text-sm">{block.properties.title || 'Video Oynatıcı'}</div>
+        </div>
+      );
+
+    case 'icon':
+      return (
+        <div className="text-center p-4">
+          <div className="text-4xl mb-2">{block.properties.icon || '⭐'}</div>
+          <p className="text-sm">{block.properties.label || 'İkon'}</p>
+        </div>
+      );
+
+    // NEW BLOCKS: Social
+    case 'social_links':
+      const socials = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn'];
+      return (
+        <div className="flex justify-center gap-3 p-4">
+          {socials.map((social) => (
+            <a
+              key={social}
+              href="#"
+              className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold"
+            >
+              {social[0]}
+            </a>
+          ))}
+        </div>
+      );
+
+    case 'social_share':
+      return (
+        <div className="p-4 bg-gray-50 rounded text-center">
+          <p className="text-sm mb-3">Bu içeriği paylaş:</p>
+          <div className="flex justify-center gap-2">
+            <button className="px-4 py-2 bg-blue-600 text-white rounded text-sm">Paylaş</button>
+            <button className="px-4 py-2 bg-green-600 text-white rounded text-sm">WhatsApp</button>
+          </div>
+        </div>
+      );
+
+    // NEW BLOCKS: E-commerce
+    case 'product':
+      return (
+        <div className="border rounded p-4">
+          <img
+            src={block.properties.image || 'https://via.placeholder.com/200'}
+            alt={block.properties.name || 'Ürün'}
+            className="w-full rounded mb-3"
+          />
+          <h4 className="font-semibold">{block.properties.name || 'Ürün Adı'}</h4>
+          <p className="text-2xl font-bold text-blue-600 mt-2">
+            {block.properties.price || '₺99.99'}
+          </p>
+          <button className="w-full mt-3 bg-blue-600 text-white py-2 rounded">
+            Sepete Ekle
+          </button>
+        </div>
+      );
+
+    case 'product_grid':
+      return (
+        <div className="grid grid-cols-2 gap-4 p-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="border rounded p-3">
+              <div className="w-full h-24 bg-gray-200 rounded mb-2"></div>
+              <div className="text-sm font-semibold">Ürün {i}</div>
+              <div className="text-blue-600 font-bold">₺99</div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'pricing_table':
+      return (
+        <div className="border rounded p-4 text-center">
+          <h3 className="text-xl font-bold mb-2">{block.properties.planName || 'Premium'}</h3>
+          <div className="text-3xl font-bold text-blue-600 mb-4">
+            {block.properties.price || '₺199'}
+            <span className="text-sm text-gray-500">/ay</span>
+          </div>
+          <ul className="text-sm space-y-2 mb-4">
+            <li>✓ Özellik 1</li>
+            <li>✓ Özellik 2</li>
+            <li>✓ Özellik 3</li>
+          </ul>
+          <button className="w-full bg-blue-600 text-white py-2 rounded font-semibold">
+            Satın Al
+          </button>
+        </div>
+      );
+
+    case 'coupon':
+      return (
+        <div className="border-2 border-dashed border-orange-400 rounded p-4 text-center bg-orange-50">
+          <div className="text-2xl font-bold text-orange-600 mb-2">
+            {block.properties.code || 'INDIRIM50'}
+          </div>
+          <p className="text-sm text-gray-700">{block.properties.description || '%50 İndirim Kodu'}</p>
+        </div>
+      );
+
+    // NEW BLOCKS: Special
+    case 'header':
+      return (
+        <div className="bg-blue-600 text-white p-6 rounded-t">
+          <div className="flex items-center justify-between">
+            <div className="font-bold text-xl">{block.properties.logo || '🏢 Logo'}</div>
+            <nav className="flex gap-4 text-sm">
+              <a href="#">Anasayfa</a>
+              <a href="#">Ürünler</a>
+              <a href="#">İletişim</a>
+            </nav>
+          </div>
+        </div>
+      );
+
+    case 'footer':
+      return (
+        <div className="bg-gray-800 text-white p-6 rounded-b text-center text-sm">
+          <p className="mb-2">{block.properties.text || '© 2025 Şirket Adı. Tüm hakları saklıdır.'}</p>
+          <div className="flex justify-center gap-4 text-xs text-gray-400">
+            <a href="#">Gizlilik</a>
+            <a href="#">Koşullar</a>
+            <a href="#">İletişim</a>
+          </div>
+        </div>
+      );
+
+    case 'logo':
+      return (
+        <div className="text-center p-4">
+          <div className="text-4xl mb-2">{block.properties.logo || '🏢'}</div>
+          <div className="font-semibold">{block.properties.companyName || 'Şirket Adı'}</div>
+        </div>
+      );
+
+    case 'html_code':
+      return (
+        <div className="p-4 bg-gray-100 rounded font-mono text-xs text-gray-700">
+          &lt;!-- Özel HTML kodu buraya --&gt;
+        </div>
+      );
+
     default:
       return (
-        <div className="p-4 bg-muted rounded text-center text-sm text-muted-foreground">
-          {block.type} bloğu
+        <div className="p-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-center">
+          <div className="text-gray-500 text-sm mb-1">📦 {block.type}</div>
+          <div className="text-xs text-gray-400">Blok henüz render edilmiyor</div>
         </div>
       );
   }

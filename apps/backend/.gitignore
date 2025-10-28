@@ -20,7 +20,7 @@
 dist/
 
 # Compiled email templates (generated from .tsx files)
-src/emails/**/*.html
+src/templates/
 
 # Node modules
 node_modules/

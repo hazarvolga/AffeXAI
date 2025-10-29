@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 import {
   Brain,
   TrendingUp,
@@ -148,31 +149,51 @@ export default function FaqLearningDashboard() {
 
   const startLearningPipeline = async () => {
     try {
+      toast.loading('Pipeline başlatılıyor...', { id: 'pipeline-action' });
+
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.startPipeline();
 
       if (result.success) {
+        toast.success('✅ Pipeline başarıyla başlatıldı!', {
+          id: 'pipeline-action',
+          description: 'Sistem aktif olarak yeni verilerden FAQ oluşturuyor'
+        });
         console.log('Learning pipeline başlatıldı:', result.message);
         // Refresh dashboard data
         await loadDashboardData();
       }
     } catch (error) {
       console.error('Pipeline başlatılamadı:', error);
+      toast.error('❌ Pipeline başlatılamadı', {
+        id: 'pipeline-action',
+        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
+      });
     }
   };
 
   const stopLearningPipeline = async () => {
     try {
+      toast.loading('Pipeline durduruluyor...', { id: 'pipeline-action' });
+
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.stopPipeline();
 
       if (result.success) {
+        toast.success('✅ Pipeline durduruldu', {
+          id: 'pipeline-action',
+          description: 'Otomatik FAQ oluşturma devre dışı bırakıldı'
+        });
         console.log('Learning pipeline durduruldu:', result.message);
         // Refresh dashboard data
         await loadDashboardData();
       }
     } catch (error) {
       console.error('Pipeline durdurulamadı:', error);
+      toast.error('❌ Pipeline durdurulamadı', {
+        id: 'pipeline-action',
+        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
+      });
     }
   };
 
@@ -264,19 +285,53 @@ export default function FaqLearningDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`border-2 ${
+          stats.processingStatus === 'running'
+            ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20'
+            : stats.processingStatus === 'error'
+            ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-950/20'
+            : 'border-yellow-200 bg-yellow-50/50 dark:border-yellow-800 dark:bg-yellow-950/20'
+        }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sistem Durumu</CardTitle>
-            {getStatusIcon(stats.processingStatus)}
+            <CardTitle className="text-sm font-medium">
+              Pipeline Durumu
+            </CardTitle>
+            <div className={`p-2 rounded-full ${
+              stats.processingStatus === 'running'
+                ? 'bg-green-100 dark:bg-green-900'
+                : stats.processingStatus === 'error'
+                ? 'bg-red-100 dark:bg-red-900'
+                : 'bg-yellow-100 dark:bg-yellow-900'
+            }`}>
+              {getStatusIcon(stats.processingStatus)}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold capitalize ${getStatusColor(stats.processingStatus)}`}>
-              {stats.processingStatus === 'running' ? 'Çalışıyor' :
-                stats.processingStatus === 'stopped' ? 'Durduruldu' : 'Hata'}
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full animate-pulse ${
+                stats.processingStatus === 'running'
+                  ? 'bg-green-500'
+                  : stats.processingStatus === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-yellow-500'
+              }`} />
+              <div className={`text-2xl font-bold ${getStatusColor(stats.processingStatus)}`}>
+                {stats.processingStatus === 'running' ? '🟢 Aktif' :
+                  stats.processingStatus === 'stopped' ? '🟡 Durduruldu' : '🔴 Hata'}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {stats.lastRun && `Son çalışma: ${stats.lastRun.toLocaleTimeString('tr-TR')}`}
+            <p className="text-xs text-muted-foreground mt-2">
+              {stats.processingStatus === 'running'
+                ? 'FAQ öğrenme aktif çalışıyor'
+                : stats.processingStatus === 'stopped'
+                ? 'Pipeline Kontrolü sekmesinden başlatın'
+                : 'Lütfen sistem yöneticisine başvurun'}
             </p>
+            {stats.lastRun && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Son çalışma: {stats.lastRun.toLocaleTimeString('tr-TR')}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -383,23 +438,52 @@ export default function FaqLearningDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <h3 className="font-medium">Otomatik Öğrenme</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Sistem otomatik olarak yeni verilerden FAQ oluşturur
-                  </p>
+              <div className="flex items-center justify-between p-6 border-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    stats.processingStatus === 'running'
+                      ? 'bg-green-100 dark:bg-green-900/50'
+                      : stats.processingStatus === 'error'
+                      ? 'bg-red-100 dark:bg-red-900/50'
+                      : 'bg-yellow-100 dark:bg-yellow-900/50'
+                  }`}>
+                    {stats.processingStatus === 'running' ? (
+                      <Play className="h-6 w-6 text-green-600 dark:text-green-400 animate-pulse" />
+                    ) : stats.processingStatus === 'error' ? (
+                      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    ) : (
+                      <Pause className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Otomatik Öğrenme Pipeline</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {stats.processingStatus === 'running'
+                        ? '🟢 Sistem aktif olarak çalışıyor - Yeni verilerden FAQ oluşturuluyor'
+                        : stats.processingStatus === 'error'
+                        ? '🔴 Hata oluştu - Pipeline çalışmıyor'
+                        : '🟡 Pipeline durdurulmuş - Başlatmak için butona tıklayın'}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   {stats.processingStatus === 'running' ? (
-                    <Button variant="outline" onClick={stopLearningPipeline}>
+                    <Button
+                      variant="outline"
+                      onClick={stopLearningPipeline}
+                      className="bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/50 border-red-200 dark:border-red-800"
+                    >
                       <Pause className="h-4 w-4 mr-2" />
                       Durdur
                     </Button>
                   ) : (
-                    <Button onClick={startLearningPipeline}>
-                      <Play className="h-4 w-4 mr-2" />
-                      Başlat
+                    <Button
+                      onClick={startLearningPipeline}
+                      className="bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+                      size="lg"
+                    >
+                      <Play className="h-5 w-5 mr-2" />
+                      Pipeline'ı Başlat
                     </Button>
                   )}
                 </div>

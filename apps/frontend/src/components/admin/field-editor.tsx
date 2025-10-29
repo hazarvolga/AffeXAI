@@ -283,7 +283,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="label">Etiket (Türkçe)*</Label>
+              <Label htmlFor="label">Etiket*</Label>
               <Input
                 id="label"
                 {...register('label', { required: true })}
@@ -293,7 +293,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="labelEn">Etiket (İngilizce)</Label>
+              <Label htmlFor="labelEn">Etiket (EN)</Label>
               <Input
                 id="labelEn"
                 {...register('labelEn')}
@@ -312,7 +312,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="placeholder">Placeholder (TR)</Label>
+              <Label htmlFor="placeholder">Placeholder</Label>
               <Input
                 id="placeholder"
                 {...register('placeholder')}
@@ -330,7 +330,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="helpText">Yardım Metni (TR)</Label>
+              <Label htmlFor="helpText">Yardım Metni</Label>
               <Input
                 id="helpText"
                 {...register('helpText')}
@@ -648,11 +648,11 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                   <div className="flex-1 grid grid-cols-3 gap-4">
                     <Input
                       {...register(`options.${index}.label` as any, { required: true })}
-                      placeholder="Etiket (TR)"
+                      placeholder="Etiket"
                     />
                     <Input
                       {...register(`options.${index}.labelEn` as any)}
-                      placeholder="Label (EN)"
+                      placeholder="Etiket (EN)"
                     />
                     <Input
                       {...register(`options.${index}.value` as any, { required: true })}

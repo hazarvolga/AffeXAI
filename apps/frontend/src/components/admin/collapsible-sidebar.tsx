@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database, ListChecks, Square } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -34,6 +34,8 @@ const emailMarketingLinks = [
 const supportLinks = [
     { href: "/admin/support", label: "Ticket Listesi", icon: LifeBuoy },
     { href: "/admin/support/forms", label: "Form Yönetimi", icon: FileStack },
+    { href: "/admin/support/form-fields", label: "Ticket Form Fields", icon: ListChecks },
+    { href: "/admin/support/fields", label: "Ticket Fields", icon: Square },
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
     { href: "/admin/support/knowledge-base", label: "Bilgi Bankası", icon: BookOpen },
@@ -212,8 +214,13 @@ export function CollapsibleDashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
-                                        // Form Management is only visible to Admin and Support Manager
-                                        if (link.href === '/admin/support/forms' && !isAdmin && !isSupportManager) {
+                                        // Form Management and Field Management are only visible to Admin and Support Manager
+                                        const adminOnlyPaths = [
+                                            '/admin/support/forms',
+                                            '/admin/support/form-fields',
+                                            '/admin/support/fields'
+                                        ];
+                                        if (adminOnlyPaths.includes(link.href) && !isAdmin && !isSupportManager) {
                                             return null;
                                         }
 

@@ -15,6 +15,7 @@ import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
 import { TicketFormDefinition } from './entities/ticket-form-definition.entity';
 import { TicketFormVersion } from './entities/ticket-form-version.entity';
+import { TicketFieldLibrary } from './entities/ticket-field-library.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { TicketFormController } from './controllers/ticket-form.controller';
@@ -83,6 +84,7 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
       TicketMacro,
       TicketFormDefinition,
       TicketFormVersion,
+      TicketFieldLibrary,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

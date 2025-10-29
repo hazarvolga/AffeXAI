@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Permission } from "@/lib/permissions/constants";
+import { Permission, UserRole } from "@/lib/permissions/constants";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
@@ -33,6 +33,7 @@ const emailMarketingLinks = [
 
 const supportLinks = [
     { href: "/admin/support", label: "Ticket Listesi", icon: LifeBuoy },
+    { href: "/admin/support/forms", label: "Form Yönetimi", icon: FileStack },
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
     { href: "/admin/support/knowledge-base", label: "Bilgi Bankası", icon: BookOpen },
@@ -60,7 +61,7 @@ const settingsLinks = [
 
 export function CollapsibleDashboardSidebar() {
     const pathname = usePathname();
-    const { hasPermission, hasAnyPermission, isLoading, permissions, userRole } = usePermissions();
+    const { hasPermission, hasAnyPermission, isLoading, permissions, userRole, isAdmin, isSupportManager } = usePermissions();
 
     // Collapsible state with localStorage
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -211,6 +212,11 @@ export function CollapsibleDashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
+                                        // Form Management is only visible to Admin and Support Manager
+                                        if (link.href === '/admin/support/forms' && !isAdmin && !isSupportManager) {
+                                            return null;
+                                        }
+
                                         const isActive = pathname === link.href;
                                         return (
                                             <Link

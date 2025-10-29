@@ -57,6 +57,10 @@ export class SiteSettingsDto {
   @IsString()
   companyName: string;
 
+  @IsString()
+  @IsNotEmpty()
+  domain: string;
+
   @IsOptional()
   @IsString()
   logoUrl: string;

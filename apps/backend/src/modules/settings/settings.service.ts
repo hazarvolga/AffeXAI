@@ -73,6 +73,7 @@ export class SettingsService {
     // Convert flat settings to nested structure
     const siteSettings: SiteSettingsDto = {
       companyName: this.getSettingValue(settings, SettingCategory.COMPANY, 'companyName', 'Aluplan Program Sistemleri'),
+      domain: this.getSettingValue(settings, SettingCategory.COMPANY, 'domain', 'affexai.com'),
       logoUrl: this.getSettingValue(settings, SettingCategory.COMPANY, 'logoUrl', 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Aluplan'),
       logoDarkUrl: this.getSettingValue(settings, SettingCategory.COMPANY, 'logoDarkUrl', 'https://placehold.co/140x40/171717/f0f0f0?text=Aluplan'),
       contact: {
@@ -99,6 +100,7 @@ export class SettingsService {
   async updateSiteSettings(settingsDto: SiteSettingsDto): Promise<SiteSettingsDto> {
     // Update company settings
     await this.updateOrCreateSetting(SettingCategory.COMPANY, 'companyName', settingsDto.companyName);
+    await this.updateOrCreateSetting(SettingCategory.COMPANY, 'domain', settingsDto.domain);
     await this.updateOrCreateSetting(SettingCategory.COMPANY, 'logoUrl', settingsDto.logoUrl);
     await this.updateOrCreateSetting(SettingCategory.COMPANY, 'logoDarkUrl', settingsDto.logoDarkUrl);
     await this.updateOrCreateSetting(SettingCategory.COMPANY, 'contact.address', settingsDto.contact.address);
@@ -699,7 +701,16 @@ export class SettingsService {
     if (['llama3.1', 'mistral', 'codellama'].includes(model)) {
       return AiProvider.LOCAL;
     }
-    
+
     return AiProvider.OPENAI; // default fallback
+  }
+
+  /**
+   * Get system domain for email threading and webhook URLs
+   * @returns Domain string (e.g., 'affexai.com', 'example.com')
+   */
+  async getDomain(): Promise<string> {
+    const setting = await this.findByKeyAndCategory('domain', SettingCategory.COMPANY);
+    return setting?.value || 'affexai.com'; // Fallback to default
   }
 }

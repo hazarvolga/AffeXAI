@@ -70,6 +70,12 @@ export async function seedCriticalSettings(dataSource: DataSource) {
       value: 'tr',
       isEncrypted: false,
     },
+    {
+      category: SettingCategory.COMPANY,
+      key: 'domain',
+      value: 'affexai.com',
+      isEncrypted: false,
+    },
 
     // ==========================================
     // EMAIL SETTINGS

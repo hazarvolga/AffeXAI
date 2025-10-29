@@ -51,6 +51,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SettingsModule } from '../settings/settings.module';
 import { AiModule } from '../ai/ai.module';
 import { FaqLearningModule } from '../faq-learning/faq-learning.module';
+import { EmailWebhookAdapterFactory } from './services/email-webhook-adapter-factory.service';
+import { ResendWebhookAdapter } from './adapters/resend-webhook.adapter';
+import { SendGridWebhookAdapter } from './adapters/sendgrid-webhook.adapter';
+import { MailgunWebhookAdapter } from './adapters/mailgun-webhook.adapter';
+import { PostmarkWebhookAdapter } from './adapters/postmark-webhook.adapter';
+import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
 
 /**
  * Tickets Module
@@ -122,6 +128,13 @@ import { FaqLearningModule } from '../faq-learning/faq-learning.module';
     TicketTemplatesService,
     TicketAnalyticsService,
     TicketNotificationsGateway,
+    // Email webhook adapters
+    EmailWebhookAdapterFactory,
+    ResendWebhookAdapter,
+    SendGridWebhookAdapter,
+    MailgunWebhookAdapter,
+    PostmarkWebhookAdapter,
+    SESWebhookAdapter,
   ],
   exports: [
     TicketsService,

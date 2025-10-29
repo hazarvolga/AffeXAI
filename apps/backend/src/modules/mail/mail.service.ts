@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
 import { TemplateRendererService } from './template-renderer.service';
 import { ResendMailAdapter } from './adapters/resend-mail.adapter';
@@ -14,6 +14,12 @@ import { EmailProvider } from '../settings/dto/email-settings.dto';
 /**
  * Mail Service Facade
  * Routes emails through appropriate provider based on settings
+ *
+ * Template Rendering Strategy:
+ * 1. Try database templates first (Email Builder system with MJML)
+ * 2. Fallback to file-based templates (Handlebars HTML)
+ *
+ * This allows gradual migration from file-based to database templates.
  */
 @Injectable()
 export class MailService implements IMailService {
@@ -24,6 +30,18 @@ export class MailService implements IMailService {
     private readonly settingsService: SettingsService,
     private readonly templateRenderer: TemplateRendererService,
   ) {}
+
+  // UnifiedTemplateService will be injected via setter after module initialization
+  private unifiedTemplateService: any;
+
+  /**
+   * Set UnifiedTemplateService (called by EmailMarketingModule)
+   * This avoids circular dependency issues
+   */
+  setUnifiedTemplateService(service: any): void {
+    this.unifiedTemplateService = service;
+    this.logger.log('✅ UnifiedTemplateService injected - database templates enabled');
+  }
 
   /**
    * Initialize the mail service with current settings
@@ -91,12 +109,49 @@ export class MailService implements IMailService {
     if (options.template && !options.html) {
       try {
         this.logger.log(`📧 Rendering template: ${options.template}`);
-        const html = await this.templateRenderer.renderTemplate(
-          options.template,
-          options.context || {},
-        );
+
+        // Strategy 1: Try database templates first (Email Builder with MJML)
+        let html: string | null = null;
+
+        if (this.unifiedTemplateService) {
+          try {
+            this.logger.log(`🔍 Checking database for template: ${options.template}`);
+
+            // Try to get template from database
+            const dbTemplate = await this.unifiedTemplateService.getTemplate(options.template);
+
+            if (dbTemplate) {
+              this.logger.log(`✅ Template found in database: ${options.template}`);
+
+              // Render with UnifiedTemplateService (MJML → HTML with dynamic header/footer)
+              const renderResult = await this.unifiedTemplateService.renderTemplate(
+                options.template,
+                {
+                  interpolate: true,
+                  data: options.context || {},
+                }
+              );
+
+              html = renderResult.html;
+              this.logger.log(`✅ Database template rendered successfully: ${options.template}`);
+            }
+          } catch (dbError) {
+            // Template not found in database - will fallback to file system
+            this.logger.log(`ℹ️ Template not in database: ${options.template} - ${dbError.message}`);
+          }
+        }
+
+        // Strategy 2: Fallback to file-based templates (Handlebars HTML)
+        if (!html) {
+          this.logger.log(`📁 Using file-based template: ${options.template}`);
+          html = await this.templateRenderer.renderTemplate(
+            options.template,
+            options.context || {},
+          );
+          this.logger.log(`✅ File-based template rendered: ${options.template}`);
+        }
+
         enhancedOptions = { ...enhancedOptions, html };
-        this.logger.log(`✅ Template rendered: ${options.template}`);
       } catch (error) {
         this.logger.error(
           `❌ Template rendering failed for ${options.template}: ${error.message}`,

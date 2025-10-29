@@ -44,11 +44,14 @@ export class TicketEmailService {
       // Fetch site settings for email branding
       const siteSettings = await this.settingsService.getSiteSettings();
 
+      // Get system domain from settings
+      const domain = await this.settingsService.getDomain();
+
       // Generate email threading headers for proper conversation threading
-      const messageId = `<ticket-${ticket.id}-created-${Date.now()}@affexai.com>`;
+      const messageId = `<ticket-${ticket.id}-created-${Date.now()}@${domain}>`;
 
       // Reply-To address for email threading (support team can reply directly)
-      const ticketReplyAddress = `ticket-${ticket.id}@affexai.com`;
+      const ticketReplyAddress = `ticket-${ticket.id}@${domain}`;
 
       // 1. Send to Customer (using customer-specific template)
       this.logger.log(`[EMAIL DEBUG] Sending email to customer: ${customer.email}`);
@@ -205,12 +208,15 @@ export class TicketEmailService {
         ? `Yeni Müşteri Mesajı - ${ticket.displayNumber}: ${ticket.subject}`
         : `Yeni Yanıt - ${ticket.displayNumber}: ${ticket.subject}`;
 
+      // Get system domain from settings
+      const domain = await this.settingsService.getDomain();
+
       // Generate threading headers for message replies
-      const originalMessageId = `<ticket-${ticket.id}-created-${ticket.createdAt.getTime()}@affexai.com>`;
-      const newMessageId = `<ticket-${ticket.id}-message-${message.id}-${Date.now()}@affexai.com>`;
+      const originalMessageId = `<ticket-${ticket.id}-created-${ticket.createdAt.getTime()}@${domain}>`;
+      const newMessageId = `<ticket-${ticket.id}-message-${message.id}-${Date.now()}@${domain}>`;
 
       // Reply-To address for email threading
-      const ticketReplyAddress = `ticket-${ticket.id}@affexai.com`;
+      const ticketReplyAddress = `ticket-${ticket.id}@${domain}`;
 
       // Get site settings for email template
       const siteSettings = await this.settingsService.getSiteSettings();

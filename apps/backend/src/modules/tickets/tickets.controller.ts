@@ -28,12 +28,15 @@ import { AddMessageDto } from './dto/add-message.dto';
 import { TicketFiltersDto } from './dto/ticket-filters.dto';
 import { MergeTicketsDto } from './dto/merge-tickets.dto';
 import { SplitTicketDto } from './dto/split-ticket.dto';
+import { InboundEmailDto } from './dto/inbound-email.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
+import { TicketEmailParserService } from './services/ticket-email-parser.service';
+import { EmailWebhookAdapterFactory, PROVIDER_AUTO } from './services/email-webhook-adapter-factory.service';
 
 /**
  * Tickets Controller
@@ -45,7 +48,11 @@ import { UserRole } from '../users/enums/user-role.enum';
 @Controller('tickets')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(
+    private readonly ticketsService: TicketsService,
+    private readonly emailParserService: TicketEmailParserService,
+    private readonly adapterFactory: EmailWebhookAdapterFactory,
+  ) {}
 
   /**
    * Create a new support ticket
@@ -333,6 +340,68 @@ export class TicketsController {
     @Body() body: { title: string; problemDescription: string; category: string },
   ) {
     return this.ticketsService.analyzeTicketWithAI(body.problemDescription, body.category);
+  }
+
+  /**
+   * Universal webhook endpoint for inbound emails
+   * Supports: Resend, SendGrid, Mailgun (auto-detected or specified)
+   * Processes email replies to tickets via Reply-To address
+   * PUBLIC endpoint - No authentication (webhook from email provider)
+   *
+   * Query params:
+   * - provider: 'resend' | 'sendgrid' | 'mailgun' | 'auto' (default: auto)
+   *
+   * Usage:
+   * - Resend: POST /tickets/inbound-email?provider=resend
+   * - SendGrid: POST /tickets/inbound-email?provider=sendgrid
+   * - Mailgun: POST /tickets/inbound-email?provider=mailgun
+   * - Auto-detect: POST /tickets/inbound-email (or ?provider=auto)
+   */
+  @Post('inbound-email')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Process inbound email replies to tickets (universal webhook)' })
+  @ApiResponse({ status: 200, description: 'Email processed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid email format or unsupported provider' })
+  async processInboundEmail(
+    @Body() payload: any,
+    @Query('provider') provider: string = PROVIDER_AUTO,
+    @Req() request: any,
+  ) {
+    try {
+      // Get appropriate adapter (auto-detect or specified)
+      const adapter = this.adapterFactory.getAdapter(provider, payload);
+
+      // Convert provider-specific format to standardized format
+      const parsedEmail = adapter.convertToStandardFormat(payload);
+
+      // Extract ticket ID from recipient email
+      const ticketId = adapter.extractTicketId(parsedEmail.to);
+      if (!ticketId) {
+        throw new BadRequestException('Invalid recipient email format - ticket ID not found');
+      }
+
+      // Validate webhook signature (if provider supports it)
+      if (adapter.validateWebhook) {
+        const isValid = adapter.validateWebhook(payload, request.headers);
+        if (!isValid) {
+          throw new BadRequestException('Invalid webhook signature');
+        }
+      }
+
+      // Process email through parser service
+      const ticket = await this.emailParserService.processInboundEmail(parsedEmail);
+
+      return {
+        success: true,
+        message: 'Email processed successfully',
+        ticketId: ticket.id,
+        displayNumber: ticket.displayNumber,
+        provider: provider === EmailProvider.AUTO ? 'auto-detected' : provider,
+      };
+    } catch (error) {
+      throw new BadRequestException(`Failed to process inbound email: ${error.message}`);
+    }
   }
 
 }

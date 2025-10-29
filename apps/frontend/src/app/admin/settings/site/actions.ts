@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 // This defines the shape of the data we expect from the form.
 const SettingsSchema = z.object({
   companyName: z.string().min(1, 'Şirket adı boş olamaz.'),
+  domain: z.string().min(1, 'Domain boş olamaz.'),
   logoUrl: z.string(),
   logoDarkUrl: z.string(),
   address: z.string(),
@@ -77,6 +78,7 @@ export async function saveSiteSettings(
 
   // Provide default values for all fields to prevent null values
   const companyName = getFormValue('companyName') || 'Aluplan Program Sistemleri 2026';
+  const domain = getFormValue('domain') || 'affexai.com';
   const logoUrl = getFormValue('logoUrl') || '';
   const logoDarkUrl = getFormValue('logoDarkUrl') || '';
   const address = getFormValue('address') || '';
@@ -87,6 +89,7 @@ export async function saveSiteSettings(
 
   const validatedFields = SettingsSchema.safeParse({
     companyName,
+    domain,
     logoUrl,
     logoDarkUrl,
     address,
@@ -120,6 +123,7 @@ export async function saveSiteSettings(
 
   const newSettings = {
     companyName: validatedFields.data.companyName,
+    domain: validatedFields.data.domain,
     logoUrl: processLogoUrl(validatedFields.data.logoUrl),
     logoDarkUrl: processLogoUrl(validatedFields.data.logoDarkUrl),
     contact: {
@@ -144,6 +148,7 @@ export async function saveSiteSettings(
     const fileContent = `
 export type SiteSettings = {
     companyName: string;
+    domain: string;
     logoId?: string;
     logoDarkId?: string;
     logoUrl?: string;

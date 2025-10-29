@@ -209,9 +209,26 @@ export default function SiteSettingsPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="grid md:grid-cols-2 gap-8 items-start">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="companyName">Şirket Adı</Label>
-                                            <Input id="companyName" name="companyName" defaultValue={effectiveSettings.companyName || ''} />
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="companyName">Şirket Adı</Label>
+                                                <Input id="companyName" name="companyName" defaultValue={effectiveSettings.companyName || ''} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="domain" className="flex items-center gap-2">
+                                                    <Globe className="h-4 w-4" />
+                                                    Domain
+                                                </Label>
+                                                <Input
+                                                    id="domain"
+                                                    name="domain"
+                                                    placeholder="example.com"
+                                                    defaultValue={effectiveSettings.domain || 'affexai.com'}
+                                                />
+                                                <p className="text-xs text-muted-foreground">
+                                                    Email adresleri için kullanılacak domain (örn: ticket-{'{uuid}'}@{effectiveSettings.domain || 'affexai.com'})
+                                                </p>
+                                            </div>
                                         </div>
                                         <div className="space-y-4">
                                             <div className="space-y-2">

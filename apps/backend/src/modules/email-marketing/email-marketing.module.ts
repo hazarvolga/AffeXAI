@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit, forwardRef, Inject } from '@nestjs/common';
 import { EmailMarketingService } from './email-marketing.service';
 import { EmailMarketingController } from './email-marketing.controller';
 import { BullModule } from '@nestjs/bullmq';
@@ -82,6 +82,8 @@ import { SettingsModule } from '../settings/settings.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PlatformIntegrationModule } from '../platform-integration/platform-integration.module';
 import { UsersModule } from '../users/users.module';
+import { MailModule } from '../mail/mail.module';
+import { MailService } from '../mail/mail.service';
 
 import { StatsController } from './controllers/stats.controller';
 import { StatsService } from './services/stats.service';
@@ -141,6 +143,7 @@ import { BlockRendererService } from './services/block-renderer.service';
     ScheduleModule.forRoot(),
     PlatformIntegrationModule,
     UsersModule, // Required for JwtAuthGuard
+    forwardRef(() => MailModule), // Forward reference to avoid circular dependency
   ],
   controllers: [
     EmailMarketingController,
@@ -235,4 +238,18 @@ import { BlockRendererService } from './services/block-renderer.service';
     BlockRendererService
   ],
 })
-export class EmailMarketingModule {}
+export class EmailMarketingModule implements OnModuleInit {
+  constructor(
+    private readonly unifiedTemplateService: UnifiedTemplateService,
+    @Inject(forwardRef(() => MailService))
+    private readonly mailService: MailService,
+  ) {}
+
+  /**
+   * Initialize module - inject UnifiedTemplateService into MailService
+   * This enables database-first template rendering for all email types
+   */
+  onModuleInit() {
+    this.mailService.setUnifiedTemplateService(this.unifiedTemplateService);
+  }
+}

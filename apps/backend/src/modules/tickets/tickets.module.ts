@@ -13,8 +13,11 @@ import { TicketTemplate } from './entities/ticket-template.entity';
 import { TicketCSAT } from './entities/ticket-csat.entity';
 import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
+import { TicketFormDefinition } from './entities/ticket-form-definition.entity';
+import { TicketFormVersion } from './entities/ticket-form-version.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
+import { TicketFormController } from './controllers/ticket-form.controller';
 import { TicketAssignmentRulesController } from './controllers/ticket-assignment-rules.controller';
 import { TicketEscalationRulesController } from './controllers/ticket-escalation-rules.controller';
 import { TicketAttachmentsController } from './controllers/ticket-attachments.controller';
@@ -44,6 +47,7 @@ import { BusinessHoursService } from './services/business-hours.service';
 import { KnowledgeBaseService } from './services/knowledge-base.service';
 import { TicketMacroService } from './services/ticket-macro.service';
 import { AICategorizationService } from './services/ai-categorization.service';
+import { TicketFormService } from './services/ticket-form.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
@@ -77,6 +81,8 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
       TicketCSAT,
       KnowledgeBaseArticle,
       TicketMacro,
+      TicketFormDefinition,
+      TicketFormVersion,
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -99,6 +105,7 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
   ],
   controllers: [
     TicketsController,
+    TicketFormController,
     TicketAssignmentRulesController,
     TicketEscalationRulesController,
     TicketAttachmentsController,
@@ -112,6 +119,7 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
   ],
   providers: [
     TicketsService,
+    TicketFormService,
     TicketAutomationService,
     TicketAssignmentRulesService,
     TicketEscalationRulesService,

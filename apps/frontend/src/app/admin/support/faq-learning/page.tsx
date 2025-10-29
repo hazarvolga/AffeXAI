@@ -85,6 +85,7 @@ export default function FaqLearningDashboard() {
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPipelineActionLoading, setIsPipelineActionLoading] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -148,52 +149,86 @@ export default function FaqLearningDashboard() {
   };
 
   const startLearningPipeline = async () => {
+    setIsPipelineActionLoading(true);
     try {
+      console.log('🚀 Starting pipeline...');
       toast.loading('Pipeline başlatılıyor...', { id: 'pipeline-action' });
 
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.startPipeline();
 
+      console.log('🚀 Pipeline start result:', result);
+
       if (result.success) {
+        // Immediately update local state for instant UI feedback
+        setStats(prev => ({ ...prev, processingStatus: 'running' }));
+
         toast.success('✅ Pipeline başarıyla başlatıldı!', {
           id: 'pipeline-action',
-          description: 'Sistem aktif olarak yeni verilerden FAQ oluşturuyor'
+          description: 'Sistem aktif olarak yeni verilerden FAQ oluşturuyor',
+          duration: 4000
         });
-        console.log('Learning pipeline başlatıldı:', result.message);
-        // Refresh dashboard data
-        await loadDashboardData();
+        console.log('✅ Learning pipeline başlatıldı:', result.message);
+
+        // Refresh dashboard data after a short delay
+        setTimeout(() => loadDashboardData(), 1000);
+      } else {
+        toast.error('❌ Pipeline başlatılamadı', {
+          id: 'pipeline-action',
+          description: result.message || 'İşlem başarısız oldu'
+        });
       }
     } catch (error) {
-      console.error('Pipeline başlatılamadı:', error);
+      console.error('❌ Pipeline başlatılamadı:', error);
       toast.error('❌ Pipeline başlatılamadı', {
         id: 'pipeline-action',
-        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
+        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu',
+        duration: 5000
       });
+    } finally {
+      setIsPipelineActionLoading(false);
     }
   };
 
   const stopLearningPipeline = async () => {
+    setIsPipelineActionLoading(true);
     try {
+      console.log('⏸️ Stopping pipeline...');
       toast.loading('Pipeline durduruluyor...', { id: 'pipeline-action' });
 
       const { FaqLearningService } = await import('@/services/faq-learning.service');
       const result = await FaqLearningService.stopPipeline();
 
+      console.log('⏸️ Pipeline stop result:', result);
+
       if (result.success) {
+        // Immediately update local state for instant UI feedback
+        setStats(prev => ({ ...prev, processingStatus: 'stopped' }));
+
         toast.success('✅ Pipeline durduruldu', {
           id: 'pipeline-action',
-          description: 'Otomatik FAQ oluşturma devre dışı bırakıldı'
+          description: 'Otomatik FAQ oluşturma devre dışı bırakıldı',
+          duration: 4000
         });
-        console.log('Learning pipeline durduruldu:', result.message);
-        // Refresh dashboard data
-        await loadDashboardData();
+        console.log('✅ Learning pipeline durduruldu:', result.message);
+
+        // Refresh dashboard data after a short delay
+        setTimeout(() => loadDashboardData(), 1000);
+      } else {
+        toast.error('❌ Pipeline durdurulamadı', {
+          id: 'pipeline-action',
+          description: result.message || 'İşlem başarısız oldu'
+        });
       }
     } catch (error) {
-      console.error('Pipeline durdurulamadı:', error);
+      console.error('❌ Pipeline durdurulamadı:', error);
       toast.error('❌ Pipeline durdurulamadı', {
         id: 'pipeline-action',
-        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
+        description: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu',
+        duration: 5000
       });
+    } finally {
+      setIsPipelineActionLoading(false);
     }
   };
 
@@ -471,19 +506,29 @@ export default function FaqLearningDashboard() {
                     <Button
                       variant="outline"
                       onClick={stopLearningPipeline}
+                      disabled={isPipelineActionLoading}
                       className="bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/50 border-red-200 dark:border-red-800"
                     >
-                      <Pause className="h-4 w-4 mr-2" />
-                      Durdur
+                      {isPipelineActionLoading ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Pause className="h-4 w-4 mr-2" />
+                      )}
+                      {isPipelineActionLoading ? 'Durduruluyor...' : 'Durdur'}
                     </Button>
                   ) : (
                     <Button
                       onClick={startLearningPipeline}
-                      className="bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+                      disabled={isPipelineActionLoading}
+                      className="bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       size="lg"
                     >
-                      <Play className="h-5 w-5 mr-2" />
-                      Pipeline'ı Başlat
+                      {isPipelineActionLoading ? (
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      ) : (
+                        <Play className="h-5 w-5 mr-2" />
+                      )}
+                      {isPipelineActionLoading ? 'Başlatılıyor...' : 'Pipeline\'ı Başlat'}
                     </Button>
                   )}
                 </div>

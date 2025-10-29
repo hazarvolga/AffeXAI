@@ -395,13 +395,13 @@ export default function TicketFieldsPage() {
 
       {/* Field Editor Dialog */}
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingField ? 'Alan Şablonunu Düzenle' : 'Yeni Alan Şablonu'}
+              {editingField ? 'Alanı Düzenle' : 'Yeni Alan'}
             </DialogTitle>
             <DialogDescription>
-              Ticket formlarında kullanılabilecek yeniden kullanılabilir alan şablonu oluşturun
+              Ticket formunda kullanılacak alanı oluşturun
             </DialogDescription>
           </DialogHeader>
           <FieldEditor

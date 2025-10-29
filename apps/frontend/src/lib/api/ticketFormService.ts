@@ -47,6 +47,14 @@ export class TicketFormService {
   }
 
   /**
+   * Get all form definitions (simplified for admin UI)
+   */
+  static async getAllFormDefinitions(): Promise<TicketFormDefinition[]> {
+    const response = await this.getFormDefinitions({ limit: 100 });
+    return response.data || [];
+  }
+
+  /**
    * Get a single form definition by ID
    */
   static async getFormDefinition(id: string): Promise<GetFormDefinitionResponse> {
@@ -103,6 +111,24 @@ export class TicketFormService {
 
     // Handle wrapped response
     return response.data || response;
+  }
+
+  /**
+   * Duplicate a form definition
+   */
+  static async duplicateFormDefinition(id: string): Promise<TicketFormDefinition> {
+    const original = await this.getFormDefinition(id);
+    const formDefinition = original.formDefinition || original;
+
+    const duplicatedDto: CreateFormDefinitionDto = {
+      name: `${formDefinition.name} (Kopya)`,
+      description: formDefinition.description,
+      schema: formDefinition.schema,
+      isActive: false, // Start as inactive
+      isDefault: false, // Can't be default
+    };
+
+    return await this.createFormDefinition(duplicatedDto);
   }
 
   /**

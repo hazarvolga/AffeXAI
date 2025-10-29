@@ -41,6 +41,7 @@ const emailMarketingLinks = [
 
 const supportLinks = [
     { href: "/admin/support", label: "Ticket Listesi", icon: LifeBuoy },
+    { href: "/admin/support/forms", label: "Form Yönetimi", icon: FileText },
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
     { href: "/admin/support/email-templates", label: "Email Şablonları", icon: Mail },

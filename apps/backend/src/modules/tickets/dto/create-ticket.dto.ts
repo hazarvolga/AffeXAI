@@ -76,4 +76,12 @@ export class CreateTicketDto {
   @IsOptional()
   @IsObject()
   customFields?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Form definition ID used to create this ticket',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsOptional()
+  @IsUUID()
+  formDefinitionId?: string;
 }

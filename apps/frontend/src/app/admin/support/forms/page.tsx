@@ -29,13 +29,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -60,7 +53,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { TicketFormService } from '@/lib/api/ticketFormService';
 import type { TicketFormDefinition } from '@/types/ticket-form.types';
-import { FormBuilder } from '@/components/admin/forms/form-builder';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -73,9 +65,7 @@ export default function TicketFormsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Dialog states
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
-  const [editingForm, setEditingForm] = useState<TicketFormDefinition | null>(null);
+  // Dialog states (only delete dialog now, builder moved to separate page)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formToDelete, setFormToDelete] = useState<string | null>(null);
 
@@ -167,47 +157,16 @@ export default function TicketFormsPage() {
     }
   };
 
-  // Open builder for new form
+  // Navigate to new form page
   const handleNewForm = () => {
-    setEditingForm(null);
-    setIsBuilderOpen(true);
+    router.push('/admin/support/forms/new');
   };
 
-  // Open builder for editing
+  // Navigate to edit form page
   const handleEdit = (form: TicketFormDefinition) => {
-    setEditingForm(form);
-    setIsBuilderOpen(true);
+    router.push(`/admin/support/forms/${form.id}/edit`);
   };
 
-  // Save form from builder
-  const handleSaveForm = async (formData: any) => {
-    try {
-      if (editingForm) {
-        // Update existing
-        await TicketFormService.updateFormDefinition(editingForm.id, formData);
-        toast({
-          title: 'Başarılı',
-          description: 'Form güncellendi',
-        });
-      } else {
-        // Create new
-        await TicketFormService.createFormDefinition(formData);
-        toast({
-          title: 'Başarılı',
-          description: 'Yeni form oluşturuldu',
-        });
-      }
-      setIsBuilderOpen(false);
-      setEditingForm(null);
-      fetchForms();
-    } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message || 'Form kaydedilirken bir hata oluştu',
-        variant: 'destructive',
-      });
-    }
-  };
 
   return (
     <div className="flex-1 space-y-6">
@@ -339,28 +298,6 @@ export default function TicketFormsPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Form Builder Dialog */}
-      <Dialog open={isBuilderOpen} onOpenChange={setIsBuilderOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingForm ? 'Form Düzenle' : 'Yeni Form Oluştur'}
-            </DialogTitle>
-            <DialogDescription>
-              Aşağıdaki form builder ile destek talep formunuzu özelleştirin
-            </DialogDescription>
-          </DialogHeader>
-          <FormBuilder
-            initialData={editingForm}
-            onSave={handleSaveForm}
-            onCancel={() => {
-              setIsBuilderOpen(false);
-              setEditingForm(null);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

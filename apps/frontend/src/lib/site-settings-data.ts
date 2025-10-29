@@ -1,5 +1,6 @@
 export type SiteSettings = {
     companyName: string;
+    domain: string;
     logoId?: string;
     logoDarkId?: string;
     logoUrl?: string;
@@ -20,6 +21,7 @@ export type SiteSettings = {
 
 export const siteSettingsData: SiteSettings = {
     "companyName": "Aluplan Program Sistemleri",
+    "domain": "aluplan.tr",
     "logoUrl": "7c6e3b56-e96d-442b-97a9-0b572d673a3c",
     "logoDarkUrl": "90f368ff-27e3-441b-a51d-f60cc3672f32",
     "contact": {

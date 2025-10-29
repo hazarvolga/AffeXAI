@@ -25,12 +25,12 @@ export class EmailWebhookAdapterFactory {
     private readonly postmarkAdapter: PostmarkWebhookAdapter,
     private readonly sesAdapter: SESWebhookAdapter,
   ) {
-    this.adapters = new Map([
-      [EmailProvider.RESEND, this.resendAdapter],
-      [EmailProvider.SENDGRID, this.sendgridAdapter],
-      [EmailProvider.MAILGUN, this.mailgunAdapter],
-      [EmailProvider.POSTMARK, this.postmarkAdapter],
-      [EmailProvider.SES, this.sesAdapter],
+    this.adapters = new Map<EmailProvider, EmailWebhookAdapter>([
+      [EmailProvider.RESEND, this.resendAdapter as EmailWebhookAdapter],
+      [EmailProvider.SENDGRID, this.sendgridAdapter as EmailWebhookAdapter],
+      [EmailProvider.MAILGUN, this.mailgunAdapter as EmailWebhookAdapter],
+      [EmailProvider.POSTMARK, this.postmarkAdapter as EmailWebhookAdapter],
+      [EmailProvider.SES, this.sesAdapter as EmailWebhookAdapter],
       // Note: SMTP doesn't support inbound webhooks
     ]);
   }

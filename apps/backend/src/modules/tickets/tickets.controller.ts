@@ -37,6 +37,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
 import { TicketEmailParserService } from './services/ticket-email-parser.service';
 import { EmailWebhookAdapterFactory, PROVIDER_AUTO } from './services/email-webhook-adapter-factory.service';
+import { EmailProvider } from '../settings/dto/email-settings.dto';
 
 /**
  * Tickets Controller
@@ -397,7 +398,7 @@ export class TicketsController {
         message: 'Email processed successfully',
         ticketId: ticket.id,
         displayNumber: ticket.displayNumber,
-        provider: provider === EmailProvider.AUTO ? 'auto-detected' : provider,
+        provider: provider === PROVIDER_AUTO ? 'auto-detected' : provider,
       };
     } catch (error) {
       throw new BadRequestException(`Failed to process inbound email: ${error.message}`);

@@ -63,12 +63,14 @@ const settingsLinks = [
 
 export function DashboardSidebar() {
     const pathname = usePathname();
-    const { hasPermission, hasAnyPermission, isLoading, permissions, userRole } = usePermissions();
-    
+    const { hasPermission, hasAnyPermission, isLoading, permissions, userRole, isAdmin, isSupportManager } = usePermissions();
+
     // DEBUG: Log permission state
     console.log('🎯 DashboardSidebar render:', {
         isLoading,
         userRole,
+        isAdmin,
+        isSupportManager,
         permissionsCount: permissions.length,
         hasEmailView: hasPermission(Permission.EMAIL_VIEW),
     });
@@ -173,22 +175,12 @@ export function DashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
-                                        // Debug log for form management
-                                        if (link.href === '/admin/support/forms') {
-                                            console.log('🔍 Form Management Link Check:', {
-                                                href: link.href,
-                                                userRole,
-                                                UserRoleADMIN: UserRole.ADMIN,
-                                                UserRoleSUPPORT_MANAGER: UserRole.SUPPORT_MANAGER,
-                                                shouldShow: userRole === UserRole.ADMIN || userRole === UserRole.SUPPORT_MANAGER
-                                            });
-                                        }
-
                                         // Form Management is only visible to Admin and Support Manager
-                                        if (link.href === '/admin/support/forms' &&
-                                            userRole !== UserRole.ADMIN &&
-                                            userRole !== UserRole.SUPPORT_MANAGER) {
-                                            return null;
+                                        if (link.href === '/admin/support/forms') {
+                                            console.log('🔍 Form Management visibility:', { isAdmin, isSupportManager, shouldShow: isAdmin || isSupportManager });
+                                            if (!isAdmin && !isSupportManager) {
+                                                return null;
+                                            }
                                         }
 
                                         const isActive = pathname === link.href;

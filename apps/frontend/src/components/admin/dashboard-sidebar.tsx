@@ -173,6 +173,13 @@ export function DashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
+                                        // Form Management is only visible to Admin and Support Manager
+                                        if (link.href === '/admin/support/forms' &&
+                                            userRole !== 'admin' &&
+                                            userRole !== 'support_manager') {
+                                            return null;
+                                        }
+
                                         const isActive = pathname === link.href;
                                         return (
                                             <Link

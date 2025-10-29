@@ -33,10 +33,10 @@ export class TicketFormController {
   /**
    * GET /ticket-forms
    * Get all form definitions with pagination and filtering
-   * Accessible by: Admin, Support Team
+   * Accessible by: Admin, Support Manager, Support Agent
    */
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
   async findAll(@Query() query: GetFormDefinitionsDto) {
     return await this.ticketFormService.findAll(query);
   }
@@ -55,10 +55,10 @@ export class TicketFormController {
   /**
    * GET /ticket-forms/:id
    * Get a single form definition by ID
-   * Accessible by: Admin, Support Team
+   * Accessible by: Admin, Support Manager, Support Agent
    */
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
   async findOne(@Param('id') id: string) {
     const formDefinition = await this.ticketFormService.findOne(id);
     return { formDefinition };
@@ -67,10 +67,10 @@ export class TicketFormController {
   /**
    * POST /ticket-forms
    * Create a new form definition
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Post()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async create(@Body() createDto: CreateTicketFormDto, @Request() req: any) {
     const userId = req.user?.id;
     const formDefinition = await this.ticketFormService.create(createDto, userId);
@@ -84,10 +84,10 @@ export class TicketFormController {
   /**
    * PUT /ticket-forms/:id
    * Update an existing form definition
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Put(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdateTicketFormDto,
@@ -105,10 +105,10 @@ export class TicketFormController {
   /**
    * DELETE /ticket-forms/:id
    * Delete a form definition
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Delete(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async remove(@Param('id') id: string) {
     return await this.ticketFormService.remove(id);
   }
@@ -116,10 +116,10 @@ export class TicketFormController {
   /**
    * POST /ticket-forms/:id/set-default
    * Set a form as the default
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Post(':id/set-default')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async setAsDefault(@Param('id') id: string) {
     return await this.ticketFormService.setAsDefault(id);
   }
@@ -127,10 +127,10 @@ export class TicketFormController {
   /**
    * PATCH /ticket-forms/:id/active
    * Toggle form active status
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Patch(':id/active')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async toggleActive(@Param('id') id: string, @Body() toggleDto: ToggleFormActiveDto) {
     const formDefinition = await this.ticketFormService.toggleActive(id, toggleDto.isActive);
     return {
@@ -143,10 +143,10 @@ export class TicketFormController {
   /**
    * GET /ticket-forms/:id/versions
    * Get version history for a form definition
-   * Accessible by: Admin, Support Team
+   * Accessible by: Admin, Support Manager, Support Agent
    */
   @Get(':id/versions')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
   async getVersions(@Param('id') id: string, @Query() query: GetFormVersionsDto) {
     return await this.ticketFormService.getVersions(id, query);
   }
@@ -154,10 +154,10 @@ export class TicketFormController {
   /**
    * GET /ticket-forms/:id/versions/:version
    * Get a specific version of a form definition
-   * Accessible by: Admin, Support Team
+   * Accessible by: Admin, Support Manager, Support Agent
    */
   @Get(':id/versions/:version')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER, UserRole.SUPPORT_AGENT)
   async getVersion(@Param('id') id: string, @Param('version') version: string) {
     const versionNumber = parseInt(version, 10);
     const formVersion = await this.ticketFormService.getVersion(id, versionNumber);
@@ -167,10 +167,10 @@ export class TicketFormController {
   /**
    * POST /ticket-forms/:id/versions/:version/revert
    * Revert form to a previous version
-   * Accessible by: Admin only
+   * Accessible by: Admin, Support Manager
    */
   @Post(':id/versions/:version/revert')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   async revertToVersion(
     @Param('id') id: string,
     @Param('version') version: string,

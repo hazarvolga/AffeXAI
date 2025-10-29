@@ -18,7 +18,26 @@ export interface FormField {
   name: string;
   label: string;
   labelEn?: string;
-  type: 'text' | 'textarea' | 'number' | 'email' | 'url' | 'date' | 'select' | 'multiselect' | 'radio' | 'checkbox' | 'file' | 'richtext';
+  type:
+    | 'text'
+    | 'textarea'
+    | 'number'
+    | 'email'
+    | 'url'
+    | 'date'
+    | 'datetime'
+    | 'time'
+    | 'select'
+    | 'multiselect'
+    | 'radio'
+    | 'checkbox'
+    | 'file'
+    | 'file-multiple'
+    | 'file-single'
+    | 'richtext'
+    | 'html'
+    | 'edd-order'
+    | 'edd-product';
   required: boolean;
   placeholder?: string;
   placeholderEn?: string;
@@ -29,6 +48,15 @@ export interface FormField {
   dataSource?: string; // e.g., 'categories', 'users'
   accept?: string; // For file type
   multiple?: boolean; // For file and select types
+
+  // Ticket Fields specific properties
+  loadAfter?: string; // Field ID to load after
+  autoFill?: boolean; // Auto-fill in ticket form if default value provided
+  ticketListWidth?: number; // Column width in ticket list (px)
+  dateDisplayAs?: 'date' | 'relative'; // "2025-01-15" vs "2 days ago"
+  dateFormat?: string; // "Y-m-d H:i:s" - custom date format
+  hasPersonalInfo?: boolean; // GDPR compliance - contains personal data
+
   validation?: {
     min?: number;
     max?: number;

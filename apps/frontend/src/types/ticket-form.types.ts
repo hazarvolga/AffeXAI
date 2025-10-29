@@ -13,12 +13,19 @@ export type FormFieldType =
   | 'email'
   | 'url'
   | 'date'
+  | 'datetime'
+  | 'time'
   | 'select'
   | 'multiselect'
   | 'radio'
   | 'checkbox'
   | 'file'
-  | 'richtext';
+  | 'file-multiple'
+  | 'file-single'
+  | 'richtext'
+  | 'html'
+  | 'edd-order'
+  | 'edd-product';
 
 /**
  * Field option for select, multiselect, and radio field types
@@ -77,9 +84,20 @@ export interface FormField {
   required: boolean;
   placeholder?: string;
   placeholderEn?: string;
+  helpText?: string; // Help text (Turkish)
+  helpTextEn?: string; // Help text (English)
   defaultValue?: any;
   options?: FieldOption[]; // For select, multiselect, radio
   dataSource?: string; // Dynamic data source (e.g., 'categories', 'users')
+
+  // Ticket Fields specific properties
+  loadAfter?: string; // Field ID to load after
+  autoFill?: boolean; // Auto-fill in ticket form if default value provided
+  ticketListWidth?: number; // Column width in ticket list (px)
+  dateDisplayAs?: 'date' | 'relative'; // "2025-01-15" vs "2 days ago"
+  dateFormat?: string; // "Y-m-d H:i:s" - custom date format
+  hasPersonalInfo?: boolean; // GDPR compliance - contains personal data
+
   validation?: FieldValidation;
   conditional?: FieldConditional;
   metadata: FieldMetadata;

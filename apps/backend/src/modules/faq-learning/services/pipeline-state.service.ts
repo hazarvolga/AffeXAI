@@ -16,9 +16,13 @@ export class PipelineStateService {
    * Get or create the pipeline state singleton
    */
   async getState(): Promise<PipelineState> {
-    let state = await this.pipelineStateRepository.findOne({
+    // Find the most recent state (there should only be one)
+    const states = await this.pipelineStateRepository.find({
       order: { createdAt: 'DESC' },
+      take: 1,
     });
+
+    let state = states[0];
 
     if (!state) {
       // Create initial state

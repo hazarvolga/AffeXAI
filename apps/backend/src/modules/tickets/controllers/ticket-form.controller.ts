@@ -36,7 +36,7 @@ export class TicketFormController {
    * Accessible by: Admin, Support Team
    */
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
   async findAll(@Query() query: GetFormDefinitionsDto) {
     return await this.ticketFormService.findAll(query);
   }
@@ -58,7 +58,7 @@ export class TicketFormController {
    * Accessible by: Admin, Support Team
    */
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
   async findOne(@Param('id') id: string) {
     const formDefinition = await this.ticketFormService.findOne(id);
     return { formDefinition };
@@ -146,7 +146,7 @@ export class TicketFormController {
    * Accessible by: Admin, Support Team
    */
   @Get(':id/versions')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
   async getVersions(@Param('id') id: string, @Query() query: GetFormVersionsDto) {
     return await this.ticketFormService.getVersions(id, query);
   }
@@ -157,7 +157,7 @@ export class TicketFormController {
    * Accessible by: Admin, Support Team
    */
   @Get(':id/versions/:version')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_AGENT)
   async getVersion(@Param('id') id: string, @Param('version') version: string) {
     const versionNumber = parseInt(version, 10);
     const formVersion = await this.ticketFormService.getVersion(id, versionNumber);

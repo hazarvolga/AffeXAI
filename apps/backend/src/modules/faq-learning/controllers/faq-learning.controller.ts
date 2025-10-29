@@ -19,6 +19,7 @@ import { UserRole } from '../../users/enums/user-role.enum';
 import { FaqLearningService, LearningPipelineResult } from '../services/faq-learning.service';
 import { BatchProcessorService } from '../services/batch-processor.service';
 import { FaqAiService } from '../services/faq-ai.service';
+import { PipelineStateService } from '../services/pipeline-state.service';
 import { ExtractionCriteria } from '../interfaces/data-extraction.interface';
 
 export class StartLearningDto {
@@ -65,6 +66,7 @@ export class FaqLearningController {
     private readonly faqLearningService: FaqLearningService,
     private readonly batchProcessor: BatchProcessorService,
     private readonly faqAiService: FaqAiService,
+    private readonly pipelineStateService: PipelineStateService,
   ) {}
 
   @Post('start')
@@ -115,17 +117,24 @@ export class FaqLearningController {
     status: string;
   }> {
     try {
-      this.logger.log('Starting learning pipeline');
-      
-      await this.faqLearningService.runLearningPipeline({});
-      
+      this.logger.log('🚀 Starting learning pipeline');
+
+      // Update pipeline state to RUNNING
+      const state = await this.pipelineStateService.start();
+
+      this.logger.log(`✅ Pipeline state updated to: ${state.status}`);
+
       return {
         success: true,
-        message: 'Learning pipeline started successfully',
+        message: 'Learning pipeline started successfully. Pipeline is now active and will process data continuously.',
         status: 'running'
       };
     } catch (error) {
-      this.logger.error('Failed to start pipeline:', error);
+      this.logger.error('❌ Failed to start pipeline:', error);
+      await this.pipelineStateService.markError({
+        message: error.message,
+        stack: error.stack,
+      });
       throw new HttpException(
         `Failed to start pipeline: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -143,15 +152,20 @@ export class FaqLearningController {
     status: string;
   }> {
     try {
-      this.logger.log('Stopping learning pipeline');
-      
+      this.logger.log('⏸️ Stopping learning pipeline');
+
+      // Update pipeline state to STOPPED
+      const state = await this.pipelineStateService.stop();
+
+      this.logger.log(`✅ Pipeline state updated to: ${state.status}`);
+
       return {
         success: true,
-        message: 'Learning pipeline stopped successfully',
+        message: 'Learning pipeline stopped successfully. Automatic FAQ generation is now disabled.',
         status: 'stopped'
       };
     } catch (error) {
-      this.logger.error('Failed to stop pipeline:', error);
+      this.logger.error('❌ Failed to stop pipeline:', error);
       throw new HttpException(
         `Failed to stop pipeline: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -199,20 +213,21 @@ export class FaqLearningController {
   }> {
     try {
       this.logger.log('📊 Dashboard endpoint called');
-      
-      const pipelineStatus = await this.faqLearningService.getPipelineStatus();
+
+      // Get pipeline state from new PipelineStateService
+      const pipelineState = await this.pipelineStateService.getState();
       const providerStatus = await this.faqAiService.getProviderStatus();
-      
+
       const totalFaqs = await this.faqLearningService.getTotalFaqCount();
       const newFaqsToday = await this.faqLearningService.getNewFaqsToday();
       const pendingReview = await this.faqLearningService.getPendingReviewCount();
       const averageConfidence = await this.faqLearningService.getAverageConfidence();
-      
+
       const recentActivity = await this.faqLearningService.getRecentActivity(10);
       const learningProgress = await this.faqLearningService.getLearningProgressBySource();
       const qualityMetrics = await this.faqLearningService.getQualityMetrics();
 
-      this.logger.log(`📊 Dashboard stats: totalFaqs=${totalFaqs}, newFaqsToday=${newFaqsToday}, pendingReview=${pendingReview}`);
+      this.logger.log(`📊 Dashboard stats: totalFaqs=${totalFaqs}, newFaqsToday=${newFaqsToday}, pendingReview=${pendingReview}, pipelineStatus=${pipelineState.status}`);
 
       const response = {
         stats: {
@@ -220,9 +235,9 @@ export class FaqLearningController {
           newFaqsToday,
           pendingReview,
           averageConfidence,
-          processingStatus: (pipelineStatus.isProcessing ? 'running' : 'stopped') as 'running' | 'stopped' | 'error',
-          lastRun: pipelineStatus.lastRun,
-          nextRun: pipelineStatus.nextScheduledRun
+          processingStatus: pipelineState.status as 'running' | 'stopped' | 'error',
+          lastRun: pipelineState.lastRun,
+          nextRun: pipelineState.nextScheduledRun
         },
         learningProgress: {
           fromChat: learningProgress.fromChat || 0,

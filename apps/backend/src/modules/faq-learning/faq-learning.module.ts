@@ -6,6 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LearnedFaqEntry } from './entities/learned-faq-entry.entity';
 import { LearningPattern } from './entities/learning-pattern.entity';
 import { FaqLearningConfig } from './entities/faq-learning-config.entity';
+import { PipelineState } from './entities/pipeline-state.entity';
 import { ChatSession } from '../chat/entities/chat-session.entity';
 import { ChatMessage } from '../chat/entities/chat-message.entity';
 import { KnowledgeBaseArticle } from '../tickets/entities/knowledge-base-article.entity';
@@ -46,6 +47,9 @@ import { MonitoringAlertingService } from './services/monitoring-alerting.servic
 import { DataPrivacyService } from './services/data-privacy.service';
 import { AuditLoggingService } from './services/audit-logging.service';
 
+// Services - Pipeline State
+import { PipelineStateService } from './services/pipeline-state.service';
+
 // Controllers
 import { FaqLearningController } from './controllers/faq-learning.controller';
 import { ReviewManagementController } from './controllers/review-management.controller';
@@ -68,6 +72,7 @@ import { forwardRef } from '@nestjs/common';
       LearnedFaqEntry,
       LearningPattern,
       FaqLearningConfig,
+      PipelineState,
       ChatSession,
       ChatMessage,
       KnowledgeBaseArticle,
@@ -115,6 +120,9 @@ import { forwardRef } from '@nestjs/common';
     // Security Services
     DataPrivacyService,
     AuditLoggingService,
+
+    // Pipeline State Service
+    PipelineStateService,
   ],
   controllers: [
     FaqLearningController,

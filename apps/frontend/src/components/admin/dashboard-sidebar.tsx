@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Permission } from "@/lib/permissions/constants";
+import { Permission, UserRole } from "@/lib/permissions/constants";
 
 const navLinks = [
     { href: "/admin", label: "Genel Bakış", icon: Home, permission: null }, // Everyone can see dashboard
@@ -173,10 +173,21 @@ export function DashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
+                                        // Debug log for form management
+                                        if (link.href === '/admin/support/forms') {
+                                            console.log('🔍 Form Management Link Check:', {
+                                                href: link.href,
+                                                userRole,
+                                                UserRoleADMIN: UserRole.ADMIN,
+                                                UserRoleSUPPORT_MANAGER: UserRole.SUPPORT_MANAGER,
+                                                shouldShow: userRole === UserRole.ADMIN || userRole === UserRole.SUPPORT_MANAGER
+                                            });
+                                        }
+
                                         // Form Management is only visible to Admin and Support Manager
                                         if (link.href === '/admin/support/forms' &&
-                                            userRole !== 'admin' &&
-                                            userRole !== 'support_manager') {
+                                            userRole !== UserRole.ADMIN &&
+                                            userRole !== UserRole.SUPPORT_MANAGER) {
                                             return null;
                                         }
 

@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, Loader2, Plus, X } from 'lucide-react';
+import { Save, Loader2, Plus, X, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ticketFieldLibraryService, {
   type TicketFieldLibrary,
@@ -264,7 +264,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Options (Seçenekler)</CardTitle>
+              <CardTitle className="text-lg">Options</CardTitle>
               <Button
                 type="button"
                 size="sm"
@@ -308,8 +308,39 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                   setValue(`options.${index}.value`, autoValue);
                 };
 
+                const handleMoveUp = () => {
+                  if (index === 0) return;
+                  const options = watch('options');
+                  const temp = options[index];
+                  options[index] = options[index - 1];
+                  options[index - 1] = temp;
+                  setValue('options', [...options]);
+                };
+
+                const handleMoveDown = () => {
+                  const options = watch('options');
+                  if (index === options.length - 1) return;
+                  const temp = options[index];
+                  options[index] = options[index + 1];
+                  options[index + 1] = temp;
+                  setValue('options', [...options]);
+                };
+
                 return (
-                  <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4">
+                  <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4 group hover:bg-muted/50 transition-colors">
+                    <div className="flex flex-col gap-1 mt-6">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleMoveUp}
+                        disabled={index === 0}
+                        className="h-6 w-6 cursor-move"
+                        title="Move up"
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="flex-1">
                       <Label htmlFor={`options.${index}.label`}>Option Label</Label>
                       <Input
@@ -324,15 +355,40 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                         </p>
                       )}
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeOption(index)}
-                      className="mt-6"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-col gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleMoveUp}
+                        disabled={index === 0}
+                        className="h-8 w-8"
+                        title="Move up"
+                      >
+                        ↑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleMoveDown}
+                        disabled={index === optionFields.length - 1}
+                        className="h-8 w-8"
+                        title="Move down"
+                      >
+                        ↓
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeOption(index)}
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        title="Remove"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 );
               })

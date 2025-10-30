@@ -176,9 +176,9 @@ export function DashboardSidebar() {
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                     {supportLinks.map(link => {
-                                        // Form Management is only visible to Admin and Support Manager
-                                        if (link.href === '/admin/support/forms') {
-                                            console.log('🔍 Form Management visibility:', { isAdmin, isSupportManager, shouldShow: isAdmin || isSupportManager });
+                                        // Form Management and Categories are only visible to Admin and Support Manager
+                                        if (link.href === '/admin/support/forms' || link.href === '/admin/support/categories') {
+                                            console.log('🔍 Admin-only link visibility:', { href: link.href, isAdmin, isSupportManager, shouldShow: isAdmin || isSupportManager });
                                             if (!isAdmin && !isSupportManager) {
                                                 return null;
                                             }

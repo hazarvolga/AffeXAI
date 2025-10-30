@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Save, Loader2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ticketFieldLibraryService, {
@@ -45,6 +48,24 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
       loadAfter: field?.fieldConfig.loadAfter || '',
       type: field?.fieldConfig.type || 'text',
       options: field?.fieldConfig.options || [],
+      // Common properties
+      extraInfo: field?.fieldConfig.extraInfo || '',
+      defaultValue: field?.fieldConfig.defaultValue || '',
+      autoFill: field?.fieldConfig.autoFill || false,
+      placeholder: field?.fieldConfig.placeholder || '',
+      ticketListWidth: field?.fieldConfig.ticketListWidth || '',
+      hasPersonalInfo: field?.fieldConfig.hasPersonalInfo || false,
+      // Text/Textarea specific
+      characterLimit: field?.fieldConfig.characterLimit || '',
+      // Number specific
+      numberType: field?.fieldConfig.numberType || 'integer',
+      // Date/DateTime/Time specific
+      dateRange: field?.fieldConfig.dateRange || '',
+      dateFormat: field?.fieldConfig.dateFormat || '',
+      timeRange: field?.fieldConfig.timeRange || '',
+      timeFormat: field?.fieldConfig.timeFormat || '',
+      // HTML specific
+      htmlContent: field?.fieldConfig.htmlContent || '',
     },
   });
 
@@ -55,10 +76,21 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
 
   const selectedType = watch('type');
   const selectedLoadAfter = watch('loadAfter');
+  const selectedAutoFill = watch('autoFill');
+  const selectedHasPersonalInfo = watch('hasPersonalInfo');
 
   // Field types that require options
   const needsOptions = ['select', 'multiselect', 'radio', 'checkbox'];
   const showOptionsSection = needsOptions.includes(selectedType);
+
+  // Field types with common properties
+  const hasCommonProperties = ['text', 'textarea', 'number', 'email', 'url', 'date', 'datetime', 'time'].includes(selectedType);
+  const hasCharacterLimit = ['text', 'textarea'].includes(selectedType);
+  const isNumberField = selectedType === 'number';
+  const isDateField = selectedType === 'date';
+  const isDateTimeField = selectedType === 'datetime';
+  const isTimeField = selectedType === 'time';
+  const isHtmlField = selectedType === 'html';
 
   const onSubmit = async (data: any) => {
     setIsSaving(true);
@@ -76,7 +108,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         .replace(/[^a-z0-9]/g, '_')
         .replace(/_+/g, '_');
 
-      // Build FormField configuration with options if needed
+      // Build FormField configuration with all properties
       const fieldConfig: FormField = {
         id: field?.fieldConfig.id || name,
         name: field?.fieldConfig.name || name,
@@ -85,6 +117,24 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         required: false,
         loadAfter: data.loadAfter || undefined,
         options: data.options || undefined,
+        // Common properties
+        extraInfo: data.extraInfo || undefined,
+        defaultValue: data.defaultValue || undefined,
+        autoFill: data.autoFill || false,
+        placeholder: data.placeholder || undefined,
+        ticketListWidth: data.ticketListWidth || undefined,
+        hasPersonalInfo: data.hasPersonalInfo || false,
+        // Text/Textarea specific
+        characterLimit: data.characterLimit || undefined,
+        // Number specific
+        numberType: data.numberType || undefined,
+        // Date/DateTime/Time specific
+        dateRange: data.dateRange || undefined,
+        dateFormat: data.dateFormat || undefined,
+        timeRange: data.timeRange || undefined,
+        timeFormat: data.timeFormat || undefined,
+        // HTML specific
+        htmlContent: data.htmlContent || undefined,
         metadata: {
           order: field?.fieldConfig.metadata?.order || 0,
         },
@@ -209,7 +259,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         </Select>
       </div>
 
-      {/* Options Section - Conditional */}
+      {/* Options Section - For Select/Radio/Checkbox */}
       {showOptionsSection && (
         <Card>
           <CardHeader>
@@ -269,6 +319,255 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                 </div>
               ))
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Common Properties Section */}
+      {hasCommonProperties && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Field Properties</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Extra Info */}
+            <div className="space-y-2">
+              <Label htmlFor="extraInfo">Extra Info</Label>
+              <Textarea
+                id="extraInfo"
+                {...register('extraInfo')}
+                placeholder="Additional information about this field"
+                rows={3}
+              />
+            </div>
+
+            {/* Default Value */}
+            <div className="space-y-2">
+              <Label htmlFor="defaultValue">Default Value</Label>
+              <Input
+                id="defaultValue"
+                {...register('defaultValue')}
+                placeholder="Default value for this field"
+              />
+            </div>
+
+            {/* Auto-fill in Ticket Form */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="autoFill"
+                checked={selectedAutoFill}
+                onCheckedChange={(checked) => setValue('autoFill', checked as boolean)}
+              />
+              <Label htmlFor="autoFill" className="cursor-pointer">
+                Auto-fill in ticket form
+              </Label>
+            </div>
+
+            {/* Placeholder */}
+            <div className="space-y-2">
+              <Label htmlFor="placeholder">Placeholder</Label>
+              <Input
+                id="placeholder"
+                {...register('placeholder')}
+                placeholder="Placeholder text"
+              />
+            </div>
+
+            {/* Ticket List Width */}
+            <div className="space-y-2">
+              <Label htmlFor="ticketListWidth">Ticket List Width (pixels)</Label>
+              <Input
+                id="ticketListWidth"
+                {...register('ticketListWidth')}
+                placeholder="e.g., 200"
+                type="number"
+              />
+            </div>
+
+            {/* Has Personal Info */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="hasPersonalInfo"
+                checked={selectedHasPersonalInfo}
+                onCheckedChange={(checked) => setValue('hasPersonalInfo', checked as boolean)}
+              />
+              <Label htmlFor="hasPersonalInfo" className="cursor-pointer">
+                Has personal info (GDPR sensitive)
+              </Label>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Character Limit - Text/Textarea */}
+      {hasCharacterLimit && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Text Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="characterLimit">Character Limit</Label>
+              <Input
+                id="characterLimit"
+                {...register('characterLimit')}
+                placeholder="e.g., 500"
+                type="number"
+              />
+              <p className="text-sm text-muted-foreground">
+                Maximum number of characters allowed
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Number Type - Number Field */}
+      {isNumberField && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Number Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="numberType">Select Type</Label>
+              <RadioGroup
+                value={watch('numberType')}
+                onValueChange={(value) => setValue('numberType', value)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="integer" id="integer" />
+                  <Label htmlFor="integer" className="cursor-pointer">Integer</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="float" id="float" />
+                  <Label htmlFor="float" className="cursor-pointer">Float</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Date Settings */}
+      {isDateField && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Date Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="dateRange">Date Range</Label>
+              <Input
+                id="dateRange"
+                {...register('dateRange')}
+                placeholder="e.g., 2020-01-01 to 2025-12-31"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dateFormat">Date Format</Label>
+              <Select value={watch('dateFormat')} onValueChange={(value) => setValue('dateFormat', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* DateTime Settings */}
+      {isDateTimeField && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Date Time Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="dateRange">Date Range</Label>
+              <Input
+                id="dateRange"
+                {...register('dateRange')}
+                placeholder="e.g., 2020-01-01 to 2025-12-31"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dateFormat">Date Format</Label>
+              <Select value={watch('dateFormat')} onValueChange={(value) => setValue('dateFormat', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DD/MM/YYYY HH:mm">DD/MM/YYYY HH:mm</SelectItem>
+                  <SelectItem value="MM/DD/YYYY HH:mm">MM/DD/YYYY HH:mm</SelectItem>
+                  <SelectItem value="YYYY-MM-DD HH:mm">YYYY-MM-DD HH:mm</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Time Settings */}
+      {isTimeField && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Time Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="timeRange">Time Range</Label>
+              <Input
+                id="timeRange"
+                {...register('timeRange')}
+                placeholder="e.g., 09:00 to 18:00"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="timeFormat">Time Format</Label>
+              <Select value={watch('timeFormat')} onValueChange={(value) => setValue('timeFormat', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="HH:mm">24-hour (HH:mm)</SelectItem>
+                  <SelectItem value="hh:mm A">12-hour (hh:mm AM/PM)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* HTML Content */}
+      {isHtmlField && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">HTML Content</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="htmlContent">
+                HTML Content <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="htmlContent"
+                {...register('htmlContent', {
+                  required: isHtmlField ? 'HTML content is required' : false,
+                })}
+                placeholder="Enter HTML content here..."
+                rows={10}
+                className="font-mono text-sm"
+              />
+              {errors.htmlContent && (
+                <p className="text-sm text-destructive">{errors.htmlContent.message as string}</p>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}

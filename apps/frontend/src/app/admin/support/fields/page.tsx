@@ -395,7 +395,7 @@ export default function TicketFieldsPage() {
 
       {/* Field Editor Dialog */}
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingField ? 'Alanı Düzenle' : 'Yeni Alan'}

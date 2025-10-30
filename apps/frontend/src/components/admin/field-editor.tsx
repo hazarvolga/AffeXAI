@@ -283,41 +283,59 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                 <p className="text-sm mt-2">Click "Add Option" to create choices for this field</p>
               </div>
             ) : (
-              optionFields.map((option, index) => (
-                <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4">
-                  <div className="flex-1 space-y-2">
-                    <div>
-                      <Label htmlFor={`options.${index}.label`}>Label (Görünen İsim)</Label>
+              optionFields.map((option, index) => {
+                const currentLabel = watch(`options.${index}.label`);
+
+                // Auto-generate value from label when label changes
+                const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const labelValue = e.target.value;
+
+                  // Generate value: lowercase, turkish chars converted, special chars to underscore
+                  const autoValue = labelValue
+                    .toLowerCase()
+                    .replace(/ı/g, 'i')
+                    .replace(/ğ/g, 'g')
+                    .replace(/ü/g, 'u')
+                    .replace(/ş/g, 's')
+                    .replace(/ö/g, 'o')
+                    .replace(/ç/g, 'c')
+                    .replace(/[^a-z0-9]/g, '_')
+                    .replace(/_+/g, '_')
+                    .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+
+                  // Set both label and auto-generated value
+                  setValue(`options.${index}.label`, labelValue);
+                  setValue(`options.${index}.value`, autoValue);
+                };
+
+                return (
+                  <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4">
+                    <div className="flex-1">
+                      <Label htmlFor={`options.${index}.label`}>Option Label</Label>
                       <Input
                         id={`options.${index}.label`}
-                        {...register(`options.${index}.label`, {
-                          required: 'Label is required',
-                        })}
+                        value={currentLabel || ''}
+                        onChange={handleLabelChange}
                         placeholder="Örn: Seçenek 1"
                       />
+                      {watch(`options.${index}.value`) && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Value: <code className="bg-muted px-1 py-0.5 rounded">{watch(`options.${index}.value`)}</code>
+                        </p>
+                      )}
                     </div>
-                    <div>
-                      <Label htmlFor={`options.${index}.value`}>Value (İç Değer)</Label>
-                      <Input
-                        id={`options.${index}.value`}
-                        {...register(`options.${index}.value`, {
-                          required: 'Value is required',
-                        })}
-                        placeholder="Örn: option_1"
-                      />
-                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOption(index)}
+                      className="mt-6"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeOption(index)}
-                    className="mt-6"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))
+                );
+              })
             )}
           </CardContent>
         </Card>
@@ -336,7 +354,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Textarea
                 id="extraInfo"
                 {...register('extraInfo')}
-                placeholder="Additional information about this field"
+                placeholder="Bu alan hakkında ek açıklama veya kullanım talimatı (isteğe bağlı)"
                 rows={3}
               />
             </div>
@@ -347,8 +365,11 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="defaultValue"
                 {...register('defaultValue')}
-                placeholder="Default value for this field"
+                placeholder="Bu alanın varsayılan değeri (isteğe bağlı)"
               />
+              <p className="text-xs text-muted-foreground">
+                Ticket oluşturulurken bu alan otomatik olarak bu değerle doldurulur
+              </p>
             </div>
 
             {/* Auto-fill in Ticket Form */}
@@ -369,8 +390,11 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="placeholder"
                 {...register('placeholder')}
-                placeholder="Placeholder text"
+                placeholder="Örn: Lütfen bir değer giriniz..."
               />
+              <p className="text-xs text-muted-foreground">
+                Alan boşken gösterilecek yardımcı metin
+              </p>
             </div>
 
             {/* Ticket List Width */}
@@ -379,9 +403,12 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="ticketListWidth"
                 {...register('ticketListWidth')}
-                placeholder="e.g., 200"
+                placeholder="Örn: 200"
                 type="number"
               />
+              <p className="text-xs text-muted-foreground">
+                Ticket listesinde bu kolonun genişliği (boş bırakılırsa otomatik)
+              </p>
             </div>
 
             {/* Has Personal Info */}
@@ -411,11 +438,11 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="characterLimit"
                 {...register('characterLimit')}
-                placeholder="e.g., 500"
+                placeholder="Örn: 500"
                 type="number"
               />
-              <p className="text-sm text-muted-foreground">
-                Maximum number of characters allowed
+              <p className="text-xs text-muted-foreground">
+                İzin verilen maksimum karakter sayısı (boş bırakılırsa sınırsız)
               </p>
             </div>
           </CardContent>
@@ -461,19 +488,23 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="dateRange"
                 {...register('dateRange')}
-                placeholder="e.g., 2020-01-01 to 2025-12-31"
+                placeholder="Örn: 2020-01-01 to 2025-12-31"
               />
+              <p className="text-xs text-muted-foreground">
+                İzin verilen tarih aralığı (isteğe bağlı)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="dateFormat">Date Format</Label>
-              <Select value={watch('dateFormat')} onValueChange={(value) => setValue('dateFormat', value)}>
+              <Select value={watch('dateFormat') || 'none'} onValueChange={(value) => setValue('dateFormat', value === 'none' ? '' : value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select format" />
+                  <SelectValue placeholder="Tarih formatı seçiniz" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                  <SelectItem value="none">-- Varsayılan --</SelectItem>
+                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (Gün/Ay/Yıl)</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (Ay/Gün/Yıl)</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (Yıl-Ay-Gün)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -493,19 +524,23 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="dateRange"
                 {...register('dateRange')}
-                placeholder="e.g., 2020-01-01 to 2025-12-31"
+                placeholder="Örn: 2020-01-01 to 2025-12-31"
               />
+              <p className="text-xs text-muted-foreground">
+                İzin verilen tarih aralığı (isteğe bağlı)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="dateFormat">Date Format</Label>
-              <Select value={watch('dateFormat')} onValueChange={(value) => setValue('dateFormat', value)}>
+              <Select value={watch('dateFormat') || 'none'} onValueChange={(value) => setValue('dateFormat', value === 'none' ? '' : value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select format" />
+                  <SelectValue placeholder="Tarih formatı seçiniz" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DD/MM/YYYY HH:mm">DD/MM/YYYY HH:mm</SelectItem>
-                  <SelectItem value="MM/DD/YYYY HH:mm">MM/DD/YYYY HH:mm</SelectItem>
-                  <SelectItem value="YYYY-MM-DD HH:mm">YYYY-MM-DD HH:mm</SelectItem>
+                  <SelectItem value="none">-- Varsayılan --</SelectItem>
+                  <SelectItem value="DD/MM/YYYY HH:mm">DD/MM/YYYY HH:mm (Gün/Ay/Yıl Saat:Dakika)</SelectItem>
+                  <SelectItem value="MM/DD/YYYY HH:mm">MM/DD/YYYY HH:mm (Ay/Gün/Yıl Saat:Dakika)</SelectItem>
+                  <SelectItem value="YYYY-MM-DD HH:mm">YYYY-MM-DD HH:mm (Yıl-Ay-Gün Saat:Dakika)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -525,18 +560,22 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               <Input
                 id="timeRange"
                 {...register('timeRange')}
-                placeholder="e.g., 09:00 to 18:00"
+                placeholder="Örn: 09:00 to 18:00"
               />
+              <p className="text-xs text-muted-foreground">
+                İzin verilen saat aralığı (isteğe bağlı)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="timeFormat">Time Format</Label>
-              <Select value={watch('timeFormat')} onValueChange={(value) => setValue('timeFormat', value)}>
+              <Select value={watch('timeFormat') || 'none'} onValueChange={(value) => setValue('timeFormat', value === 'none' ? '' : value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select format" />
+                  <SelectValue placeholder="Saat formatı seçiniz" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="HH:mm">24-hour (HH:mm)</SelectItem>
-                  <SelectItem value="hh:mm A">12-hour (hh:mm AM/PM)</SelectItem>
+                  <SelectItem value="none">-- Varsayılan --</SelectItem>
+                  <SelectItem value="HH:mm">24-saat (HH:mm) - Örn: 14:30</SelectItem>
+                  <SelectItem value="hh:mm A">12-saat (hh:mm AM/PM) - Örn: 02:30 PM</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -560,13 +599,16 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
                 {...register('htmlContent', {
                   required: isHtmlField ? 'HTML content is required' : false,
                 })}
-                placeholder="Enter HTML content here..."
+                placeholder="Örn: <div class='custom-field'><p>Özel içerik buraya</p></div>"
                 rows={10}
                 className="font-mono text-sm"
               />
               {errors.htmlContent && (
                 <p className="text-sm text-destructive">{errors.htmlContent.message as string}</p>
               )}
+              <p className="text-xs text-muted-foreground">
+                Formda gösterilecek HTML içeriği (raw HTML olarak render edilir)
+              </p>
             </div>
           </CardContent>
         </Card>

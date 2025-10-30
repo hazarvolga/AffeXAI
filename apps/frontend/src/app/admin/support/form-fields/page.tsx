@@ -45,29 +45,8 @@ export default function TicketFormFieldsPage() {
   const [editingField, setEditingField] = useState<any>(null);
   const [deleteConfirmField, setDeleteConfirmField] = useState<any>(null);
 
-  // Mock data - will be replaced with actual API call
-  const [formFields, setFormFields] = useState([
-    {
-      id: '1',
-      fieldName: 'Müşteri Tipi',
-      fieldId: 'musteri_tipi',
-      isRequired: true,
-      width: 'full',
-      loadAfter: null,
-      visibilityConditions: [],
-    },
-    {
-      id: '2',
-      fieldName: 'Ürün',
-      fieldId: 'urun',
-      isRequired: false,
-      width: '1/3',
-      loadAfter: 'musteri_tipi',
-      visibilityConditions: [
-        { field: 'musteri_tipi', operator: 'Equal', value: 'kurumsal' }
-      ],
-    },
-  ]);
+  // Empty state - will be populated when fields are added
+  const [formFields, setFormFields] = useState<any[]>([]);
 
   const handleNewField = () => {
     setEditingField(null);
@@ -84,8 +63,19 @@ export default function TicketFormFieldsPage() {
   };
 
   const handleSaveField = async (data: any) => {
-    // TODO: API call to save
-    console.log('Saving field:', data);
+    // Add to state (will be replaced with API call)
+    if (editingField) {
+      // Update existing
+      setFormFields(formFields.map(f => f.id === editingField.id ? { ...editingField, ...data } : f));
+    } else {
+      // Add new
+      const newField = {
+        id: Date.now().toString(),
+        ...data,
+      };
+      setFormFields([...formFields, newField]);
+    }
+
     setIsEditorOpen(false);
     setEditingField(null);
   };

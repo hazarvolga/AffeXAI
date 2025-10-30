@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Save, Loader2, Plus, X, GripVertical } from 'lucide-react';
+import { Save, Loader2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ticketFieldLibraryService, {
   type TicketFieldLibrary,
@@ -25,6 +25,7 @@ import ticketFieldLibraryService, {
 } from '@/lib/api/ticketFieldLibraryService';
 import type { FormField } from '@/types/ticket-form.types';
 import { useQuery } from '@tanstack/react-query';
+import { SortableList } from '@/components/common/sortable-list';
 
 interface FieldEditorProps {
   field: TicketFieldLibrary | null;
@@ -276,122 +277,74 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             {optionFields.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                 <p>No options added yet</p>
                 <p className="text-sm mt-2">Click "Add Option" to create choices for this field</p>
               </div>
             ) : (
-              optionFields.map((option, index) => {
-                const currentLabel = watch(`options.${index}.label`);
+              <SortableList
+                items={optionFields}
+                onReorder={(reorderedItems) => {
+                  setValue('options', reorderedItems);
+                }}
+                keyExtractor={(item, index) => `option-${index}`}
+                renderItem={(option, index) => {
+                  const currentLabel = watch(`options.${index}.label`);
 
-                // Auto-generate value from label when label changes
-                const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                  const labelValue = e.target.value;
+                  // Auto-generate value from label when label changes
+                  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const labelValue = e.target.value;
 
-                  // Generate value: lowercase, turkish chars converted, special chars to underscore
-                  const autoValue = labelValue
-                    .toLowerCase()
-                    .replace(/ı/g, 'i')
-                    .replace(/ğ/g, 'g')
-                    .replace(/ü/g, 'u')
-                    .replace(/ş/g, 's')
-                    .replace(/ö/g, 'o')
-                    .replace(/ç/g, 'c')
-                    .replace(/[^a-z0-9]/g, '_')
-                    .replace(/_+/g, '_')
-                    .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+                    // Generate value: lowercase, turkish chars converted, special chars to underscore
+                    const autoValue = labelValue
+                      .toLowerCase()
+                      .replace(/ı/g, 'i')
+                      .replace(/ğ/g, 'g')
+                      .replace(/ü/g, 'u')
+                      .replace(/ş/g, 's')
+                      .replace(/ö/g, 'o')
+                      .replace(/ç/g, 'c')
+                      .replace(/[^a-z0-9]/g, '_')
+                      .replace(/_+/g, '_')
+                      .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
 
-                  // Set both label and auto-generated value
-                  setValue(`options.${index}.label`, labelValue);
-                  setValue(`options.${index}.value`, autoValue);
-                };
+                    // Set both label and auto-generated value
+                    setValue(`options.${index}.label`, labelValue);
+                    setValue(`options.${index}.value`, autoValue);
+                  };
 
-                const handleMoveUp = () => {
-                  if (index === 0) return;
-                  const options = watch('options');
-                  const temp = options[index];
-                  options[index] = options[index - 1];
-                  options[index - 1] = temp;
-                  setValue('options', [...options]);
-                };
-
-                const handleMoveDown = () => {
-                  const options = watch('options');
-                  if (index === options.length - 1) return;
-                  const temp = options[index];
-                  options[index] = options[index + 1];
-                  options[index + 1] = temp;
-                  setValue('options', [...options]);
-                };
-
-                return (
-                  <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4 group hover:bg-muted/50 transition-colors">
-                    <div className="flex flex-col gap-1 mt-6">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleMoveUp}
-                        disabled={index === 0}
-                        className="h-6 w-6 cursor-move"
-                        title="Move up"
-                      >
-                        <GripVertical className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex-1">
-                      <Label htmlFor={`options.${index}.label`}>Option Label</Label>
-                      <Input
-                        id={`options.${index}.label`}
-                        value={currentLabel || ''}
-                        onChange={handleLabelChange}
-                        placeholder="Örn: Seçenek 1"
-                      />
-                      {watch(`options.${index}.value`) && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Value: <code className="bg-muted px-1 py-0.5 rounded">{watch(`options.${index}.value`)}</code>
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleMoveUp}
-                        disabled={index === 0}
-                        className="h-8 w-8"
-                        title="Move up"
-                      >
-                        ↑
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleMoveDown}
-                        disabled={index === optionFields.length - 1}
-                        className="h-8 w-8"
-                        title="Move down"
-                      >
-                        ↓
-                      </Button>
+                  return (
+                    <>
+                      <div className="flex-1">
+                        <Label htmlFor={`options.${index}.label`}>Option Label</Label>
+                        <Input
+                          id={`options.${index}.label`}
+                          value={currentLabel || ''}
+                          onChange={handleLabelChange}
+                          placeholder="Örn: Seçenek 1"
+                        />
+                        {watch(`options.${index}.value`) && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Value: <code className="bg-muted px-1 py-0.5 rounded">{watch(`options.${index}.value`)}</code>
+                          </p>
+                        )}
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => removeOption(index)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        className="h-8 w-8 text-destructive hover:text-destructive mt-6"
                         title="Remove"
                       >
                         <X className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </div>
-                );
-              })
+                    </>
+                  );
+                }}
+              />
             )}
           </CardContent>
         </Card>

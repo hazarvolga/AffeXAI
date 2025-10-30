@@ -157,12 +157,15 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
       {/* Load After */}
       <div className="space-y-2">
         <Label htmlFor="loadAfter">Load After (Hangi alandan sonra gelecek?)</Label>
-        <Select value={selectedLoadAfter} onValueChange={(value) => setValue('loadAfter', value)}>
+        <Select
+          value={selectedLoadAfter || 'none'}
+          onValueChange={(value) => setValue('loadAfter', value === 'none' ? '' : value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seçiniz..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">-- Yok --</SelectItem>
+            <SelectItem value="none">-- Yok --</SelectItem>
             {existingFields?.items.map((f) => (
               <SelectItem key={f.id} value={f.fieldConfig.id}>
                 {f.fieldConfig.label} ({f.fieldConfig.id})

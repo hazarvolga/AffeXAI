@@ -30,6 +30,7 @@ import { TicketCSATController } from './controllers/ticket-csat.controller';
 import { KnowledgeBaseController } from './controllers/knowledge-base.controller';
 import { TicketMacroController } from './controllers/ticket-macro.controller';
 import { AICategorizationController } from './controllers/ai-categorization.controller';
+import { TicketCategoryController } from './controllers/ticket-category.controller';
 import { UsersModule } from '../users/users.module';
 import { MailModule } from '../mail/mail.module';
 import { AuthModule } from '../../auth/auth.module';
@@ -51,6 +52,7 @@ import { TicketMacroService } from './services/ticket-macro.service';
 import { AICategorizationService } from './services/ai-categorization.service';
 import { TicketFormService } from './services/ticket-form.service';
 import { TicketFieldLibraryService } from './services/ticket-field-library.service';
+import { TicketCategoryService } from './services/ticket-category.service';
 import { TicketNotificationsGateway } from './gateways/ticket-notifications.gateway';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
@@ -111,6 +113,7 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
     TicketsController,
     TicketFormController,
     TicketFieldLibraryController,
+    TicketCategoryController,
     TicketAssignmentRulesController,
     TicketEscalationRulesController,
     TicketAttachmentsController,
@@ -126,6 +129,7 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
     TicketsService,
     TicketFormService,
     TicketFieldLibraryService,
+    TicketCategoryService,
     TicketAutomationService,
     TicketAssignmentRulesService,
     TicketEscalationRulesService,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Save, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Save, Loader2, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ticketFieldLibraryService, {
   type TicketFieldLibrary,
@@ -38,16 +39,26 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
     queryFn: () => ticketFieldLibraryService.getAllFields({ limit: 1000 }),
   });
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm({
     defaultValues: {
       label: field?.fieldConfig.label || '',
       loadAfter: field?.fieldConfig.loadAfter || '',
       type: field?.fieldConfig.type || 'text',
+      options: field?.fieldConfig.options || [],
     },
+  });
+
+  const { fields: optionFields, append: appendOption, remove: removeOption } = useFieldArray({
+    control,
+    name: 'options',
   });
 
   const selectedType = watch('type');
   const selectedLoadAfter = watch('loadAfter');
+
+  // Field types that require options
+  const needsOptions = ['select', 'multiselect', 'radio', 'checkbox'];
+  const showOptionsSection = needsOptions.includes(selectedType);
 
   const onSubmit = async (data: any) => {
     setIsSaving(true);
@@ -65,7 +76,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         .replace(/[^a-z0-9]/g, '_')
         .replace(/_+/g, '_');
 
-      // Build minimal FormField configuration
+      // Build FormField configuration with options if needed
       const fieldConfig: FormField = {
         id: field?.fieldConfig.id || name,
         name: field?.fieldConfig.name || name,
@@ -73,6 +84,7 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
         type: data.type,
         required: false,
         loadAfter: data.loadAfter || undefined,
+        options: data.options || undefined,
         metadata: {
           order: field?.fieldConfig.metadata?.order || 0,
         },
@@ -196,6 +208,70 @@ export function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Options Section - Conditional */}
+      {showOptionsSection && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Options (Seçenekler)</CardTitle>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => appendOption({ label: '', value: '' })}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Option
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {optionFields.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                <p>No options added yet</p>
+                <p className="text-sm mt-2">Click "Add Option" to create choices for this field</p>
+              </div>
+            ) : (
+              optionFields.map((option, index) => (
+                <div key={option.id} className="flex gap-2 items-start border rounded-lg p-4">
+                  <div className="flex-1 space-y-2">
+                    <div>
+                      <Label htmlFor={`options.${index}.label`}>Label (Görünen İsim)</Label>
+                      <Input
+                        id={`options.${index}.label`}
+                        {...register(`options.${index}.label`, {
+                          required: 'Label is required',
+                        })}
+                        placeholder="Örn: Seçenek 1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`options.${index}.value`}>Value (İç Değer)</Label>
+                      <Input
+                        id={`options.${index}.value`}
+                        {...register(`options.${index}.value`, {
+                          required: 'Value is required',
+                        })}
+                        placeholder="Örn: option_1"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeOption(index)}
+                    className="mt-6"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Footer */}
       <div className="flex justify-end gap-4 pt-4 border-t">

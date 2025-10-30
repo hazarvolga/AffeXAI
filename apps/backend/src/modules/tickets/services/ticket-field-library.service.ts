@@ -229,7 +229,23 @@ export class TicketFieldLibraryService {
       throw new BadRequestException(`Invalid field type: ${fieldConfig.type}`);
     }
 
-    // Options validation removed - fields can be defined without options
-    // Options will be added later in form configuration or actual form usage
+    // Validate options for select/radio/checkbox fields
+    const needsOptions = ['select', 'multiselect', 'radio', 'checkbox'];
+    if (needsOptions.includes(fieldConfig.type)) {
+      if (!fieldConfig.options || fieldConfig.options.length === 0) {
+        throw new BadRequestException(
+          `Field type "${fieldConfig.type}" requires at least one option`,
+        );
+      }
+
+      // Validate each option has label and value
+      for (const option of fieldConfig.options) {
+        if (!option.label || !option.value) {
+          throw new BadRequestException(
+            'Each option must have both label and value',
+          );
+        }
+      }
+    }
   }
 }

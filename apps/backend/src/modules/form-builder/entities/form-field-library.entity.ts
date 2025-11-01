@@ -9,27 +9,27 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { FormField } from './ticket-form-definition.entity';
+import { FormField } from './form-definition.entity';
 
 /**
- * TicketFieldLibrary Entity
+ * FormFieldLibrary Entity
  *
- * Stores reusable field templates that can be added to ticket forms.
+ * Stores reusable field templates that can be added to forms across any module.
  * This acts as a library of pre-configured fields that admins can manage
  * and quickly add to any form without recreating them each time.
  *
  * Examples:
- * - "Ürün Seçiniz" (Product Selection dropdown)
- * - "Hotinfo Dosyasını Yükle" (Hotinfo file upload)
- * - "Allplan Versiyon" (Version selector)
+ * - "Product Selection" dropdown (for tickets, events, etc.)
+ * - "File Upload" field (for support, applications)
+ * - "Version Selector" (for tickets, downloads)
  */
-@Entity('ticket_field_library')
-export class TicketFieldLibrary {
+@Entity('form_field_library')
+export class FormFieldLibrary {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 100 })
-  @Index('IDX_ticket_field_library_name')
+  @Index('IDX_form_field_library_name')
   name: string; // Field name for internal use (e.g., "product_selector")
 
   @Column({ type: 'jsonb' })
@@ -39,14 +39,14 @@ export class TicketFieldLibrary {
   description: string; // Description of what this field is for
 
   @Column({ type: 'boolean', default: true })
-  @Index('IDX_ticket_field_library_is_active')
+  @Index('IDX_form_field_library_is_active')
   isActive: boolean; // Can be used in forms
 
   @Column({ type: 'boolean', default: false })
   isSystemField: boolean; // System-defined fields cannot be deleted
 
   @Column({ type: 'varchar', array: true, default: '{}' })
-  tags: string[]; // Tags for categorization/filtering
+  tags: string[]; // Tags for categorization/filtering (e.g., ['support', 'events'])
 
   @CreateDateColumn()
   createdAt: Date;

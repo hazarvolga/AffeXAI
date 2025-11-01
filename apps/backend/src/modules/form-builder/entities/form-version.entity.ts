@@ -8,21 +8,21 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { TicketFormDefinition, FormSchema } from './ticket-form-definition.entity';
+import { FormDefinition, FormSchema } from './form-definition.entity';
 
-@Entity('ticket_form_versions')
-@Index('IDX_ticket_form_versions_form_version_unique', ['formDefinitionId', 'version'], { unique: true })
-export class TicketFormVersion {
+@Entity('form_versions')
+@Index('IDX_form_versions_form_version_unique', ['formDefinitionId', 'version'], { unique: true })
+export class FormVersion {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'uuid' })
-  @Index('IDX_ticket_form_versions_form_definition_id')
+  @Index('IDX_form_versions_form_definition_id')
   formDefinitionId: string;
 
-  @ManyToOne(() => TicketFormDefinition, formDefinition => formDefinition.versions)
+  @ManyToOne(() => FormDefinition, formDefinition => formDefinition.versions)
   @JoinColumn({ name: 'formDefinitionId' })
-  formDefinition: TicketFormDefinition;
+  formDefinition: FormDefinition;
 
   @Column({ type: 'int' })
   version: number;
@@ -34,7 +34,7 @@ export class TicketFormVersion {
   changeLog: string;
 
   @CreateDateColumn()
-  @Index('IDX_ticket_form_versions_created_at')
+  @Index('IDX_form_versions_created_at')
   createdAt: Date;
 
   @Column({ type: 'uuid', nullable: true })

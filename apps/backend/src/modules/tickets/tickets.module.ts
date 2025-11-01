@@ -13,9 +13,6 @@ import { TicketTemplate } from './entities/ticket-template.entity';
 import { TicketCSAT } from './entities/ticket-csat.entity';
 import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
-import { TicketFormDefinition } from './entities/ticket-form-definition.entity';
-import { TicketFormVersion } from './entities/ticket-form-version.entity';
-import { TicketFieldLibrary } from './entities/ticket-field-library.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { TicketFormController } from './controllers/ticket-form.controller';
@@ -60,6 +57,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SettingsModule } from '../settings/settings.module';
 import { AiModule } from '../ai/ai.module';
 import { FaqLearningModule } from '../faq-learning/faq-learning.module';
+import { FormBuilderModule } from '../form-builder/form-builder.module';
 import { EmailWebhookAdapterFactory } from './services/email-webhook-adapter-factory.service';
 import { ResendWebhookAdapter } from './adapters/resend-webhook.adapter';
 import { SendGridWebhookAdapter } from './adapters/sendgrid-webhook.adapter';
@@ -86,10 +84,8 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
       TicketCSAT,
       KnowledgeBaseArticle,
       TicketMacro,
-      TicketFormDefinition,
-      TicketFormVersion,
-      TicketFieldLibrary,
     ]),
+    FormBuilderModule, // Import FormBuilderModule for form entities
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

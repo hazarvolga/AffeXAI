@@ -31,6 +31,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggingModule } from './common/logging/logging.module';
 import { SystemLogsModule } from './modules/system-logs/system-logs.module';
+import { FormBuilderModule } from './modules/form-builder/form-builder.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { SystemLogsModule } from './modules/system-logs/system-logs.module';
     KnowledgeSourcesModule,
     CrmModule,
     SystemLogsModule, // Add system logs API
+    FormBuilderModule, // Centralized form builder for all modules
   ],
   controllers: [AppController],
   providers: [AppService],

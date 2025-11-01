@@ -10,14 +10,13 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { TicketFormVersion } from './ticket-form-version.entity';
-import { Ticket } from './ticket.entity';
+import { FormVersion } from './form-version.entity';
+import { Ticket } from '../../tickets/entities/ticket.entity';
 
 export interface FormField {
   id: string;
   name: string;
   label: string;
-  labelEn?: string;
   type:
     | 'text'
     | 'textarea'
@@ -40,11 +39,9 @@ export interface FormField {
     | 'edd-product';
   required: boolean;
   placeholder?: string;
-  placeholderEn?: string;
   helpText?: string;
-  helpTextEn?: string;
   defaultValue?: any;
-  options?: Array<{ label: string; labelEn?: string; value: string | number | boolean }>;
+  options?: Array<{ label: string; value: string | number | boolean }>;
   dataSource?: string; // e.g., 'categories', 'users'
   accept?: string; // For file type
   multiple?: boolean; // For file and select types
@@ -97,13 +94,13 @@ export interface FormSchema {
   }>;
 }
 
-@Entity('ticket_form_definitions')
-export class TicketFormDefinition {
+@Entity('form_definitions')
+export class FormDefinition {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 100 })
-  @Index('IDX_ticket_form_definitions_name')
+  @Index('IDX_form_definitions_name')
   name: string;
 
   @Column({ type: 'text', nullable: true })
@@ -116,12 +113,27 @@ export class TicketFormDefinition {
   schema: FormSchema;
 
   @Column({ type: 'boolean', default: true })
-  @Index('IDX_ticket_form_definitions_is_active')
+  @Index('IDX_form_definitions_is_active')
   isActive: boolean;
 
   @Column({ type: 'boolean', default: false })
-  @Index('IDX_ticket_form_definitions_is_default')
+  @Index('IDX_form_definitions_is_default')
   isDefault: boolean;
+
+  // New columns for Form Builder generalization
+  @Column({ type: 'varchar', length: 50, default: 'tickets' })
+  @Index('IDX_form_definitions_module')
+  module: string; // 'tickets', 'events', 'cms', 'certificates', etc.
+
+  @Column({ type: 'varchar', length: 50, default: 'standard' })
+  @Index('IDX_form_definitions_form_type')
+  formType: string; // 'standard', 'survey', 'registration', 'application', etc.
+
+  @Column({ type: 'boolean', default: false })
+  allowPublicSubmissions: boolean; // Allow non-authenticated users to submit
+
+  @Column({ type: 'jsonb', default: '{}' })
+  settings: any; // Module-specific settings (e.g., email notifications, redirects)
 
   @CreateDateColumn()
   createdAt: Date;
@@ -136,8 +148,8 @@ export class TicketFormDefinition {
   @JoinColumn({ name: 'createdBy' })
   creator: User;
 
-  @OneToMany(() => TicketFormVersion, version => version.formDefinition)
-  versions: TicketFormVersion[];
+  @OneToMany(() => FormVersion, version => version.formDefinition)
+  versions: FormVersion[];
 
   @OneToMany(() => Ticket, ticket => ticket.formDefinition)
   tickets: Ticket[];

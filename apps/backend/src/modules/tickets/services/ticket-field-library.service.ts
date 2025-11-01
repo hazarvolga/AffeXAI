@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TicketFieldLibrary } from '../entities/ticket-field-library.entity';
-import { FormField } from '../entities/ticket-form-definition.entity';
+import { FormFieldLibrary } from '../../form-builder/entities/form-field-library.entity';
+import { FormField } from '../../form-builder/entities/form-definition.entity';
 
 export interface CreateFieldLibraryDto {
   name: string;
@@ -31,8 +31,8 @@ export interface FieldLibraryFilters {
 @Injectable()
 export class TicketFieldLibraryService {
   constructor(
-    @InjectRepository(TicketFieldLibrary)
-    private readonly fieldLibraryRepository: Repository<TicketFieldLibrary>,
+    @InjectRepository(FormFieldLibrary)
+    private readonly fieldLibraryRepository: Repository<FormFieldLibrary>,
   ) {}
 
   /**
@@ -91,7 +91,7 @@ export class TicketFieldLibraryService {
   /**
    * Get a single field library entry by ID
    */
-  async findOne(id: string): Promise<TicketFieldLibrary> {
+  async findOne(id: string): Promise<FormFieldLibrary> {
     const field = await this.fieldLibraryRepository.findOne({
       where: { id },
       relations: ['creator', 'updater'],
@@ -110,7 +110,7 @@ export class TicketFieldLibraryService {
   async create(
     createDto: CreateFieldLibraryDto,
     userId?: string,
-  ): Promise<TicketFieldLibrary> {
+  ): Promise<FormFieldLibrary> {
     // Validate field config
     this.validateFieldConfig(createDto.fieldConfig);
 
@@ -141,7 +141,7 @@ export class TicketFieldLibraryService {
     id: string,
     updateDto: UpdateFieldLibraryDto,
     userId?: string,
-  ): Promise<TicketFieldLibrary> {
+  ): Promise<FormFieldLibrary> {
     const field = await this.findOne(id);
 
     // System fields cannot be deleted or have their name changed
@@ -192,7 +192,7 @@ export class TicketFieldLibraryService {
   /**
    * Toggle active status
    */
-  async toggleActive(id: string, isActive: boolean): Promise<TicketFieldLibrary> {
+  async toggleActive(id: string, isActive: boolean): Promise<FormFieldLibrary> {
     const field = await this.findOne(id);
     field.isActive = isActive;
     return await this.fieldLibraryRepository.save(field);

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TicketFormDefinition } from '../entities/ticket-form-definition.entity';
-import { TicketFormVersion } from '../entities/ticket-form-version.entity';
+import { FormDefinition } from '../../form-builder/entities/form-definition.entity';
+import { FormVersion } from '../../form-builder/entities/form-version.entity';
 import {
   CreateTicketFormDto,
   UpdateTicketFormDto,
@@ -13,10 +13,10 @@ import {
 @Injectable()
 export class TicketFormService {
   constructor(
-    @InjectRepository(TicketFormDefinition)
-    private readonly formDefinitionRepository: Repository<TicketFormDefinition>,
-    @InjectRepository(TicketFormVersion)
-    private readonly formVersionRepository: Repository<TicketFormVersion>,
+    @InjectRepository(FormDefinition)
+    private readonly formDefinitionRepository: Repository<FormDefinition>,
+    @InjectRepository(FormVersion)
+    private readonly formVersionRepository: Repository<FormVersion>,
   ) {}
 
   /**
@@ -75,7 +75,7 @@ export class TicketFormService {
   async findOne(id: string) {
     const formDefinition = await this.formDefinitionRepository.findOne({
       where: { id },
-      relations: ['createdByUser', 'versions'],
+      relations: ['creator', 'versions'],
     });
 
     if (!formDefinition) {
@@ -237,7 +237,7 @@ export class TicketFormService {
 
     const [versions, total] = await this.formVersionRepository.findAndCount({
       where: { formDefinitionId },
-      relations: ['createdByUser'],
+      relations: ['creator'],
       order: { version: 'DESC' },
       skip,
       take: limit,
@@ -258,7 +258,7 @@ export class TicketFormService {
   async getVersion(formDefinitionId: string, version: number) {
     const formVersion = await this.formVersionRepository.findOne({
       where: { formDefinitionId, version },
-      relations: ['createdByUser'],
+      relations: ['creator'],
     });
 
     if (!formVersion) {
@@ -323,7 +323,7 @@ export class TicketFormService {
   private async unsetAllDefaults() {
     await this.formDefinitionRepository
       .createQueryBuilder()
-      .update(TicketFormDefinition)
+      .update(FormDefinition)
       .set({ isDefault: false })
       .where('isDefault = :isDefault', { isDefault: true })
       .execute();

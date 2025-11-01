@@ -13,7 +13,7 @@ import { TicketStatus } from '../enums/ticket-status.enum';
 import { TicketPriority } from '../enums/ticket-priority.enum';
 import { TicketMessage } from './ticket-message.entity';
 import { TicketCategory } from './ticket-category.entity';
-import { TicketFormDefinition } from './ticket-form-definition.entity';
+import { FormDefinition } from '../../form-builder/entities/form-definition.entity';
 
 /**
  * Ticket Entity
@@ -130,9 +130,9 @@ export class Ticket {
   @Column({ type: 'uuid', nullable: true })
   formDefinitionId: string;
 
-  @ManyToOne(() => TicketFormDefinition, { nullable: true })
+  @ManyToOne(() => FormDefinition, { nullable: true })
   @JoinColumn({ name: 'formDefinitionId' })
-  formDefinition: TicketFormDefinition;
+  formDefinition: FormDefinition;
 
   @OneToMany(() => TicketMessage, (message) => message.ticket)
   messages: TicketMessage[];

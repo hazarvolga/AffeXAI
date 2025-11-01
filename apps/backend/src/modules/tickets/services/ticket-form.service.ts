@@ -28,7 +28,7 @@ export class TicketFormService {
 
     const queryBuilder = this.formDefinitionRepository
       .createQueryBuilder('form')
-      .leftJoinAndSelect('form.createdByUser', 'user')
+      .leftJoinAndSelect('form.creator', 'user')
       .select([
         'form.id',
         'form.name',

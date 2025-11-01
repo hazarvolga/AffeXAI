@@ -41,11 +41,17 @@ export class FormSubmissionController {
    * Get all form submissions with filters
    */
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get all form submissions with filters' })
   @ApiResponse({ status: 200, description: 'Returns paginated submissions' })
   async findAll(@Query() filters: FormSubmissionFiltersDto) {
-    return await this.submissionService.findAll(filters);
+    // Convert string dates to Date objects
+    const processedFilters = {
+      ...filters,
+      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+    };
+    return await this.submissionService.findAll(processedFilters);
   }
 
   /**
@@ -53,7 +59,7 @@ export class FormSubmissionController {
    * Get submission statistics
    */
   @Get('stats')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get submission statistics' })
   @ApiResponse({ status: 200, description: 'Returns submission stats' })
   async getStats(@Query('formId') formId?: string) {
@@ -65,11 +71,17 @@ export class FormSubmissionController {
    * Preview export data before downloading
    */
   @Get('export/preview')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Preview export data' })
   @ApiResponse({ status: 200, description: 'Returns export preview stats' })
   async getExportPreview(@Query() options: ExportSubmissionsDto) {
-    return await this.exportService.getExportPreview(options);
+    // Convert string dates to Date objects
+    const processedOptions = {
+      ...options,
+      startDate: options.startDate ? new Date(options.startDate) : undefined,
+      endDate: options.endDate ? new Date(options.endDate) : undefined,
+    };
+    return await this.exportService.getExportPreview(processedOptions as any);
   }
 
   /**
@@ -77,7 +89,7 @@ export class FormSubmissionController {
    * Export form submissions
    */
   @Get('export')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Export form submissions' })
   @ApiResponse({
     status: 200,
@@ -94,22 +106,30 @@ export class FormSubmissionController {
   ) {
     const { format, ...exportOptions } = options;
 
+    // Convert string dates to Date objects
+    const processedOptions = {
+      ...exportOptions,
+      startDate: exportOptions.startDate ? new Date(exportOptions.startDate) : undefined,
+      endDate: exportOptions.endDate ? new Date(exportOptions.endDate) : undefined,
+      format,
+    };
+
     let filename: string;
     let contentType: string;
     let data: any;
 
     if (format === 'excel') {
-      data = await this.exportService.exportToExcel(exportOptions as any);
+      data = await this.exportService.exportToExcel(processedOptions as any);
       contentType =
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       filename = this.exportService.generateFilename(undefined, 'excel');
     } else if (format === 'csv') {
-      data = await this.exportService.exportToCSV(exportOptions as any);
+      data = await this.exportService.exportToCSV(processedOptions as any);
       contentType = 'text/csv';
       filename = this.exportService.generateFilename(undefined, 'csv');
     } else {
       // JSON
-      data = await this.exportService.exportToJSON(exportOptions as any);
+      data = await this.exportService.exportToJSON(processedOptions as any);
       contentType = 'application/json';
       filename = this.exportService.generateFilename(undefined, 'json');
     }
@@ -129,7 +149,7 @@ export class FormSubmissionController {
    * Get a single submission
    */
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Get a submission by ID' })
   @ApiResponse({ status: 200, description: 'Returns submission details' })
   @ApiResponse({ status: 404, description: 'Submission not found' })
@@ -153,7 +173,7 @@ export class FormSubmissionController {
    * Update a submission
    */
   @Put(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Update a submission' })
   @ApiResponse({ status: 200, description: 'Submission updated successfully' })
   @ApiResponse({ status: 404, description: 'Submission not found' })
@@ -169,7 +189,7 @@ export class FormSubmissionController {
    * Mark submission as processed
    */
   @Post(':id/process')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Mark submission as processed' })
   @ApiResponse({
     status: 200,
@@ -191,7 +211,7 @@ export class FormSubmissionController {
    * Mark submission as failed
    */
   @Post(':id/fail')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Mark submission as failed' })
   @ApiResponse({ status: 200, description: 'Submission marked as failed' })
   async markAsFailed(
@@ -206,7 +226,7 @@ export class FormSubmissionController {
    * Archive a submission
    */
   @Post(':id/archive')
-  @Roles(UserRole.ADMIN, UserRole.SUPPORT_TEAM)
+  @Roles(UserRole.ADMIN, UserRole.SUPPORT_MANAGER)
   @ApiOperation({ summary: 'Archive a submission' })
   @ApiResponse({ status: 200, description: 'Submission archived' })
   async archive(@Param('id') id: string) {

@@ -62,8 +62,8 @@ export class FormSubmissionService {
       sourceModule: createDto.sourceModule,
       sourceRecordId: createDto.sourceRecordId,
       submittedBy: createDto.submittedBy,
-      submitterIp: createDto.submitterIp,
-      submitterUserAgent: createDto.submitterUserAgent,
+      ipAddress: createDto.submitterIp,
+      userAgent: createDto.submitterUserAgent,
       status: 'pending',
       submittedAt: new Date(),
     });

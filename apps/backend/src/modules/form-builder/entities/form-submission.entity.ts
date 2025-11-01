@@ -86,6 +86,9 @@ export class FormSubmission {
   @Column({ type: 'text', nullable: true })
   userAgent: string;
 
+  @Column({ type: 'text', nullable: true })
+  processingNotes: string; // Notes added when processing the submission
+
   @CreateDateColumn()
   createdAt: Date;
 

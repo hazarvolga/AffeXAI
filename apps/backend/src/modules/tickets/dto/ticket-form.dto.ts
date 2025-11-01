@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, ValidateNested, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { FormSchema } from '../entities/ticket-form-definition.entity';
+import { FormSchema } from '../../form-builder/entities/form-definition.entity';
 
 /**
  * DTO for creating a new ticket form definition

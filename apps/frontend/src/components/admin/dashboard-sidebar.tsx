@@ -42,13 +42,18 @@ const emailMarketingLinks = [
 const supportLinks = [
     { href: "/admin/support", label: "Ticket Listesi", icon: LifeBuoy },
     { href: "/admin/support/categories", label: "Ticket Categories", icon: FolderTree },
-    { href: "/admin/support/forms", label: "Form Yönetimi", icon: FileText },
     { href: "/admin/support/analytics", label: "Raporlar & Analiz", icon: TrendingUp },
     { href: "/admin/support/templates", label: "Ticket Şablonları", icon: FileText },
     { href: "/admin/support/email-templates", label: "Email Şablonları", icon: Mail },
     { href: "/admin/support/knowledge-base", label: "Bilgi Bankası", icon: BookOpen },
     { href: "/admin/support/macros", label: "Makro Yönetimi", icon: Wand2 },
     { href: "/admin/support/ai-insights", label: "AI Insights", icon: Brain },
+];
+
+const formBuilderLinks = [
+    { href: "/admin/form-builder", label: "Genel Bakış", icon: FileText },
+    { href: "/admin/form-builder/forms", label: "Form Yönetimi", icon: FileText },
+    { href: "/admin/form-builder/submissions", label: "Gönderiler", icon: Send },
 ];
 
 const userManagementLinks = [
@@ -195,6 +200,42 @@ export function DashboardSidebar() {
                                                 )}
                                             >
                                                 <link.icon className="h-3 w-3" />
+                                                {link.label}
+                                            </Link>
+                                        )
+                                    })}
+                                    </nav>
+                                </AccordionContent>
+                            </AccordionItem>
+                             )}
+
+                             {/* Form Builder - Admin and Support Manager only */}
+                             {(isAdmin || isSupportManager) && (
+                             <AccordionItem value="form-builder" className="border-none">
+                                <AccordionTrigger className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
+                                    pathname.startsWith('/admin/form-builder') && "bg-muted text-primary"
+                                )}>
+                                    <div className="flex items-center gap-3">
+                                        <Layers className="h-4 w-4" />
+                                        Form Builder
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-8 pt-1">
+                                    <nav className="grid gap-1">
+                                    {formBuilderLinks.map(link => {
+                                        const isActive = pathname === link.href;
+                                        const Icon = link.icon;
+                                        return (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                className={cn(
+                                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                    isActive && "bg-muted text-primary"
+                                                )}
+                                            >
+                                                <Icon className="h-3 w-3" />
                                                 {link.label}
                                             </Link>
                                         )

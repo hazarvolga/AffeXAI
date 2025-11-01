@@ -8,6 +8,13 @@ import { FormFieldLibrary } from './entities/form-field-library.entity';
 import { FormSubmission } from './entities/form-submission.entity';
 import { FormAction } from './entities/form-action.entity';
 
+// Services
+import { FormSubmissionService } from './services/form-submission.service';
+import { FormExportService } from './services/form-export.service';
+
+// Controllers
+import { FormSubmissionController } from './controllers/form-submission.controller';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -18,8 +25,8 @@ import { FormAction } from './entities/form-action.entity';
       FormAction,
     ]),
   ],
-  controllers: [],
-  providers: [],
-  exports: [TypeOrmModule],
+  controllers: [FormSubmissionController],
+  providers: [FormSubmissionService, FormExportService],
+  exports: [TypeOrmModule, FormSubmissionService, FormExportService],
 })
 export class FormBuilderModule {}

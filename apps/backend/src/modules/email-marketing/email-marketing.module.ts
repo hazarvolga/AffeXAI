@@ -142,7 +142,7 @@ import { BlockRendererService } from './services/block-renderer.service';
     SharedModule,
     ScheduleModule.forRoot(),
     PlatformIntegrationModule,
-    UsersModule, // Required for JwtAuthGuard
+    forwardRef(() => UsersModule), // Required for JwtAuthGuard, use forwardRef due to circular dependency
     forwardRef(() => MailModule), // Forward reference to avoid circular dependency
   ],
   controllers: [

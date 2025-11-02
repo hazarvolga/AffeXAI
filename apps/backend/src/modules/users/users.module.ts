@@ -18,7 +18,7 @@ import { UserEmailService } from './services/user-email.service';
     SharedModule,
     forwardRef(() => RolesModule),
     forwardRef(() => CrmModule), // Use forwardRef to avoid circular dependency
-    MailModule,
+    forwardRef(() => MailModule), // Use forwardRef to avoid circular dependency with EmailMarketingModule
   ],
   controllers: [UsersController],
   providers: [UsersService, UserRolesService, UserEmailService],

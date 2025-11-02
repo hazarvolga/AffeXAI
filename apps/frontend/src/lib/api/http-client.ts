@@ -193,7 +193,7 @@ export class HttpClient {
 
     // Load auth token from localStorage (client-side only)
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('auth_token') || localStorage.getItem('aluplan_access_token');
+      const storedToken = localStorage.getItem('access_token');
       if (storedToken) {
         this.authToken = storedToken;
       }
@@ -241,8 +241,8 @@ export class HttpClient {
         
         // If no manual token, try multiple sources
         if (!token && typeof window !== 'undefined') {
-          // Try localStorage first - both auth_token and aluplan_access_token
-          token = localStorage.getItem('auth_token') || localStorage.getItem('aluplan_access_token');
+          // Try localStorage first with OAuth 2.0 standard key
+          token = localStorage.getItem('access_token');
           console.log('🔐 HTTP Client: Token from localStorage:', !!token);
 
           // If still no token, try tokenStorage
@@ -256,7 +256,7 @@ export class HttpClient {
               console.log('🔐 HTTP Client: TokenStorage not available');
             }
           }
-          
+
           // Update internal token if found
           if (token) {
             this.authToken = token;
@@ -440,8 +440,7 @@ export class HttpClient {
         const tokenStorageModule = require('../auth/token-storage');
         const tokenStorage = tokenStorageModule.tokenStorage || tokenStorageModule.default;
         tokenStorage?.clear();
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('aluplan_access_token');
+        localStorage.removeItem('access_token');
       } catch (error) {
         console.error('Error clearing tokens:', error);
       }
@@ -559,15 +558,13 @@ export class HttpClient {
   public setAuthToken(token: string | null): void {
     console.log('🔐 HttpClient: Setting auth token:', !!token);
     this.authToken = token;
-    // Save to localStorage (client-side only)
+    // Save to localStorage (client-side only, OAuth 2.0 standard)
     if (typeof window !== 'undefined') {
       if (token) {
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('aluplan_access_token', token);
+        localStorage.setItem('access_token', token);
         console.log('🔐 HttpClient: Token saved to localStorage');
       } else {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('aluplan_access_token');
+        localStorage.removeItem('access_token');
         console.log('🔐 HttpClient: Token removed from localStorage');
       }
     }

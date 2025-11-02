@@ -67,27 +67,19 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Login successful, setting cookies');
 
-    // Set cookies server-side
+    // Set cookies server-side (OAuth 2.0 standard)
     const cookieStore = await cookies();
 
-    cookieStore.set('auth_token', data.access_token, {
-      httpOnly: true,
+    cookieStore.set('access_token', data.access_token, {
+      httpOnly: false, // Client-side accessible for API calls
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
     });
 
-    cookieStore.set('aluplan_access_token', data.access_token, {
-      httpOnly: false, // Client-side accessible for API calls
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    });
-
     if (data.refresh_token) {
-      cookieStore.set('aluplan_refresh_token', data.refresh_token, {
+      cookieStore.set('refresh_token', data.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

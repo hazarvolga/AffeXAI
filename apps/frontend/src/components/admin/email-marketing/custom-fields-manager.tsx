@@ -362,38 +362,36 @@ export default function CustomFieldsManager() {
   }
 
   if (!isAuthenticated) {
-    // Debug info
+    // Debug info (OAuth 2.0 standard)
     const debugInfo = {
-      localStorage_auth_token: typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null,
-      localStorage_aluplan_access_token: typeof window !== 'undefined' ? localStorage.getItem('aluplan_access_token') : null,
+      localStorage_access_token: typeof window !== 'undefined' ? localStorage.getItem('access_token') : null,
       localStorage_keys: typeof window !== 'undefined' ? Object.keys(localStorage) : [],
       httpClient_token: httpClient.getAuthToken(),
     };
-    
+
     console.log('🔐 Debug - Auth state:', debugInfo);
-    
+
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Giriş Gerekli</h3>
           <p className="text-muted-foreground mb-4">Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.</p>
-          
+
           {/* Debug info */}
           <div className="text-xs text-left bg-gray-100 p-2 rounded mb-4 max-w-md">
             <strong>Debug Info:</strong><br/>
-            localStorage auth_token: {debugInfo.localStorage_auth_token ? 'EXISTS' : 'MISSING'}<br/>
-            localStorage aluplan_access_token: {debugInfo.localStorage_aluplan_access_token ? 'EXISTS' : 'MISSING'}<br/>
+            localStorage access_token: {debugInfo.localStorage_access_token ? 'EXISTS' : 'MISSING'}<br/>
             httpClient token: {debugInfo.httpClient_token ? 'EXISTS' : 'MISSING'}<br/>
             localStorage keys: {debugInfo.localStorage_keys.join(', ')}
           </div>
-          
+
           <div className="space-y-2">
             <Button onClick={() => window.location.href = '/login'}>
               Giriş Yap
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 localStorage.clear();
                 sessionStorage.clear();
@@ -402,11 +400,11 @@ export default function CustomFieldsManager() {
             >
               Oturumu Temizle
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
-                // Try to manually set token from localStorage
-                const token = localStorage.getItem('auth_token') || localStorage.getItem('aluplan_access_token');
+                // Try to manually set token from localStorage (OAuth 2.0 standard)
+                const token = localStorage.getItem('access_token');
                 if (token) {
                   httpClient.setAuthToken(token);
                   window.location.reload();

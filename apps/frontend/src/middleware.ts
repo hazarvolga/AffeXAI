@@ -35,9 +35,8 @@ export function middleware(request: NextRequest) {
   const requiresAuth = isAdminRoute || isPortalRoute;
 
   if (requiresAuth) {
-    // Get auth token from cookies or headers
-    const authToken = request.cookies.get('auth_token')?.value ||
-                     request.cookies.get('aluplan_access_token')?.value ||
+    // Get auth token from cookies or headers (OAuth 2.0 standard)
+    const authToken = request.cookies.get('access_token')?.value ||
                      request.headers.get('authorization')?.replace('Bearer ', '');
 
     // No token = redirect to login

@@ -246,11 +246,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(currentUser);
       } catch (err) {
         console.error('🔐 Session restoration failed:', err);
-        // Clear invalid tokens
+        // Clear invalid tokens (OAuth 2.0 standard)
         tokenStorage.clear();
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('aluplan_access_token');
+          localStorage.removeItem('access_token');
         }
       } finally {
         setIsLoading(false);

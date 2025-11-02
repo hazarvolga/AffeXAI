@@ -30,8 +30,8 @@ export class TokenStorage {
 
   constructor(config?: Partial<TokenStorageConfig>) {
     this.config = {
-      accessTokenKey: config?.accessTokenKey || 'aluplan_access_token',
-      refreshTokenKey: config?.refreshTokenKey || 'aluplan_refresh_token',
+      accessTokenKey: config?.accessTokenKey || 'access_token',
+      refreshTokenKey: config?.refreshTokenKey || 'refresh_token',
       storageType: config?.storageType || 'localStorage',
     };
 

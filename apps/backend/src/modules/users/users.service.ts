@@ -70,34 +70,39 @@ export class UsersService {
 
       console.log('✓ User created successfully:', savedUser.id);
 
-      // CRITICAL: Check if email exists in CRM database
-      // If yes, automatically assign customer role
-      let primaryRoleId = savedUser.roleId;
-      let additionalRoles: string[] = [];
+      // Determine primary role and additional roles
+      // Priority: 1. Explicit primaryRoleId from DTO, 2. CRM check, 3. savedUser.roleId
+      let primaryRoleId = createUserDto.primaryRoleId || savedUser.roleId;
+      let additionalRoles: string[] = createUserDto.additionalRoleIds || [];
 
-      try {
-        const isCustomer = await this.crmService.isCustomerEmail(savedUser.email);
+      // CRM check only if no explicit primaryRoleId was provided
+      if (!createUserDto.primaryRoleId) {
+        try {
+          const isCustomer = await this.crmService.isCustomerEmail(savedUser.email);
 
-        if (isCustomer) {
-          console.log('🎯 CRM Check: Email found in CRM database - auto-assigning customer role');
+          if (isCustomer) {
+            console.log('🎯 CRM Check: Email found in CRM database - auto-assigning customer role');
 
-          // Get customer role ID
-          const roles = await this.rolesService.findAll();
-          const customerRole = roles.find(r => r.name === 'customer');
+            // Get customer role ID
+            const roles = await this.rolesService.findAll();
+            const customerRole = roles.find(r => r.name === 'customer');
 
-          if (customerRole) {
-            // Set customer as primary role (not viewer)
-            primaryRoleId = customerRole.id;
-            console.log('✅ Customer role will be set as primary:', customerRole.name);
+            if (customerRole) {
+              // Set customer as primary role (not viewer)
+              primaryRoleId = customerRole.id;
+              console.log('✅ Customer role will be set as primary:', customerRole.name);
+            } else {
+              console.warn('⚠️ Customer role not found in database, using viewer role');
+            }
           } else {
-            console.warn('⚠️ Customer role not found in database, using viewer role');
+            console.log('ℹ️ CRM Check: Email not found in CRM - assigning viewer role');
           }
-        } else {
-          console.log('ℹ️ CRM Check: Email not found in CRM - assigning viewer role');
+        } catch (crmError) {
+          console.error('❌ CRM check failed:', crmError.message);
+          // Continue with default viewer role if CRM check fails
         }
-      } catch (crmError) {
-        console.error('❌ CRM check failed:', crmError.message);
-        // Continue with default viewer role if CRM check fails
+      } else {
+        console.log('ℹ️ Explicit primaryRoleId provided - skipping CRM check');
       }
 
       // CRITICAL: Create user_roles junction table entry

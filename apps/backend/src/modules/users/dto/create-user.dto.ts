@@ -58,17 +58,31 @@ export class CreateUserDto {
   @IsOptional()
   bio?: string;
 
-  @ApiPropertyOptional({ description: 'Role ID (UUID)', example: 'a1b2c3d4-e5f6-4789-abcd-000000000003' })
+  @ApiPropertyOptional({ description: 'Role ID (UUID) - Legacy field for backward compatibility', example: 'a1b2c3d4-e5f6-4789-abcd-000000000003' })
   @IsUUID()
   @IsOptional()
   roleId?: string;
+
+  @ApiPropertyOptional({ description: 'Primary Role ID (UUID) - NEW: Multi-role system', example: 'a1b2c3d4-e5f6-4789-abcd-000000000003' })
+  @IsUUID()
+  @IsOptional()
+  primaryRoleId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Additional Role IDs (UUIDs) - NEW: Multi-role system',
+    example: ['a1b2c3d4-e5f6-4789-abcd-000000000004', 'a1b2c3d4-e5f6-4789-abcd-000000000005'],
+    type: [String]
+  })
+  @IsUUID('4', { each: true })
+  @IsOptional()
+  additionalRoleIds?: string[];
 
   @ApiPropertyOptional({ description: 'Is user active', default: true })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Additional metadata (JSON object for account types, preferences, etc.)',
     example: { isCustomer: true, isStudent: false, isSubscriber: true }
   })
@@ -76,7 +90,7 @@ export class CreateUserDto {
   metadata?: Record<string, any>;
 
   // Legacy field - kept for backward compatibility
-  @ApiPropertyOptional({ description: 'Legacy role field (deprecated, use roleId)', deprecated: true })
+  @ApiPropertyOptional({ description: 'Legacy role field (deprecated, use primaryRoleId)', deprecated: true })
   @IsString()
   @IsOptional()
   role?: string;

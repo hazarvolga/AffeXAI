@@ -137,7 +137,7 @@ export function UserForm({ user = null }: UserFormProps) {
         setLoading(true);
 
         try {
-            // First role is primary, rest are additional
+            // Multi-role support: First role is primary, rest are additional
             const primaryRoleId = selectedRoles[0];
             const additionalRoleIds = selectedRoles.slice(1);
 
@@ -155,19 +155,18 @@ export function UserForm({ user = null }: UserFormProps) {
                     selectedRoles,
                 });
 
-                // Update existing user with new multi-role system
+                // Update existing user with multi-role system
                 const updateData: UpdateUserDto = {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
                     email: formData.email,
-                    primaryRoleId: primaryRoleId, // NEW: Use new multi-role fields
+                    primaryRoleId: primaryRoleId, // NEW: Multi-role system
                     additionalRoleIds: additionalRoleIds, // NEW: Additional roles
                     phone: formData.phone || undefined,
                     city: formData.city || undefined,
                     country: formData.country || undefined,
                     address: formData.address || undefined,
                     bio: formData.bio || undefined,
-                    // No need to store roles in metadata anymore - handled by user_roles table
                 };
 
                 // Only include password if it's provided
@@ -200,8 +199,7 @@ export function UserForm({ user = null }: UserFormProps) {
                     lastName: formData.lastName,
                     email: formData.email,
                     password: formData.password,
-                    roleId: primaryRoleId, // Legacy field for backward compatibility
-                    primaryRoleId: primaryRoleId, // NEW: Primary role
+                    primaryRoleId: primaryRoleId, // NEW: Multi-role system
                     additionalRoleIds: additionalRoleIds, // NEW: Additional roles
                     phone: formData.phone || undefined,
                     city: formData.city || undefined,

@@ -87,6 +87,7 @@ const ComponentDetailPage = () => {
         componentType: component.componentType as any,
         blockType: component.blockType,
         blockCategory: component.blockCategory,
+        blockId: component.blockId, // ✅ Add blockId for DynamicFormGenerator
         props: component.props,
         tags: component.tags,
         categoryId: component.categoryId,

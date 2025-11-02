@@ -9,6 +9,7 @@ export interface ReusableComponent {
   componentType: string;
   blockType?: string;
   blockCategory?: string;
+  blockId?: string; // Reference to prebuild block config
   props: Record<string, any>;
   tags: string[];
   categoryId?: string;
@@ -128,6 +129,7 @@ export interface CreateComponentDto {
   componentType: string;
   blockType?: string;
   blockCategory?: string;
+  blockId?: string; // Reference to prebuild block config
   props: Record<string, any>;
   tags?: string[];
   categoryId?: string;
@@ -143,6 +145,7 @@ export interface UpdateComponentDto {
   componentType?: string;
   blockType?: string;
   blockCategory?: string;
+  blockId?: string; // Reference to prebuild block config
   props?: Record<string, any>;
   tags?: string[];
   categoryId?: string;

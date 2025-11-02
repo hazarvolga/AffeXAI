@@ -44,7 +44,7 @@ export const ReusableComponentPropsEditor: React.FC<PropsEditorProps> = ({
         </CardHeader>
         <CardContent>
           <DynamicFormGenerator
-            schema={allBlockConfigs[blockId].schema}
+            schema={allBlockConfigs[blockId]}
             values={value}
             onChange={handlePropChange}
           />

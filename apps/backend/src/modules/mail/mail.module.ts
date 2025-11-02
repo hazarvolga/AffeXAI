@@ -7,6 +7,8 @@ import { WebhookService } from './services/webhook.service';
 import { TemplateRendererService } from './template-renderer.service';
 import { EmailSuppression } from './entities/email-suppression.entity';
 import { SettingsModule } from '../settings/settings.module';
+import { Ticket } from '../tickets/entities/ticket.entity';
+import { TicketMessage } from '../tickets/entities/ticket-message.entity';
 
 import { EmailMarketingModule } from '../email-marketing/email-marketing.module';
 import { EmailEventListener } from './listeners/email-event.listener';
@@ -18,7 +20,7 @@ import { EmailEventListener } from './listeners/email-event.listener';
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EmailSuppression]),
+    TypeOrmModule.forFeature([EmailSuppression, Ticket, TicketMessage]),
     SettingsModule,
     forwardRef(() => EmailMarketingModule), // Forward reference for UnifiedTemplateService
   ],

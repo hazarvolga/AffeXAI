@@ -29,6 +29,8 @@ import { KnowledgeBaseService } from './services/knowledge-base.service';
  * Tickets Service
  * Business logic for ticket management
  */
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 @Injectable()
 export class TicketsService {
   private readonly logger = new Logger(TicketsService.name);
@@ -57,6 +59,7 @@ export class TicketsService {
     private readonly appLoggerService: AppLoggerService,
     private readonly faqSearchService: FaqEnhancedSearchService,
     private readonly knowledgeBaseService: KnowledgeBaseService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -509,44 +512,22 @@ export class TicketsService {
       const isCustomerMessage = userId === ticket.userId;
 
       if (messageWithAuthor) {
-        // If customer sends message, notify assigned user + all support managers
-        if (isCustomerMessage) {
-          // Notify assigned user if exists
-          if (ticket.assignedTo) {
-            await this.ticketEmailService.sendNewMessageEmail(
-              ticket,
-              messageWithAuthor,
-              ticket.assignedTo,
-              isCustomerMessage,
-            );
-          }
+        const customer = await this.userRepository.findOne({ where: { id: ticket.userId } });
+        
+        // Emit ticket.message.created event for email notifications
+        this.eventEmitter.emit('ticket.message.created', {
+          ticketId: ticket.id,
+          messageId: savedMessage.id,
+          isFromCustomer: isCustomerMessage,
+          customerEmail: customer?.email,
+          customerName: customer ? `${customer.firstName} ${customer.lastName}` : undefined,
+          supportEmail: ticket.assignedTo?.email,
+          supportName: ticket.assignedTo ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}` : undefined,
+          ticketSubject: ticket.subject,
+          messageContent: dto.content,
+        });
 
-          // Notify all support managers
-          const supportManagers = await this.getSupportManagers();
-          for (const manager of supportManagers) {
-            // Skip if manager is the assigned user (already notified)
-            if (ticket.assignedTo && manager.id === ticket.assignedTo.id) {
-              continue;
-            }
-            await this.ticketEmailService.sendNewMessageEmail(
-              ticket,
-              messageWithAuthor,
-              manager,
-              isCustomerMessage,
-            );
-          }
-        } else {
-          // If support sends message, notify customer
-          const customer = await this.userRepository.findOne({ where: { id: ticket.userId } });
-          if (customer) {
-            await this.ticketEmailService.sendNewMessageEmail(
-              ticket,
-              messageWithAuthor,
-              customer,
-              isCustomerMessage,
-            );
-          }
-        }
+        this.logger.log(`📧 Emitted ticket.message.created event for ticket ${ticket.id}`);
       }
     }
 

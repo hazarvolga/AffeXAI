@@ -1,9 +1,12 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EmailWebhookEvent, EmailWebhookEventType, BounceReason } from '../interfaces/webhook-event.interface';
 import { EmailSuppression } from '../entities/email-suppression.entity';
 import { SubscriberService } from '../../email-marketing/subscriber.service';
+import { Ticket } from '../../tickets/entities/ticket.entity';
+import { TicketMessage } from '../../tickets/entities/ticket-message.entity';
 
 @Injectable()
 export class WebhookService {
@@ -12,8 +15,17 @@ export class WebhookService {
   constructor(
     @InjectRepository(EmailSuppression)
     private suppressionRepository: Repository<EmailSuppression>,
+    
+    @InjectRepository(Ticket)
+    private ticketRepository: Repository<Ticket>,
+    
+    @InjectRepository(TicketMessage)
+    private ticketMessageRepository: Repository<TicketMessage>,
+    
     @Inject(forwardRef(() => SubscriberService))
     private subscriberService: SubscriberService,
+    
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -250,5 +262,93 @@ export class WebhookService {
     return await this.suppressionRepository.find({
       order: { suppressedAt: 'DESC' },
     });
+  }
+
+  /**
+   * Handle inbound emails (email replies to tickets)
+   * Parse ticket ID from recipient address and create ticket message
+   */
+  async handleInboundEmail(inboundData: {
+    from: string;
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+    messageId: string;
+    inReplyTo?: string;
+    references?: string;
+    headers: any;
+  }): Promise<void> {
+    this.logger.log(`📧 Processing inbound email from: ${inboundData.from}`);
+    this.logger.log(`   To: ${inboundData.to}`);
+    this.logger.log(`   Subject: ${inboundData.subject}`);
+
+    try {
+      // Extract ticket ID from recipient address (ticket-{id}@domain.com or ticket+{id}@domain.com)
+      const ticketIdMatch = inboundData.to.match(/ticket[-+](\d+)@/);
+      
+      if (!ticketIdMatch) {
+        this.logger.warn(`❌ Could not extract ticket ID from recipient: ${inboundData.to}`);
+        return;
+      }
+
+      const ticketId = parseInt(ticketIdMatch[1], 10);
+      this.logger.log(`🎫 Extracted ticket ID: ${ticketId}`);
+
+      // Look up ticket in database
+      const ticket = await this.ticketRepository.findOne({
+        where: { id: ticketId },
+        relations: ['customer', 'assignedTo'],
+      });
+
+      if (!ticket) {
+        this.logger.warn(`❌ Ticket not found: ${ticketId}`);
+        return;
+      }
+
+      this.logger.log(`✅ Found ticket: ${ticket.subject} (Status: ${ticket.status})`);
+
+      // Determine if this is from customer or support team
+      const isFromCustomer = inboundData.from.toLowerCase() === ticket.customer?.email?.toLowerCase();
+      
+      // Create new ticket message
+      const ticketMessage = this.ticketMessageRepository.create({
+        ticket: { id: ticketId },
+        sender: isFromCustomer ? ticket.customer : ticket.assignedTo,
+        message: inboundData.text || inboundData.html || '',
+        isInternal: false, // Email replies are always public
+        createdAt: new Date(),
+      });
+
+      await this.ticketMessageRepository.save(ticketMessage);
+      this.logger.log(`✅ Created ticket message from email reply`);
+
+      // Emit ticket.message.created event for email notifications
+      this.eventEmitter.emit('ticket.message.created', {
+        ticketId: ticket.id,
+        messageId: ticketMessage.id,
+        isFromCustomer,
+        customerEmail: ticket.customer?.email,
+        customerName: `${ticket.customer?.firstName} ${ticket.customer?.lastName}`,
+        supportEmail: ticket.assignedTo?.email,
+        supportName: ticket.assignedTo ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}` : undefined,
+        ticketSubject: ticket.subject,
+        messageContent: ticketMessage.message,
+      });
+
+      this.logger.log(`📧 Emitted ticket.message.created event`);
+
+      // Update ticket status if it was closed/resolved
+      if (ticket.status === 'closed' || ticket.status === 'resolved') {
+        ticket.status = 'open'; // Reopen ticket on customer reply
+        ticket.updatedAt = new Date();
+        await this.ticketRepository.save(ticket);
+        this.logger.log(`🔄 Reopened ticket ${ticketId} due to customer reply`);
+      }
+
+    } catch (error) {
+      this.logger.error(`❌ Error processing inbound email: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 }

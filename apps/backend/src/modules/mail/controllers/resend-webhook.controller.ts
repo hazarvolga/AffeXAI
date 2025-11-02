@@ -74,6 +74,65 @@ export class ResendWebhookController {
   }
 
   /**
+   * Handle inbound emails (email replies)
+   * 
+   * Setup in Resend dashboard:
+   * 1. Go to Domains → your domain → Inbound
+   * 2. Add inbound rule to forward emails
+   * 3. Set webhook URL: https://yourdomain.com/api/webhooks/resend/inbound
+   * 4. Forward emails matching pattern: ticket-*@yourdomain.com
+   */
+  @Post('inbound')
+  async handleInboundEmail(
+    @Headers('svix-id') svixId: string,
+    @Headers('svix-timestamp') svixTimestamp: string,
+    @Headers('svix-signature') svixSignature: string,
+    @Body() payload: any,
+  ) {
+    this.logger.log('📧 Received inbound email webhook');
+
+    // Verify webhook signature in production
+    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+    
+    if (process.env.NODE_ENV === 'production' && webhookSecret) {
+      try {
+        const wh = new Webhook(webhookSecret);
+        wh.verify(JSON.stringify(payload), {
+          'svix-id': svixId,
+          'svix-timestamp': svixTimestamp,
+          'svix-signature': svixSignature,
+        });
+        this.logger.log('✅ Inbound email signature verified');
+      } catch (err) {
+        this.logger.error(`❌ Inbound email signature verification failed: ${err.message}`);
+        throw new BadRequestException('Invalid signature');
+      }
+    } else {
+      this.logger.warn('⚠️ Development mode: Skipping signature verification');
+    }
+
+    // Extract email data from Resend inbound payload
+    const inboundData = {
+      from: payload.data.from,
+      to: payload.data.to,
+      subject: payload.data.subject,
+      text: payload.data.text,
+      html: payload.data.html,
+      messageId: payload.data.message_id,
+      inReplyTo: payload.data.in_reply_to,
+      references: payload.data.references,
+      headers: payload.data.headers,
+    };
+
+    this.logger.log(`📨 Inbound email from: ${inboundData.from} to: ${inboundData.to}`);
+
+    // Process inbound email (check if it's a ticket reply)
+    await this.webhookService.handleInboundEmail(inboundData);
+
+    return { success: true };
+  }
+
+  /**
    * Map Resend-specific webhook payload to generic EmailWebhookEvent
    */
   private mapResendToGenericEvent(payload: ResendWebhookPayload): EmailWebhookEvent {

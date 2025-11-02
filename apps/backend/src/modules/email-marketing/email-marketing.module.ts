@@ -80,8 +80,8 @@ import { ValidationJobProcessor } from './processors/validation-job.processor';
 import { SharedModule } from '../../shared/shared.module';
 import { SettingsModule } from '../settings/settings.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PlatformIntegrationModule } from '../platform-integration/platform-integration.module';
 import { UsersModule } from '../users/users.module';
+import { PlatformIntegrationModule } from '../platform-integration/platform-integration.module';
 import { MailModule } from '../mail/mail.module';
 import { MailService } from '../mail/mail.service';
 

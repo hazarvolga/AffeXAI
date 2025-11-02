@@ -284,21 +284,21 @@ export class WebhookService {
     this.logger.log(`   Subject: ${inboundData.subject}`);
 
     try {
-      // Extract ticket ID from recipient address (ticket-{id}@domain.com or ticket+{id}@domain.com)
-      const ticketIdMatch = inboundData.to.match(/ticket[-+](\d+)@/);
-      
+      // Extract ticket ID from recipient address (ticket-{uuid}@domain.com)
+      const ticketIdMatch = inboundData.to.match(/ticket-([a-f0-9-]+)@/);
+
       if (!ticketIdMatch) {
         this.logger.warn(`❌ Could not extract ticket ID from recipient: ${inboundData.to}`);
         return;
       }
 
-      const ticketId = parseInt(ticketIdMatch[1], 10);
+      const ticketId = ticketIdMatch[1];
       this.logger.log(`🎫 Extracted ticket ID: ${ticketId}`);
 
       // Look up ticket in database
       const ticket = await this.ticketRepository.findOne({
         where: { id: ticketId },
-        relations: ['customer', 'assignedTo'],
+        relations: ['user', 'assignedTo'],
       });
 
       if (!ticket) {
@@ -309,13 +309,13 @@ export class WebhookService {
       this.logger.log(`✅ Found ticket: ${ticket.subject} (Status: ${ticket.status})`);
 
       // Determine if this is from customer or support team
-      const isFromCustomer = inboundData.from.toLowerCase() === ticket.customer?.email?.toLowerCase();
-      
+      const isFromCustomer = inboundData.from.toLowerCase() === ticket.user?.email?.toLowerCase();
+
       // Create new ticket message
       const ticketMessage = this.ticketMessageRepository.create({
-        ticket: { id: ticketId },
-        sender: isFromCustomer ? ticket.customer : ticket.assignedTo,
-        message: inboundData.text || inboundData.html || '',
+        ticketId: ticketId,
+        authorId: isFromCustomer ? ticket.userId : ticket.assignedToId,
+        content: inboundData.text || inboundData.html || '',
         isInternal: false, // Email replies are always public
         createdAt: new Date(),
       });
@@ -328,19 +328,19 @@ export class WebhookService {
         ticketId: ticket.id,
         messageId: ticketMessage.id,
         isFromCustomer,
-        customerEmail: ticket.customer?.email,
-        customerName: `${ticket.customer?.firstName} ${ticket.customer?.lastName}`,
+        customerEmail: ticket.user?.email,
+        customerName: ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : undefined,
         supportEmail: ticket.assignedTo?.email,
         supportName: ticket.assignedTo ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}` : undefined,
         ticketSubject: ticket.subject,
-        messageContent: ticketMessage.message,
+        messageContent: ticketMessage.content,
       });
 
       this.logger.log(`📧 Emitted ticket.message.created event`);
 
       // Update ticket status if it was closed/resolved
       if (ticket.status === 'closed' || ticket.status === 'resolved') {
-        ticket.status = 'open'; // Reopen ticket on customer reply
+        ticket.status = 'open' as any; // Reopen ticket on customer reply
         ticket.updatedAt = new Date();
         await this.ticketRepository.save(ticket);
         this.logger.log(`🔄 Reopened ticket ${ticketId} due to customer reply`);

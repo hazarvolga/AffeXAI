@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MailService } from '../mail.service';
-import { MailChannel } from '../mail.types';
+import { MailChannel } from '../interfaces/mail-service.interface';
 
 /**
  * Email Event Listener
@@ -61,33 +61,36 @@ export class EmailEventListener {
    */
   @OnEvent('ticket.message.created')
   async handleTicketMessageCreated(payload: {
-    ticketId: number;
-    messageId: number;
-    ticketDisplayNumber: string;
-    ticketTitle: string;
-    messageText: string;
-    senderRole: string; // 'customer' | 'support'
-    customerEmail: string;
-    customerName: string;
-    assignedToEmail?: string;
-    assignedToName?: string;
+    ticketId: string;
+    messageId: string;
+    isFromCustomer: boolean;
+    customerEmail?: string;
+    customerName?: string;
+    supportEmail?: string;
+    supportName?: string;
+    ticketSubject: string;
+    messageContent: string;
   }) {
-    this.logger.log(`📧 Handling ticket.message.created event for ticket #${payload.ticketDisplayNumber}`);
+    this.logger.log(`📧 Handling ticket.message.created event for ticket ${payload.ticketId}`);
 
     try {
-      if (payload.senderRole === 'customer') {
+      if (payload.isFromCustomer) {
         // Customer sent message → notify support team
-        if (payload.assignedToEmail) {
+        if (payload.supportEmail && payload.supportName) {
           await this.sendTicketNotificationToSupport(payload);
         } else {
-          this.logger.warn(`⚠️ Ticket #${payload.ticketDisplayNumber} has no assigned support - skipping email`);
+          this.logger.warn(`⚠️ Ticket ${payload.ticketId} has no assigned support - skipping email`);
         }
       } else {
         // Support sent message → notify customer
-        await this.sendTicketNotificationToCustomer(payload);
+        if (payload.customerEmail && payload.customerName) {
+          await this.sendTicketNotificationToCustomer(payload);
+        } else {
+          this.logger.warn(`⚠️ Ticket ${payload.ticketId} has no customer email - skipping email`);
+        }
       }
 
-      this.logger.log(`✅ Ticket notification sent for #${payload.ticketDisplayNumber}`);
+      this.logger.log(`✅ Ticket notification sent for ${payload.ticketId}`);
     } catch (error) {
       this.logger.error(`❌ Failed to send ticket notification: ${error.message}`, error.stack);
       // Don't throw - email failure shouldn't break ticket message creation
@@ -98,30 +101,30 @@ export class EmailEventListener {
    * Send ticket notification to customer
    */
   private async sendTicketNotificationToCustomer(payload: {
-    ticketDisplayNumber: string;
-    ticketTitle: string;
-    messageText: string;
-    customerEmail: string;
-    customerName: string;
-    assignedToName?: string;
+    ticketId: string;
+    ticketSubject: string;
+    messageContent: string;
+    customerEmail?: string;
+    customerName?: string;
+    supportName?: string;
   }) {
     const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
-    const ticketUrl = `${baseUrl}/portal/support/${payload.ticketDisplayNumber}`;
+    const ticketUrl = `${baseUrl}/portal/support/${payload.ticketId}`;
 
     await this.mailService.sendMail({
       to: {
-        email: payload.customerEmail,
-        name: payload.customerName,
+        email: payload.customerEmail!,
+        name: payload.customerName!,
       },
-      subject: `Destek Talebiniz Yanıtlandı - #${payload.ticketDisplayNumber}`,
+      subject: `Destek Talebiniz Yanıtlandı - ${payload.ticketSubject}`,
       template: 'ticket-reply-customer',
       channel: MailChannel.TRANSACTIONAL,
       context: {
         customerName: payload.customerName,
-        ticketNumber: payload.ticketDisplayNumber,
-        ticketTitle: payload.ticketTitle,
-        messageText: payload.messageText,
-        supportName: payload.assignedToName || 'Destek Ekibi',
+        ticketNumber: payload.ticketId,
+        ticketTitle: payload.ticketSubject,
+        messageText: payload.messageContent,
+        supportName: payload.supportName || 'Destek Ekibi',
         ticketUrl,
       },
     });
@@ -131,30 +134,30 @@ export class EmailEventListener {
    * Send ticket notification to support team
    */
   private async sendTicketNotificationToSupport(payload: {
-    ticketDisplayNumber: string;
-    ticketTitle: string;
-    messageText: string;
-    customerName: string;
-    assignedToEmail: string;
-    assignedToName: string;
+    ticketId: string;
+    ticketSubject: string;
+    messageContent: string;
+    customerName?: string;
+    supportEmail?: string;
+    supportName?: string;
   }) {
     const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
-    const ticketUrl = `${baseUrl}/admin/support/${payload.ticketDisplayNumber}`;
+    const ticketUrl = `${baseUrl}/admin/support/${payload.ticketId}`;
 
     await this.mailService.sendMail({
       to: {
-        email: payload.assignedToEmail,
-        name: payload.assignedToName,
+        email: payload.supportEmail!,
+        name: payload.supportName!,
       },
-      subject: `Yeni Müşteri Mesajı - #${payload.ticketDisplayNumber}`,
+      subject: `Yeni Müşteri Mesajı - ${payload.ticketSubject}`,
       template: 'ticket-reply-support',
       channel: MailChannel.TRANSACTIONAL,
       context: {
-        supportName: payload.assignedToName,
+        supportName: payload.supportName,
         customerName: payload.customerName,
-        ticketNumber: payload.ticketDisplayNumber,
-        ticketTitle: payload.ticketTitle,
-        messageText: payload.messageText,
+        ticketNumber: payload.ticketId,
+        ticketTitle: payload.ticketSubject,
+        messageText: payload.messageContent,
         ticketUrl,
       },
     });

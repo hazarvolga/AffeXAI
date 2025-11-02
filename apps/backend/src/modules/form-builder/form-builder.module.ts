@@ -15,6 +15,9 @@ import { FormExportService } from './services/form-export.service';
 // Controllers
 import { FormSubmissionController } from './controllers/form-submission.controller';
 
+// Import UsersModule for authentication guards
+import { UsersModule } from '../users/users.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -24,6 +27,7 @@ import { FormSubmissionController } from './controllers/form-submission.controll
       FormSubmission,
       FormAction,
     ]),
+    UsersModule, // Required for JwtAuthGuard and RolesGuard
   ],
   controllers: [FormSubmissionController],
   providers: [FormSubmissionService, FormExportService],

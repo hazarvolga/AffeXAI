@@ -523,6 +523,66 @@ export default function SiteSettingsPage() {
                                 <Separator/>
 
                                 <div>
+                                    <h3 className="text-lg font-medium mb-4">Transactional Email Adresleri</h3>
+                                    <p className="text-sm text-muted-foreground mb-4">
+                                        Sistem tarafından otomatik olarak kullanılan email adresleri. Bu adresler, yukarıda girilen domain adına göre otomatik oluşturulur.
+                                    </p>
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="p-4 border rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <p className="text-sm font-medium">Destek Maili</p>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">Ticket cevapları ve destek bildirimleri</p>
+                                            <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                                                destek@{effectiveSettings.domain || 'affexai.com'}
+                                            </code>
+                                        </div>
+
+                                        <div className="p-4 border rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <p className="text-sm font-medium">Ticket Reply-To</p>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">Ticket email yanıtları için</p>
+                                            <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                                                ticket-{'{uuid}'}@{effectiveSettings.domain || 'affexai.com'}
+                                            </code>
+                                        </div>
+
+                                        <div className="p-4 border rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <p className="text-sm font-medium">Event Bildirimleri</p>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">Etkinlik kayıt ve bildirimler</p>
+                                            <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                                                event@{effectiveSettings.domain || 'affexai.com'}
+                                            </code>
+                                        </div>
+
+                                        <div className="p-4 border rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <p className="text-sm font-medium">Newsletter</p>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">E-posta pazarlama kampanyaları</p>
+                                            <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                                                newsletter@{effectiveSettings.domain || 'affexai.com'}
+                                            </code>
+                                        </div>
+                                    </div>
+                                    <Alert className="mt-4">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertDescription className="text-sm">
+                                            <strong>Not:</strong> Bu email adresleri yukarıda girilen domain adına göre otomatik oluşturulur. Domain değiştirirseniz, email adresleri de otomatik olarak güncellenecektir. Email servisinizde (Resend, SendGrid vb.) bu adresleri doğruladığınızdan emin olun.
+                                        </AlertDescription>
+                                    </Alert>
+                                </div>
+
+                                <Separator/>
+
+                                <div>
                                     <h3 className="text-lg font-medium mb-4">Varsayılan Şablonlar</h3>
                                     <div className="space-y-4">
                                         <Input 

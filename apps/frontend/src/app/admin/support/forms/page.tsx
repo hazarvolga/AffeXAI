@@ -73,10 +73,13 @@ export default function TicketFormsPage() {
   const fetchForms = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching forms...');
       const data = await TicketFormService.getAllFormDefinitions();
+      console.log('📋 Forms received:', data);
+      console.log('📊 Forms count:', data?.length || 0);
       setForms(data);
     } catch (error) {
-      console.error('Error fetching forms:', error);
+      console.error('❌ Error fetching forms:', error);
       toast({
         title: 'Hata',
         description: 'Form listesi yüklenirken bir hata oluştu',

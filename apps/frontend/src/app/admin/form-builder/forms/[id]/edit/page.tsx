@@ -30,7 +30,7 @@ export default function EditFormPage() {
           description: error.message || 'Form yüklenirken bir hata oluştu',
           variant: 'destructive',
         });
-        router.push('/admin/support/forms');
+        router.push('/admin/form-builder/forms');
       } finally {
         setLoading(false);
       }
@@ -48,7 +48,7 @@ export default function EditFormPage() {
         title: 'Başarılı',
         description: 'Form güncellendi',
       });
-      router.push('/admin/support/forms');
+      router.push('/admin/form-builder/forms');
     } catch (error: any) {
       toast({
         title: 'Hata',
@@ -59,7 +59,7 @@ export default function EditFormPage() {
   };
 
   const handleCancel = () => {
-    router.push('/admin/support/forms');
+    router.push('/admin/form-builder/forms');
   };
 
   if (loading) {
@@ -74,7 +74,7 @@ export default function EditFormPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[400px] gap-4">
         <p className="text-muted-foreground">Form bulunamadı</p>
-        <Button onClick={() => router.push('/admin/support/forms')}>
+        <Button onClick={() => router.push('/admin/form-builder/forms')}>
           Form Listesine Dön
         </Button>
       </div>

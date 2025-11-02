@@ -74,7 +74,9 @@ export default function TicketFormsPage() {
     try {
       setLoading(true);
       const data = await TicketFormService.getAllFormDefinitions();
-      setForms(data);
+      // Filter out ticket forms (module: 'tickets')
+      const nonTicketForms = data.filter(form => (form as any).module !== 'tickets');
+      setForms(nonTicketForms);
     } catch (error) {
       console.error('Error fetching forms:', error);
       toast({
@@ -159,12 +161,12 @@ export default function TicketFormsPage() {
 
   // Navigate to new form page
   const handleNewForm = () => {
-    router.push('/admin/support/forms/new');
+    router.push('/admin/form-builder/forms/new');
   };
 
   // Navigate to edit form page
   const handleEdit = (form: TicketFormDefinition) => {
-    router.push(`/admin/support/forms/${form.id}/edit`);
+    router.push(`/admin/form-builder/forms/${form.id}/edit`);
   };
 
 
@@ -173,9 +175,9 @@ export default function TicketFormsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ticket Form Yönetimi</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Form Yönetimi</h1>
           <p className="text-muted-foreground mt-1">
-            Destek talep formlarını özelleştirin ve yönetin
+            Genel amaçlı formları özelleştirin ve yönetin (Events, Certificates, CMS, Email)
           </p>
         </div>
         <Button onClick={handleNewForm}>

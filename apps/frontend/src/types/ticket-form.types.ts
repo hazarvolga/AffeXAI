@@ -127,6 +127,10 @@ export interface TicketFormDefinition {
   schema: FormSchema;
   isActive: boolean;
   isDefault: boolean;
+  module?: string; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+  formType?: string; // 'standard', 'survey', 'registration', 'application', etc.
+  allowPublicSubmissions?: boolean; // Allow non-authenticated users to submit
+  settings?: any; // Module-specific settings
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
@@ -155,6 +159,8 @@ export interface CreateFormDefinitionDto {
   schema: FormSchema;
   isActive?: boolean;
   isDefault?: boolean;
+  module?: string; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+  formType?: string; // 'standard', 'survey', 'registration', 'application', etc.
 }
 
 export interface UpdateFormDefinitionDto {
@@ -163,6 +169,8 @@ export interface UpdateFormDefinitionDto {
   schema?: FormSchema;
   isActive?: boolean;
   isDefault?: boolean;
+  module?: string; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+  formType?: string; // 'standard', 'survey', 'registration', 'application', etc.
   changeLog?: string; // For version tracking
 }
 
@@ -173,6 +181,8 @@ export interface FormDefinitionListItem {
   version: number;
   isActive: boolean;
   isDefault: boolean;
+  module?: string; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+  formType?: string; // 'standard', 'survey', 'registration', 'application', etc.
   fieldCount: number;
   createdAt: string;
   updatedAt: string;

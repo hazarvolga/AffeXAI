@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { FormBuilder } from '@/components/admin/forms/form-builder';
+import { TicketFormBuilder } from '@/components/admin/forms/ticket-form-builder';
 import { TicketFormService } from '@/lib/api/ticketFormService';
 import { useToast } from '@/hooks/use-toast';
 import type { TicketFormDefinition } from '@/types/ticket-form.types';
@@ -100,8 +100,8 @@ export default function EditFormPage() {
         </div>
       </div>
 
-      {/* Form Builder */}
-      <FormBuilder
+      {/* Ticket Form Builder */}
+      <TicketFormBuilder
         initialData={form}
         onSave={handleSave}
         onCancel={handleCancel}

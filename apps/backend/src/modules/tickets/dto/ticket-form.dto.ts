@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, ValidateNested, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { FormSchema } from '../../form-builder/entities/form-definition.entity';
+import { FormSchemaDto } from './form-schema.dto';
 
 /**
  * DTO for creating a new ticket form definition
@@ -15,8 +15,8 @@ export class CreateTicketFormDto {
   description?: string;
 
   @ValidateNested()
-  @Type(() => Object)
-  schema: FormSchema;
+  @Type(() => FormSchemaDto)
+  schema: FormSchemaDto;
 
   @IsBoolean()
   @IsOptional()
@@ -25,6 +25,14 @@ export class CreateTicketFormDto {
   @IsBoolean()
   @IsOptional()
   isDefault?: boolean = false;
+
+  @IsString()
+  @IsOptional()
+  module?: string = 'tickets'; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+
+  @IsString()
+  @IsOptional()
+  formType?: string = 'standard'; // 'standard', 'survey', 'registration', 'application', etc.
 }
 
 /**
@@ -40,9 +48,9 @@ export class UpdateTicketFormDto {
   description?: string;
 
   @ValidateNested()
-  @Type(() => Object)
+  @Type(() => FormSchemaDto)
   @IsOptional()
-  schema?: FormSchema;
+  schema?: FormSchemaDto;
 
   @IsBoolean()
   @IsOptional()
@@ -51,6 +59,14 @@ export class UpdateTicketFormDto {
   @IsBoolean()
   @IsOptional()
   isDefault?: boolean;
+
+  @IsString()
+  @IsOptional()
+  module?: string; // 'tickets', 'events', 'cms', 'certificates', 'generic', etc.
+
+  @IsString()
+  @IsOptional()
+  formType?: string; // 'standard', 'survey', 'registration', 'application', etc.
 
   @IsString()
   @IsOptional()

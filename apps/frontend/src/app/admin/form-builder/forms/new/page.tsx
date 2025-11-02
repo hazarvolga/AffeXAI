@@ -13,12 +13,17 @@ export default function NewFormPage() {
 
   const handleSave = async (formData: any) => {
     try {
-      await TicketFormService.createFormDefinition(formData);
+      // Add module field for generic forms (not tickets)
+      const formDataWithModule = {
+        ...formData,
+        module: 'generic', // This is NOT a ticket form
+      };
+      await TicketFormService.createFormDefinition(formDataWithModule);
       toast({
         title: 'Başarılı',
         description: 'Yeni form oluşturuldu',
       });
-      router.push('/admin/support/forms');
+      router.push('/admin/form-builder/forms');
     } catch (error: any) {
       toast({
         title: 'Hata',
@@ -29,7 +34,7 @@ export default function NewFormPage() {
   };
 
   const handleCancel = () => {
-    router.push('/admin/support/forms');
+    router.push('/admin/form-builder/forms');
   };
 
   return (
@@ -46,7 +51,7 @@ export default function NewFormPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Yeni Form Oluştur</h1>
           <p className="text-muted-foreground mt-1">
-            Destek talep formunu aşağıdaki araçlarla özelleştirin
+            Genel amaçlı form oluşturun (Events, Certificates, CMS, Email Marketing)
           </p>
         </div>
       </div>

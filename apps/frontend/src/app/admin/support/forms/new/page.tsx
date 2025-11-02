@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { FormBuilder } from '@/components/admin/forms/form-builder';
+import { TicketFormBuilder } from '@/components/admin/forms/ticket-form-builder';
 import { TicketFormService } from '@/lib/api/ticketFormService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -51,8 +51,8 @@ export default function NewFormPage() {
         </div>
       </div>
 
-      {/* Form Builder */}
-      <FormBuilder
+      {/* Ticket Form Builder */}
+      <TicketFormBuilder
         initialData={null}
         onSave={handleSave}
         onCancel={handleCancel}

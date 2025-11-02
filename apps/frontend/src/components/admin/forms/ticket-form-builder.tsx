@@ -49,10 +49,12 @@ import {
   X,
   Eye,
   Settings,
+  Library,
 } from 'lucide-react';
 import type { TicketFormDefinition, FormField as FormFieldType } from '@/types/ticket-form.types';
 import { FieldEditor } from './field-editor';
 import { DynamicFormRenderer } from '@/components/tickets/dynamic-form-renderer';
+import ticketFieldLibraryService, { type TicketFieldLibrary } from '@/lib/api/ticketFieldLibraryService';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
@@ -62,13 +64,13 @@ const formSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
-interface FormBuilderProps {
+interface TicketFormBuilderProps {
   initialData?: TicketFormDefinition | null;
   onSave: (data: any) => void;
   onCancel: () => void;
 }
 
-export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps) {
+export function TicketFormBuilder({ initialData, onSave, onCancel }: TicketFormBuilderProps) {
   const { toast } = useToast();
   const [fields, setFields] = useState<FormFieldType[]>(
     initialData?.schema.fields || []
@@ -76,6 +78,11 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
   const [editingField, setEditingField] = useState<FormFieldType | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'builder' | 'preview'>('builder');
+
+  // Field Library integration
+  const [showFieldLibrary, setShowFieldLibrary] = useState(false);
+  const [libraryFields, setLibraryFields] = useState<TicketFieldLibrary[]>([]);
+  const [loadingLibrary, setLoadingLibrary] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -87,13 +94,57 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
     },
   });
 
+  // Load Field Library
+  useEffect(() => {
+    if (showFieldLibrary && libraryFields.length === 0) {
+      loadFieldLibrary();
+    }
+  }, [showFieldLibrary]);
+
+  const loadFieldLibrary = async () => {
+    try {
+      setLoadingLibrary(true);
+      const response = await ticketFieldLibraryService.getAllFields({
+        isActive: true,
+        limit: 100
+      });
+      setLibraryFields(response.items);
+    } catch (error) {
+      console.error('Failed to load field library:', error);
+      toast({
+        title: 'Hata',
+        description: 'Alan kütüphanesi yüklenirken bir hata oluştu',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingLibrary(false);
+    }
+  };
+
+  // Add field from library
+  const handleAddFromLibrary = (libraryField: TicketFieldLibrary) => {
+    const newField: FormFieldType = {
+      ...libraryField.fieldConfig,
+      id: `field_${Date.now()}`,
+      metadata: {
+        ...(libraryField.fieldConfig.metadata || {}),
+        order: fields.length,
+      },
+    };
+    setFields([...fields, newField]);
+    setShowFieldLibrary(false);
+    toast({
+      title: 'Başarılı',
+      description: `"${newField.label}" alanı forma eklendi`,
+    });
+  };
+
   // Add new custom field
   const handleAddField = () => {
     const newField: FormFieldType = {
       id: `field_${Date.now()}`,
       name: `field_${fields.length + 1}`,
       label: 'Yeni Alan',
-      labelEn: 'New Field',
       type: 'text',
       required: false,
       metadata: {
@@ -142,7 +193,11 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
 
     // Update order metadata
     newFields.forEach((field, i) => {
-      field.metadata.order = i;
+      if (!field.metadata) {
+        field.metadata = { order: i, width: 'full' };
+      } else {
+        field.metadata.order = i;
+      }
     });
 
     setFields(newFields);
@@ -159,7 +214,7 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
         fields: fields.map((field, index) => ({
           ...field,
           metadata: {
-            ...field.metadata,
+            ...(field.metadata || {}),
             order: index,
           },
         })),
@@ -301,10 +356,20 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
                         Formda görünecek alanları ekleyin ve düzenleyin
                       </CardDescription>
                     </div>
-                    <Button type="button" onClick={handleAddField} variant="outline">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Alan Ekle
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => setShowFieldLibrary(true)}
+                        variant="outline"
+                      >
+                        <Library className="mr-2 h-4 w-4" />
+                        Kütüphaneden Ekle
+                      </Button>
+                      <Button type="button" onClick={handleAddField} variant="outline">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Alan Ekle
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -327,12 +392,12 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
                               {field.required && (
                                 <Badge variant="destructive">Zorunlu</Badge>
                               )}
-                              {field.metadata.agentOnly && (
+                              {field.metadata?.agentOnly && (
                                 <Badge variant="secondary">Agent Only</Badge>
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {field.name} • Genişlik: {field.metadata.width || 'full'}
+                              {field.name} • Genişlik: {field.metadata?.width || 'full'}
                             </p>
                           </div>
                           <div className="flex items-center gap-1">
@@ -433,6 +498,81 @@ export function FormBuilder({ initialData, onSave, onCancel }: FormBuilderProps)
           }}
         />
       )}
+
+      {/* Field Library Dialog */}
+      <Dialog open={showFieldLibrary} onOpenChange={setShowFieldLibrary}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Alan Kütüphanesi</DialogTitle>
+            <DialogDescription>
+              Hazır alan şablonlarından seçim yapın
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {loadingLibrary ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Alan kütüphanesi yükleniyor...</p>
+              </div>
+            ) : libraryFields.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Henüz kütüphanede alan bulunmuyor</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {libraryFields.map((libraryField) => (
+                  <Card
+                    key={libraryField.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleAddFromLibrary(libraryField)}
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-base">{libraryField.name}</CardTitle>
+                          {libraryField.description && (
+                            <CardDescription className="mt-1">
+                              {libraryField.description}
+                            </CardDescription>
+                          )}
+                        </div>
+                        <Badge variant="outline">{libraryField.fieldConfig.type}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {libraryField.fieldConfig.label}
+                        </Badge>
+                        {libraryField.fieldConfig.required && (
+                          <Badge variant="destructive" className="text-xs">
+                            Zorunlu
+                          </Badge>
+                        )}
+                        {libraryField.fieldConfig.metadata?.agentOnly && (
+                          <Badge variant="secondary" className="text-xs">
+                            Agent Only
+                          </Badge>
+                        )}
+                        {libraryField.tags && libraryField.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {libraryField.tags && libraryField.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{libraryField.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

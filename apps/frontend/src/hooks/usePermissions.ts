@@ -63,18 +63,9 @@ export interface UsePermissionsReturn {
 export function usePermissions(): UsePermissionsReturn {
   const { user, isLoading } = useAuth();
 
-  // DEBUG: Log user data
-  console.log('🔍 usePermissions - user data:', {
-    email: user?.email,
-    roleId: user?.roleId,
-    primaryRole: user?.primaryRole,
-    roles: user?.roles,
-    rolesCount: user?.roles?.length
-  });
-
   // Get user's PRIMARY role (for role shortcuts like isAdmin)
   const userRole = useMemo(() => {
-    // NEW: Try primaryRole first (from multi-role system)
+    // Try primaryRole first (from multi-role system)
     if (user?.primaryRole?.name) {
       const roleName = user.primaryRole.name;
       const matchingRole = Object.values(UserRole).find(
@@ -98,36 +89,27 @@ export function usePermissions(): UsePermissionsReturn {
   // Get COMBINED permissions from ALL user roles (multi-role support)
   const permissions = useMemo(() => {
     const allPermissions = new Set<Permission>();
-    
-    console.log('🔍 usePermissions - calculating permissions...');
 
-    // NEW: Get permissions from ALL roles (not just primary)
+    // Get permissions from ALL roles (not just primary)
     if (user?.roles && user.roles.length > 0) {
       user.roles.forEach(role => {
         const roleName = role.name;
         const matchingRole = Object.values(UserRole).find(
           r => r === roleName || r.toLowerCase() === roleName.toLowerCase()
         );
-        console.log('🔍 Processing role:', { roleName, matchingRole });
         if (matchingRole) {
           const rolePerms = getRolePermissions(matchingRole);
-          console.log('🔍 Role permissions:', { role: matchingRole, perms: rolePerms.length });
           rolePerms.forEach(perm => allPermissions.add(perm));
         }
       });
-      const finalPermissions = Array.from(allPermissions);
-      console.log('🔍 Final combined permissions:', finalPermissions.length);
-      return finalPermissions;
+      return Array.from(allPermissions);
     }
 
     // FALLBACK: Single role (backward compatibility)
     if (userRole) {
-      const rolePerms = getRolePermissions(userRole);
-      console.log('🔍 Using fallback single role:', { userRole, perms: rolePerms.length });
-      return rolePerms;
+      return getRolePermissions(userRole);
     }
 
-    console.log('⚠️ No permissions found!');
     return [];
   }, [user?.roles, userRole]);
 

@@ -18,7 +18,7 @@ export type {
  */
 class GroupsService extends BaseApiService<Group, CreateGroupDto, UpdateGroupDto> {
   constructor() {
-    super({ endpoint: '/email-marketing/groups', useWrappedResponses: true });
+    super({ endpoint: '/api/email-marketing/groups', useWrappedResponses: true });
   }
 }
 

@@ -18,7 +18,7 @@ export type {
  */
 class SegmentsService extends BaseApiService<Segment, CreateSegmentDto, UpdateSegmentDto> {
   constructor() {
-    super({ endpoint: '/email-marketing/segments', useWrappedResponses: true });
+    super({ endpoint: '/api/email-marketing/segments', useWrappedResponses: true });
   }
 }
 

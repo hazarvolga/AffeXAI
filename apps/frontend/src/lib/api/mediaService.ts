@@ -17,7 +17,7 @@ export type { Media, CreateMediaDto, UpdateMediaDto, MediaType, MediaQueryParams
  */
 class MediaService extends BaseApiService<Media, CreateMediaDto, UpdateMediaDto> {
   constructor() {
-    super({ endpoint: '/media', useWrappedResponses: true });
+    super({ endpoint: '/api/media', useWrappedResponses: true });
   }
 
   /**

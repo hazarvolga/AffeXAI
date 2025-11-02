@@ -15,7 +15,7 @@ import type {
 } from '@/types/ticket-form.types';
 
 export class TicketFormService {
-  private static readonly BASE_URL = '/ticket-forms';
+  private static readonly BASE_URL = '/api/ticket-forms';
 
   /**
    * Get all form definitions

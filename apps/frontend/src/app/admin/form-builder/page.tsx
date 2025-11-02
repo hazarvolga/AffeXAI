@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, FileText, Send } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, FileText, Send, Loader2 } from 'lucide-react';
+import { FormBuilderService, type FormBuilderStats } from '@/services/form-builder.service';
+import { useToast } from '@/hooks/use-toast';
 
 export default function FormBuilderPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [activeModule, setActiveModule] = useState<string>('all');
+  const [stats, setStats] = useState<FormBuilderStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const modules = [
     { value: 'all', label: 'All Forms', icon: FileText },
@@ -19,11 +25,32 @@ export default function FormBuilderPage() {
     { value: 'cms', label: 'CMS', icon: FileText },
   ];
 
-  const stats = {
-    totalForms: 12,
-    activeForms: 8,
-    totalSubmissions: 1234,
-    pendingSubmissions: 45,
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
+
+  const loadDashboardStats = async () => {
+    try {
+      setIsLoading(true);
+      const data = await FormBuilderService.getDashboardStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load dashboard statistics',
+        variant: 'destructive',
+      });
+      // Set zeros on error
+      setStats({
+        totalForms: 0,
+        activeForms: 0,
+        totalSubmissions: 0,
+        pendingSubmissions: 0,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,7 +77,11 @@ export default function FormBuilderPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalForms}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.totalForms ?? 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
               Across all modules
             </p>
@@ -63,7 +94,11 @@ export default function FormBuilderPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeForms}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.activeForms ?? 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
               Currently in use
             </p>
@@ -78,7 +113,11 @@ export default function FormBuilderPage() {
             <Send className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSubmissions}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.totalSubmissions ?? 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
               All time submissions
             </p>
@@ -93,7 +132,11 @@ export default function FormBuilderPage() {
             <Send className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingSubmissions}</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <div className="text-2xl font-bold">{stats?.pendingSubmissions ?? 0}</div>
+            )}
             <p className="text-xs text-muted-foreground">
               Awaiting processing
             </p>

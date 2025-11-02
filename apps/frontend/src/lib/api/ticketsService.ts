@@ -202,8 +202,8 @@ export interface TicketStats {
  */
 class TicketsService extends BaseApiService<Ticket, CreateTicketDto, UpdateTicketDto> {
   constructor() {
-    super({ 
-      endpoint: '/tickets',
+    super({
+      endpoint: '/api/tickets',
       useWrappedResponses: true // Backend uses global ApiResponse wrapper
     });
   }

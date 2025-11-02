@@ -31,7 +31,7 @@ export type {
  */
 class EmailMarketingService extends BaseApiService<EmailCampaign, CreateCampaignDto, UpdateCampaignDto> {
   constructor() {
-    super({ endpoint: '/email-campaigns', useWrappedResponses: true });
+    super({ endpoint: '/api/email-campaigns', useWrappedResponses: true });
   }
 
   /**

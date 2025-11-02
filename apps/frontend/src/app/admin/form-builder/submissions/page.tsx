@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,7 @@ import {
   Search,
 } from 'lucide-react';
 
-export default function SubmissionsPage() {
+function SubmissionsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const moduleParam = searchParams.get('module') || 'all';
@@ -304,5 +304,13 @@ export default function SubmissionsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SubmissionsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SubmissionsContent />
+    </Suspense>
   );
 }

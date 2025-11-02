@@ -193,7 +193,7 @@ class AuthService {
    * Get current user from API
    */
   async getCurrentUser(): Promise<CurrentUser> {
-    return await httpClient.getWrapped<CurrentUser>('/auth/me');
+    return await httpClient.getWrapped<CurrentUser>('/api/auth/me');
   }
 
   /**

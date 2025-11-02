@@ -82,7 +82,7 @@ export interface CertificateStatistics {
 
 class CertificatesService extends BaseApiService<Certificate, CreateCertificateDto, UpdateCertificateDto> {
   constructor() {
-    super({ endpoint: '/certificates/v2', useWrappedResponses: true });
+    super({ endpoint: '/api/certificates/v2', useWrappedResponses: true });
   }
 
   async getAllCertificates(filters?: { status?: string; userId?: string }): Promise<Certificate[]> {

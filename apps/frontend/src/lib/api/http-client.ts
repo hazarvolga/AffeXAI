@@ -154,8 +154,8 @@ export class HttpClient {
   private authToken: string | null = null;
 
   constructor(config?: HttpClientConfig) {
-    // Default configuration - FORCE PORT 9006
-    const apiUrl = 'http://localhost:9006/api';
+    // Default configuration - FORCE PORT 9006 (no /api suffix - services add it)
+    const apiUrl = 'http://localhost:9006';
 
     this.config = {
       baseURL: config?.baseURL || apiUrl,
@@ -193,7 +193,7 @@ export class HttpClient {
 
     // Load auth token from localStorage (client-side only)
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('auth_token');
+      const storedToken = localStorage.getItem('auth_token') || localStorage.getItem('aluplan_access_token');
       if (storedToken) {
         this.authToken = storedToken;
       }
@@ -241,10 +241,10 @@ export class HttpClient {
         
         // If no manual token, try multiple sources
         if (!token && typeof window !== 'undefined') {
-          // Try localStorage first (primary source)
-          token = localStorage.getItem('auth_token');
+          // Try localStorage first - both auth_token and aluplan_access_token
+          token = localStorage.getItem('auth_token') || localStorage.getItem('aluplan_access_token');
           console.log('🔐 HTTP Client: Token from localStorage:', !!token);
-          
+
           // If still no token, try tokenStorage
           if (!token) {
             try {

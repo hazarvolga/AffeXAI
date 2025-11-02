@@ -29,7 +29,7 @@ export type DashboardStats = EventDashboardStats;
  */
 class EventsService extends BaseApiService<Event, CreateEventDto, UpdateEventDto> {
   constructor() {
-    super({ endpoint: '/events', useWrappedResponses: true });
+    super({ endpoint: '/api/events', useWrappedResponses: true });
   }
 
   /**

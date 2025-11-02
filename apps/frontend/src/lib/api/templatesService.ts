@@ -19,7 +19,7 @@ export type {
  */
 class TemplatesService extends BaseApiService<EmailTemplate, CreateTemplateDto, UpdateTemplateDto> {
   constructor() {
-    super({ endpoint: '/email-templates', useWrappedResponses: true });
+    super({ endpoint: '/api/email-templates', useWrappedResponses: true });
   }
 
   /**

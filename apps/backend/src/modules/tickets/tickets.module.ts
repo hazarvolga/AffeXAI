@@ -13,6 +13,8 @@ import { TicketTemplate } from './entities/ticket-template.entity';
 import { TicketCSAT } from './entities/ticket-csat.entity';
 import { KnowledgeBaseArticle } from './entities/knowledge-base-article.entity';
 import { TicketMacro } from './entities/ticket-macro.entity';
+import { FormDefinition } from '../form-builder/entities/form-definition.entity';
+import { FormVersion } from '../form-builder/entities/form-version.entity';
 import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { TicketFormController } from './controllers/ticket-form.controller';
@@ -84,8 +86,10 @@ import { SESWebhookAdapter } from './adapters/ses-webhook.adapter';
       TicketCSAT,
       KnowledgeBaseArticle,
       TicketMacro,
+      FormDefinition, // For ticket form management
+      FormVersion, // For form versioning
     ]),
-    FormBuilderModule, // Import FormBuilderModule for form entities
+    FormBuilderModule, // Import FormBuilderModule for form submissions
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

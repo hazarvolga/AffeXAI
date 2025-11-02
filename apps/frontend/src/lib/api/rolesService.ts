@@ -16,8 +16,8 @@ export type { Role, CreateRoleDto, UpdateRoleDto, RoleQueryParams };
  */
 class RolesService extends BaseApiService<Role, CreateRoleDto, UpdateRoleDto> {
   constructor() {
-    super({ 
-      endpoint: '/roles',
+    super({
+      endpoint: '/api/roles',
       useWrappedResponses: true // Backend uses global ApiResponse wrapper
     });
   }

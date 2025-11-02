@@ -19,7 +19,7 @@ export type {
  */
 class SubscribersService extends BaseApiService<Subscriber, CreateSubscriberDto, UpdateSubscriberDto> {
   constructor() {
-    super({ endpoint: '/email-marketing/subscribers', useWrappedResponses: true });
+    super({ endpoint: '/api/email-marketing/subscribers', useWrappedResponses: true });
   }
 
   async subscribe(email: string): Promise<Subscriber> {

@@ -29,6 +29,7 @@
     "seed:users": "ts-node src/database/seeds/seed-users-roles.ts",
     "seed:tickets": "ts-node src/database/seeds/seed-tickets.ts",
     "seed:critical-settings": "tsx src/database/seeds/run-critical-settings.ts",
+    "seed:default-ticket-form": "tsx src/database/seeds/seed-default-ticket-form.ts",
     "seed:email-builder": "ts-node src/scripts/seed-email-builder-templates.ts",
     "seed:ticket-templates": "ts-node src/scripts/seed-ticket-email-templates.ts",
     "update:empty-templates": "tsx src/scripts/update-empty-templates.ts"

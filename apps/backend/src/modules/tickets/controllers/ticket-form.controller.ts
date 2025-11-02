@@ -23,6 +23,7 @@ import {
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
+import { Public } from '../../../auth/decorators/public.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 
 @Controller('ticket-forms')
@@ -44,8 +45,9 @@ export class TicketFormController {
   /**
    * GET /ticket-forms/default
    * Get the default form definition
-   * Accessible by: All authenticated users
+   * Accessible by: Public (no authentication required for user portal)
    */
+  @Public()
   @Get('default')
   async findDefault() {
     const formDefinition = await this.ticketFormService.findDefault();

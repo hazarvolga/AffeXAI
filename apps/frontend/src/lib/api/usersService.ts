@@ -19,8 +19,8 @@ export type { User, CreateUserDto, UpdateUserDto, UserQueryParams, UserStats, Us
  */
 class UsersService extends BaseApiService<User, CreateUserDto, UpdateUserDto> {
   constructor() {
-    super({ 
-      endpoint: '/users',
+    super({
+      endpoint: '/api/users',
       useWrappedResponses: true // Backend uses global ApiResponse wrapper
     });
   }

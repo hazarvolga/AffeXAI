@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database, Box, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -322,6 +322,36 @@ export function CollapsibleDashboardSidebar() {
                                             )}
                                         >
                                             Sayfalar
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/reusable-components"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-all hover:text-primary",
+                                                pathname.startsWith("/admin/cms/reusable-components") && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Box className="h-3 w-3" />
+                                            Bileşenler
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/reusable-sections"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-all hover:text-primary",
+                                                pathname.startsWith("/admin/cms/reusable-sections") && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Layers className="h-3 w-3" />
+                                            Section'lar
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/favorites"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-all hover:text-primary",
+                                                pathname === "/admin/cms/favorites" && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Star className="h-3 w-3" />
+                                            Favorilerim
                                         </Link>
                                         <Link
                                             href="/admin/cms/categories"

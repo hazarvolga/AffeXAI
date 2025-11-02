@@ -212,6 +212,9 @@ export class AuthController {
         emailVerified: user.emailVerified,
         emailVerifiedAt: user.emailVerifiedAt,
         metadata: user.metadata,
+        // ✅ CRITICAL: Include roles with permissions for frontend permission checks
+        roles: user.roles || [],           // All user roles with permissions
+        primaryRole: user.primaryRole,      // Primary role with permissions
       }
     };
   }

@@ -63,14 +63,7 @@ export interface UsePermissionsReturn {
 export function usePermissions(): UsePermissionsReturn {
   const { user, isLoading } = useAuth();
 
-  // DEBUG: Log user data
-  console.log('🔍 usePermissions - user data:', {
-    email: user?.email,
-    roleId: user?.roleId,
-    primaryRole: user?.primaryRole,
-    roles: user?.roles,
-    rolesCount: user?.roles?.length
-  });
+  
 
   // Get user's PRIMARY role (for role shortcuts like isAdmin)
   const userRole = useMemo(() => {
@@ -96,40 +89,36 @@ export function usePermissions(): UsePermissionsReturn {
   }, [user?.primaryRole, user?.roleId]);
 
   // Get COMBINED permissions from ALL user roles (multi-role support)
+  // FIXED: Use backend permissions directly instead of frontend mapping
   const permissions = useMemo(() => {
-    const allPermissions = new Set<Permission>();
+    const allPermissions = new Set<string>();
     
-    console.log('🔍 usePermissions - calculating permissions...');
-
-    // NEW: Get permissions from ALL roles (not just primary)
+    // NEW: Get permissions directly from backend role data
     if (user?.roles && user.roles.length > 0) {
       user.roles.forEach(role => {
-        const roleName = role.name;
-        const matchingRole = Object.values(UserRole).find(
-          r => r === roleName || r.toLowerCase() === roleName.toLowerCase()
-        );
-        console.log('🔍 Processing role:', { roleName, matchingRole });
-        if (matchingRole) {
-          const rolePerms = getRolePermissions(matchingRole);
-          console.log('🔍 Role permissions:', { role: matchingRole, perms: rolePerms.length });
-          rolePerms.forEach(perm => allPermissions.add(perm));
+        // Use backend permissions if available
+        if (role.permissions && Array.isArray(role.permissions)) {
+          role.permissions.forEach(perm => allPermissions.add(perm));
         }
       });
-      const finalPermissions = Array.from(allPermissions);
-      console.log('🔍 Final combined permissions:', finalPermissions.length);
+      
+      const finalPermissions = Array.from(allPermissions) as Permission[];
       return finalPermissions;
     }
 
-    // FALLBACK: Single role (backward compatibility)
+    // FALLBACK: Try primaryRole.permissions
+    if (user?.primaryRole?.permissions && Array.isArray(user.primaryRole.permissions)) {
+      return user.primaryRole.permissions as Permission[];
+    }
+
+    // LAST RESORT: Use frontend mapping (backward compatibility)
     if (userRole) {
       const rolePerms = getRolePermissions(userRole);
-      console.log('🔍 Using fallback single role:', { userRole, perms: rolePerms.length });
       return rolePerms;
     }
 
-    console.log('⚠️ No permissions found!');
     return [];
-  }, [user?.roles, userRole]);
+  }, [user?.roles, user?.primaryRole, userRole]);
 
   // Permission checking functions - now check against COMBINED permissions
   const hasPermission = useMemo(

@@ -6,16 +6,16 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('text')
   message: string;
 
-  @Column()
+  @Column('varchar')
   type: string;
 
-  @Column({ default: false })
+  @Column('boolean', { default: false })
   isRead: boolean;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   userId: string;
 
   @Column({ type: 'jsonb', nullable: true })

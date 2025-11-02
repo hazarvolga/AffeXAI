@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database, Mail } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database, Mail, Box, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -64,13 +64,7 @@ export function DashboardSidebar() {
     const pathname = usePathname();
     const { hasPermission, hasAnyPermission, isLoading, permissions, userRole } = usePermissions();
     
-    // DEBUG: Log permission state
-    console.log('🎯 DashboardSidebar render:', {
-        isLoading,
-        userRole,
-        permissionsCount: permissions.length,
-        hasEmailView: hasPermission(Permission.EMAIL_VIEW),
-    });
+    
 
     const isNavLinkActive = (href: string) => {
         if (href === "/admin") {
@@ -317,16 +311,47 @@ export function DashboardSidebar() {
                                         <Link
                                             href="/admin/cms"
                                             className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                 pathname === "/admin/cms" && "bg-muted text-primary"
                                             )}
                                         >
+                                            <FileText className="h-3 w-3" />
                                             Sayfalar
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/reusable-components"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                pathname.startsWith("/admin/cms/reusable-components") && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Box className="h-3 w-3" />
+                                            Bileşenler
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/reusable-sections"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                pathname.startsWith("/admin/cms/reusable-sections") && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Layers className="h-3 w-3" />
+                                            Section'lar
+                                        </Link>
+                                        <Link
+                                            href="/admin/cms/favorites"
+                                            className={cn(
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
+                                                pathname === "/admin/cms/favorites" && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Star className="h-3 w-3" />
+                                            Favorilerim
                                         </Link>
                                         <Link
                                             href="/admin/cms/categories"
                                             className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                 pathname === "/admin/cms/categories" && "bg-muted text-primary"
                                             )}
                                         >
@@ -335,7 +360,7 @@ export function DashboardSidebar() {
                                         <Link
                                             href="/admin/cms/menus"
                                             className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                 pathname === "/admin/cms/menus" && "bg-muted text-primary"
                                             )}
                                         >
@@ -344,16 +369,17 @@ export function DashboardSidebar() {
                                         <Link
                                             href="/admin/cms/editor"
                                             className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                 pathname === "/admin/cms/editor" && "bg-muted text-primary"
                                             )}
                                         >
+                                            <Palette className="h-3 w-3" />
                                             Görsel Editör
                                         </Link>
                                         <Link
                                             href="/admin/cms/media"
                                             className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary text-xs",
                                                 pathname === "/admin/cms/media" && "bg-muted text-primary"
                                             )}
                                         >
@@ -365,19 +391,7 @@ export function DashboardSidebar() {
                             )}
 
                             {/* CMS Analytics - Permission: CMS_VIEW */}
-                            {(() => {
-                                const hasCmsView = hasPermission(Permission.CMS_VIEW);
-                                console.log('🎯 CMS Analytics visibility check:', {
-                                    hasCmsView,
-                                    userRole,
-                                    allPermissions: permissions,
-                                    permissionsCount: permissions.length,
-                                    specificCheck: permissions.includes(Permission.CMS_VIEW),
-                                    CMS_VIEW_VALUE: Permission.CMS_VIEW
-                                });
-                                // TEMPORARY: Always show for debugging
-                                return true; // hasCmsView;
-                            })() && (
+                            {hasPermission(Permission.CMS_VIEW) && (
                             <AccordionItem value="cms-analytics" className="border-none">
                                 <AccordionTrigger className={cn(
                                     "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",

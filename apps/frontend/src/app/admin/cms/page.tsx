@@ -4,7 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { FileText, Palette, Image, Package, ArrowRight } from 'lucide-react';
+import { FileText, Palette, Image, Package, ArrowRight, Box, Layers, Star } from 'lucide-react';
 import { AnalyticsCards } from '@/components/cms/analytics-cards';
 
 const DASHBOARD_CARDS = [
@@ -21,6 +21,27 @@ const DASHBOARD_CARDS = [
     href: '/admin/cms/editor',
     icon: Palette,
     buttonText: 'Editörü Aç',
+  },
+  {
+    title: 'Yeniden Kullanılabilir Bileşenler',
+    description: 'Tekrar kullanılabilir UI bileşenlerini yönetin.',
+    href: '/admin/cms/reusable-components',
+    icon: Box,
+    buttonText: 'Bileşenleri Yönet',
+  },
+  {
+    title: 'Yeniden Kullanılabilir Section\'lar',
+    description: 'Birden fazla bileşenden oluşan section\'ları yönetin.',
+    href: '/admin/cms/reusable-sections',
+    icon: Layers,
+    buttonText: 'Section\'ları Yönet',
+  },
+  {
+    title: 'Favorilerim',
+    description: 'Favori bileşenler ve section\'larınıza hızlı erişim.',
+    href: '/admin/cms/favorites',
+    icon: Star,
+    buttonText: 'Favorileri Görüntüle',
   },
   {
     title: 'Medya Yönetimi',

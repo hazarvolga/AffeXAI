@@ -1667,6 +1667,343 @@ export const progressBlocksConfig: Record<string, BlockPropertySchema> = {
   },
 };
 
+// Homepage Sections Config (NEW - Phase 1 + Phase 3: Design Token Migration)
+export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
+  'thumbnail-carousel': {
+    sectionTitle: { type: 'text', label: 'Section Title', defaultValue: 'Our Solutions' },
+    ...createTextStyleProperties('sectionTitle', 'heading2', 'center', 'primary', 'bold'),
+    sectionDescription: { type: 'textarea', label: 'Section Description', defaultValue: 'Discover our comprehensive solutions' },
+    ...createTextStyleProperties('sectionDescription', 'body', 'center', 'secondary', 'normal'),
+    // Design Token: Background color
+    bgColor: {
+      type: 'text',
+      label: 'Background Color',
+      defaultValue: 'bg-background',
+      tokenReference: {
+        category: 'color',
+        suggestedPath: 'color.background.primary',
+        allowCustom: true,
+        description: 'Section background color'
+      }
+    },
+    // Design Token: Spacing
+    paddingY: {
+      type: 'text',
+      label: 'Vertical Padding',
+      defaultValue: 'py-16 md:py-24',
+      tokenReference: {
+        category: 'spacing',
+        suggestedPath: 'spacing.section.y',
+        allowCustom: true,
+        description: 'Top and bottom padding'
+      }
+    },
+    imagePosition: {
+      type: 'select',
+      label: 'Image Position',
+      options: ['left', 'right'],
+      defaultValue: 'left'
+    },
+    slides: {
+      type: 'list',
+      label: 'Carousel Slides',
+      itemSchema: {
+        id: { type: 'text', label: 'Unique ID', defaultValue: 'slide-1' },
+        category: { type: 'text', label: 'Category Badge', defaultValue: 'CATEGORY' },
+        // Design Token: Badge color
+        categoryBgColor: {
+          type: 'text',
+          label: 'Badge Background Color',
+          defaultValue: 'bg-primary/10',
+          tokenReference: {
+            category: 'color',
+            suggestedPath: 'color.primary.light',
+            allowCustom: true,
+            description: 'Category badge background'
+          }
+        },
+        title: { type: 'text', label: 'Slide Title', defaultValue: 'Solution Title' },
+        description: { type: 'textarea', label: 'Description', defaultValue: 'Solution description text' },
+        imageUrl: { type: 'image', label: 'Slide Image URL', defaultValue: '/placeholder.jpg' },
+        imageHint: { type: 'text', label: 'Image Alt Text', defaultValue: 'Solution image' },
+        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'Building' },
+        // Design Token: Icon color
+        iconColor: {
+          type: 'text',
+          label: 'Icon Color',
+          defaultValue: 'text-primary',
+          tokenReference: {
+            category: 'color',
+            suggestedPath: 'color.primary',
+            allowCustom: true,
+            description: 'Icon color'
+          }
+        },
+        items: {
+          type: 'list',
+          label: 'Quick Links',
+          itemSchema: {
+            title: { type: 'text', label: 'Link Title', defaultValue: 'Learn More' },
+            href: { type: 'text', label: 'Link URL', defaultValue: '#' },
+          },
+        },
+      },
+    },
+  },
+  'tabbed-grid': {
+    sectionTitle: { type: 'text', label: 'Section Title', defaultValue: 'Resources' },
+    ...createTextStyleProperties('sectionTitle', 'heading2', 'center', 'primary', 'bold'),
+    sectionDescription: { type: 'textarea', label: 'Section Description', defaultValue: 'Explore our resources' },
+    ...createTextStyleProperties('sectionDescription', 'body', 'center', 'secondary', 'normal'),
+    // Design Token: Background color
+    bgColor: {
+      type: 'text',
+      label: 'Background Color',
+      defaultValue: 'bg-background',
+      tokenReference: {
+        category: 'color',
+        suggestedPath: 'color.background.primary',
+        allowCustom: true,
+        description: 'Section background color'
+      }
+    },
+    // Design Token: Spacing
+    paddingY: {
+      type: 'text',
+      label: 'Vertical Padding',
+      defaultValue: 'py-16 md:py-24',
+      tokenReference: {
+        category: 'spacing',
+        suggestedPath: 'spacing.section.y',
+        allowCustom: true,
+        description: 'Top and bottom padding'
+      }
+    },
+    // Design Token: Card spacing
+    cardGap: {
+      type: 'text',
+      label: 'Card Gap',
+      defaultValue: 'gap-6',
+      tokenReference: {
+        category: 'spacing',
+        suggestedPath: 'spacing.grid.gap',
+        allowCustom: true,
+        description: 'Gap between cards'
+      }
+    },
+    tabs: {
+      type: 'list',
+      label: 'Tabs',
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
+        title: { type: 'text', label: 'Tab Title', defaultValue: 'Tab Name' },
+        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'FileText' },
+        items: {
+          type: 'list',
+          label: 'Tab Items',
+          itemSchema: {
+            title: { type: 'text', label: 'Item Title', defaultValue: 'Card Title' },
+            description: { type: 'textarea', label: 'Item Description', defaultValue: 'Card description' },
+            ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Learn More' },
+            ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: '#' },
+            // Design Token: Card colors
+            cardBgColor: {
+              type: 'text',
+              label: 'Card Background',
+              defaultValue: 'bg-card',
+              tokenReference: {
+                category: 'color',
+                suggestedPath: 'color.card.background',
+                allowCustom: true,
+                description: 'Card background color'
+              }
+            },
+          },
+        },
+      },
+    },
+  },
+  'hero-tabbed-carousel': {
+    autoplayDelay: { type: 'number', label: 'Autoplay Delay (ms)', defaultValue: 5000 },
+    // Design Token: Hero height
+    heroHeight: {
+      type: 'text',
+      label: 'Hero Height',
+      defaultValue: 'h-[600px] md:h-[700px]',
+      tokenReference: {
+        category: 'dimension',
+        suggestedPath: 'dimension.hero.height',
+        allowCustom: true,
+        description: 'Hero section height'
+      }
+    },
+    // Design Token: Overlay color
+    overlayColor: {
+      type: 'text',
+      label: 'Overlay Color',
+      defaultValue: 'bg-black/40',
+      tokenReference: {
+        category: 'color',
+        suggestedPath: 'color.overlay.dark',
+        allowCustom: true,
+        description: 'Hero overlay color and opacity'
+      }
+    },
+    tabs: {
+      type: 'list',
+      label: 'Hero Tabs',
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
+        title: { type: 'text', label: 'Tab Title', defaultValue: 'Solutions' },
+        slides: {
+          type: 'list',
+          label: 'Tab Slides',
+          itemSchema: {
+            image: { type: 'image', label: 'Background Image URL', defaultValue: '/placeholder.jpg' },
+            imageHint: { type: 'text', label: 'Image Alt Text', defaultValue: 'Hero image' },
+            headline: { type: 'text', label: 'Main Headline', defaultValue: 'Welcome to Our Platform' },
+            // Design Token: Headline text size
+            headlineFontSize: {
+              type: 'text',
+              label: 'Headline Font Size',
+              defaultValue: 'text-4xl md:text-5xl lg:text-6xl',
+              tokenReference: {
+                category: 'typography',
+                suggestedPath: 'typography.size.hero',
+                allowCustom: true,
+                description: 'Hero headline font size'
+              }
+            },
+            subheadline: { type: 'textarea', label: 'Subheadline', defaultValue: 'Discover amazing features' },
+            ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Get Started' },
+            ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: '#' },
+            // Design Token: CTA button color
+            ctaBgColor: {
+              type: 'text',
+              label: 'CTA Background Color',
+              defaultValue: 'bg-primary',
+              tokenReference: {
+                category: 'color',
+                suggestedPath: 'color.primary',
+                allowCustom: true,
+                description: 'CTA button background'
+              }
+            },
+          },
+        },
+      },
+    },
+  },
+  'education-multi-layout': {
+    sectionTitle: { type: 'text', label: 'Section Title', defaultValue: 'Education & Support' },
+    ...createTextStyleProperties('sectionTitle', 'heading2', 'center', 'primary', 'bold'),
+    sectionDescription: { type: 'textarea', label: 'Section Description', defaultValue: 'Expand your knowledge and get the support you need' },
+    ...createTextStyleProperties('sectionDescription', 'body', 'center', 'secondary', 'normal'),
+    // Design Token: Background color
+    bgColor: {
+      type: 'text',
+      label: 'Background Color',
+      defaultValue: 'bg-background',
+      tokenReference: {
+        category: 'color',
+        suggestedPath: 'color.background.secondary',
+        allowCustom: true,
+        description: 'Section background color'
+      }
+    },
+    // Design Token: Spacing
+    paddingY: {
+      type: 'text',
+      label: 'Vertical Padding',
+      defaultValue: 'py-16 md:py-24',
+      tokenReference: {
+        category: 'spacing',
+        suggestedPath: 'spacing.section.y',
+        allowCustom: true,
+        description: 'Top and bottom padding'
+      }
+    },
+    // Design Token: Grid/Carousel gap
+    itemGap: {
+      type: 'text',
+      label: 'Item Gap',
+      defaultValue: 'gap-6',
+      tokenReference: {
+        category: 'spacing',
+        suggestedPath: 'spacing.grid.gap',
+        allowCustom: true,
+        description: 'Gap between items in grid/carousel'
+      }
+    },
+    tabs: {
+      type: 'list',
+      label: 'Education Tabs',
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
+        title: { type: 'text', label: 'Tab Title', defaultValue: 'Training' },
+        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'BookOpen' },
+        layoutType: {
+          type: 'select',
+          label: 'Layout Type',
+          options: ['carousel', 'grid-2col', 'grid-3col'],
+          defaultValue: 'carousel'
+        },
+        autoplay: { type: 'boolean', label: 'Enable Autoplay (carousel only)', defaultValue: false },
+        items: {
+          type: 'list',
+          label: 'Tab Items',
+          itemSchema: {
+            title: { type: 'text', label: 'Item Title', defaultValue: 'Title' },
+            description: { type: 'textarea', label: 'Item Description', defaultValue: 'Description' },
+            date: { type: 'text', label: 'Date (optional)', defaultValue: '' },
+            category: { type: 'text', label: 'Category (optional)', defaultValue: '' },
+            ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Learn More' },
+            ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: '#' },
+            // Design Token: CTA button styling
+            ctaBgColor: {
+              type: 'text',
+              label: 'CTA Button Background',
+              defaultValue: 'bg-primary',
+              tokenReference: {
+                category: 'color',
+                suggestedPath: 'color.primary',
+                allowCustom: true,
+                description: 'CTA button background color'
+              }
+            },
+            imageUrl: { type: 'image', label: 'Image URL (optional)', defaultValue: '' },
+            iconName: { type: 'text', label: 'Lucide Icon Name (optional)', defaultValue: '' },
+            // Design Token: Icon color
+            iconColor: {
+              type: 'text',
+              label: 'Icon Color',
+              defaultValue: 'text-primary',
+              tokenReference: {
+                category: 'color',
+                suggestedPath: 'color.primary',
+                allowCustom: true,
+                description: 'Icon color'
+              }
+            },
+            // Design Token: Card background (for grid layouts)
+            cardBgColor: {
+              type: 'text',
+              label: 'Card Background',
+              defaultValue: 'bg-card',
+              tokenReference: {
+                category: 'color',
+                suggestedPath: 'color.card.background',
+                allowCustom: true,
+                description: 'Card background for grid layouts'
+              }
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 // All block configurations
 export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...navigationBlocksConfig,
@@ -1685,4 +2022,5 @@ export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...pricingBlocksConfig,
   ...ratingBlocksConfig,
   ...progressBlocksConfig,
+  ...homepageSectionsConfig,
 };

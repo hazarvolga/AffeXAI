@@ -57,6 +57,11 @@ import { KnowledgeBaseArticle } from '../modules/tickets/entities/knowledge-base
 import { KnowledgeBaseCategory } from '../modules/tickets/entities/knowledge-base-category.entity';
 // CMS - Missing entities
 import { PageTemplate } from '../modules/cms/entities/page-template.entity';
+import { ReusableComponent } from '../modules/cms/entities/reusable-component.entity';
+import { ReusableSection } from '../modules/cms/entities/reusable-section.entity';
+import { SectionComponent } from '../modules/cms/entities/section-component.entity';
+import { ComponentFavorite } from '../modules/cms/entities/component-favorite.entity';
+import { ComponentUsageHistory } from '../modules/cms/entities/component-usage-history.entity';
 // Platform Integration - Missing entities
 import { Webhook } from '../modules/platform-integration/entities/webhook.entity';
 import { AutomationRule } from '../modules/platform-integration/entities/automation-rule.entity';
@@ -123,6 +128,11 @@ export const AppDataSource = new DataSource({
     Menu,
     MenuItem,
     CmsMetric,
+    ReusableComponent,
+    ReusableSection,
+    SectionComponent,
+    ComponentFavorite,
+    ComponentUsageHistory,
     // Tickets (complete)
     Ticket,
     TicketMessage,

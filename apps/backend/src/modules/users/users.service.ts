@@ -12,6 +12,7 @@ import { CacheService } from '../../shared/services/cache.service';
 import { RolesService } from '../roles/roles.service';
 import { UserRolesService } from './user-roles.service';
 import { CrmService } from '../crm/crm.service';
+import { UserEmailService } from './services/user-email.service';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +25,7 @@ export class UsersService {
     @Inject(forwardRef(() => UserRolesService))
     private userRolesService: UserRolesService,
     private crmService: CrmService,
+    private userEmailService: UserEmailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -132,6 +134,34 @@ export class UsersService {
       // Clear cache
       await this.cacheService.del('users:all');
 
+      // TODO: Send account creation email with password reset link
+      // Send account creation email with password reset link
+      try {
+        // Generate password reset token (32 random bytes as hex string)
+        const crypto = require('crypto');
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetExpires = new Date();
+        resetExpires.setHours(resetExpires.getHours() + 24); // 24 hours expiry
+
+        // Save reset token to database for password reset
+        await this.usersRepository.update(savedUser.id, {
+          emailVerificationToken: resetToken,
+          emailVerificationExpires: resetExpires,
+        });
+
+        // Construct reset URL for manual sharing
+        const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
+        const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+
+        console.log('✅ User created successfully:', savedUser.email);
+        console.log('📧 Sending account creation email...');
+        
+        // Send account creation email
+        await this.userEmailService.sendAccountCreatedEmail(savedUser, resetToken);
+      } catch (emailError) {
+        console.error('❌ Error sending account creation email:', emailError);
+        // Don't fail user creation if email sending fails
+      }
       return savedUser;
     } catch (error) {
       console.error('❌ Error in UsersService.create:', error);

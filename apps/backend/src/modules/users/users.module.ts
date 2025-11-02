@@ -9,6 +9,8 @@ import { Role } from '../roles/entities/role.entity';
 import { SharedModule } from '../../shared/shared.module';
 import { RolesModule } from '../roles/roles.module';
 import { CrmModule } from '../crm/crm.module';
+import { MailModule } from '../mail/mail.module';
+import { UserEmailService } from './services/user-email.service';
 
 @Module({
   imports: [
@@ -16,9 +18,10 @@ import { CrmModule } from '../crm/crm.module';
     SharedModule,
     forwardRef(() => RolesModule),
     forwardRef(() => CrmModule), // Use forwardRef to avoid circular dependency
+    MailModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, UserRolesService],
+  providers: [UsersService, UserRolesService, UserEmailService],
   exports: [UsersService, UserRolesService, TypeOrmModule],
 })
 export class UsersModule {}

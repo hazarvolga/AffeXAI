@@ -7,8 +7,9 @@ import { WebhookService } from './services/webhook.service';
 import { TemplateRendererService } from './template-renderer.service';
 import { EmailSuppression } from './entities/email-suppression.entity';
 import { SettingsModule } from '../settings/settings.module';
-import { EmailMarketingModule } from '../email-marketing/email-marketing.module';
 
+import { EmailMarketingModule } from '../email-marketing/email-marketing.module';
+import { EmailEventListener } from './listeners/email-event.listener';
 /**
  * Mail Module
  * Provides email sending functionality across the application
@@ -19,7 +20,7 @@ import { EmailMarketingModule } from '../email-marketing/email-marketing.module'
   imports: [
     TypeOrmModule.forFeature([EmailSuppression]),
     SettingsModule,
-    forwardRef(() => EmailMarketingModule), // Forward reference to avoid circular dependency
+    forwardRef(() => EmailMarketingModule), // Forward reference for UnifiedTemplateService
   ],
   controllers: [
     MailController,
@@ -29,6 +30,7 @@ import { EmailMarketingModule } from '../email-marketing/email-marketing.module'
     MailService,
     WebhookService,
     TemplateRendererService,
+    EmailEventListener,
   ],
   exports: [
     MailService,

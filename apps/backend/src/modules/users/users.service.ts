@@ -13,6 +13,7 @@ import { RolesService } from '../roles/roles.service';
 import { UserRolesService } from './user-roles.service';
 import { CrmService } from '../crm/crm.service';
 import { UserEmailService } from './services/user-email.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +27,7 @@ export class UsersService {
     private userRolesService: UserRolesService,
     private crmService: CrmService,
     private userEmailService: UserEmailService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -154,10 +156,16 @@ export class UsersService {
         const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
         console.log('✅ User created successfully:', savedUser.email);
-        console.log('📧 Sending account creation email...');
+        console.log('📧 Emitting user.created event...');
         
-        // Send account creation email
-        await this.userEmailService.sendAccountCreatedEmail(savedUser, resetToken);
+        // Emit event for email notification (decoupled from business logic)
+        this.eventEmitter.emit('user.created', {
+          userId: savedUser.id,
+          email: savedUser.email,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+          resetToken,
+        });
       } catch (emailError) {
         console.error('❌ Error sending account creation email:', emailError);
         // Don't fail user creation if email sending fails

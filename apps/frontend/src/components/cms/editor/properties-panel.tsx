@@ -15,8 +15,10 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Lock, ArrowUp, ArrowDown, X, Image as ImageIcon, Plus, GripVertical, Trash2, Video as VideoIcon, Play, Loader2 } from 'lucide-react';
+import { Lock, ArrowUp, ArrowDown, X, Image as ImageIcon, Plus, GripVertical, Trash2, Video as VideoIcon, Play, Loader2, Save } from 'lucide-react';
 import { allBlockConfigs } from '@/components/cms/blocks/block-configs';
+import { DynamicFormGenerator } from '@/components/cms/reusable/dynamic-form-generator';
+import { ReusableComponentsService } from '@/services/reusable-content.service';
 import { Media } from '@/lib/media/types';
 import { Skeleton } from '@/components/loading/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -43,6 +45,7 @@ interface PropertiesPanelProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  reusableComponentId?: string; // ID of reusable component from database
 }
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
@@ -54,12 +57,47 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onMoveDown,
   canMoveUp = true,
   canMoveDown = true,
+  reusableComponentId,
 }) => {
   const [localProps, setLocalProps] = useState<ComponentProps>(componentProps);
   const [activeTab, setActiveTab] = useState<'content' | 'style' | 'advanced'>('content');
   const [mediaModalOpen, setMediaModalOpen] = useState<Record<string, boolean>>({});
   const [loadingMedia, setLoadingMedia] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  // Handle saving reusable component changes to database
+  const handleSaveToLibrary = async () => {
+    if (!reusableComponentId || !componentProps.blockId) {
+      toast({
+        title: "Cannot Save",
+        description: "This is not a reusable component",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await ReusableComponentsService.update(reusableComponentId, {
+        props: localProps,
+      });
+
+      toast({
+        title: "Saved Successfully",
+        description: "Component changes have been saved to the library",
+      });
+    } catch (error) {
+      console.error('Failed to save reusable component:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save component changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Normalize component type - detect if it's a block component
   const normalizedComponentType = (() => {
@@ -903,9 +941,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   };
 
   const renderBlockContentProperties = () => {
-    // Block ID is the original componentType (e.g., "nav-logo-cta", "hero-split")
-    const blockId = componentType;
-    
+    // Check if this is a reusable component with blockId in componentProps
+    const blockId = componentProps.blockId || componentType;
+
     if (!blockId) {
       return (
         <div className="text-center text-muted-foreground py-8">
@@ -916,7 +954,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
     // Get block configuration from allBlockConfigs
     const blockConfig = allBlockConfigs[blockId];
-    
+
     if (!blockConfig) {
       return (
         <div className="text-center text-muted-foreground py-8">
@@ -925,11 +963,50 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       );
     }
 
+    // If this is a reusable component (has blockId in props), use DynamicFormGenerator
+    if (componentProps.blockId) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+              Reusable Block: {blockId}
+            </div>
+            {reusableComponentId && (
+              <Button
+                size="sm"
+                onClick={handleSaveToLibrary}
+                disabled={isSaving || isLocked}
+                className="h-7"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-3 w-3 mr-1" />
+                    Save to Library
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          <DynamicFormGenerator
+            schema={blockConfig}
+            values={localProps}
+            onChange={(key, value) => updateProp(key, value)}
+          />
+        </div>
+      );
+    }
+
     // Get all content properties from block config (not just from localProps)
     const contentPropertyKeys = Object.keys(blockConfig).filter(key => {
       // Exclude style properties and className
       if (isStyleProperty(key) || key === 'className') return false;
-      
+
       // Exclude URL fields if corresponding mediaId field exists
       // (logoUrl hidden if logoMediaId exists, imageUrl hidden if imageMediaId exists)
       if (key.toLowerCase().endsWith('url')) {
@@ -938,7 +1015,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           return false; // Hide URL field, use MediaPicker via mediaId instead
         }
       }
-      
+
       return true;
     });
 
@@ -956,12 +1033,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
           Block: {blockId}
         </div>
-        
+
         {/* Render all properties from block config */}
         {contentPropertyKeys.map(propKey => {
           const propConfig = blockConfig[propKey];
           const propValue = localProps[propKey] !== undefined ? localProps[propKey] : propConfig.defaultValue;
-          
+
           return (
             <div key={propKey} className="space-y-2">
               <Label htmlFor={propKey} className="text-sm font-medium">
@@ -976,9 +1053,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   };
 
   const renderBlockStyleProperties = () => {
-    // Block ID is the original componentType (e.g., "nav-logo-cta", "hero-split")
-    const blockId = componentType;
-    
+    // Check if this is a reusable component with blockId in componentProps
+    const blockId = componentProps.blockId || componentType;
+
     if (!blockId) {
       return (
         <div className="text-center text-muted-foreground py-8">
@@ -989,11 +1066,22 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
     // Get block configuration from allBlockConfigs
     const blockConfig = allBlockConfigs[blockId];
-    
+
     if (!blockConfig) {
       return (
         <div className="text-center text-muted-foreground py-8">
           <p>Block configuration not found for: {blockId}</p>
+        </div>
+      );
+    }
+
+    // If this is a reusable component (has blockId in props), style properties
+    // are also handled by DynamicFormGenerator in Content tab
+    if (componentProps.blockId) {
+      return (
+        <div className="text-center text-muted-foreground py-8">
+          <p>Style properties are handled in the Content tab</p>
+          <p className="text-sm mt-2">Use the Content tab to edit all properties</p>
         </div>
       );
     }

@@ -5,7 +5,8 @@
 
 import { allBlockConfigs } from '@/components/cms/blocks/block-configs';
 
-export type ComponentCategory = 
+export type ComponentCategory =
+  | 'Reusable' // Reusable components from database
   | 'Navigation'
   | 'Hero'
   | 'Content'
@@ -285,6 +286,7 @@ export const getComponentById = (id: string): ComponentRegistryItem | undefined 
  */
 export const getAllCategories = (): ComponentCategory[] => {
   return [
+    'Reusable', // Reusable components from database - shown first
     'Navigation',
     'Hero',
     'Content',

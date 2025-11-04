@@ -73,6 +73,7 @@ interface EditorComponent {
   orderIndex?: number;
   children?: EditorComponent[];
   locked?: boolean; // Add locked property
+  reusableComponentId?: string; // Database ID for reusable components
 }
 
 // Define history item type
@@ -1050,16 +1051,18 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
       props: defaultProps,
       children: [],
       locked: false,
+      // Store reusableComponentId if this is a reusable component (has blockId in props)
+      reusableComponentId: defaultProps.blockId ? componentId : undefined,
     };
-    
+
     const newComponents = [...components, newComponent];
     setComponents(newComponents);
     saveToHistory(newComponents);
-    
+
     // Auto-select the newly added component
     setSelectedComponentId(newComponent.id);
     setSelectedComponentType(newComponent.type);
-    
+
     toast({
       title: "Component Added",
       description: `${componentId} has been added to the page`,
@@ -1680,6 +1683,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
                     onMoveDown={canMoveDown ? handleMoveDown : undefined}
                     canMoveUp={canMoveUp}
                     canMoveDown={canMoveDown}
+                    reusableComponentId={selectedComponent?.reusableComponentId}
                   />
                 </div>
               </Card>

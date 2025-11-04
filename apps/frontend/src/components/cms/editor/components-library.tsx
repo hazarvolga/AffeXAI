@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Search, Plus, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Search, Plus, GripVertical, ChevronLeft, ChevronRight, Loader2, Copy, Trash2, MoreVertical, Download, Upload } from 'lucide-react';
 import {
   componentsRegistry,
   getComponentsByCategory,
@@ -15,6 +18,8 @@ import {
   type ComponentCategory,
   type ComponentRegistryItem,
 } from '@/lib/cms/components-registry';
+import { ReusableComponentsService, type ReusableComponent } from '@/services/reusable-content.service';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface ComponentsLibraryProps {
   onAddComponent: (componentId: string, defaultProps: any) => void;
@@ -22,13 +27,106 @@ interface ComponentsLibraryProps {
 
 export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddComponent }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('Navigation');
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('Reusable');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const categories = getAllCategories();
+
+  // Fetch reusable components from API
+  const { data: reusableComponentsData, isLoading: isLoadingReusable } = useQuery({
+    queryKey: ['reusable-components-editor'],
+    queryFn: () => ReusableComponentsService.getAll({ isPublic: true, limit: 100 }),
+    enabled: selectedCategory === 'Reusable' || searchQuery.trim() !== '',
+  });
+
+  // Duplicate mutation
+  const duplicateMutation = useMutation({
+    mutationFn: (componentId: string) =>
+      ReusableComponentsService.duplicate(componentId, `Copy of Component`, false),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reusable-components-editor'] });
+      toast({
+        title: "Component Duplicated",
+        description: "Component has been successfully duplicated",
+      });
+    },
+    onError: (error) => {
+      console.error('Duplicate failed:', error);
+      toast({
+        title: "Duplicate Failed",
+        description: "Failed to duplicate component. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (componentId: string) => ReusableComponentsService.delete(componentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reusable-components-editor'] });
+      toast({
+        title: "Component Deleted",
+        description: "Component has been successfully deleted",
+      });
+    },
+    onError: (error) => {
+      console.error('Delete failed:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete component. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Export mutation
+  const exportMutation = useMutation({
+    mutationFn: (componentId: string) => ReusableComponentsService.export(componentId),
+    onSuccess: (data) => {
+      // Download as JSON file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `component-${data.slug || 'export'}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Component Exported",
+        description: "Component has been successfully exported",
+      });
+    },
+    onError: (error) => {
+      console.error('Export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export component. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handler functions
+  const handleDuplicate = (componentId: string) => {
+    duplicateMutation.mutate(componentId);
+  };
+
+  const handleDelete = (componentId: string) => {
+    deleteMutation.mutate(componentId);
+  };
+
+  const handleExport = (componentId: string) => {
+    exportMutation.mutate(componentId);
+  };
 
   // Check scroll position to show/hide arrows and gradients
   const checkScrollPosition = () => {
@@ -82,16 +180,46 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
     }
   };
 
-  // Filter components based on search query
+  // Convert reusable components to registry format
+  const reusableComponents: ComponentRegistryItem[] = useMemo(() => {
+    if (!reusableComponentsData?.data) return [];
+
+    return reusableComponentsData.data.map((comp: ReusableComponent) => ({
+      id: comp.id, // Use database ID
+      name: comp.name,
+      description: comp.description || 'Reusable component',
+      category: 'Reusable' as ComponentCategory,
+      thumbnailUrl: comp.thumbnailUrl,
+      defaultProps: comp.props,
+      blockId: comp.blockId, // Store blockId for later use
+      componentType: comp.componentType,
+    }));
+  }, [reusableComponentsData]);
+
+  // Filter components based on search query and category
   const filteredComponents = useMemo(() => {
     if (searchQuery.trim()) {
-      return searchComponents(searchQuery);
+      // Search in both prebuild and reusable components
+      const prebuildResults = searchComponents(searchQuery);
+      const reusableResults = reusableComponents.filter(comp =>
+        comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (comp.description && comp.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      return [...reusableResults, ...prebuildResults];
     }
+
+    if (selectedCategory === 'Reusable') {
+      return reusableComponents;
+    }
+
     return getComponentsByCategory(selectedCategory);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, reusableComponents]);
 
   // Get component count per category for badges
   const getCategoryCount = (category: ComponentCategory) => {
+    if (category === 'Reusable') {
+      return reusableComponents.length;
+    }
     return getComponentsByCategory(category).length;
   };
 
@@ -99,10 +227,50 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
     onAddComponent(component.id, component.defaultProps);
   };
 
+  // Import file handler
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Assuming the file contains an array of components or a single component
+      const components = Array.isArray(data) ? data : [data];
+
+      await ReusableComponentsService.import(components, false);
+      queryClient.invalidateQueries({ queryKey: ['reusable-components-editor'] });
+
+      toast({
+        title: "Components Imported",
+        description: `Successfully imported ${components.length} component(s)`,
+      });
+    } catch (error) {
+      console.error('Import failed:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import components. Please check the file format.",
+        variant: "destructive",
+      });
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b space-y-3">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -113,6 +281,28 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
             className="pl-9"
           />
         </div>
+
+        {/* Import Button (only show for Reusable category) */}
+        {selectedCategory === 'Reusable' && (
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleImportClick}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Import Components
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+        )}
       </div>
 
       {/* Category Tabs */}
@@ -180,7 +370,15 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
       {/* Components Grid */}
       <ScrollArea className="flex-1">
         <div className="p-4">
-          {filteredComponents.length === 0 ? (
+          {/* Loading state for reusable components */}
+          {selectedCategory === 'Reusable' && isLoadingReusable ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Loader2 className="h-12 w-12 text-muted-foreground mb-3 animate-spin" />
+              <p className="text-sm text-muted-foreground">
+                Loading reusable components...
+              </p>
+            </div>
+          ) : filteredComponents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mb-3" />
               <p className="text-sm text-muted-foreground">
@@ -194,6 +392,10 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
                   key={component.id}
                   component={component}
                   onAdd={handleAddComponent}
+                  onDuplicate={selectedCategory === 'Reusable' ? handleDuplicate : undefined}
+                  onDelete={selectedCategory === 'Reusable' ? handleDelete : undefined}
+                  onExport={selectedCategory === 'Reusable' ? handleExport : undefined}
+                  isReusable={selectedCategory === 'Reusable'}
                 />
               ))}
             </div>
@@ -207,10 +409,22 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
 interface ComponentCardProps {
   component: ComponentRegistryItem;
   onAdd: (component: ComponentRegistryItem) => void;
+  onDuplicate?: (componentId: string) => void;
+  onDelete?: (componentId: string) => void;
+  onExport?: (componentId: string) => void;
+  isReusable?: boolean;
 }
 
-const ComponentCard: React.FC<ComponentCardProps> = ({ component, onAdd }) => {
+const ComponentCard: React.FC<ComponentCardProps> = ({
+  component,
+  onAdd,
+  onDuplicate,
+  onDelete,
+  onExport,
+  isReusable = false
+}) => {
   const [isDragging, setIsDragging] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     setIsDragging(true);
@@ -227,37 +441,103 @@ const ComponentCard: React.FC<ComponentCardProps> = ({ component, onAdd }) => {
     setIsDragging(false);
   };
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(component.id);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
-    <div 
-      className={`group relative rounded-lg border bg-card p-4 hover:border-primary transition-colors cursor-move ${isDragging ? 'opacity-50' : ''}`}
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      {/* Drag Handle - Top Right */}
-      <div className="absolute top-2 right-2 p-1 rounded bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-      </div>
-
-      {/* Component Info */}
-      <div className="space-y-2 pr-8">
-        <h3 className="font-semibold text-sm leading-tight">{component.name}</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-          {component.description}
-        </p>
-      </div>
-
-      {/* Add Button */}
-      <Button
-        size="sm"
-        variant="outline"
-        className="mt-3 w-full"
-        onClick={() => onAdd(component)}
+    <>
+      <div
+        className={`group relative rounded-lg border bg-card p-4 hover:border-primary transition-colors cursor-move ${isDragging ? 'opacity-50' : ''}`}
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
-        <Plus className="h-4 w-4 mr-1" />
-        Add to Page
-      </Button>
-    </div>
+        {/* Drag Handle - Top Left */}
+        <div className="absolute top-2 left-2 p-1 rounded bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+
+        {/* Actions Menu - Top Right (only for reusable components) */}
+        {isReusable && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onDuplicate && (
+                  <DropdownMenuItem onClick={() => onDuplicate(component.id)}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Duplicate
+                  </DropdownMenuItem>
+                )}
+                {onExport && (
+                  <DropdownMenuItem onClick={() => onExport(component.id)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </DropdownMenuItem>
+                )}
+                {onDelete && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {/* Component Info */}
+        <div className="space-y-2 pr-8 pl-8">
+          <h3 className="font-semibold text-sm leading-tight">{component.name}</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+            {component.description}
+          </p>
+        </div>
+
+        {/* Add Button */}
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-3 w-full"
+          onClick={() => onAdd(component)}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Add to Page
+        </Button>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Component</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{component.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

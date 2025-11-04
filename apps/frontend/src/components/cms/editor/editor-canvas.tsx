@@ -225,9 +225,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       );
     };
 
-    // All components are now prebuild blocks from the registry
-    const ComponentToRender = componentRegistry[component.type];
-    
+    // Check if this is a reusable component with blockId in props
+    const blockId = component.props?.blockId || component.type;
+    const ComponentToRender = componentRegistry[blockId];
+
     if (ComponentToRender) {
       return (
         <div key={component.id} className={baseClasses} onClick={handleClick}>
@@ -238,14 +239,20 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               <Lock className="h-3 w-3" />
             </div>
           )}
+          {/* Show indicator for reusable components */}
+          {component.props?.blockId && (
+            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded shadow-sm">
+              Reusable
+            </div>
+          )}
         </div>
       );
     }
-    
+
     // Unknown component type
     return (
       <div key={component.id} className="p-4 text-center text-muted-foreground border border-dashed rounded bg-red-50">
-        <p className="text-sm text-red-600 font-medium">Unknown component type: {component.type}</p>
+        <p className="text-sm text-red-600 font-medium">Unknown component type: {blockId}</p>
         <p className="text-xs text-red-500 mt-1">This component is not registered in the component registry</p>
       </div>
     );

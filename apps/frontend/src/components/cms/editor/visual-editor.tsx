@@ -1045,9 +1045,12 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
 
   // Add prebuild component from Components Library
   const handleAddPrebuildComponent = useCallback((componentId: string, defaultProps: any) => {
+    // For reusable components, use blockId as type; for prebuild components, use componentId
+    const componentType = defaultProps.blockId || componentId;
+
     const newComponent: EditorComponent = {
       id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: componentId,
+      type: componentType, // Use blockId for reusable, componentId for prebuild
       props: defaultProps,
       children: [],
       locked: false,
@@ -1065,7 +1068,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
 
     toast({
       title: "Component Added",
-      description: `${componentId} has been added to the page`,
+      description: `${componentType} has been added to the page`,
     });
   }, [components, saveToHistory, toast]);
 

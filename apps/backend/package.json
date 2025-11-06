@@ -33,6 +33,7 @@
     "seed:ticket-templates": "ts-node src/scripts/seed-ticket-email-templates.ts",
     "seed:reusable-content": "ts-node src/database/seeds/run-reusable-content.ts",
     "seed:homepage-sections": "tsx src/database/seeds/run-homepage-sections.ts",
+    "seed:cms-templates": "tsx src/modules/cms/seeds/run-templates.ts",
     "update:empty-templates": "tsx src/scripts/update-empty-templates.ts"
   },
   "dependencies": {

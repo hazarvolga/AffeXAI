@@ -224,7 +224,15 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
   };
 
   const handleAddComponent = (component: ComponentRegistryItem) => {
-    onAddComponent(component.id, component.defaultProps);
+    // For reusable components, use blockId as componentId; for prebuild, use id
+    const componentId = component.blockId || component.id;
+
+    // For reusable components, include the reusable component ID in props
+    const props = component.blockId
+      ? { ...component.defaultProps, reusableComponentId: component.id }
+      : component.defaultProps;
+
+    onAddComponent(componentId, props);
   };
 
   // Import file handler

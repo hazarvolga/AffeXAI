@@ -234,23 +234,45 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
         const sortedComponents = sectionComponents.sort((a, b) => a.orderIndex - b.orderIndex);
 
         for (const comp of sortedComponents) {
-          // Use componentType or blockType as the component ID
-          const componentId = comp.componentType || comp.blockType;
+          // Determine component ID based on 3 possible sources:
+          // 1. reusableComponent.blockId (if using existing reusable component)
+          // 2. blockType (if using prebuild block)
+          // 3. componentType (if inline component definition)
+          let componentId: string | undefined;
+          let componentProps: Record<string, any> = {};
+
+          if (comp.reusableComponent?.blockId) {
+            // Using existing reusable component
+            componentId = comp.reusableComponent.blockId;
+            componentProps = {
+              ...comp.reusableComponent.props,
+              ...comp.props, // Override with section-specific props
+              reusableComponentId: comp.reusableComponentId,
+            };
+          } else if (comp.blockType) {
+            // Using prebuild block
+            componentId = comp.blockType;
+            componentProps = comp.props || {};
+          } else if (comp.componentType) {
+            // Inline component definition
+            componentId = comp.componentType;
+            componentProps = comp.props || {};
+          }
 
           if (!componentId) {
-            console.warn('Section component missing componentType/blockType:', comp);
+            console.warn('Section component missing all identifiers (reusableComponent.blockId, blockType, componentType):', comp);
             continue;
           }
 
-          // Add component props with section metadata
-          const componentProps = {
-            ...comp.props,
+          // Add section metadata
+          const finalProps = {
+            ...componentProps,
             _fromSection: component.id,
             _sectionName: component.name,
             _orderIndex: comp.orderIndex,
           };
 
-          onAddComponent(componentId, componentProps);
+          onAddComponent(componentId, finalProps);
         }
 
         toast({

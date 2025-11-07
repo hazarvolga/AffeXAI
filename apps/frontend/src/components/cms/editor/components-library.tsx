@@ -547,15 +547,17 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
   return (
     <>
       <div
-        className={`group relative rounded-lg border bg-card p-4 hover:border-primary transition-colors cursor-move ${isDragging ? 'opacity-50' : ''}`}
-        draggable
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        className={`group relative rounded-lg border bg-card p-4 hover:border-primary transition-colors ${isReusable ? 'cursor-default' : 'cursor-move'} ${isDragging ? 'opacity-50' : ''}`}
+        draggable={!isReusable}
+        onDragStart={!isReusable ? handleDragStart : undefined}
+        onDragEnd={!isReusable ? handleDragEnd : undefined}
       >
-        {/* Drag Handle - Top Left */}
-        <div className="absolute top-2 left-2 p-1 rounded bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-        </div>
+        {/* Drag Handle - Top Left (hidden for reusable sections) */}
+        {!isReusable && (
+          <div className="absolute top-2 left-2 p-1 rounded bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
 
         {/* Actions Menu - Top Right (only for reusable components) */}
         {isReusable && (

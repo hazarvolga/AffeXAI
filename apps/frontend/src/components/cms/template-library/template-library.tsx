@@ -47,6 +47,9 @@ const categoryOptions: { value: TemplateCategory; label: string }[] = [
   { value: 'News', label: 'News' },
   { value: 'Case Study', label: 'Case Studies' },
   { value: 'Feature', label: 'Features' },
+  { value: 'Error', label: 'Error Pages' },
+  { value: 'Verification', label: 'Verification' },
+  { value: 'Campaign', label: 'Campaigns' },
 ];
 
 /**

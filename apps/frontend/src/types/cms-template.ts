@@ -29,7 +29,10 @@ export type TemplateCategory =
   | 'Pricing'       // Pricing and plans pages
   | 'News'          // News and announcements
   | 'Case Study'    // Success stories and case studies
-  | 'Feature';      // Feature-focused landing pages
+  | 'Feature'       // Feature-focused landing pages
+  | 'Error'         // Error pages (404, 500)
+  | 'Verification'  // Verification pages (certificate, email)
+  | 'Campaign';     // Campaign and promotional landing pages
 
 /**
  * Layout Configuration for Templates

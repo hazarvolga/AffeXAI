@@ -23,6 +23,7 @@ export const templatesData = [
         headingFont: 'Inter',
         bodyFont: 'Inter',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -209,6 +210,7 @@ export const templatesData = [
         headingFont: 'Poppins',
         bodyFont: 'Inter',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -401,6 +403,7 @@ export const templatesData = [
         headingFont: 'Montserrat',
         bodyFont: 'Open Sans',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -526,6 +529,7 @@ export const templatesData = [
         headingFont: 'Playfair Display',
         bodyFont: 'Lato',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -626,6 +630,7 @@ export const templatesData = [
         headingFont: 'Merriweather',
         bodyFont: 'Lora',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -723,6 +728,7 @@ export const templatesData = [
         headingFont: 'Inter',
         bodyFont: 'Inter',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -958,6 +964,7 @@ export const templatesData = [
         headingFont: 'Inter',
         bodyFont: 'Inter',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {
@@ -1156,6 +1163,7 @@ export const templatesData = [
         headingFont: 'Inter',
         bodyFont: 'Inter',
       },
+      supportedContexts: ['public'],
     },
     blocks: [
       {

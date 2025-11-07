@@ -233,24 +233,37 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
         // Sort by orderIndex and add each component to canvas
         const sortedComponents = sectionComponents.sort((a, b) => a.orderIndex - b.orderIndex);
 
+        console.log('🔍 Section components loaded:', {
+          sectionId: component.id,
+          sectionName: component.name,
+          componentCount: sortedComponents.length,
+          components: sortedComponents.map(c => ({
+            id: c.id,
+            reusableComponentId: c.reusableComponentId,
+            blockType: c.blockType,
+            componentType: c.componentType,
+            hasReusableComponent: !!c.reusableComponent,
+            reusableBlockId: c.reusableComponent?.blockId,
+            reusableComponentType: c.reusableComponent?.componentType,
+          }))
+        });
+
         for (const comp of sortedComponents) {
-          // Determine component ID based on 3 possible sources:
-          // 1. reusableComponent.blockId (if using existing reusable component)
-          // 2. blockType (if using prebuild block)
-          // 3. componentType (if inline component definition)
+          // Determine component ID with comprehensive fallback chain:
+          // Priority: reusableComponent.blockId > reusableComponent.componentType > blockType > componentType
           let componentId: string | undefined;
           let componentProps: Record<string, any> = {};
 
-          if (comp.reusableComponent?.blockId) {
-            // Using existing reusable component
-            componentId = comp.reusableComponent.blockId;
+          if (comp.reusableComponent) {
+            // Using existing reusable component - try blockId first, then componentType
+            componentId = comp.reusableComponent.blockId || comp.reusableComponent.componentType;
             componentProps = {
               ...comp.reusableComponent.props,
               ...comp.props, // Override with section-specific props
               reusableComponentId: comp.reusableComponentId,
             };
           } else if (comp.blockType) {
-            // Using prebuild block
+            // Using prebuild block directly
             componentId = comp.blockType;
             componentProps = comp.props || {};
           } else if (comp.componentType) {
@@ -260,7 +273,15 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
           }
 
           if (!componentId) {
-            console.warn('Section component missing all identifiers (reusableComponent.blockId, blockType, componentType):', comp);
+            console.error('❌ Section component missing all identifiers:', {
+              id: comp.id,
+              reusableComponentId: comp.reusableComponentId,
+              hasReusableComponent: !!comp.reusableComponent,
+              reusableComponentBlockId: comp.reusableComponent?.blockId,
+              reusableComponentType: comp.reusableComponent?.componentType,
+              blockType: comp.blockType,
+              componentType: comp.componentType,
+            });
             continue;
           }
 

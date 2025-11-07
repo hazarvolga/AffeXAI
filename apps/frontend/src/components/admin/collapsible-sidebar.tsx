@@ -335,16 +335,6 @@ export function CollapsibleDashboardSidebar() {
                                             Sayfalar
                                         </Link>
                                         <Link
-                                            href="/admin/cms/reusable-components"
-                                            className={cn(
-                                                "flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-all hover:text-primary",
-                                                pathname.startsWith("/admin/cms/reusable-components") && "bg-muted text-primary"
-                                            )}
-                                        >
-                                            <Box className="h-3 w-3" />
-                                            Bileşenler
-                                        </Link>
-                                        <Link
                                             href="/admin/cms/reusable-sections"
                                             className={cn(
                                                 "flex items-center gap-3 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-all hover:text-primary",

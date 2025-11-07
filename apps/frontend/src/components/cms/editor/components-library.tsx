@@ -18,7 +18,7 @@ import {
   type ComponentCategory,
   type ComponentRegistryItem,
 } from '@/lib/cms/components-registry';
-import { ReusableComponentsService, type ReusableComponent } from '@/services/reusable-content.service';
+import { ReusableSectionsService, type ReusableSection } from '@/services/reusable-content.service';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface ComponentsLibraryProps {
@@ -37,29 +37,29 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
   const queryClient = useQueryClient();
   const categories = getAllCategories();
 
-  // Fetch reusable components from API
-  const { data: reusableComponentsData, isLoading: isLoadingReusable } = useQuery({
-    queryKey: ['reusable-components-editor'],
-    queryFn: () => ReusableComponentsService.getAll({ isPublic: true, limit: 100 }),
+  // Fetch reusable sections from API (not components!)
+  const { data: reusableSectionsData, isLoading: isLoadingReusable } = useQuery({
+    queryKey: ['reusable-sections-editor'],
+    queryFn: () => ReusableSectionsService.getAll({ isPublic: true, limit: 100 }),
     enabled: selectedCategory === 'Reusable' || searchQuery.trim() !== '',
   });
 
   // Duplicate mutation
   const duplicateMutation = useMutation({
-    mutationFn: (componentId: string) =>
-      ReusableComponentsService.duplicate(componentId, `Copy of Component`, false),
+    mutationFn: (sectionId: string) =>
+      ReusableSectionsService.duplicate(sectionId, `Copy of Section`, false),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reusable-components-editor'] });
+      queryClient.invalidateQueries({ queryKey: ['reusable-sections-editor'] });
       toast({
-        title: "Component Duplicated",
-        description: "Component has been successfully duplicated",
+        title: "Section Duplicated",
+        description: "Section has been successfully duplicated",
       });
     },
     onError: (error) => {
       console.error('Duplicate failed:', error);
       toast({
         title: "Duplicate Failed",
-        description: "Failed to duplicate component. Please try again.",
+        description: "Failed to duplicate section. Please try again.",
         variant: "destructive",
       });
     },
@@ -67,12 +67,12 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (componentId: string) => ReusableComponentsService.delete(componentId),
+    mutationFn: (sectionId: string) => ReusableSectionsService.delete(sectionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reusable-components-editor'] });
+      queryClient.invalidateQueries({ queryKey: ['reusable-sections-editor'] });
       toast({
-        title: "Component Deleted",
-        description: "Component has been successfully deleted",
+        title: "Section Deleted",
+        description: "Section has been successfully deleted",
       });
     },
     onError: (error) => {
@@ -180,56 +180,56 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
     }
   };
 
-  // Convert reusable components to registry format
-  const reusableComponents: ComponentRegistryItem[] = useMemo(() => {
-    if (!reusableComponentsData?.data) return [];
+  // Convert reusable sections to registry format (NOT components!)
+  const reusableSections: ComponentRegistryItem[] = useMemo(() => {
+    if (!reusableSectionsData?.data) return [];
 
-    return reusableComponentsData.data.map((comp: ReusableComponent) => ({
-      id: comp.id, // Use database ID
-      name: comp.name,
-      description: comp.description || 'Reusable component',
+    return reusableSectionsData.data.map((section: ReusableSection) => ({
+      id: section.id, // Use database ID
+      name: section.name,
+      description: section.description || 'Reusable section',
       category: 'Reusable' as ComponentCategory,
-      thumbnailUrl: comp.thumbnailUrl,
-      defaultProps: comp.props,
-      blockId: comp.blockId, // Store blockId for later use
-      componentType: comp.componentType,
+      thumbnailUrl: section.thumbnailUrl,
+      defaultProps: {}, // Sections have components, not direct props
+      sectionType: section.sectionType,
     }));
-  }, [reusableComponentsData]);
+  }, [reusableSectionsData]);
 
   // Filter components based on search query and category
   const filteredComponents = useMemo(() => {
     if (searchQuery.trim()) {
-      // Search in both prebuild and reusable components
+      // Search in both prebuild and reusable sections
       const prebuildResults = searchComponents(searchQuery);
-      const reusableResults = reusableComponents.filter(comp =>
-        comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (comp.description && comp.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      const reusableResults = reusableSections.filter(section =>
+        section.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (section.description && section.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
       return [...reusableResults, ...prebuildResults];
     }
 
     if (selectedCategory === 'Reusable') {
-      return reusableComponents;
+      // ONLY show user-created sections, NO prebuild components!
+      return reusableSections;
     }
 
     return getComponentsByCategory(selectedCategory);
-  }, [searchQuery, selectedCategory, reusableComponents]);
+  }, [searchQuery, selectedCategory, reusableSections]);
 
   // Get component count per category for badges
   const getCategoryCount = (category: ComponentCategory) => {
     if (category === 'Reusable') {
-      return reusableComponents.length;
+      return reusableSections.length;
     }
     return getComponentsByCategory(category).length;
   };
 
   const handleAddComponent = (component: ComponentRegistryItem) => {
-    // For reusable components, use blockId as componentId; for prebuild, use id
-    const componentId = component.blockId || component.id;
+    // For reusable sections, add sectionId; for prebuild, use id
+    const componentId = component.id;
 
-    // For reusable components, include the reusable component ID in props
-    const props = component.blockId
-      ? { ...component.defaultProps, reusableComponentId: component.id }
+    // For reusable sections, include the reusable section ID in props
+    const props = component.category === 'Reusable'
+      ? { ...component.defaultProps, reusableSectionId: component.id }
       : component.defaultProps;
 
     onAddComponent(componentId, props);
@@ -383,15 +383,24 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Loader2 className="h-12 w-12 text-muted-foreground mb-3 animate-spin" />
               <p className="text-sm text-muted-foreground">
-                Loading reusable components...
+                Loading reusable sections...
               </p>
             </div>
           ) : filteredComponents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">
-                {searchQuery ? 'No components found' : 'No components in this category'}
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                {selectedCategory === 'Reusable'
+                  ? 'Henüz reusable section oluşturmadınız'
+                  : (searchQuery ? 'No components found' : 'No components in this category')
+                }
               </p>
+              {selectedCategory === 'Reusable' && !searchQuery && (
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  Visual editor'da section grupları oluşturup "Save as Reusable Section" ile kaydedin.
+                  Daha sonra buradan tekrar kullanabilirsiniz.
+                </p>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3">

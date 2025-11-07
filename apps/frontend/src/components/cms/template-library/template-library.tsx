@@ -50,6 +50,7 @@ const categoryOptions: { value: TemplateCategory; label: string }[] = [
   { value: 'Error', label: 'Error Pages' },
   { value: 'Verification', label: 'Verification' },
   { value: 'Campaign', label: 'Campaigns' },
+  { value: 'E-Commerce', label: 'E-Commerce' },
 ];
 
 /**

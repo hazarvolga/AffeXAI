@@ -32,7 +32,8 @@ export type TemplateCategory =
   | 'Feature'       // Feature-focused landing pages
   | 'Error'         // Error pages (404, 500)
   | 'Verification'  // Verification pages (certificate, email)
-  | 'Campaign';     // Campaign and promotional landing pages
+  | 'Campaign'      // Campaign and promotional landing pages
+  | 'E-Commerce';   // E-commerce pages (product, cart, checkout)
 
 /**
  * Layout Configuration for Templates

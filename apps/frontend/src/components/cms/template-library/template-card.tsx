@@ -87,6 +87,7 @@ function CategoryBadge({ category }: { category: PageTemplate['category'] }) {
     'Error': { variant: 'secondary', label: 'Error' },
     'Verification': { variant: 'default', label: 'Verification' },
     'Campaign': { variant: 'outline', label: 'Campaign' },
+    'E-Commerce': { variant: 'default', label: 'E-Commerce' },
   };
 
   const config = variants[category] || { variant: 'outline' as const, label: category };

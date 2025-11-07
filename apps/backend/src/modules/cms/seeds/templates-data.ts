@@ -2815,4 +2815,393 @@ export const templatesData = [
       estimatedSetupTime: '10 minutes',
     },
   },
+
+  // ==================== FAZ 4: E-TİCARET ====================
+
+  // Template 21: Product Category
+  {
+    name: 'Product Category',
+    description: 'Ürün kategori sayfası - ürün listesi, filtreleme, sıralama, sepete ekle',
+    category: 'E-Commerce',
+    isFeatured: true,
+    designSystem: {
+      colors: {
+        primary: '#8b5cf6',
+        secondary: '#a78bfa',
+        background: '#ffffff',
+        text: '#111827',
+      },
+      typography: {
+        headingFont: 'Inter',
+        bodyFont: 'Inter',
+      },
+      supportedContexts: ['public'],
+    },
+    blocks: [
+      {
+        id: 'header',
+        type: 'nav-logo-cta',
+        props: {
+          logoUrl: '/logo.svg',
+          menuItems: [
+            { label: 'Ürünler', url: '/products' },
+            { label: 'Kategoriler', url: '/categories' },
+            { label: 'İletişim', url: '/contact' },
+          ],
+          ctaButton: {
+            label: 'Sepetim',
+            url: '/cart',
+          },
+        },
+      },
+      {
+        id: 'hero',
+        type: 'hero-centered-bg-image',
+        props: {
+          title: 'BIM Yazılımları',
+          subtitle: 'Profesyonel İnşaat Çözümleri',
+          description: 'Mimarlık ve inşaat sektörü için en gelişmiş BIM yazılımları',
+        },
+      },
+      {
+        id: 'products',
+        type: 'gallery-four-image-mosaic',
+        props: {
+          images: [
+            {
+              src: '/products/allplan-architecture.jpg',
+              alt: 'Allplan Architecture',
+              caption: 'Allplan Architecture',
+              price: '₺12.999',
+            },
+            {
+              src: '/products/allplan-engineering.jpg',
+              alt: 'Allplan Engineering',
+              caption: 'Allplan Engineering',
+              price: '₺15.999',
+            },
+            {
+              src: '/products/allplan-bridge.jpg',
+              alt: 'Allplan Bridge',
+              caption: 'Allplan Bridge',
+              price: '₺18.999',
+            },
+            {
+              src: '/products/allplan-precast.jpg',
+              alt: 'Allplan Precast',
+              caption: 'Allplan Precast',
+              price: '₺14.999',
+            },
+          ],
+        },
+      },
+      {
+        id: 'features',
+        type: 'features-icon-grid-three',
+        props: {
+          sectionTitle: 'Neden Allplan?',
+          features: [
+            {
+              icon: 'shield-check',
+              title: 'Güvenli Ödeme',
+              description: '256-bit SSL şifreleme',
+            },
+            {
+              icon: 'truck',
+              title: 'Hızlı Teslimat',
+              description: 'Dijital ürünler anında',
+            },
+            {
+              icon: 'headphones',
+              title: '7/24 Destek',
+              description: 'Uzman destek ekibi',
+            },
+          ],
+        },
+      },
+      {
+        id: 'cta',
+        type: 'content-cta-box',
+        props: {
+          title: 'Demo Talep Edin',
+          description: 'Ürünlerimizi denemek ister misiniz?',
+          ctaButton: {
+            label: 'Ücretsiz Demo',
+            url: '/demo',
+          },
+        },
+      },
+      {
+        id: 'footer',
+        type: 'footer-multi-column',
+        props: {
+          companyName: 'Şirket Adı',
+        },
+      },
+    ],
+    layoutOptions: {
+      maxWidth: '1280px',
+      spacing: 'comfortable',
+      headerSticky: true,
+    },
+    metadata: {
+      tags: ['e-commerce', 'product-category', 'shopping', 'catalog'],
+      difficulty: 'intermediate',
+      estimatedSetupTime: '10 minutes',
+    },
+  },
+
+  // Template 22: E-Commerce Landing
+  {
+    name: 'E-Commerce Landing',
+    description: 'E-ticaret ana sayfa - öne çıkan ürünler, kampanyalar, kategoriler',
+    category: 'E-Commerce',
+    isFeatured: true,
+    designSystem: {
+      colors: {
+        primary: '#ec4899',
+        secondary: '#f472b6',
+        background: '#ffffff',
+        text: '#111827',
+      },
+      typography: {
+        headingFont: 'Inter',
+        bodyFont: 'Inter',
+      },
+      supportedContexts: ['public'],
+    },
+    blocks: [
+      {
+        id: 'header',
+        type: 'nav-sticky-transparent',
+        props: {
+          logoUrl: '/logo.svg',
+          menuItems: [
+            { label: 'Ürünler', url: '/products' },
+            { label: 'Kampanyalar', url: '/deals' },
+            { label: 'Kategoriler', url: '/categories' },
+            { label: 'Hakkımızda', url: '/about' },
+          ],
+          ctaButton: {
+            label: 'Sepetim',
+            url: '/cart',
+          },
+        },
+      },
+      {
+        id: 'hero',
+        type: 'hero-gradient-floating-cta',
+        props: {
+          title: 'Yeni Sezon İndirimde!',
+          subtitle: 'Tüm BIM Yazılımlarında',
+          description: '%30 İndirim + Ücretsiz Eğitim',
+          primaryButtonText: 'Alışverişe Başla',
+          primaryButtonUrl: '/products',
+          secondaryButtonText: 'Kampanyalar',
+          secondaryButtonUrl: '/deals',
+        },
+      },
+      {
+        id: 'categories',
+        type: 'features-icon-grid-three',
+        props: {
+          sectionTitle: 'Kategoriler',
+          features: [
+            {
+              icon: 'building',
+              title: 'Mimarlık',
+              description: 'Mimari tasarım yazılımları',
+            },
+            {
+              icon: 'settings',
+              title: 'Mühendislik',
+              description: 'Yapı mühendisliği çözümleri',
+            },
+            {
+              icon: 'layers',
+              title: 'Altyapı',
+              description: 'Köprü ve altyapı projeleri',
+            },
+          ],
+        },
+      },
+      {
+        id: 'featured-products',
+        type: 'gallery-four-image-mosaic',
+        props: {
+          images: [
+            {
+              src: '/products/featured-1.jpg',
+              alt: 'Öne Çıkan Ürün 1',
+              caption: 'Allplan 2025',
+            },
+            {
+              src: '/products/featured-2.jpg',
+              alt: 'Öne Çıkan Ürün 2',
+              caption: 'BIM Tools Pro',
+            },
+            {
+              src: '/products/featured-3.jpg',
+              alt: 'Öne Çıkan Ürün 3',
+              caption: 'Project Manager',
+            },
+            {
+              src: '/products/featured-4.jpg',
+              alt: 'Öne Çıkan Ürün 4',
+              caption: 'Visualization Suite',
+            },
+          ],
+        },
+      },
+      {
+        id: 'stats',
+        type: 'stats-four-column',
+        props: {
+          sectionTitle: 'Rakamlarla E-Mağazamız',
+          stats: [
+            {
+              value: '50+',
+              label: 'Ürün',
+            },
+            {
+              value: '10K+',
+              label: 'Mutlu Müşteri',
+            },
+            {
+              value: '98%',
+              label: 'Memnuniyet',
+            },
+            {
+              value: '24/7',
+              label: 'Destek',
+            },
+          ],
+        },
+      },
+      {
+        id: 'testimonials',
+        type: 'testimonial-carousel',
+        props: {
+          testimonials: [
+            {
+              content: 'Harika ürünler, hızlı teslimat ve mükemmel müşteri hizmeti!',
+              name: 'Mehmet Demir',
+              company: 'Demir İnşaat',
+              rating: 5,
+            },
+          ],
+        },
+      },
+      {
+        id: 'footer',
+        type: 'footer-extended-cta',
+        props: {
+          companyName: 'Şirket Adı',
+          ctaTitle: 'Bültene Abone Ol',
+          ctaSubtitle: 'Kampanyalardan ilk sen haberdar ol',
+        },
+      },
+    ],
+    layoutOptions: {
+      maxWidth: '1280px',
+      spacing: 'relaxed',
+      headerSticky: true,
+    },
+    metadata: {
+      tags: ['e-commerce', 'shopping', 'store', 'products', 'deals'],
+      difficulty: 'intermediate',
+      estimatedSetupTime: '12 minutes',
+    },
+  },
+
+  // Template 23: Cart & Checkout
+  {
+    name: 'Cart & Checkout',
+    description: 'Sepet ve ödeme sayfası - ürün listesi, toplam tutar, ödeme formu',
+    category: 'E-Commerce',
+    isFeatured: true,
+    designSystem: {
+      colors: {
+        primary: '#0891b2',
+        secondary: '#06b6d4',
+        background: '#ffffff',
+        text: '#111827',
+      },
+      typography: {
+        headingFont: 'Inter',
+        bodyFont: 'Inter',
+      },
+      supportedContexts: ['public'],
+    },
+    blocks: [
+      {
+        id: 'header',
+        type: 'nav-minimal-logo-left',
+        props: {
+          logoUrl: '/logo.svg',
+          menuItems: [
+            { label: 'Alışverişe Devam Et', url: '/products' },
+          ],
+        },
+      },
+      {
+        id: 'hero',
+        type: 'hero-centered-bg-image',
+        props: {
+          title: 'Sepetim',
+          subtitle: 'Alışverişi Tamamla',
+          description: 'Güvenli ödeme ile siparişini hemen tamamla',
+        },
+      },
+      {
+        id: 'cart-content',
+        type: 'content-single-fullwidth',
+        props: {
+          content:
+            '<div style="max-width: 900px; margin: 0 auto;"><div style="background: #f9fafb; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;"><h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Sepetinizdeki Ürünler</h3><div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem;"><div style="display: flex; justify-content: space-between; align-items: center;"><div><h4 style="font-weight: 600;">Allplan Architecture 2025</h4><p style="color: #6b7280; font-size: 0.875rem;">1 Yıllık Lisans</p></div><div style="text-align: right;"><p style="font-weight: 600; font-size: 1.125rem;">₺12.999</p></div></div></div><div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem;"><div style="display: flex; justify-content: space-between; align-items: center;"><div><h4 style="font-weight: 600;">BIM Tools Pro</h4><p style="color: #6b7280; font-size: 0.875rem;">Eklenti Paketi</p></div><div style="text-align: right;"><p style="font-weight: 600; font-size: 1.125rem;">₺2.499</p></div></div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e5e7eb;"><div><h3 style="font-size: 1.25rem; font-weight: 700;">Toplam</h3></div><div><p style="font-size: 1.5rem; font-weight: 700; color: #0891b2;">₺15.498</p></div></div></div><div style="background: #ecfeff; padding: 2rem; border-radius: 8px; border: 2px solid #06b6d4;"><h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Güvenli Ödeme</h3><p style="margin-bottom: 1.5rem; color: #0f172a;">256-bit SSL şifreleme ile korunan ödeme</p><button style="width: 100%; padding: 1rem; background: #0891b2; color: white; border: none; border-radius: 6px; font-size: 1.125rem; font-weight: 600; cursor: pointer;">Ödemeye Geç</button></div></div>',
+        },
+      },
+      {
+        id: 'security',
+        type: 'features-icon-grid-three',
+        props: {
+          sectionTitle: 'Güvenli Alışveriş',
+          features: [
+            {
+              icon: 'lock',
+              title: 'SSL Sertifikası',
+              description: '256-bit şifreleme',
+            },
+            {
+              icon: 'shield-check',
+              title: 'Güvenli Ödeme',
+              description: 'PCI DSS uyumlu',
+            },
+            {
+              icon: 'refresh-cw',
+              title: '14 Gün İade',
+              description: 'Koşulsuz iade garantisi',
+            },
+          ],
+        },
+      },
+      {
+        id: 'footer',
+        type: 'footer-compact-centered',
+        props: {
+          companyName: 'Şirket Adı',
+        },
+      },
+    ],
+    layoutOptions: {
+      maxWidth: '1280px',
+      spacing: 'comfortable',
+      headerSticky: false,
+    },
+    metadata: {
+      tags: ['e-commerce', 'cart', 'checkout', 'payment', 'shopping-cart'],
+      difficulty: 'advanced',
+      estimatedSetupTime: '15 minutes',
+    },
+  },
 ];

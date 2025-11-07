@@ -68,17 +68,17 @@ function ColorSchemePreview({ template }: { template: PageTemplate }) {
  */
 function CategoryBadge({ category }: { category: PageTemplate['category'] }) {
   const variants: Record<string, { variant: 'default' | 'secondary' | 'outline'; label: string }> = {
-    landing: { variant: 'default', label: 'Landing' },
-    content: { variant: 'secondary', label: 'Content' },
-    ecommerce: { variant: 'default', label: 'E-Commerce' },
-    dashboard: { variant: 'secondary', label: 'Dashboard' },
-    authentication: { variant: 'outline', label: 'Auth' },
-    error: { variant: 'outline', label: 'Error' },
-    portfolio: { variant: 'secondary', label: 'Portfolio' },
-    custom: { variant: 'outline', label: 'Custom' },
+    'Landing Page': { variant: 'default', label: 'Landing' },
+    'Education': { variant: 'secondary', label: 'Education' },
+    'Business': { variant: 'default', label: 'Business' },
+    'Portfolio': { variant: 'secondary', label: 'Portfolio' },
+    'Blog': { variant: 'outline', label: 'Blog' },
+    'Product': { variant: 'default', label: 'Product' },
+    'Solutions': { variant: 'secondary', label: 'Solutions' },
+    'Event': { variant: 'outline', label: 'Event' },
   };
 
-  const config = variants[category] || variants.custom;
+  const config = variants[category] || { variant: 'outline' as const, label: category };
 
   return (
     <Badge variant={config.variant}>

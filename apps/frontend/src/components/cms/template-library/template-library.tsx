@@ -31,14 +31,14 @@ interface TemplateLibraryProps {
  * Category filter chips
  */
 const categoryOptions: { value: TemplateCategory; label: string }[] = [
-  { value: 'landing', label: 'Landing Pages' },
-  { value: 'content', label: 'Content Pages' },
-  { value: 'ecommerce', label: 'E-Commerce' },
-  { value: 'dashboard', label: 'Dashboard' },
-  { value: 'authentication', label: 'Authentication' },
-  { value: 'error', label: 'Error Pages' },
-  { value: 'portfolio', label: 'Portfolio' },
-  { value: 'custom', label: 'Custom' },
+  { value: 'Landing Page', label: 'Landing Pages' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Business', label: 'Business' },
+  { value: 'Portfolio', label: 'Portfolio' },
+  { value: 'Blog', label: 'Blog' },
+  { value: 'Product', label: 'Product' },
+  { value: 'Solutions', label: 'Solutions' },
+  { value: 'Event', label: 'Events' },
 ];
 
 /**

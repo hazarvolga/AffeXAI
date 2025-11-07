@@ -14,14 +14,14 @@ import type { ThemeContext, ThemeMode, DesignTokens } from './design-tokens';
  * Template Categories for Organization
  */
 export type TemplateCategory =
-  | 'landing'      // Landing pages and marketing
-  | 'content'      // Blog, articles, documentation
-  | 'ecommerce'    // Product pages, checkout flows
-  | 'dashboard'    // Admin/Portal dashboards
-  | 'authentication' // Login, signup, password reset
-  | 'error'        // 404, 500, maintenance pages
-  | 'portfolio'    // Portfolio and case studies
-  | 'custom';      // User-defined templates
+  | 'Landing Page'  // Landing pages and marketing
+  | 'Education'     // Educational platforms and courses
+  | 'Business'      // Corporate and business websites
+  | 'Portfolio'     // Portfolio and case studies
+  | 'Blog'          // Blog and articles
+  | 'Product'       // Product pages and showcases
+  | 'Solutions'     // Solutions and services pages
+  | 'Event';        // Events, conferences, training
 
 /**
  * Layout Configuration for Templates

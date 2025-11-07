@@ -26,7 +26,10 @@ export type TemplateCategory =
   | 'Team'          // Team and about pages
   | 'FAQ'           // Frequently asked questions
   | 'Legal'         // Legal pages (privacy, terms, KVKK)
-  | 'Pricing';      // Pricing and plans pages
+  | 'Pricing'       // Pricing and plans pages
+  | 'News'          // News and announcements
+  | 'Case Study'    // Success stories and case studies
+  | 'Feature';      // Feature-focused landing pages
 
 /**
  * Layout Configuration for Templates

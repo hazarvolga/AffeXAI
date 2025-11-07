@@ -81,6 +81,9 @@ function CategoryBadge({ category }: { category: PageTemplate['category'] }) {
     'FAQ': { variant: 'outline', label: 'FAQ' },
     'Legal': { variant: 'outline', label: 'Legal' },
     'Pricing': { variant: 'default', label: 'Pricing' },
+    'News': { variant: 'secondary', label: 'News' },
+    'Case Study': { variant: 'default', label: 'Case Study' },
+    'Feature': { variant: 'outline', label: 'Feature' },
   };
 
   const config = variants[category] || { variant: 'outline' as const, label: category };

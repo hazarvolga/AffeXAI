@@ -44,6 +44,9 @@ const categoryOptions: { value: TemplateCategory; label: string }[] = [
   { value: 'FAQ', label: 'FAQ' },
   { value: 'Legal', label: 'Legal' },
   { value: 'Pricing', label: 'Pricing' },
+  { value: 'News', label: 'News' },
+  { value: 'Case Study', label: 'Case Studies' },
+  { value: 'Feature', label: 'Features' },
 ];
 
 /**

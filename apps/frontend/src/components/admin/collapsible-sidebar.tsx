@@ -161,7 +161,18 @@ export function CollapsibleDashboardSidebar() {
 
                         {/* Show accordions only when not collapsed */}
                         {!isCollapsed && (
-                         <Accordion type="multiple" className="w-full">
+                         <Accordion
+                            type="multiple"
+                            className="w-full"
+                            defaultValue={
+                                pathname.startsWith('/admin/cms') ? ['cms-management', 'cms-analytics'] :
+                                pathname.startsWith('/admin/email-marketing') ? ['email-marketing'] :
+                                pathname.startsWith('/admin/support') ? ['support-system', 'faq-learning'] :
+                                pathname.startsWith('/admin/users') ? ['user-management'] :
+                                pathname.startsWith('/admin/settings') ? ['settings-management'] :
+                                []
+                            }
+                        >
                              {/* Email Marketing - Permission: EMAIL_VIEW */}
                              {hasPermission(Permission.EMAIL_VIEW) && (
                              <AccordionItem value="email-marketing" className="border-none">

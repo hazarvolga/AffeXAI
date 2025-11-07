@@ -21,7 +21,12 @@ export type TemplateCategory =
   | 'Blog'          // Blog and articles
   | 'Product'       // Product pages and showcases
   | 'Solutions'     // Solutions and services pages
-  | 'Event';        // Events, conferences, training
+  | 'Event'         // Events, conferences, training
+  | 'Contact'       // Contact pages
+  | 'Team'          // Team and about pages
+  | 'FAQ'           // Frequently asked questions
+  | 'Legal'         // Legal pages (privacy, terms, KVKK)
+  | 'Pricing';      // Pricing and plans pages
 
 /**
  * Layout Configuration for Templates

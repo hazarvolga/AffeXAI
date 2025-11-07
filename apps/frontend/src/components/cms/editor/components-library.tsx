@@ -223,16 +223,52 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
     return getComponentsByCategory(category).length;
   };
 
-  const handleAddComponent = (component: ComponentRegistryItem) => {
-    // For reusable sections, add sectionId; for prebuild, use id
-    const componentId = component.id;
+  const handleAddComponent = async (component: ComponentRegistryItem) => {
+    // For reusable sections, expand into individual components
+    if (component.category === 'Reusable') {
+      try {
+        // Fetch section's components
+        const sectionComponents = await ReusableSectionsService.getComponents(component.id);
 
-    // For reusable sections, include the reusable section ID in props
-    const props = component.category === 'Reusable'
-      ? { ...component.defaultProps, reusableSectionId: component.id }
-      : component.defaultProps;
+        // Sort by orderIndex and add each component to canvas
+        const sortedComponents = sectionComponents.sort((a, b) => a.orderIndex - b.orderIndex);
 
-    onAddComponent(componentId, props);
+        for (const comp of sortedComponents) {
+          // Use componentType or blockType as the component ID
+          const componentId = comp.componentType || comp.blockType;
+
+          if (!componentId) {
+            console.warn('Section component missing componentType/blockType:', comp);
+            continue;
+          }
+
+          // Add component props with section metadata
+          const componentProps = {
+            ...comp.props,
+            _fromSection: component.id,
+            _sectionName: component.name,
+            _orderIndex: comp.orderIndex,
+          };
+
+          onAddComponent(componentId, componentProps);
+        }
+
+        toast({
+          title: "Section Added",
+          description: `Added ${sortedComponents.length} component(s) from "${component.name}"`,
+        });
+      } catch (error) {
+        console.error('Failed to load section components:', error);
+        toast({
+          title: "Failed to Add Section",
+          description: "Could not load section components. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Regular prebuild component - add directly
+      onAddComponent(component.id, component.defaultProps);
+    }
   };
 
   // Import file handler
@@ -425,7 +461,7 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
 
 interface ComponentCardProps {
   component: ComponentRegistryItem;
-  onAdd: (component: ComponentRegistryItem) => void;
+  onAdd: (component: ComponentRegistryItem) => void | Promise<void>;
   onDuplicate?: (componentId: string) => void;
   onDelete?: (componentId: string) => void;
   onExport?: (componentId: string) => void;

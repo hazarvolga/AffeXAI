@@ -291,12 +291,11 @@ export const SectionBuilder: React.FC = () => {
           <EditorCanvas
             components={components}
             selectedComponentId={selectedComponentId}
-            onSelectComponent={handleSelectComponent}
-            onDeleteComponent={handleDeleteComponent}
-            onMoveComponent={handleMoveComponent}
-            onUpdateComponents={setComponents}
-            viewportMode="desktop"
-            zoomLevel={100}
+            onComponentSelect={handleSelectComponent}
+            onComponentUpdate={handleUpdateComponentProps}
+            onComponentDelete={handleDeleteComponent}
+            onMoveUp={(id) => handleMoveComponent(id, 'up')}
+            onMoveDown={(id) => handleMoveComponent(id, 'down')}
           />
         </div>
 

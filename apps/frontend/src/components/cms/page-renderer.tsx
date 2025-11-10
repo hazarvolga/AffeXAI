@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { TextComponent } from './text-component';
 import { ButtonComponent } from './button-component';

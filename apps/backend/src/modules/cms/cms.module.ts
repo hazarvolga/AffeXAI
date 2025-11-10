@@ -28,6 +28,9 @@ import { CmsMetricsController } from './controllers/cms-metrics.controller';
 import { TemplateController } from './controllers/template.controller';
 import { ReusableComponentsController } from './controllers/reusable-components.controller';
 import { ReusableSectionsController } from './controllers/reusable-sections.controller';
+import { ThemeSettings } from './entities/theme-settings.entity';
+import { ThemeSettingsService } from './services/theme-settings.service';
+import { ThemeSettingsController } from './controllers/theme-settings.controller';
 import { PlatformIntegrationModule } from '../platform-integration/platform-integration.module';
 import { UsersModule } from '../users/users.module';
 
@@ -46,6 +49,7 @@ import { UsersModule } from '../users/users.module';
       SectionComponent,
       ComponentFavorite,
       ComponentUsageHistory,
+      ThemeSettings,
     ]),
     PlatformIntegrationModule,
     UsersModule,
@@ -59,6 +63,7 @@ import { UsersModule } from '../users/users.module';
     TemplateController,
     ReusableComponentsController,
     ReusableSectionsController,
+    ThemeSettingsController,
   ],
   providers: [
     PageService,
@@ -69,6 +74,7 @@ import { UsersModule } from '../users/users.module';
     TemplateService,
     ReusableComponentsService,
     ReusableSectionsService,
+    ThemeSettingsService,
   ],
   exports: [
     PageService,
@@ -79,6 +85,7 @@ import { UsersModule } from '../users/users.module';
     TemplateService,
     ReusableComponentsService,
     ReusableSectionsService,
+    ThemeSettingsService,
   ],
 })
 export class CmsModule {}

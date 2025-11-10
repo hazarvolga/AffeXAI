@@ -1,386 +1,419 @@
-
 'use client';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { MegaMenuCategory, MenuItem } from '@/lib/types';
-import { ChevronDown, Menu, X, Mail, ArrowRight, UserCog, User } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '../ui/sheet';
-import { ScrollArea, ScrollBar } from '../ui/scroll-area';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { menus } from '@/lib/menu-data';
-import { ThemeToggle } from '../common/theme-toggle';
-import { getPlatformIcon } from '@/lib/social-media-data';
-import Image from 'next/image';
-import settingsService, { type SiteSettings } from '@/lib/api/settingsService';
-import mediaService from '@/lib/api/mediaService';
 
-const topBarLinks = [
-  { href: '/help', text: 'Yardım Merkezi' },
-  { href: '/downloads#faq', text: 'ALLPLAN FAQ' },
-  { href: '/education/training', text: 'LEARN NOW' },
-  { href: '#', text: 'Duyurular' },
-  { href: '/downloads#remote', text: 'Microsoft Teams' },
-  { href: '#', text: 'Product Lifecycle' },
-  { href: '/downloads#customer', text: 'Allplan Connect: Login' },
-  { href: '/downloads#license', text: 'Allplan Connect License' },
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Menu, X, ChevronDown, Phone, Mail, MapPin } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
+import { ThemeSettingsService, type TopBarLink, type ThemeSettings } from '@/services/theme-settings.service';
+import { cmsMenuService } from '@/lib/cms/menu-service';
+import type { CmsMenu } from '@affexai/shared-types';
+
+// Main navigation items
+const mainNav = [
+  {
+    label: 'Çözümler',
+    href: '/solutions',
+    submenu: [
+      { label: 'Mimarlık', href: '/solutions/architecture' },
+      { label: 'İnşaat Mühendisliği', href: '/solutions/civil-engineering' },
+      { label: 'Yapı Fiziği', href: '/solutions/building-physics' },
+    ],
+  },
+  {
+    label: 'Ürünler',
+    href: '/products',
+    submenu: [
+      { label: 'Allplan Architecture', href: '/products/allplan-architecture' },
+      { label: 'Allplan Engineering', href: '/products/allplan-engineering' },
+      { label: 'Allplan Bimplus', href: '/products/allplan-bimplus' },
+    ],
+  },
+  {
+    label: 'Eğitim & Destek',
+    href: '/education',
+    submenu: [
+      { label: 'Eğitim Programları', href: '/education/training' },
+      { label: 'Sertifika Programları', href: '/education/certification' },
+      { label: 'Teknik Destek', href: '/support' },
+    ],
+  },
+  { label: 'Başarı Hikayeleri', href: '/case-studies' },
+  { label: 'İndirme Merkezi', href: '/downloads' },
+  { label: 'İletişim', href: '/contact' },
 ];
 
-const MegaMenuContent = ({ categories, parentHref }: { categories: MegaMenuCategory[], parentHref: string }) => (
-  <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-      {categories.map((category) => (
-        <div key={category.title}>
-          <p className="font-semibold uppercase tracking-wider text-sm text-primary">{category.title}</p>
-          <div className="mt-4 grid grid-cols-1 gap-1">
-            {category.items.map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                className="group -m-3 flex items-start gap-4 rounded-lg p-3 transition-all duration-200 hover:bg-secondary"
-              >
-                {item.icon && (
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors duration-200 group-hover:bg-accent group-hover:text-accent-foreground">
-                    <item.icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="font-medium text-foreground transition-colors group-hover:text-primary">{item.title}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const MegaMenuItem = ({ title, parentHref, categories }: { title: string; parentHref: string; categories: MegaMenuCategory[] }) => {
-    return (
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button variant="ghost" className="px-2 group">
-                  <Link href={parentHref} className="text-sm font-medium text-foreground hover:text-primary">{title}</Link>
-                  <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180 ml-1" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent
-                align="start"
-                sideOffset={20}
-                className="w-screen max-w-none rounded-none border-x-0 border-b-0 p-0 top-full animate-in fade-in-0 slide-in-from-top-4 duration-300"
-            >
-                <MegaMenuContent categories={categories} parentHref={parentHref}/>
-            </PopoverContent>
-        </Popover>
-    );
-};
-
-
 export function Header() {
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
-  const [lightLogoUrl, setLightLogoUrl] = useState<string>('https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo');
-  const [darkLogoUrl, setDarkLogoUrl] = useState<string>('https://placehold.co/140x40/171717/f0f0f0?text=Logo');
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Site settings state (existing)
+  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [companyName, setCompanyName] = useState<string>('ALLPLAN TÜRKİYE');
+  const [companyPhone, setCompanyPhone] = useState<string>('');
+  const [companyEmail, setCompanyEmail] = useState<string>('');
+  const [companyAddress, setCompanyAddress] = useState<string>('');
 
-  // Fetch site settings on component mount
+  // Fetch theme settings
+  const { data: themeSettings, isLoading: isLoadingTheme } = useQuery<ThemeSettings>({
+    queryKey: ['theme-settings-active'],
+    queryFn: () => ThemeSettingsService.getActiveTheme(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch header menu if headerMenuId exists
+  const { data: headerMenu } = useQuery<CmsMenu>({
+    queryKey: ['header-menu', themeSettings?.headerMenuId],
+    queryFn: () => cmsMenuService.getMenu(themeSettings!.headerMenuId!),
+    enabled: !!themeSettings?.headerMenuId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Extract theme data with defaults
+  const topBarLinks = themeSettings?.headerConfig?.topBarLinks || [];
+  const ctaButtons = themeSettings?.headerConfig?.ctaButtons || {
+    contact: { show: true, text: 'İletişim', href: '/contact' },
+    demo: { show: true, text: 'Demo İste', href: '#demo' },
+  };
+  const authLinks = themeSettings?.headerConfig?.authLinks || {
+    showLogin: true,
+    showSignup: true,
+    loginText: 'Giriş Yap',
+    signupText: 'Kayıt Ol',
+  };
+  const layout = themeSettings?.headerConfig?.layout || {
+    sticky: true,
+    transparent: false,
+    shadow: true,
+  };
+
+  // Fetch site settings (existing logic - logo, company info)
   useEffect(() => {
-    const fetchSiteSettings = async () => {
+    async function fetchSiteSettings() {
       try {
-        const settings = await settingsService.getSiteSettings();
-        console.log('[Header] Site settings fetched:', settings);
-        setSiteSettings(settings);
-        
-        // Convert media IDs to URLs
-        if (settings.logoUrl) {
-          console.log('[Header] Converting light logo URL:', settings.logoUrl);
-          const url = await mediaService.getMediaUrl(settings.logoUrl);
-          console.log('[Header] Light logo URL result:', url);
-          setLightLogoUrl(url);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/site`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        if (settings.logoDarkUrl) {
-          console.log('[Header] Converting dark logo URL:', settings.logoDarkUrl);
-          const url = await mediaService.getMediaUrl(settings.logoDarkUrl);
-          console.log('[Header] Dark logo URL result:', url);
-          setDarkLogoUrl(url);
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          const settings = result.data;
+
+          // Site settings
+          if (settings.site) {
+            if (settings.site.logoUrl) {
+              const fullLogoUrl = settings.site.logoUrl.startsWith('http')
+                ? settings.site.logoUrl
+                : `${process.env.NEXT_PUBLIC_API_URL}${settings.site.logoUrl}`;
+              setLogoUrl(fullLogoUrl);
+            }
+            if (settings.site.companyName) {
+              setCompanyName(settings.site.companyName);
+            }
+            if (settings.site.companyPhone) {
+              setCompanyPhone(settings.site.companyPhone);
+            }
+            if (settings.site.companyEmail) {
+              setCompanyEmail(settings.site.companyEmail);
+            }
+            if (settings.site.companyAddress) {
+              setCompanyAddress(settings.site.companyAddress);
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to fetch site settings:', error);
-        // Fallback to default values
-        setSiteSettings({
-          companyName: "Aluplan Program Sistemleri",
-          logoUrl: "https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo",
-          logoDarkUrl: "https://placehold.co/140x40/171717/f0f0f0?text=Logo",
-          contact: {
-            address: "",
-            phone: "",
-            email: ""
-          },
-          socialMedia: {},
-          seo: {
-            defaultTitle: "Aluplan",
-            defaultDescription: "Aluplan Digital Solutions"
-          }
-        });
       }
-    };
+    }
 
     fetchSiteSettings();
   }, []);
 
-  const navItems: MenuItem[] = menus.find(m => m.id === 'main-nav')?.items || [];
-  
-  const renderNavItems = (items: MenuItem[]) => {
-      return items.filter(item => item.parentId === null).map(item => {
-        if (item.behavior === 'mega' && item.megaMenuCategories) {
-          return (
-            <MegaMenuItem 
-              key={item.id} 
-              title={item.title} 
-              parentHref={item.href} 
-              categories={item.megaMenuCategories} 
-            />
-          );
-        }
-        return (
-          <Button asChild variant="ghost" key={item.id}>
-            <Link href={item.href} className="text-sm font-medium text-foreground hover:text-primary">
-              {item.title}
-            </Link>
-          </Button>
-        );
-      });
+  const toggleSubmenu = (label: string) => {
+    setOpenSubmenu(openSubmenu === label ? null : label);
   };
 
-  const renderMobileNavItems = (items: MenuItem[]) => {
-      const topLevelItems = items.filter(item => item.parentId === null);
-      
-      const renderAccordionItems = topLevelItems.map(item => {
-          const children = items.filter(child => child.parentId === item.id);
-          const hasMegaMenu = item.behavior === 'mega' && item.megaMenuCategories && item.megaMenuCategories.length > 0;
-          
-          if (!hasMegaMenu && children.length === 0) {
-             return (
-                 <SheetClose asChild key={item.id}>
-                    <Link href={item.href} className="block rounded-lg py-3 px-4 text-base font-medium text-foreground hover:bg-secondary hover:text-primary">{item.title}</Link>
-                </SheetClose>
-             )
-          }
-
-          return (
-              <AccordionItem value={item.id} key={item.id}>
-                <AccordionTrigger className="hover:no-underline font-semibold text-foreground py-3 px-4">
-                    <Link href={item.href} className="flex-1 text-left">{item.title}</Link>
-                </AccordionTrigger>
-                <AccordionContent className="pl-8 pb-0">
-                    <SheetClose asChild>
-                        <Link href={item.href} className="flex items-center gap-2 rounded-lg py-2 text-base font-semibold text-primary hover:bg-secondary">
-                            Genel Bakış <ArrowRight className="h-4 w-4"/>
-                        </Link>
-                    </SheetClose>
-                    {(item.megaMenuCategories || []).flatMap(c => c.items).map(subItem => (
-                        <SheetClose asChild key={subItem.title}>
-                            <Link href={subItem.href} className="block rounded-lg py-2 text-base font-medium text-muted-foreground hover:bg-secondary hover:text-primary">{subItem.title}</Link>
-                        </SheetClose>
-                    ))}
-                    {children.map(childItem => (
-                        <SheetClose asChild key={childItem.id}>
-                             <Link href={childItem.href} className="block rounded-lg py-2 text-base font-medium text-muted-foreground hover:bg-secondary hover:text-primary">{childItem.title}</Link>
-                        </SheetClose>
-                    ))}
-                </AccordionContent>
-            </AccordionItem>
-          )
-      });
-      
-      const regularLinks = topLevelItems.filter(item => item.behavior === 'link' && !items.some(child => child.parentId === item.id));
-
-      return (
-        <>
-            <Accordion type="multiple" className="w-full px-4">
-                {renderAccordionItems.filter(item => (item.props as any).value)}
-            </Accordion>
-             <div className="pt-4 mt-4 border-t px-4">
-                {regularLinks.map((link) => (
-                    <SheetClose asChild key={link.id}>
-                        <Link href={link.href} className="block rounded-lg py-2 text-base font-medium text-foreground hover:bg-secondary hover:text-primary">{link.title}</Link>
-                    </SheetClose>
-                ))}
-            </div>
-        </>
-      )
-  };
-
-  // Get logo URL based on theme
-  const getDynamicLogoUrl = (isDarkMode: boolean = false): string => {
-    return isDarkMode ? darkLogoUrl : lightLogoUrl;
-  };
-
-  if (!siteSettings) {
-    // Show a loading state or placeholder while fetching settings
-    return (
-      <div className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        </div>
-      </div>
-    );
-  }
+  // Use header menu if available, otherwise fall back to hardcoded mainNav
+  const navigationItems = React.useMemo(() => {
+    if (headerMenu?.items && Array.isArray(headerMenu.items) && headerMenu.items.length > 0) {
+      return headerMenu.items
+        .filter(item => item && item.label)
+        .map(item => ({
+          label: item.label,
+          href: item.url || '#',
+          submenu: item.children && Array.isArray(item.children)
+            ? item.children
+                .filter(child => child && child.label)
+                .map(child => ({
+                  label: child.label,
+                  href: child.url || '#',
+                }))
+            : undefined,
+        }));
+    }
+    return mainNav;
+  }, [headerMenu]);
 
   return (
-    <div className={cn('sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm', isScrolled ? 'shadow-md' : '')}>
-      {/* Top Bar 1 */}
-      <div className="bg-secondary/50 text-secondary-foreground border-b border-border/50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex items-center gap-3">
-                      {Object.entries(siteSettings.socialMedia || {}).map(([platform, url]) => {
-                          if (!url) return null;
-                          const Icon = getPlatformIcon(platform);
-                          return (
-                               <a key={platform} href={url as string} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                                <Icon className="h-4 w-4" />
-                            </a>
-                          )
-                      })}
-                  </div>
-                  <div className="hidden sm:block w-px h-4 bg-border"></div>
-                  <a href={`mailto:${siteSettings.contact.email}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                      <Mail className="h-4 w-4" />
-                      <span className="hidden md:inline">{siteSettings.contact.email}</span>
-                  </a>
-              </div>
-              <div className="flex items-center gap-4 font-medium">
-                  <Link href="/login" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                    <UserCog className="h-4 w-4" /> Giriş Yap
+    <header className={cn(
+      "w-full bg-white border-b",
+      layout.sticky && "sticky top-0 z-50",
+      layout.shadow && "shadow-sm"
+    )}>
+      {/* Top Bar */}
+      <div className="bg-gray-50 border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-10 text-sm">
+            {/* Top Bar Links */}
+            <div className="hidden lg:flex items-center space-x-6">
+              {topBarLinks
+                .sort((a, b) => a.order - b.order)
+                .map((link, index) => (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    className="text-gray-600 hover:text-primary transition-colors"
+                  >
+                    {link.text}
                   </Link>
-                  <div className="w-px h-4 bg-border"></div>
-                  <Link href="/signup" className="hover:text-primary transition-colors flex items-center gap-1.5">
-                    <User className="h-4 w-4" /> Kayıt Ol
-                  </Link>
-                  <div className="w-px h-4 bg-border"></div>
-                  <ThemeToggle />
-              </div>
-          </div>
-      </div>
+                ))}
+            </div>
 
-      {/* Top Bar 2 */}
-      <div className="hidden lg:block bg-background border-b">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex items-center gap-2">
-                    {topBarLinks.map(link => (
-                        <Button key={link.text} variant="outline" size="sm" asChild className="h-8 border-dashed shadow-sm hover:shadow-md transition-shadow">
-                            <Link href={link.href}>{link.text}</Link>
-                        </Button>
-                    ))}
-                </div>
-                <ScrollBar orientation="horizontal" className="h-1.5" />
-            </ScrollArea>
-          </div>
-      </div>
-      
-      <header>
-        <div className="container mx-auto flex h-28 items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
-           <Link href="/" className="flex items-center gap-2 font-semibold">
-                <span className="sr-only">{siteSettings.companyName}</span>
-                <img
-                    className="dark:hidden h-auto"
-                    src={getDynamicLogoUrl(false) || 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo'}
-                    alt={`${siteSettings.companyName} Logo`}
-                    width={200}
-                    height={60}
-                    onError={(e) => {
-                      console.error('[Header] Light logo failed to load:', getDynamicLogoUrl(false));
-                      e.currentTarget.src = 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo';
-                    }}
-                />
-                <img
-                    className="hidden dark:block h-auto"
-                    src={getDynamicLogoUrl(true) || 'https://placehold.co/140x40/171717/f0f0f0?text=Logo'}
-                    alt={`${siteSettings.companyName} Logo`}
-                    width={200}
-                    height={60}
-                    onError={(e) => {
-                      console.error('[Header] Dark logo failed to load:', getDynamicLogoUrl(true));
-                      e.currentTarget.src = 'https://placehold.co/140x40/171717/f0f0f0?text=Logo';
-                    }}
-                />
-            </Link>
-          <nav className="hidden items-center gap-x-2 lg:flex">
-             {renderNavItems(navItems)}
-          </nav>
-          <div className="hidden items-center gap-2 lg:flex">
-            <Button variant="ghost" asChild><Link href="/contact">İletişim</Link></Button>
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90">Demo İste</Button>
-          </div>
-          <div className="lg:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Menüyü aç</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-xs p-0 flex flex-col">
-                  <div className="flex items-center justify-between p-4 border-b">
-                      <Link href="/" className="text-xl font-bold text-primary">
-                        <img
-                          src={getDynamicLogoUrl(false) || 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo'}
-                          alt={`${siteSettings.companyName} Logo`}
-                          width={160}
-                          height={45}
-                          className="h-auto"
-                          onError={(e) => {
-                            console.error('[Header] Mobile logo failed:', getDynamicLogoUrl(false));
-                            e.currentTarget.src = 'https://placehold.co/140x40/f7f7f7/1a1a1a?text=Logo';
-                          }}
-                        />
-                      </Link>
-                      <SheetClose asChild>
-                          <Button variant="ghost" size="icon">
-                              <X className="h-6 w-6" />
-                              <span className="sr-only">Menüyü kapat</span>
-                          </Button>
-                      </SheetClose>
-                  </div>
-                  <ScrollArea className="flex-1">
-                      <div className="p-4 space-y-2">
-                            {topBarLinks.map(link => (
-                                <SheetClose asChild key={link.text}>
-                                    <Link href={link.href} className="block rounded-lg py-2 pl-2 pr-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary">{link.text}</Link>
-                                </SheetClose>
-                            ))}
-                        </div>
-                      {renderMobileNavItems(navItems)}
-                  </ScrollArea>
-                   <div className="p-4 border-t mt-auto space-y-2">
-                        <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90">Demo İste</Button>
-                        <Button variant="outline" className="w-full">İletişim</Button>
-                  </div>
-              </SheetContent>
-            </Sheet>
+            {/* Contact Info */}
+            <div className="hidden md:flex items-center space-x-4 text-gray-600">
+              {companyPhone && (
+                <a href={`tel:${companyPhone}`} className="flex items-center space-x-1 hover:text-primary">
+                  <Phone className="h-3 w-3" />
+                  <span>{companyPhone}</span>
+                </a>
+              )}
+              {companyEmail && (
+                <a href={`mailto:${companyEmail}`} className="flex items-center space-x-1 hover:text-primary">
+                  <Mail className="h-3 w-3" />
+                  <span>{companyEmail}</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
-      </header>
-    </div>
+      </div>
+
+      {/* Main Header */}
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={companyName}
+                width={180}
+                height={60}
+                className="h-12 w-auto object-contain"
+                priority
+              />
+            ) : (
+              <div className="flex items-center space-x-2">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">A</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{companyName}</span>
+              </div>
+            )}
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            {navigationItems.map((item) => (
+              <div key={item.label} className="relative group">
+                {item.submenu ? (
+                  <>
+                    <button
+                      className={cn(
+                        "flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors py-2",
+                        pathname.startsWith(item.href) && "text-primary font-medium"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                    {/* Dropdown */}
+                    <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <div className="py-2">
+                        {item.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.label}
+                            href={subItem.href}
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                          >
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "text-gray-700 hover:text-primary transition-colors",
+                      pathname === item.href && "text-primary font-medium"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          {/* CTA Buttons */}
+          <div className="hidden lg:flex items-center space-x-4">
+            {ctaButtons.contact?.show && (
+              <Link
+                href={ctaButtons.contact.href}
+                className="px-4 py-2 text-gray-700 hover:text-primary transition-colors"
+              >
+                {ctaButtons.contact.text}
+              </Link>
+            )}
+            {ctaButtons.demo?.show && (
+              <Link
+                href={ctaButtons.demo.href}
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                {ctaButtons.demo.text}
+              </Link>
+            )}
+            {authLinks.showLogin && (
+              <Link
+                href="/admin"
+                className="px-4 py-2 text-gray-700 hover:text-primary transition-colors"
+              >
+                {authLinks.loginText}
+              </Link>
+            )}
+            {authLinks.showSignup && (
+              <Link
+                href="/admin/signup"
+                className="px-6 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+              >
+                {authLinks.signupText}
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 text-gray-700 hover:text-primary transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t border-gray-200">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            {/* Mobile Navigation */}
+            {navigationItems.map((item) => (
+              <div key={item.label}>
+                {item.submenu ? (
+                  <>
+                    <button
+                      onClick={() => toggleSubmenu(item.label)}
+                      className="flex items-center justify-between w-full text-gray-700 hover:text-primary transition-colors py-2"
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          openSubmenu === item.label && "rotate-180"
+                        )}
+                      />
+                    </button>
+                    {openSubmenu === item.label && (
+                      <div className="pl-4 space-y-2 mt-2">
+                        {item.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.label}
+                            href={subItem.href}
+                            className="block text-gray-600 hover:text-primary transition-colors py-1"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="block text-gray-700 hover:text-primary transition-colors py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+
+            {/* Mobile CTA Buttons */}
+            <div className="pt-4 border-t border-gray-200 space-y-2">
+              {ctaButtons.contact?.show && (
+                <Link
+                  href={ctaButtons.contact.href}
+                  className="block w-full px-4 py-2 text-center text-gray-700 hover:text-primary transition-colors border border-gray-300 rounded-lg"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {ctaButtons.contact.text}
+                </Link>
+              )}
+              {ctaButtons.demo?.show && (
+                <Link
+                  href={ctaButtons.demo.href}
+                  className="block w-full px-4 py-2 text-center bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {ctaButtons.demo.text}
+                </Link>
+              )}
+              {authLinks.showLogin && (
+                <Link
+                  href="/admin"
+                  className="block w-full px-4 py-2 text-center text-gray-700 hover:text-primary transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {authLinks.loginText}
+                </Link>
+              )}
+              {authLinks.showSignup && (
+                <Link
+                  href="/admin/signup"
+                  className="block w-full px-4 py-2 text-center border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {authLinks.signupText}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
-
-    

@@ -5,27 +5,52 @@ import { Globe } from 'lucide-react';
 import { getPlatformIcon } from '@/lib/social-media-data';
 import settingsService, { type SiteSettings } from '@/lib/api/settingsService';
 import { useEffect, useState } from 'react';
-
-const footerNav = {
-  explore: [
-    { name: 'Çözümler', href: '/solutions' },
-    { name: 'Ürünler', href: '/products' },
-    { name: 'Başarı Hikayeleri', href: '/case-studies' },
-  ],
-  support: [
-    { name: 'Eğitim & Destek', href: '/education' },
-    { name: 'İndirme Merkezi', href: '/downloads' },
-    { name: 'İletişim', href: '/contact' },
-  ],
-  legal: [
-      { name: 'Gizlilik Politikası', href: '/privacy'},
-      { name: 'Kullanım Koşulları', href: '/terms'},
-  ]
-};
+import { useQuery } from '@tanstack/react-query';
+import { ThemeSettingsService, type ThemeSettings } from '@/services/theme-settings.service';
 
 export function Footer() {
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
 
+  // Fetch theme settings
+  const { data: themeSettings, isLoading: isLoadingTheme } = useQuery<ThemeSettings>({
+    queryKey: ['theme-settings-active'],
+    queryFn: () => ThemeSettingsService.getActiveTheme(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  // Extract footer data with defaults
+  const footerSections = themeSettings?.footerConfig?.sections || [
+    {
+      title: 'Keşfet',
+      customLinks: [
+        { name: 'Çözümler', href: '/solutions', order: 1 },
+        { name: 'Ürünler', href: '/products', order: 2 },
+        { name: 'Başarı Hikayeleri', href: '/case-studies', order: 3 },
+      ],
+    },
+    {
+      title: 'Destek',
+      customLinks: [
+        { name: 'Eğitim & Destek', href: '/education', order: 1 },
+        { name: 'İndirme Merkezi', href: '/downloads', order: 2 },
+        { name: 'İletişim', href: '/contact', order: 3 },
+      ],
+    },
+    {
+      title: 'Yasal',
+      customLinks: [
+        { name: 'Gizlilik Politikası', href: '/privacy', order: 1 },
+        { name: 'Kullanım Koşulları', href: '/terms', order: 2 },
+      ],
+    },
+  ];
+
+  const showLanguageSelector = themeSettings?.footerConfig?.showLanguageSelector ?? true;
+  const languageText = themeSettings?.footerConfig?.languageText || 'Türkiye (Türkçe)';
+  const copyrightText = themeSettings?.footerConfig?.copyrightText || 'Tüm hakları saklıdır.';
+
+  // Fetch site settings (existing logic)
   useEffect(() => {
     const fetchSiteSettings = async () => {
       try {
@@ -80,6 +105,7 @@ export function Footer() {
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+          {/* Company Info & Social */}
           <div className="space-y-4">
             <Link href="/" className="text-2xl font-bold text-primary">
               {siteSettings.companyName}
@@ -87,72 +113,63 @@ export function Footer() {
             <p className="text-sm text-muted-foreground max-w-xs">
               {siteSettings.seo.defaultDescription}
             </p>
-             <div className="flex space-x-4">
-                {Object.entries(siteSettings.socialMedia).map(([platform, url]) => {
-                  if (!url) return null;
-                  const Icon = getPlatformIcon(platform);
-                  return (
-                    <a key={platform} href={url as string} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                        <Icon className="h-6 w-6"/>
-                        <span className="sr-only">{platform}</span>
-                    </a>
-                  )
-                })}
+            <div className="flex space-x-4">
+              {Object.entries(siteSettings.socialMedia).map(([platform, url]) => {
+                if (!url) return null;
+                const Icon = getPlatformIcon(platform);
+                return (
+                  <a
+                    key={platform}
+                    href={url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Icon className="h-6 w-6"/>
+                    <span className="sr-only">{platform}</span>
+                  </a>
+                );
+              })}
             </div>
           </div>
+
+          {/* Footer Navigation Sections */}
           <div className="mt-12 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-              <div>
+            {footerSections.map((section) => (
+              <div key={section.title}>
                 <h3 className="text-sm font-semibold tracking-wider uppercase">
-                  Keşfet
+                  {section.title}
                 </h3>
                 <ul role="list" className="mt-4 space-y-2">
-                  {footerNav.explore.map((item) => (
-                    <li key={item.name}>
-                      <Link href={item.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
+                  {section.customLinks
+                    ?.sort((a, b) => a.order - b.order)
+                    .map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               </div>
-              <div className="mt-12 md:mt-0">
-                <h3 className="text-sm font-semibold tracking-wider uppercase">
-                  Destek
-                </h3>
-                <ul role="list" className="mt-4 space-y-2">
-                  {footerNav.support.map((item) => (
-                    <li key={item.name}>
-                      <Link href={item.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="md:grid md:grid-cols-1 md:gap-8">
-                <div>
-                    <h3 className="text-sm font-semibold tracking-wider uppercase">Yasal</h3>
-                    <ul role="list" className="mt-4 space-y-2">
-                       {footerNav.legal.map((item) => (
-                        <li key={item.name}>
-                          <Link href={item.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                            {item.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                </div>
-            </div>
+            ))}
           </div>
         </div>
+
+        {/* Bottom Bar */}
         <div className="mt-12 border-t border-border pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground order-2 sm:order-1">&copy; {new Date().getFullYear()} {siteSettings.companyName}. Tüm hakları saklıdır.</p>
-          <div className="flex items-center space-x-2 order-1 sm:order-2">
-            <Globe className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Türkiye (Türkçe)</span>
-          </div>
+          <p className="text-sm text-muted-foreground order-2 sm:order-1">
+            &copy; {new Date().getFullYear()} {siteSettings.companyName}. {copyrightText}
+          </p>
+          {showLanguageSelector && (
+            <div className="flex items-center space-x-2 order-1 sm:order-2">
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{languageText}</span>
+            </div>
+          )}
         </div>
       </div>
     </footer>

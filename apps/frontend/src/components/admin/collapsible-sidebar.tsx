@@ -55,6 +55,7 @@ const userManagementLinks = [
 
 const settingsLinks = [
     { href: "/admin/settings/site", label: "Site Ayarları", icon: Settings },
+    { href: "/admin/settings/theme", label: "Tema Ayarları", icon: Palette },
     { href: "/admin/settings/automation", label: "Otomasyon Merkezi", icon: Bot },
 ];
 

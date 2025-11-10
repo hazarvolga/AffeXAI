@@ -310,9 +310,9 @@ export const SectionBuilder: React.FC = () => {
           >
             {selectedComponent && selectedComponentType ? (
               <PropertiesPanel
-                component={selectedComponent}
                 componentType={selectedComponentType}
-                onUpdateProps={(newProps) => handleUpdateComponentProps(selectedComponent.id, newProps)}
+                componentProps={selectedComponent.props || {}}
+                onPropsChange={(newProps) => handleUpdateComponentProps(selectedComponent.id, newProps)}
               />
             ) : (
               <div className="p-6 text-center text-muted-foreground">

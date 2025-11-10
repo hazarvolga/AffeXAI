@@ -41,7 +41,9 @@ export const ComponentsLibrary: React.FC<ComponentsLibraryProps> = ({ onAddCompo
   const { data: reusableSectionsData, isLoading: isLoadingReusable } = useQuery({
     queryKey: ['reusable-sections-editor'],
     queryFn: () => ReusableSectionsService.getAll({ isPublic: true, limit: 100 }),
-    enabled: selectedCategory === 'Reusable' || searchQuery.trim() !== '',
+    // Always fetch sections so they're available when Reusable tab is clicked
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   // Duplicate mutation

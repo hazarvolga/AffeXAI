@@ -109,9 +109,10 @@ export const SectionBuilder: React.FC = () => {
   }, []);
 
   // Select component
-  const handleSelectComponent = useCallback((componentId: string, componentType: string) => {
+  const handleSelectComponent = useCallback((componentId: string, componentType?: string) => {
+    console.log('🎯 Component selected:', { componentId, componentType });
     setSelectedComponentId(componentId);
-    setSelectedComponentType(componentType);
+    setSelectedComponentType(componentType || '');
   }, []);
 
   // Save section
@@ -307,7 +308,7 @@ export const SectionBuilder: React.FC = () => {
             exit={{ width: 0, opacity: 0 }}
             className="flex-shrink-0 border-l bg-card overflow-hidden"
           >
-            {selectedComponent ? (
+            {selectedComponent && selectedComponentType ? (
               <PropertiesPanel
                 component={selectedComponent}
                 componentType={selectedComponentType}
@@ -316,7 +317,11 @@ export const SectionBuilder: React.FC = () => {
             ) : (
               <div className="p-6 text-center text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Select a component to edit its properties</p>
+                <p className="text-sm">
+                  {selectedComponent && !selectedComponentType
+                    ? 'Loading component properties...'
+                    : 'Select a component to edit its properties'}
+                </p>
               </div>
             )}
           </motion.div>

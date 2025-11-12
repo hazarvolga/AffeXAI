@@ -14,39 +14,42 @@ import type { CmsMenu } from '@affexai/shared-types';
 // Main navigation items
 const mainNav = [
   {
+    id: 'nav-solutions',
     label: 'Çözümler',
     href: '/solutions',
     submenu: [
-      { label: 'Mimarlık', href: '/solutions/architecture' },
-      { label: 'İnşaat Mühendisliği', href: '/solutions/civil-engineering' },
-      { label: 'Yapı Fiziği', href: '/solutions/building-physics' },
+      { id: 'nav-sol-arch', label: 'Mimarlık', href: '/solutions/architecture' },
+      { id: 'nav-sol-civil', label: 'İnşaat Mühendisliği', href: '/solutions/civil-engineering' },
+      { id: 'nav-sol-physics', label: 'Yapı Fiziği', href: '/solutions/building-physics' },
     ],
   },
   {
+    id: 'nav-products',
     label: 'Ürünler',
     href: '/products',
     submenu: [
-      { label: 'Allplan Architecture', href: '/products/allplan-architecture' },
-      { label: 'Allplan Engineering', href: '/products/allplan-engineering' },
-      { label: 'Allplan Bimplus', href: '/products/allplan-bimplus' },
+      { id: 'nav-prod-arch', label: 'Allplan Architecture', href: '/products/allplan-architecture' },
+      { id: 'nav-prod-eng', label: 'Allplan Engineering', href: '/products/allplan-engineering' },
+      { id: 'nav-prod-bim', label: 'Allplan Bimplus', href: '/products/allplan-bimplus' },
     ],
   },
   {
+    id: 'nav-education',
     label: 'Eğitim & Destek',
     href: '/education',
     submenu: [
-      { label: 'Eğitim Programları', href: '/education/training' },
-      { label: 'Sertifika Programları', href: '/education/certification' },
-      { label: 'Teknik Destek', href: '/support' },
+      { id: 'nav-edu-training', label: 'Eğitim Programları', href: '/education/training' },
+      { id: 'nav-edu-cert', label: 'Sertifika Programları', href: '/education/certification' },
+      { id: 'nav-edu-support', label: 'Teknik Destek', href: '/support' },
     ],
   },
-  { label: 'Başarı Hikayeleri', href: '/case-studies' },
-  { label: 'İndirme Merkezi', href: '/downloads' },
-  { label: 'İletişim', href: '/contact' },
-  { label: 'BackupHome', href: '/backup-home' },
-  { label: 'BackupProducts', href: '/backup-products' },
-  { label: 'BackupSolutions', href: '/backup-solutions' },
-  { label: 'BackupDownloads', href: '/backup-downloads' },
+  { id: 'nav-case-studies', label: 'Başarı Hikayeleri', href: '/case-studies' },
+  { id: 'nav-downloads', label: 'İndirme Merkezi', href: '/downloads' },
+  { id: 'nav-contact', label: 'İletişim', href: '/contact' },
+  { id: 'nav-backup-home', label: 'BackupHome', href: '/backup-home' },
+  { id: 'nav-backup-products', label: 'BackupProducts', href: '/backup-products' },
+  { id: 'nav-backup-solutions', label: 'BackupSolutions', href: '/backup-solutions' },
+  { id: 'nav-backup-downloads', label: 'BackupDownloads', href: '/backup-downloads' },
 ];
 
 export function Header() {
@@ -74,7 +77,9 @@ export function Header() {
     queryKey: ['header-menu', themeSettings?.headerMenuId],
     queryFn: () => cmsMenuService.getMenu(themeSettings!.headerMenuId!),
     enabled: !!themeSettings?.headerMenuId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // Cache for 30 seconds (shorter for CMS changes)
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchInterval: 60 * 1000, // Refetch every minute
   });
 
   // Extract theme data with defaults
@@ -152,16 +157,28 @@ export function Header() {
   const navigationItems = React.useMemo(() => {
     if (headerMenu?.items && Array.isArray(headerMenu.items) && headerMenu.items.length > 0) {
       return headerMenu.items
-        .filter(item => item && item.label)
+        .filter(item => item && item.label && item.isActive)
         .map(item => ({
+          id: item.id,
           label: item.label,
           href: item.url || '#',
           submenu: item.children && Array.isArray(item.children)
             ? item.children
-                .filter(child => child && child.label)
+                .filter(child => child && child.label && child.isActive)
                 .map(child => ({
+                  id: child.id,
                   label: child.label,
                   href: child.url || '#',
+                  // 3rd level support
+                  submenu: child.children && Array.isArray(child.children)
+                    ? child.children
+                        .filter(grandchild => grandchild && grandchild.label && grandchild.isActive)
+                        .map(grandchild => ({
+                          id: grandchild.id,
+                          label: grandchild.label,
+                          href: grandchild.url || '#',
+                        }))
+                    : undefined,
                 }))
             : undefined,
         }));
@@ -239,47 +256,83 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {navigationItems.map((item) => (
-              <div key={item.label} className="relative group">
-                {item.submenu ? (
-                  <>
-                    <button
+            {navigationItems.map((item) => {
+              const hasSubmenu = item.submenu && item.submenu.length > 0;
+              const hasMegaMenu = hasSubmenu && item.submenu.some(sub => sub.submenu && sub.submenu.length > 0);
+              
+              return (
+                <div key={item.id || item.label} className="relative group">
+                  {hasSubmenu ? (
+                    <>
+                      <button
+                        className={cn(
+                          "flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors py-2",
+                          pathname.startsWith(item.href) && "text-primary font-medium"
+                        )}
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                      
+                      {/* Mega Menu for 3+ levels, Regular Dropdown for 2 levels */}
+                      {hasMegaMenu ? (
+                        <div className="absolute left-0 top-full mt-2 w-auto min-w-[600px] bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                          <div className="grid grid-cols-3 gap-4 p-6">
+                            {item.submenu.map((subItem) => (
+                              <div key={subItem.id || subItem.label} className="space-y-2">
+                                <Link
+                                  href={subItem.href}
+                                  className="block font-semibold text-gray-900 hover:text-primary transition-colors"
+                                >
+                                  {subItem.label}
+                                </Link>
+                                {subItem.submenu && subItem.submenu.length > 0 && (
+                                  <div className="pl-3 space-y-1">
+                                    {subItem.submenu.map((thirdLevelItem) => (
+                                      <Link
+                                        key={thirdLevelItem.id || thirdLevelItem.label}
+                                        href={thirdLevelItem.href}
+                                        className="block text-sm text-gray-600 hover:text-primary hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+                                      >
+                                        {thirdLevelItem.label}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                          <div className="py-2">
+                            {item.submenu.map((subItem) => (
+                              <Link
+                                key={subItem.id || subItem.label}
+                                href={subItem.href}
+                                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                              >
+                                {subItem.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
                       className={cn(
-                        "flex items-center space-x-1 text-gray-700 hover:text-primary transition-colors py-2",
-                        pathname.startsWith(item.href) && "text-primary font-medium"
+                        "text-gray-700 hover:text-primary transition-colors",
+                        pathname === item.href && "text-primary font-medium"
                       )}
                     >
-                      <span>{item.label}</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
-                    {/* Dropdown */}
-                    <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                      <div className="py-2">
-                        {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.label}
-                            href={subItem.href}
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
-                          >
-                            {subItem.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "text-gray-700 hover:text-primary transition-colors",
-                      pathname === item.href && "text-primary font-medium"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                )}
-              </div>
-            ))}
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           {/* CTA Buttons */}
@@ -334,7 +387,7 @@ export function Header() {
           <div className="container mx-auto px-4 py-4 space-y-4">
             {/* Mobile Navigation */}
             {navigationItems.map((item) => (
-              <div key={item.label}>
+              <div key={item.id || item.label}>
                 {item.submenu ? (
                   <>
                     <button
@@ -352,14 +405,30 @@ export function Header() {
                     {openSubmenu === item.label && (
                       <div className="pl-4 space-y-2 mt-2">
                         {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.label}
-                            href={subItem.href}
-                            className="block text-gray-600 hover:text-primary transition-colors py-1"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {subItem.label}
-                          </Link>
+                          <div key={subItem.id || subItem.label}>
+                            <Link
+                              href={subItem.href}
+                              className="block text-gray-600 hover:text-primary transition-colors py-1 font-medium"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {subItem.label}
+                            </Link>
+                            {/* 3rd level items */}
+                            {subItem.submenu && subItem.submenu.length > 0 && (
+                              <div className="pl-4 space-y-1 mt-1">
+                                {subItem.submenu.map((thirdLevelItem) => (
+                                  <Link
+                                    key={thirdLevelItem.id || thirdLevelItem.label}
+                                    href={thirdLevelItem.href}
+                                    className="block text-sm text-gray-500 hover:text-primary transition-colors py-1"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                  >
+                                    {thirdLevelItem.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -375,6 +444,7 @@ export function Header() {
                 )}
               </div>
             ))}
+
 
             {/* Mobile CTA Buttons */}
             <div className="pt-4 border-t border-gray-200 space-y-2">

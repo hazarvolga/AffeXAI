@@ -151,6 +151,19 @@ export class CmsMenuService {
       data,
     );
   }
+
+  /**
+   * Batch update menu items (for drag & drop hierarchy changes)
+   */
+  async batchUpdateMenuItems(
+    menuId: string,
+    updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ): Promise<void> {
+    await httpClient.postWrapped<{ message: string }, Array<{ id: string; parentId: string | null; orderIndex: number }>>(
+      `/cms/menus/${menuId}/items/batch-update`,
+      updates,
+    );
+  }
 }
 
 // Export singleton instance

@@ -5,7 +5,7 @@ export interface CmsPageResponse {
   id: string;
   title: string;
   slug: string;
-  content: any; // JSON content blocks
+  components: any[]; // CMS components/blocks array
   metaTitle?: string;
   metaDescription?: string;
   status: 'draft' | 'published' | 'archived';
@@ -34,5 +34,19 @@ export class CmsPageService {
    */
   static async getHomepage(): Promise<CmsPageResponse> {
     return this.getPageBySlug('home');
+  }
+
+  /**
+   * Get all pages (admin endpoint - for dropdowns)
+   */
+  static async getAllPages(): Promise<Array<{ id: string; title: string; slug: string }>> {
+    return httpClient.getWrapped<Array<{ id: string; title: string; slug: string }>>('/cms/pages');
+  }
+
+  /**
+   * Get all categories (admin endpoint - for dropdowns)
+   */
+  static async getAllCategories(): Promise<Array<{ id: string; name: string; slug: string }>> {
+    return httpClient.getWrapped<Array<{ id: string; name: string; slug: string }>>('/cms/categories');
   }
 }

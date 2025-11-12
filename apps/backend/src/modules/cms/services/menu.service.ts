@@ -71,8 +71,13 @@ export class MenuService {
   }): Promise<Menu[]> {
     const queryBuilder = this.menuRepository
       .createQueryBuilder('menu')
-      .leftJoinAndSelect('menu.items', 'items')
-      .orderBy('menu.name', 'ASC');
+      .leftJoinAndSelect('menu.items', 'items', 'items.parentId IS NULL')
+      .leftJoinAndSelect('items.children', 'children')
+      .leftJoinAndSelect('children.children', 'grandchildren')
+      .orderBy('menu.name', 'ASC')
+      .addOrderBy('items.orderIndex', 'ASC')
+      .addOrderBy('children.orderIndex', 'ASC')
+      .addOrderBy('grandchildren.orderIndex', 'ASC');
 
     if (params?.location) {
       queryBuilder.where('menu.location = :location', {
@@ -101,11 +106,29 @@ export class MenuService {
   async findOneMenu(id: string): Promise<Menu> {
     const menu = await this.menuRepository.findOne({
       where: { id },
-      relations: ['items'],
+      relations: ['items', 'items.children', 'items.children.children'],
     });
 
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
+    }
+
+    // Filter to only include root items (no parentId) and their nested children
+    if (menu.items) {
+      menu.items = menu.items.filter(item => !item.parentId);
+      // Sort root items by orderIndex
+      menu.items.sort((a, b) => a.orderIndex - b.orderIndex);
+      
+      // Recursively sort children
+      const sortChildren = (items: any[]) => {
+        items.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            item.children.sort((a: any, b: any) => a.orderIndex - b.orderIndex);
+            sortChildren(item.children);
+          }
+        });
+      };
+      sortChildren(menu.items);
     }
 
     return menu;
@@ -117,11 +140,29 @@ export class MenuService {
   async findMenuBySlug(slug: string): Promise<Menu> {
     const menu = await this.menuRepository.findOne({
       where: { slug },
-      relations: ['items'],
+      relations: ['items', 'items.children', 'items.children.children'],
     });
 
     if (!menu) {
       throw new NotFoundException(`Menu with slug "${slug}" not found`);
+    }
+
+    // Filter to only include root items (no parentId) and their nested children
+    if (menu.items) {
+      menu.items = menu.items.filter(item => !item.parentId);
+      // Sort root items by orderIndex
+      menu.items.sort((a, b) => a.orderIndex - b.orderIndex);
+      
+      // Recursively sort children
+      const sortChildren = (items: any[]) => {
+        items.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            item.children.sort((a: any, b: any) => a.orderIndex - b.orderIndex);
+            sortChildren(item.children);
+          }
+        });
+      };
+      sortChildren(menu.items);
     }
 
     return menu;
@@ -363,6 +404,36 @@ export class MenuService {
       for (let i = 0; i < dto.menuItemIds.length; i++) {
         await manager.update(MenuItem, dto.menuItemIds[i], {
           orderIndex: dto.orderIndexes[i],
+        });
+      }
+    });
+  }
+
+  /**
+   * Batch update menu items (for drag & drop operations)
+   */
+  async batchUpdateMenuItems(
+    menuId: string,
+    updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ): Promise<void> {
+    // Validate all items belong to the menu
+    const menuItems = await this.findMenuItems(menuId);
+    const menuItemIds = new Set(menuItems.map((item) => item.id));
+
+    for (const update of updates) {
+      if (!menuItemIds.has(update.id)) {
+        throw new BadRequestException(
+          `Menu item ${update.id} does not belong to menu ${menuId}`,
+        );
+      }
+    }
+
+    // Perform batch update in transaction
+    await this.menuItemRepository.manager.transaction(async (manager) => {
+      for (const update of updates) {
+        await manager.update(MenuItem, update.id, {
+          parentId: update.parentId,
+          orderIndex: update.orderIndex,
         });
       }
     });

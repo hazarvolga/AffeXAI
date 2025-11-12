@@ -116,6 +116,16 @@ export class MenuController {
     await this.menuService.removeMenuItem(id);
   }
 
+  @Post(':menuId/items/batch-update')
+  @HttpCode(HttpStatus.OK)
+  async batchUpdateMenuItems(
+    @Param('menuId') menuId: string,
+    @Body() updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ) {
+    await this.menuService.batchUpdateMenuItems(menuId, updates);
+    return { message: 'Menu items updated successfully' };
+  }
+
   @Post('items/reorder')
   @HttpCode(HttpStatus.OK)
   async reorderMenuItems(@Body() dto: ReorderMenuItemsDto) {

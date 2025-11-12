@@ -43,6 +43,10 @@ const mainNav = [
   { label: 'Başarı Hikayeleri', href: '/case-studies' },
   { label: 'İndirme Merkezi', href: '/downloads' },
   { label: 'İletişim', href: '/contact' },
+  { label: 'BackupHome', href: '/backup-home' },
+  { label: 'BackupProducts', href: '/backup-products' },
+  { label: 'BackupSolutions', href: '/backup-solutions' },
+  { label: 'BackupDownloads', href: '/backup-downloads' },
 ];
 
 export function Header() {

@@ -35,7 +35,9 @@
     "seed:homepage-sections": "tsx src/database/seeds/run-homepage-sections.ts",
     "seed:cms-templates": "tsx src/modules/cms/seeds/run-templates.ts",
     "seed:theme-settings": "ts-node src/database/seeds/run-theme-settings.ts",
-    "update:empty-templates": "tsx src/scripts/update-empty-templates.ts"
+    "seed:migrate-pages": "tsx src/database/seeds/run-migrate-public-pages.ts",
+    "update:empty-templates": "tsx src/scripts/update-empty-templates.ts",
+    "seed:remaining-pages": "tsx src/database/seeds/run-seed-remaining-pages.ts"
   },
   "dependencies": {
     "@affexai/shared-types": "file:../../types-shared",

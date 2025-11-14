@@ -469,7 +469,7 @@ const MenuItemDialog = ({
               <SelectTrigger id="item-parent">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px] overflow-y-auto">
                 <SelectItem value="none">Yok (Ana Öğe)</SelectItem>
                 {hierarchicalParents.map(parent => (
                   <SelectItem key={parent.id} value={parent.id}>

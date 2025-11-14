@@ -36,13 +36,10 @@ interface MenuTreeNode extends SortableTreeNode {
 const convertToNestedTree = (items: CmsMenuItem[]): MenuTreeNode[] => {
   if (!items || items.length === 0) return [];
 
-  // Build tree from flat items
-  const itemMap = new Map<string, MenuTreeNode>();
-  const rootItems: MenuTreeNode[] = [];
-
-  // First pass: Create tree nodes
-  items.forEach(item => {
-    itemMap.set(item.id, {
+  // If items already have children property from backend, use them directly
+  const rootItems: MenuTreeNode[] = items
+    .filter(item => !item.parentId)
+    .map(item => ({
       id: item.id,
       label: item.label,
       type: item.type,
@@ -52,35 +49,29 @@ const convertToNestedTree = (items: CmsMenuItem[]): MenuTreeNode[] => {
       target: item.target,
       icon: item.icon,
       isActive: item.isActive,
-      children: [],
-    });
-  });
-
-  // Second pass: Build parent-child relationships
-  itemMap.forEach(node => {
-    if (node.parentId) {
-      const parent = itemMap.get(node.parentId);
-      if (parent) {
-        if (!parent.children) parent.children = [];
-        parent.children.push(node);
-      }
-    } else {
-      rootItems.push(node);
-    }
-  });
-
-  // Sort by orderIndex at each level
-  const sortByOrder = (nodes: MenuTreeNode[]) => {
-    nodes.sort((a, b) => a.orderIndex - b.orderIndex);
-    nodes.forEach(node => {
-      if (node.children && node.children.length > 0) {
-        sortByOrder(node.children);
-      }
-    });
-  };
-  sortByOrder(rootItems);
+      children: item.children ? convertChildrenToTreeNodes(item.children) : [],
+    }))
+    .sort((a, b) => a.orderIndex - b.orderIndex);
 
   return rootItems;
+};
+
+// Helper function to recursively convert children
+const convertChildrenToTreeNodes = (children: any[]): MenuTreeNode[] => {
+  return children
+    .map(child => ({
+      id: child.id,
+      label: child.label,
+      type: child.type,
+      url: child.url,
+      parentId: child.parentId,
+      orderIndex: child.orderIndex,
+      target: child.target,
+      icon: child.icon,
+      isActive: child.isActive,
+      children: child.children ? convertChildrenToTreeNodes(child.children) : [],
+    }))
+    .sort((a, b) => a.orderIndex - b.orderIndex);
 };
 
 const convertToFlatItems = (treeNodes: MenuTreeNode[]): CmsMenuItem[] => {
@@ -303,7 +294,36 @@ const MenuItemDialog = ({
     return items.filter(i => i.id !== currentItemId && !childIds.has(i.id));
   };
   
-  const potentialParents = getValidParentOptions(menuItems, item?.id);
+  // Build hierarchical parent list with indentation
+  const buildHierarchicalParentList = (
+    items: CmsMenuItem[],
+    currentItemId?: string,
+    parentId: string | null = null,
+    level: number = 0
+  ): Array<{ id: string; label: string; level: number }> => {
+    const result: Array<{ id: string; label: string; level: number }> = [];
+
+    items
+      .filter(item => item.parentId === parentId && item.id !== currentItemId)
+      .forEach(item => {
+        // Skip if this item is a descendant of current item (prevent circular)
+        const isDescendant = (itemId: string): boolean => {
+          const children = items.filter(i => i.parentId === itemId);
+          if (children.some(c => c.id === currentItemId)) return true;
+          return children.some(c => isDescendant(c.id));
+        };
+
+        if (!isDescendant(item.id)) {
+          result.push({ id: item.id, label: item.label, level });
+          // Recursively add children
+          result.push(...buildHierarchicalParentList(items, currentItemId, item.id, level + 1));
+        }
+      });
+
+    return result;
+  };
+
+  const hierarchicalParents = buildHierarchicalParentList(menuItems, item?.id);
 
   const handleSave = () => {
     onSave({
@@ -430,9 +450,12 @@ const MenuItemDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Yok (Ana Öğe)</SelectItem>
-                {potentialParents.map(parent => (
+                {hierarchicalParents.map(parent => (
                   <SelectItem key={parent.id} value={parent.id}>
-                    {parent.label}
+                    <span style={{ paddingLeft: `${parent.level * 20}px` }}>
+                      {parent.level > 0 && '└─ '}
+                      {parent.label}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

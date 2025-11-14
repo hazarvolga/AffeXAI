@@ -69,15 +69,7 @@ export class MenuService {
     isActive?: boolean;
     search?: string;
   }): Promise<Menu[]> {
-    const queryBuilder = this.menuRepository
-      .createQueryBuilder('menu')
-      .leftJoinAndSelect('menu.items', 'items', 'items.parentId IS NULL')
-      .leftJoinAndSelect('items.children', 'children')
-      .leftJoinAndSelect('children.children', 'grandchildren')
-      .orderBy('menu.name', 'ASC')
-      .addOrderBy('items.orderIndex', 'ASC')
-      .addOrderBy('children.orderIndex', 'ASC')
-      .addOrderBy('grandchildren.orderIndex', 'ASC');
+    const queryBuilder = this.menuRepository.createQueryBuilder('menu');
 
     if (params?.location) {
       queryBuilder.where('menu.location = :location', {
@@ -97,7 +89,28 @@ export class MenuService {
       });
     }
 
-    return queryBuilder.getMany();
+    queryBuilder.orderBy('menu.name', 'ASC');
+
+    const menus = await queryBuilder.getMany();
+
+    // Build nested tree for each menu (unlimited depth)
+    const buildNestedTree = (allItems: any[], parentId: string | null): any[] => {
+      return allItems
+        .filter(item => item.parentId === parentId)
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map(item => ({
+          ...item,
+          children: buildNestedTree(allItems, item.id),
+        }));
+    };
+
+    // Load items for each menu
+    for (const menu of menus) {
+      const allItems = await this.findMenuItems(menu.id);
+      menu.items = buildNestedTree(allItems, null);
+    }
+
+    return menus;
   }
 
   /**
@@ -106,30 +119,28 @@ export class MenuService {
   async findOneMenu(id: string): Promise<Menu> {
     const menu = await this.menuRepository.findOne({
       where: { id },
-      relations: ['items', 'items.children', 'items.children.children'],
     });
 
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
     }
 
-    // Filter to only include root items (no parentId) and their nested children
-    if (menu.items) {
-      menu.items = menu.items.filter(item => !item.parentId);
-      // Sort root items by orderIndex
-      menu.items.sort((a, b) => a.orderIndex - b.orderIndex);
-      
-      // Recursively sort children
-      const sortChildren = (items: any[]) => {
-        items.forEach(item => {
-          if (item.children && item.children.length > 0) {
-            item.children.sort((a: any, b: any) => a.orderIndex - b.orderIndex);
-            sortChildren(item.children);
-          }
-        });
-      };
-      sortChildren(menu.items);
-    }
+    // Load all items for this menu (flat)
+    const allItems = await this.findMenuItems(id);
+
+    // Build nested tree recursively (unlimited depth)
+    const buildNestedTree = (parentId: string | null): any[] => {
+      return allItems
+        .filter(item => item.parentId === parentId)
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map(item => ({
+          ...item,
+          children: buildNestedTree(item.id), // Recursive call for unlimited depth
+        }));
+    };
+
+    // Set only root items with nested children
+    menu.items = buildNestedTree(null);
 
     return menu;
   }
@@ -140,30 +151,28 @@ export class MenuService {
   async findMenuBySlug(slug: string): Promise<Menu> {
     const menu = await this.menuRepository.findOne({
       where: { slug },
-      relations: ['items', 'items.children', 'items.children.children'],
     });
 
     if (!menu) {
       throw new NotFoundException(`Menu with slug "${slug}" not found`);
     }
 
-    // Filter to only include root items (no parentId) and their nested children
-    if (menu.items) {
-      menu.items = menu.items.filter(item => !item.parentId);
-      // Sort root items by orderIndex
-      menu.items.sort((a, b) => a.orderIndex - b.orderIndex);
-      
-      // Recursively sort children
-      const sortChildren = (items: any[]) => {
-        items.forEach(item => {
-          if (item.children && item.children.length > 0) {
-            item.children.sort((a: any, b: any) => a.orderIndex - b.orderIndex);
-            sortChildren(item.children);
-          }
-        });
-      };
-      sortChildren(menu.items);
-    }
+    // Load all items for this menu (flat)
+    const allItems = await this.findMenuItems(menu.id);
+
+    // Build nested tree recursively (unlimited depth)
+    const buildNestedTree = (parentId: string | null): any[] => {
+      return allItems
+        .filter(item => item.parentId === parentId)
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map(item => ({
+          ...item,
+          children: buildNestedTree(item.id), // Recursive call for unlimited depth
+        }));
+    };
+
+    // Set only root items with nested children
+    menu.items = buildNestedTree(null);
 
     return menu;
   }

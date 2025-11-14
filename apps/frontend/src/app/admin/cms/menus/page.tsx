@@ -101,6 +101,7 @@ const convertToFlatItems = (treeNodes: MenuTreeNode[]): CmsMenuItem[] => {
         isActive: node.isActive,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       };
       flatItems.push(flatItem);
 
@@ -235,6 +236,7 @@ const MenuItemDialog = ({
   const [label, setLabel] = useState('');
   const [type, setType] = useState<MenuItemType>(MenuItemType.CUSTOM);
   const [url, setUrl] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [parentId, setParentId] = useState<string | null>(null);
   const [target, setTarget] = useState<'_blank' | '_self'>('_self');
   const [icon, setIcon] = useState('');
@@ -247,6 +249,7 @@ const MenuItemDialog = ({
       setLabel(item.label || '');
       setType(item.type || MenuItemType.CUSTOM);
       setUrl(item.url || '');
+      setCategoryId(item.categoryId || '');
       setParentId(item.parentId || null);
       setTarget(item.target || '_self');
       setIcon(item.icon || '');
@@ -256,6 +259,7 @@ const MenuItemDialog = ({
       setLabel('');
       setType(MenuItemType.CUSTOM);
       setUrl('');
+      setCategoryId('');
       setParentId(null);
       setTarget('_self');
       setIcon('');
@@ -620,8 +624,15 @@ export default function MenuManagementPage() {
         ...data,
       });
 
+      // Reload menu from backend
       const updatedMenu = await cmsMenuService.getMenu(activeMenuId);
       setMenus(menus.map(m => m.id === activeMenuId ? updatedMenu : m));
+
+      // Update draft items to reflect new item (CRITICAL FIX)
+      if (updatedMenu.items) {
+        setDraftItems(convertToNestedTree(updatedMenu.items));
+      }
+      setHasUnsavedChanges(false); // Reset unsaved changes flag
 
       toast({
         title: 'Başarılı',
@@ -652,6 +663,12 @@ export default function MenuManagementPage() {
       const updatedMenu = await cmsMenuService.getMenu(activeMenuId);
       setMenus(menus.map(m => m.id === activeMenuId ? updatedMenu : m));
 
+      // Update draft items to reflect changes
+      if (updatedMenu.items) {
+        setDraftItems(convertToNestedTree(updatedMenu.items));
+      }
+      setHasUnsavedChanges(false);
+
       toast({
         title: 'Başarılı',
         description: 'Menü öğesi başarıyla güncellendi.',
@@ -672,6 +689,12 @@ export default function MenuManagementPage() {
       await cmsMenuService.deleteMenuItem(itemId);
       const updatedMenu = await cmsMenuService.getMenu(activeMenuId);
       setMenus(menus.map(m => m.id === activeMenuId ? updatedMenu : m));
+
+      // Update draft items to reflect deletion
+      if (updatedMenu.items) {
+        setDraftItems(convertToNestedTree(updatedMenu.items));
+      }
+      setHasUnsavedChanges(false);
 
       toast({
         title: 'Başarılı',
@@ -706,7 +729,7 @@ export default function MenuManagementPage() {
       // Prepare batch update payload
       const updates = flatItems.map(item => ({
         id: item.id,
-        parentId: item.parentId,
+        parentId: item.parentId ?? null, // Convert undefined to null
         orderIndex: item.orderIndex,
       }));
 

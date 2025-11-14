@@ -259,7 +259,7 @@ export function Header() {
             {navigationItems.map((item) => {
               const hasSubmenu = item.submenu && item.submenu.length > 0;
               const hasMegaMenu = hasSubmenu && item.submenu.some(sub => sub.submenu && sub.submenu.length > 0);
-              
+
               return (
                 <div key={item.id || item.label} className="relative group">
                   {hasSubmenu ? (
@@ -273,37 +273,59 @@ export function Header() {
                         <span>{item.label}</span>
                         <ChevronDown className="h-4 w-4" />
                       </button>
-                      
-                      {/* Mega Menu for 3+ levels, Regular Dropdown for 2 levels */}
+
+                      {/* Mega Menu for 3+ levels - Full Width Below Header */}
                       {hasMegaMenu ? (
-                        <div className="absolute left-0 top-full mt-2 w-auto min-w-[600px] bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                          <div className="grid grid-cols-3 gap-4 p-6">
-                            {item.submenu.map((subItem) => (
-                              <div key={subItem.id || subItem.label} className="space-y-2">
-                                <Link
-                                  href={subItem.href}
-                                  className="block font-semibold text-gray-900 hover:text-primary transition-colors"
-                                >
-                                  {subItem.label}
-                                </Link>
-                                {subItem.submenu && subItem.submenu.length > 0 && (
-                                  <div className="pl-3 space-y-1">
-                                    {subItem.submenu.map((thirdLevelItem) => (
-                                      <Link
-                                        key={thirdLevelItem.id || thirdLevelItem.label}
-                                        href={thirdLevelItem.href}
-                                        className="block text-sm text-gray-600 hover:text-primary hover:bg-gray-50 px-2 py-1 rounded transition-colors"
-                                      >
-                                        {thirdLevelItem.label}
-                                      </Link>
-                                    ))}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-0 w-screen opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                          {/* Full-width backdrop with shadow */}
+                          <div className="bg-white border-t border-gray-200 shadow-xl">
+                            <div className="container mx-auto px-4 py-8">
+                              {/* Dynamic grid based on number of columns */}
+                              <div className={cn(
+                                "grid gap-6",
+                                item.submenu.length === 1 && "grid-cols-1 max-w-sm mx-auto",
+                                item.submenu.length === 2 && "grid-cols-2 max-w-3xl mx-auto",
+                                item.submenu.length === 3 && "grid-cols-3 max-w-5xl mx-auto",
+                                item.submenu.length === 4 && "grid-cols-4",
+                                item.submenu.length >= 5 && "grid-cols-5"
+                              )}>
+                                {item.submenu.map((subItem) => (
+                                  <div
+                                    key={subItem.id || subItem.label}
+                                    className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors border border-gray-200"
+                                  >
+                                    {/* Main category link */}
+                                    <Link
+                                      href={subItem.href}
+                                      className="block font-bold text-gray-900 hover:text-primary transition-colors mb-3 text-base"
+                                    >
+                                      {subItem.label}
+                                    </Link>
+
+                                    {/* Sub-items in boxed list */}
+                                    {subItem.submenu && subItem.submenu.length > 0 && (
+                                      <div className="space-y-1.5">
+                                        {subItem.submenu.map((thirdLevelItem) => (
+                                          <Link
+                                            key={thirdLevelItem.id || thirdLevelItem.label}
+                                            href={thirdLevelItem.href}
+                                            className="block text-sm text-gray-600 hover:text-primary hover:bg-white px-3 py-2 rounded-md transition-all group/item"
+                                          >
+                                            <span className="group-hover/item:translate-x-1 inline-block transition-transform">
+                                              {thirdLevelItem.label}
+                                            </span>
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                ))}
                               </div>
-                            ))}
+                            </div>
                           </div>
                         </div>
                       ) : (
+                        /* Regular dropdown for simple 2-level menus */
                         <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                           <div className="py-2">
                             {item.submenu.map((subItem) => (
@@ -383,44 +405,44 @@ export function Header() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200">
-          <div className="container mx-auto px-4 py-4 space-y-4">
+        <div className="lg:hidden border-t border-gray-200 bg-white max-h-[calc(100vh-180px)] overflow-y-auto">
+          <div className="container mx-auto px-4 py-4 space-y-2">
             {/* Mobile Navigation */}
             {navigationItems.map((item) => (
-              <div key={item.id || item.label}>
+              <div key={item.id || item.label} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
                 {item.submenu ? (
                   <>
                     <button
                       onClick={() => toggleSubmenu(item.label)}
-                      className="flex items-center justify-between w-full text-gray-700 hover:text-primary transition-colors py-2"
+                      className="flex items-center justify-between w-full text-gray-900 font-medium hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-gray-50"
                     >
-                      <span>{item.label}</span>
+                      <span className="text-base">{item.label}</span>
                       <ChevronDown
                         className={cn(
-                          "h-4 w-4 transition-transform",
+                          "h-5 w-5 transition-transform duration-200",
                           openSubmenu === item.label && "rotate-180"
                         )}
                       />
                     </button>
                     {openSubmenu === item.label && (
-                      <div className="pl-4 space-y-2 mt-2">
+                      <div className="mt-2 space-y-1 animate-in slide-in-from-top-2 duration-200">
                         {item.submenu.map((subItem) => (
-                          <div key={subItem.id || subItem.label}>
+                          <div key={subItem.id || subItem.label} className="bg-gray-50 rounded-lg p-3">
                             <Link
                               href={subItem.href}
-                              className="block text-gray-600 hover:text-primary transition-colors py-1 font-medium"
+                              className="block text-gray-900 font-semibold hover:text-primary transition-colors mb-2 text-sm"
                               onClick={() => setIsMobileMenuOpen(false)}
                             >
                               {subItem.label}
                             </Link>
-                            {/* 3rd level items */}
+                            {/* 3rd level items - Boxed style like desktop */}
                             {subItem.submenu && subItem.submenu.length > 0 && (
-                              <div className="pl-4 space-y-1 mt-1">
+                              <div className="space-y-1 pl-2 border-l-2 border-primary/20">
                                 {subItem.submenu.map((thirdLevelItem) => (
                                   <Link
                                     key={thirdLevelItem.id || thirdLevelItem.label}
                                     href={thirdLevelItem.href}
-                                    className="block text-sm text-gray-500 hover:text-primary transition-colors py-1"
+                                    className="block text-sm text-gray-600 hover:text-primary hover:bg-white transition-all py-2 px-3 rounded-md"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                   >
                                     {thirdLevelItem.label}
@@ -436,7 +458,7 @@ export function Header() {
                 ) : (
                   <Link
                     href={item.href}
-                    className="block text-gray-700 hover:text-primary transition-colors py-2"
+                    className="block text-gray-900 font-medium hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-gray-50 text-base"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.label}

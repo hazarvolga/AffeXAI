@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { cmsMenuService } from '@/lib/cms/menu-service';
+import { cmsCategoryService } from '@/lib/cms/category-service';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { CmsPageService } from '@/services/cms-page.service';
@@ -265,6 +266,13 @@ const MenuItemDialog = ({
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
+  // Fetch CMS categories for CATEGORY type selector
+  const { data: cmsCategories, isLoading: loadingCategories } = useQuery({
+    queryKey: ['cms-categories-active'],
+    queryFn: () => cmsCategoryService.getCategories({ isActive: true }),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
   // Handle page selection - auto-fill URL and label
   const handlePageSelect = (pageId: string) => {
     const selectedPage = cmsPages?.find(p => p.id === pageId);
@@ -273,6 +281,19 @@ const MenuItemDialog = ({
       // Auto-fill label if empty
       if (!label) {
         setLabel(selectedPage.title);
+      }
+    }
+  };
+
+  // Handle category selection - auto-fill URL and label
+  const handleCategorySelect = (categoryId: string) => {
+    const selectedCategory = cmsCategories?.find(c => c.id === categoryId);
+    if (selectedCategory) {
+      setCategoryId(categoryId);
+      setUrl(`/category/${selectedCategory.slug}`);
+      // Auto-fill label if empty
+      if (!label) {
+        setLabel(selectedCategory.name);
       }
     }
   };
@@ -447,18 +468,47 @@ const MenuItemDialog = ({
           </div>
         )}
 
-        {/* CATEGORY Type */}
+        {/* CATEGORY Type - Show category selector */}
         {type === MenuItemType.CATEGORY && (
           <div className="space-y-2">
-            <Label>Kategori</Label>
-            <Input 
-              placeholder="Kategori slug'ı (örn: architecture)" 
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Kategori slug'ını girin. Kategori yönetimi yakında eklenecek.
-            </p>
+            <Label htmlFor="category-select">Kategori</Label>
+            <Select
+              value={cmsCategories?.find(c => c.id === categoryId)?.id || ''}
+              onValueChange={handleCategorySelect}
+              disabled={loadingCategories}
+            >
+              <SelectTrigger id="category-select">
+                <SelectValue placeholder={loadingCategories ? "Yükleniyor..." : "Kategori seçin"} />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px] overflow-y-auto">
+                {loadingCategories && (
+                  <SelectItem value="loading" disabled>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+                    Yükleniyor...
+                  </SelectItem>
+                )}
+                {!loadingCategories && cmsCategories && cmsCategories.length === 0 && (
+                  <SelectItem value="no-categories" disabled>
+                    Henüz kategori yok
+                  </SelectItem>
+                )}
+                {!loadingCategories && cmsCategories && cmsCategories.length > 0 && cmsCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{category.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        /{category.slug}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {url && (
+              <div className="text-xs text-muted-foreground">
+                URL: {url}
+              </div>
+            )}
           </div>
         )}
 
@@ -676,7 +726,8 @@ export default function MenuManagementPage() {
       if (updatedMenu.items) {
         setDraftItems(convertToNestedTree(updatedMenu.items));
       }
-      setHasUnsavedChanges(false); // Reset unsaved changes flag
+      // Don't reset hasUnsavedChanges here - CRUD operations save directly to backend
+      // Only drag&drop changes need Save/Cancel buttons
 
       toast({
         title: 'Başarılı',
@@ -711,7 +762,7 @@ export default function MenuManagementPage() {
       if (updatedMenu.items) {
         setDraftItems(convertToNestedTree(updatedMenu.items));
       }
-      setHasUnsavedChanges(false);
+      // Don't reset hasUnsavedChanges - update operations save directly
 
       toast({
         title: 'Başarılı',
@@ -738,7 +789,7 @@ export default function MenuManagementPage() {
       if (updatedMenu.items) {
         setDraftItems(convertToNestedTree(updatedMenu.items));
       }
-      setHasUnsavedChanges(false);
+      // Don't reset hasUnsavedChanges - delete operations save directly
 
       toast({
         title: 'Başarılı',

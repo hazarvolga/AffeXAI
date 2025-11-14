@@ -6,36 +6,36 @@ import { Footer } from '@/components/layout/footer';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// Generate metadata for homepage SEO
+// Generate metadata for Products page SEO
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const page = await CmsPageService.getHomepage();
+    const page = await CmsPageService.getPageBySlug('products');
 
     if (!page) {
       return {
-        title: 'Affexai - AEC Çözümleri',
-        description: 'Affexai ile inşaat ve mimarlık sektörüne özel çözümler',
+        title: 'Products - Affexai',
+        description: 'Explore our comprehensive range of AEC software products',
       };
     }
 
     return {
-      title: page.metaTitle || page.title || 'Affexai - AEC Çözümleri',
-      description: page.metaDescription || 'Affexai ile inşaat ve mimarlık sektörüne özel çözümler',
+      title: page.metaTitle || page.title || 'Products - Affexai',
+      description: page.metaDescription || 'Explore our comprehensive range of AEC software products',
     };
   } catch (error) {
     return {
-      title: 'Affexai - AEC Çözümleri',
-      description: 'Affexai ile inşaat ve mimarlık sektörüne özel çözümler',
+      title: 'Products - Affexai',
+      description: 'Explore our comprehensive range of AEC software products',
     };
   }
 }
 
-export default async function HomePage() {
+export default async function ProductsPage() {
   try {
-    // Fetch homepage from CMS (slug: 'home')
-    const page = await CmsPageService.getHomepage();
+    // Fetch products page from CMS (slug: 'products')
+    const page = await CmsPageService.getPageBySlug('products');
 
-    // Render homepage with header and footer always visible
+    // Render page with header and footer always visible
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -60,60 +60,28 @@ export default async function HomePage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                       />
                     </svg>
                   </div>
                   <h1 className="text-4xl font-bold mb-4">
-                    Ana Sayfa İçeriği Bekleniyor
+                    Products Page Content Pending
                   </h1>
                   <p className="text-lg text-muted-foreground mb-8">
-                    Ana sayfa için CMS içeriği henüz eklenmemiş. İçerik eklemek için aşağıdaki adımları takip edin.
-                  </p>
-                </div>
-
-                <div className="bg-muted/30 rounded-lg p-6 mb-8 text-left">
-                  <h2 className="font-semibold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-sm">
-                      1
-                    </span>
-                    CMS Editor Gidin
-                  </h2>
-                  <p className="text-sm text-muted-foreground mb-4 ml-8">
-                    Admin panelinden CMS sayfalarına gidin ve mevcut ana sayfayı düzenleyin.
-                  </p>
-
-                  <h2 className="font-semibold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-sm">
-                      2
-                    </span>
-                    İçerik Ekleyin
-                  </h2>
-                  <p className="text-sm text-muted-foreground mb-4 ml-8">
-                    Sürükle-bırak editörü kullanarak bloklar ekleyin veya bir şablondan başlayın.
-                  </p>
-
-                  <h2 className="font-semibold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-sm">
-                      3
-                    </span>
-                    Yayınlayın
-                  </h2>
-                  <p className="text-sm text-muted-foreground ml-8">
-                    İçeriğinizi kaydedin ve yayınlayın - içerik otomatik olarak burada görünecektir.
+                    The CMS content for the Products page hasn't been added yet. Please add content through the CMS editor.
                   </p>
                 </div>
 
                 <div className="flex gap-4 justify-center">
                   <Button asChild size="lg">
                     <Link href="/admin/cms/pages">
-                      CMS Sayfalarına Git
+                      Go to CMS Pages
                     </Link>
                   </Button>
                   {page && (
                     <Button asChild variant="outline" size="lg">
                       <Link href={`/admin/cms/editor?pageId=${page.id}`}>
-                        Ana Sayfayı Düzenle
+                        Edit Products Page
                       </Link>
                     </Button>
                   )}
@@ -127,7 +95,7 @@ export default async function HomePage() {
       </div>
     );
   } catch (error) {
-    console.error('Error loading homepage:', error);
+    console.error('Error loading products page:', error);
 
     // Fallback: Error occurred
     return (
@@ -153,15 +121,15 @@ export default async function HomePage() {
                 </svg>
               </div>
               <h1 className="text-4xl font-bold mb-4">
-                Ana Sayfa Yüklenemedi
+                Products Page Could Not Be Loaded
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                CMS içeriği yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin veya yöneticinizle iletişime geçin.
+                An error occurred while loading the CMS content. Please try again later or contact your administrator.
               </p>
               <div className="flex gap-4 justify-center">
                 <Button asChild variant="outline">
                   <Link href="/admin/cms/pages">
-                    CMS Paneline Git
+                    Go to CMS Panel
                   </Link>
                 </Button>
               </div>

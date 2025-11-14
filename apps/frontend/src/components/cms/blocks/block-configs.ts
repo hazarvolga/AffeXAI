@@ -2004,6 +2004,217 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
   },
 };
 
+// Migration Blocks Configuration (from migration-blocks.tsx)
+// Complex nested structures with full editing capabilities
+const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
+  // 1. CMS Hero Carousel - Complex nested tabs → slides structure
+  'cms-hero-carousel': {
+    autoplayDelay: { type: 'number', label: 'Autoplay Delay (ms)', defaultValue: 5000 },
+    tabs: {
+      type: 'list',
+      label: 'Hero Tabs',
+      defaultValue: [],
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
+        name: { type: 'text', label: 'Tab Name', defaultValue: 'Tab 1' },
+        slides: {
+          type: 'list',
+          label: 'Slides',
+          defaultValue: [],
+          itemSchema: {
+            image: { type: 'image', label: 'Slide Image', defaultValue: '' },
+            imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
+            headline: { type: 'text', label: 'Headline', defaultValue: '' },
+            subheadline: { type: 'textarea', label: 'Subheadline', defaultValue: '' },
+            ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Learn More' },
+            ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: '#' },
+          },
+        },
+      },
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 2. CMS Solutions Carousel - Nested slides with category, items
+  'cms-solutions-carousel': {
+    title: { type: 'text', label: 'Section Title', defaultValue: 'Çözümlerimiz' },
+    subtitle: { type: 'textarea', label: 'Section Subtitle', defaultValue: 'Sektörünüz ne olursa olsun, projenizin her aşaması için güçlü ve esnek bir çözümümüz var.' },
+    slides: {
+      type: 'list',
+      label: 'Solution Slides',
+      defaultValue: [],
+      itemSchema: {
+        id: { type: 'text', label: 'Slide ID', defaultValue: 'solution-1' },
+        category: { type: 'text', label: 'Category', defaultValue: 'Category' },
+        title: { type: 'text', label: 'Title', defaultValue: '' },
+        description: { type: 'textarea', label: 'Description', defaultValue: '' },
+        imageUrl: { type: 'image', label: 'Image URL', defaultValue: '' },
+        imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
+        iconName: { type: 'text', label: 'Icon Name (Lucide)', defaultValue: '' },
+        items: {
+          type: 'list',
+          label: 'Solution Items',
+          defaultValue: [],
+          itemSchema: {
+            title: { type: 'text', label: 'Item Title', defaultValue: '' },
+            href: { type: 'text', label: 'Item Link', defaultValue: '#' },
+          },
+        },
+      },
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 3. CMS Products Carousel - Similar to solutions carousel
+  'cms-products-carousel': {
+    title: { type: 'text', label: 'Section Title', defaultValue: 'Ürünlerimiz' },
+    subtitle: { type: 'textarea', label: 'Section Subtitle', defaultValue: 'İhtiyaçlarınıza özel olarak tasarlanmış, sektör lideri Allplan ve iş ortağı ürünlerini keşfedin.' },
+    slides: {
+      type: 'list',
+      label: 'Product Slides',
+      defaultValue: [],
+      itemSchema: {
+        id: { type: 'text', label: 'Slide ID', defaultValue: 'product-1' },
+        category: { type: 'text', label: 'Category', defaultValue: 'Category' },
+        title: { type: 'text', label: 'Title', defaultValue: '' },
+        description: { type: 'textarea', label: 'Description', defaultValue: '' },
+        imageUrl: { type: 'image', label: 'Image URL', defaultValue: '' },
+        imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
+        iconName: { type: 'text', label: 'Icon Name (Lucide)', defaultValue: '' },
+        items: {
+          type: 'list',
+          label: 'Product Items',
+          defaultValue: [],
+          itemSchema: {
+            title: { type: 'text', label: 'Item Title', defaultValue: '' },
+            href: { type: 'text', label: 'Item Link', defaultValue: '#' },
+          },
+        },
+      },
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 4. CMS Workflow Section - Complex nested tabs → items structure
+  'cms-workflow-section': {
+    title: { type: 'text', label: 'Section Title', defaultValue: 'İş Akışı' },
+    subtitle: { type: 'textarea', label: 'Section Subtitle', defaultValue: 'Allplan ile proje yaşam döngüsünün her aşamasında verimli çalışın.' },
+    tabs: {
+      type: 'list',
+      label: 'Workflow Tabs',
+      defaultValue: [],
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: 'workflow-1' },
+        title: { type: 'text', label: 'Tab Title', defaultValue: 'Workflow 1' },
+        items: {
+          type: 'list',
+          label: 'Workflow Items',
+          defaultValue: [],
+          itemSchema: {
+            id: { type: 'text', label: 'Item ID', defaultValue: 'item-1' },
+            title: { type: 'text', label: 'Item Title', defaultValue: '' },
+            contentTitle: { type: 'text', label: 'Content Title', defaultValue: '' },
+            text: { type: 'textarea', label: 'Text Content', defaultValue: '' },
+            image: { type: 'image', label: 'Image URL', defaultValue: '' },
+            imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
+          },
+        },
+      },
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 5. CMS Parallax Spacer - Simple component with optional CTA
+  'cms-parallax-spacer': {
+    imageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/parallax/1920/800' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: 'parallax background' },
+    title: { type: 'text', label: 'Title', defaultValue: 'Section Title' },
+    subtitle: { type: 'textarea', label: 'Subtitle', defaultValue: 'Section subtitle' },
+    buttonText: { type: 'text', label: 'Button Text (Optional)', defaultValue: '' },
+    buttonLink: { type: 'text', label: 'Button Link (Optional)', defaultValue: '' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 6. CMS Certificate Verification - Simple CTA section
+  'cms-certificate-verification': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Instantly Verify Your Allplan Certificate' },
+    description: { type: 'textarea', label: 'Description', defaultValue: 'Quickly check the validity of your Allplan certificates in real-time.' },
+    ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Check Now' },
+    ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: 'https://sertifikasorgulama.aluplan.com.tr/' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 7. CMS Newsletter Section - With benefits list (string array)
+  'cms-newsletter-section': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Bültenimize Abone Olun' },
+    subtitle: { type: 'textarea', label: 'Subtitle', defaultValue: 'ALLPLAN güncellemelerini ilk öğrenen siz olun.' },
+    benefits: {
+      type: 'textarea',
+      label: 'Benefits (one per line)',
+      defaultValue: `En son sürüm duyuruları ve yenilikler
+Etkinliklere, eğitimlere ve webinarlara özel davetiyeler
+Sektör, şirket ve ürün haberleri`,
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // 8. CMS Why Aluplan - Two-column with items list
+  'cms-why-aluplan': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Neden Aluplan Digital?' },
+    content: { type: 'textarea', label: 'Content', defaultValue: 'Sektördeki 20 yılı aşkın tecrübemizle...' },
+    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/why-aluplan/800/600' },
+    imagePosition: { type: 'select', label: 'Image Position', options: ['left', 'right'], defaultValue: 'left' },
+    items: {
+      type: 'list',
+      label: 'Feature Items',
+      defaultValue: [],
+      itemSchema: {
+        title: { type: 'text', label: 'Item Title', defaultValue: '' },
+        description: { type: 'textarea', label: 'Item Description', defaultValue: '' },
+      },
+    },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // Simple migration blocks (already have simple structures)
+  'hero-with-image-and-text-overlay': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Welcome' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Discover our amazing platform' },
+    backgroundImageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/hero/1920/1080' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'hero-with-background-image': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Welcome' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Discover our amazing platform' },
+    backgroundImageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/hero-bg/1920/1080' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'content-section-with-title': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Section Title' },
+    content: { type: 'textarea', label: 'Content (HTML)', defaultValue: 'Section content goes here.' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'content-with-call-to-action': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Ready to Get Started?' },
+    content: { type: 'text', label: 'Content', defaultValue: 'Join thousands of satisfied customers today.' },
+    buttonText: { type: 'text', label: 'Button Text', defaultValue: 'Get Started' },
+    buttonUrl: { type: 'text', label: 'Button URL', defaultValue: '#' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'content-with-image-two-column': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Our Story' },
+    content: { type: 'textarea', label: 'Content (HTML)', defaultValue: 'Learn about our journey and what makes us unique.' },
+    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/two-col/800/600' },
+    imagePosition: { type: 'select', label: 'Image Position', options: ['left', 'right'], defaultValue: 'right' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'newsletter-signup-form': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Subscribe to Our Newsletter' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Get the latest updates delivered to your inbox.' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+};
+
 // All block configurations
 export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...navigationBlocksConfig,
@@ -2023,4 +2234,5 @@ export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...ratingBlocksConfig,
   ...progressBlocksConfig,
   ...homepageSectionsConfig,
+  ...migrationBlocksConfig, // ADD MIGRATION BLOCKS
 };

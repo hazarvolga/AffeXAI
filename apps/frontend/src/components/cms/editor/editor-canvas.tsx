@@ -27,6 +27,7 @@ import { statsBlocks } from '@/components/cms/blocks/stats-blocks';
 import { pricingBlocks } from '@/components/cms/blocks/pricing-blocks';
 import { ratingBlocks } from '@/components/cms/blocks/rating-blocks';
 import { progressBlocks } from '@/components/cms/blocks/progress-blocks';
+import { migrationBlocks } from '@/components/cms/blocks/migration-blocks';
 
 interface EditorComponent {
   id: string;
@@ -76,6 +77,7 @@ const allBlockArrays = [
   pricingBlocks,
   ratingBlocks,
   progressBlocks,
+  migrationBlocks,
 ];
 
 allBlockArrays.forEach((blockArray) => {
@@ -239,12 +241,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               <Lock className="h-3 w-3" />
             </div>
           )}
-          {/* Show indicator for reusable components */}
-          {component.props?.blockId && (
-            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded shadow-sm">
-              Reusable
-            </div>
-          )}
+          {/* Reusable badge removed - these are normal page components */}
         </div>
       );
     }

@@ -7,8 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { BlockPropertySchema } from '@/components/cms/blocks/block-configs';
+import { MediaPicker } from '@/components/cms/editor/media-picker';
+import { useToast } from '@/hooks/use-toast';
+import NextImage from 'next/image';
 
 interface DynamicFormGeneratorProps {
   schema: BlockPropertySchema;
@@ -30,6 +33,8 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
   values,
   onChange,
 }) => {
+  const { toast } = useToast();
+
   /**
    * Render a single form field based on property type
    */
@@ -41,6 +46,141 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
   ) => {
     const fieldKey = parentPath ? `${parentPath}.${key}` : key;
     const value = currentValue ?? config.defaultValue ?? '';
+
+    // Special handling for mediaId fields (e.g., imageMediaId, logoMediaId, mediaId)
+    if (key.toLowerCase().includes('mediaid')) {
+      // Determine corresponding URL field name
+      const urlFieldName = key.replace(/MediaId$/i, 'Url').replace(/mediaid$/i, 'url');
+
+      // For list items, we need to get the URL from the parent item
+      // Extract index from parentPath if exists (e.g., "items[0]" -> index 0)
+      let currentUrl = '';
+      if (parentPath.includes('[')) {
+        const match = parentPath.match(/\[(\d+)\]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          const listKey = parentPath.split('[')[0];
+          const items = values[listKey];
+          if (items && items[index]) {
+            currentUrl = items[index][urlFieldName] || '';
+          }
+        }
+      } else {
+        currentUrl = values[urlFieldName] || '';
+      }
+
+      return (
+        <div key={fieldKey} className="space-y-2">
+          <Label>{config.label}</Label>
+          <div className="border rounded-lg p-3 bg-gray-50">
+            <MediaPicker
+              value={value || undefined}
+              onChange={async (mediaId) => {
+                if (mediaId) {
+                  // Update mediaId
+                  onChange(key, mediaId);
+
+                  // Fetch and update corresponding URL field
+                  try {
+                    const response = await fetch(`/api/media/${mediaId}`);
+
+                    if (!response.ok) {
+                      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.url) {
+                      // For list items, we need to update the URL in the parent onChange
+                      if (parentPath.includes('[')) {
+                        const match = parentPath.match(/\[(\d+)\]/);
+                        if (match) {
+                          const index = parseInt(match[1]);
+                          const listKey = parentPath.split('[')[0];
+                          const items = [...(values[listKey] || [])];
+                          if (items[index]) {
+                            items[index] = { ...items[index], [urlFieldName]: data.url };
+                            onChange(listKey, items);
+                          }
+                        }
+                      } else {
+                        onChange(urlFieldName, data.url);
+                      }
+                    } else {
+                      throw new Error('Media URL not found in response');
+                    }
+                  } catch (err) {
+                    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+                    console.error('Error fetching media URL:', errorMessage, err);
+                    toast({
+                      title: 'Error',
+                      description: `Failed to load media URL: ${errorMessage}`,
+                      variant: 'destructive',
+                    });
+                  }
+                } else {
+                  // Clear both mediaId and URL
+                  onChange(key, null);
+                  if (parentPath.includes('[')) {
+                    const match = parentPath.match(/\[(\d+)\]/);
+                    if (match) {
+                      const index = parseInt(match[1]);
+                      const listKey = parentPath.split('[')[0];
+                      const items = [...(values[listKey] || [])];
+                      if (items[index]) {
+                        items[index] = { ...items[index], [urlFieldName]: '' };
+                        onChange(listKey, items);
+                      }
+                    }
+                  } else {
+                    onChange(urlFieldName, '');
+                  }
+                }
+              }}
+              placeholder={`Select ${config.label || 'media'}`}
+            />
+          </div>
+          {currentUrl && (
+            <div className="relative group">
+              <NextImage
+                src={currentUrl}
+                alt="Preview"
+                width={300}
+                height={128}
+                className="w-full h-32 object-contain rounded border bg-white"
+              />
+              <button
+                onClick={() => {
+                  onChange(key, null);
+                  if (parentPath.includes('[')) {
+                    const match = parentPath.match(/\[(\d+)\]/);
+                    if (match) {
+                      const index = parseInt(match[1]);
+                      const listKey = parentPath.split('[')[0];
+                      const items = [...(values[listKey] || [])];
+                      if (items[index]) {
+                        items[index] = { ...items[index], [urlFieldName]: '' };
+                        onChange(listKey, items);
+                      }
+                    }
+                  } else {
+                    onChange(urlFieldName, '');
+                  }
+                }}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+          {value && (
+            <div className="text-xs text-muted-foreground">
+              Media ID: {value}
+            </div>
+          )}
+        </div>
+      );
+    }
 
     switch (config.type) {
       case 'text':
@@ -163,23 +303,55 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
         return (
           <div key={fieldKey} className="space-y-2">
             <Label htmlFor={fieldKey}>{config.label}</Label>
-            <Input
-              id={fieldKey}
-              type="text"
-              value={value}
-              onChange={(e) => onChange(key, e.target.value)}
-              placeholder="https://example.com/image.jpg or /uploads/..."
-            />
-            <p className="text-xs text-muted-foreground">
-              📁 Media library integration coming soon
-            </p>
-            {value && (
-              <img
-                src={value}
-                alt={config.label}
-                className="mt-2 max-w-xs rounded border"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            <div className="border rounded-lg p-3 bg-gray-50">
+              <MediaPicker
+                value={undefined}
+                onChange={async (mediaId) => {
+                  if (mediaId) {
+                    try {
+                      const response = await fetch(`/api/media/${mediaId}`);
+                      if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                      }
+                      const data = await response.json();
+                      if (data.url) {
+                        onChange(key, data.url);
+                      } else {
+                        throw new Error('Media URL not found in response');
+                      }
+                    } catch (err) {
+                      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+                      console.error('Error fetching media URL:', errorMessage, err);
+                      toast({
+                        title: 'Error',
+                        description: `Failed to load media URL: ${errorMessage}`,
+                        variant: 'destructive',
+                      });
+                    }
+                  } else {
+                    onChange(key, '');
+                  }
+                }}
+                placeholder={`Select ${config.label || 'image'}`}
+                filterType="image"
               />
+            </div>
+            {value && (
+              <div className="relative group">
+                <NextImage
+                  src={value}
+                  alt={config.label || 'Image'}
+                  width={300}
+                  height={128}
+                  className="w-full h-32 object-contain rounded border bg-white"
+                />
+                <button
+                  onClick={() => onChange(key, '')}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
             )}
           </div>
         );

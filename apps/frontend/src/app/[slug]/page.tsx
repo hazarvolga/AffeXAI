@@ -4,15 +4,23 @@ import { CmsPageService } from '@/services/cms-page.service';
 import { PageRenderer } from '@/components/cms/page-renderer';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const page = await CmsPageService.getPageBySlug(params.slug);
+    const resolvedParams = await params;
+    const page = await CmsPageService.getPageBySlug(resolvedParams.slug);
+
+    if (!page) {
+      return {
+        title: 'Page Not Found',
+        description: 'The requested page could not be found.',
+      };
+    }
 
     return {
       title: page.metaTitle || page.title,
@@ -28,10 +36,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CmsPage({ params }: PageProps) {
   try {
-    const page = await CmsPageService.getPageBySlug(params.slug);
+    const resolvedParams = await params;
+    const page = await CmsPageService.getPageBySlug(resolvedParams.slug);
 
-    // Check if page is published
-    if (page.status !== 'published') {
+    // Check if page exists and is published
+    if (!page || page.status !== 'published') {
       notFound();
     }
 
@@ -48,8 +57,8 @@ export default async function CmsPage({ params }: PageProps) {
 
         {/* Page Content - Render CMS blocks */}
         <div className="container mx-auto px-4 py-12">
-          {page.content && page.content.components ? (
-            <PageRenderer components={page.content.components} />
+          {page.components || (page.content && page.content.components) ? (
+            <PageRenderer components={page.components || page.content.components} />
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <p>No content available for this page.</p>

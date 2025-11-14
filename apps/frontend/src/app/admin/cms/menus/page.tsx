@@ -294,6 +294,25 @@ const MenuItemDialog = ({
     return items.filter(i => i.id !== currentItemId && !childIds.has(i.id));
   };
   
+  // Flatten nested menu items to flat list (needed for buildHierarchicalParentList)
+  const flattenMenuItems = (items: CmsMenuItem[]): CmsMenuItem[] => {
+    const result: CmsMenuItem[] = [];
+
+    const flatten = (itemList: CmsMenuItem[]) => {
+      itemList.forEach(item => {
+        // Add the item itself
+        result.push(item);
+        // Recursively add children if they exist
+        if (item.children && Array.isArray(item.children) && item.children.length > 0) {
+          flatten(item.children);
+        }
+      });
+    };
+
+    flatten(items);
+    return result;
+  };
+
   // Build hierarchical parent list with indentation
   const buildHierarchicalParentList = (
     items: CmsMenuItem[],
@@ -323,7 +342,9 @@ const MenuItemDialog = ({
     return result;
   };
 
-  const hierarchicalParents = buildHierarchicalParentList(menuItems, item?.id);
+  // Flatten menuItems first (backend sends nested structure)
+  const flatMenuItems = flattenMenuItems(menuItems);
+  const hierarchicalParents = buildHierarchicalParentList(flatMenuItems, item?.id);
 
   const handleSave = () => {
     onSave({

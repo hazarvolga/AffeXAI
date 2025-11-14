@@ -679,45 +679,68 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
 
   // Save page
   const handleSavePage = useCallback(async () => {
-    if (!pageId) {
-      toast({
-        title: "Error",
-        description: "No page ID provided",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    let currentPageId = pageId;
+
     try {
-      // First, verify that the page exists
-      try {
-        const page = await cmsService.getPage(pageId);
-        console.log('Page exists:', page);
-      } catch (error) {
-        console.error('Page not found:', error);
+      // If no pageId, create a new page first
+      if (!currentPageId) {
+        console.log('Creating new page...');
+        const newPage = await cmsService.createPage({
+          title: pageTitle || 'Untitled Page',
+          slug: pageSlug || `page-${Date.now()}`,
+          description: pageDescription,
+          status: 'draft',
+          layoutOptions: {
+            showHeader,
+            showFooter,
+          },
+          categoryId: selectedCategoryId || undefined,
+        } as any);
+
+        currentPageId = newPage.id;
+        console.log('New page created with ID:', currentPageId);
+
+        // Update URL with new pageId
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('pageId', currentPageId);
+        newUrl.searchParams.delete('template'); // Remove template param
+        window.history.pushState({}, '', newUrl);
+
         toast({
-          title: "Error",
-          description: "Page not found. Please make sure you're editing a valid page.",
-          variant: "destructive",
+          title: "Page Created",
+          description: "New page created successfully. Saving components...",
         });
-        return;
+      } else {
+        // Page exists, verify it
+        try {
+          const page = await cmsService.getPage(currentPageId);
+          console.log('Page exists:', page);
+        } catch (error) {
+          console.error('Page not found:', error);
+          toast({
+            title: "Error",
+            description: "Page not found. Please make sure you're editing a valid page.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Update page metadata with layout options and category
+        await cmsService.updatePage(currentPageId, {
+          title: pageTitle,
+          slug: pageSlug,
+          description: pageDescription,
+          layoutOptions: {
+            showHeader,
+            showFooter,
+          },
+          categoryId: selectedCategoryId || undefined,
+        } as any);
       }
-      
-      // Update page metadata with layout options and category
-      await cmsService.updatePage(pageId, {
-        title: pageTitle,
-        slug: pageSlug,
-        description: pageDescription,
-        layoutOptions: {
-          showHeader,
-          showFooter,
-        },
-        categoryId: selectedCategoryId || undefined,
-      } as any);
       
       // Save components to the backend
       // First, get existing components for this page
-      const existingComponents = await cmsService.getComponents(pageId);
+      const existingComponents = await cmsService.getComponents(currentPageId);
       console.log('Existing components:', existingComponents);
       
       // Delete components that no longer exist
@@ -740,10 +763,10 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
         const isPrebuildBlock = !['text', 'button', 'image', 'container', 'card', 'grid'].includes(component.type);
         
         const componentData: CreateComponentDto = {
-          pageId,
+          pageId: currentPageId,
           parentId: null,
           type: isPrebuildBlock ? 'block' : component.type as any,
-          props: isPrebuildBlock 
+          props: isPrebuildBlock
             ? { ...component.props, blockId: component.type } // Store original block ID in props
             : component.props,
           orderIndex: component.orderIndex || 0,
@@ -787,7 +810,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
         try {
           const menu = await cmsService.getMenu(menuId);
           const menuItems = menu.items || [];
-          const existingItem = menuItems.find(item => item.pageId === pageId);
+          const existingItem = menuItems.find(item => item.pageId === currentPageId);
 
           if (!existingItem) {
             // Calculate the correct order index based on position settings
@@ -802,7 +825,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
             // Add page to menu with full hierarchical placement support
             await cmsService.addPageToMenu(
               menuId,
-              pageId,
+              currentPageId,
               pageTitle,
               orderIndex,
               parentId || undefined
@@ -1422,8 +1445,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
                     </>
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={handleSavePage}
                   className="flex items-center gap-2"
@@ -1431,7 +1454,39 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
                   <Save className="h-4 w-4" />
                   Save Draft
                 </Button>
-                
+
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={async () => {
+                    if (!pageId) {
+                      toast({
+                        title: "Error",
+                        description: "Please save the page first before publishing",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    try {
+                      await cmsService.publishPage(pageId);
+                      toast({
+                        title: "Success",
+                        description: "Page published successfully!",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to publish page",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Publish
+                </Button>
+
                 {/* Preview Mode Toggle */}
                 <div className="flex items-center gap-1 border rounded-md p-1">
                   <Button 

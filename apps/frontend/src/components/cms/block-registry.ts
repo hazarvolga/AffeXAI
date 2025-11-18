@@ -24,7 +24,13 @@ import {
 } from './blocks/migration-blocks';
 
 // Import special blocks
-import { SpecialFeatureTrio } from './blocks/special-blocks';
+import {
+  SpecialFeatureTrio,
+  SpecialFeatureCardSingle,
+  SpecialGridContainer,
+  SpecialProductGrid,
+  SpecialResourceTabs
+} from './blocks/special-blocks';
 
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
@@ -51,6 +57,10 @@ export const blockRegistry = {
   'newsletter-signup-form': NewsletterSignupForm,
   // Special blocks
   'special-feature-trio': SpecialFeatureTrio,
+  'special-feature-card-single': SpecialFeatureCardSingle,
+  'special-grid-container': SpecialGridContainer,
+  'special-product-grid': SpecialProductGrid,
+  'special-resource-tabs': SpecialResourceTabs,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

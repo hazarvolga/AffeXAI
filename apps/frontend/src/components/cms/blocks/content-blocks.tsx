@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Content Block 1: Single Fullwidth Section
-export const ContentSingleFullwidth: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentSingleFullwidth: React.FC<any> = (props) => {
   const title = props?.title || "Important Announcement";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -52,7 +52,7 @@ export const ContentSingleFullwidth: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Content Block 2: Two-Column Section
-export const ContentTwoColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentTwoColumn: React.FC<any> = (props) => {
   const title = props?.title || "Our Services";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -116,7 +116,7 @@ export const ContentTwoColumn: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 3: Three-Column Grid Section
-export const ContentThreeColumnGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentThreeColumnGrid: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const title = props?.title || "Our Features";
   const titleVariant = props?.titleVariant || "heading2";
@@ -198,7 +198,7 @@ export const ContentThreeColumnGrid: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Content Block 4: Large + Small Column Section
-export const ContentLargeSmallColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentLargeSmallColumn: React.FC<any> = (props) => {
   const title = props?.title || "Our Story";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -270,7 +270,7 @@ export const ContentLargeSmallColumn: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Content Block 5: Small + Large Column Section
-export const ContentSmallLargeColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentSmallLargeColumn: React.FC<any> = (props) => {
   const title = props?.title || "Case Study";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -342,7 +342,7 @@ export const ContentSmallLargeColumn: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Content Block 6: Asymmetric Section with Background Accent
-export const ContentAsymmetricAccent: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentAsymmetricAccent: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const containerPadding = props?.containerPadding || "xl";
   const containerBackground = props?.containerBackground || "none";

@@ -217,6 +217,8 @@ const MenuItemDialog = ({
     label: string;
     type: MenuItemType;
     url?: string;
+    pageId?: string;
+    categoryId?: string;
     parentId?: string | null;
     target?: '_blank' | '_self';
     icon?: string;
@@ -371,7 +373,9 @@ const MenuItemDialog = ({
     onSave({
       label,
       type,
-      url: type === MenuItemType.CUSTOM ? url : undefined,
+      url: url || undefined, // Always send URL for all types (PAGE, CATEGORY, CUSTOM)
+      pageId: type === MenuItemType.PAGE ? (cmsPages?.find(p => p.slug === url?.replace('/', ''))?.id || undefined) : undefined,
+      categoryId: type === MenuItemType.CATEGORY ? categoryId || undefined : undefined,
       parentId: parentId || null,
       target,
       icon,
@@ -705,6 +709,8 @@ export default function MenuManagementPage() {
     label: string;
     type: MenuItemType;
     url?: string;
+    pageId?: string;
+    categoryId?: string;
     parentId?: string | null;
     target?: '_blank' | '_self';
     icon?: string;
@@ -746,6 +752,8 @@ export default function MenuManagementPage() {
     label: string;
     type: MenuItemType;
     url?: string;
+    pageId?: string;
+    categoryId?: string;
     parentId?: string | null;
     target?: '_blank' | '_self';
     icon?: string;
@@ -795,12 +803,23 @@ export default function MenuManagementPage() {
         title: 'Başarılı',
         description: 'Menü öğesi başarıyla silindi.',
       });
-    } catch (error) {
-      toast({
-        title: 'Hata',
-        description: 'Menü öğesi silinirken bir hata oluştu.',
-        variant: 'destructive',
-      });
+    } catch (error: any) {
+      // Better error handling for items with children
+      const errorMessage = error?.response?.data?.message || error?.message || 'Menü öğesi silinirken bir hata oluştu.';
+
+      if (errorMessage.includes('child items')) {
+        toast({
+          title: 'Silinemez',
+          description: 'Bu menü öğesinin alt öğeleri var. Önce alt öğeleri silin veya başka bir üst öğeye taşıyın.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Hata',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setDeleteItemId(null);
     }

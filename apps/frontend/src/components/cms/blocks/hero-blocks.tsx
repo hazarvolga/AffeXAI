@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Hero Block 1: Centered Hero with Background Image
-export const HeroCenteredBgImage: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroCenteredBgImage: React.FC<any> = (props) => {
   const title = props?.title || "Welcome to Our Platform";
   const titleVariant = props?.titleVariant || "heading1";
   const titleAlign = props?.titleAlign || "center";
@@ -68,7 +68,7 @@ export const HeroCenteredBgImage: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Hero Block 2: Split Hero with Image on Right
-export const HeroSplitImageRight: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroSplitImageRight: React.FC<any> = (props) => {
   const title = props?.title || "Transform Your Business";
   const titleVariant = props?.titleVariant || "heading1";
   const titleAlign = props?.titleAlign || "left";
@@ -141,7 +141,7 @@ export const HeroSplitImageRight: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Hero Block 3: Gradient Hero with Floating CTA
-export const HeroGradientFloatingCta: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroGradientFloatingCta: React.FC<any> = (props) => {
   const title = props?.title || "Innovation Meets Excellence";
   const titleVariant = props?.titleVariant || "heading1";
   const titleAlign = props?.titleAlign || "center";
@@ -199,7 +199,7 @@ export const HeroGradientFloatingCta: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Hero Block 4: Video Hero Background
-export const HeroVideoBackground: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroVideoBackground: React.FC<any> = (props) => {
   const title = props?.title || "Experience the Future";
   const titleVariant = props?.titleVariant || "heading1";
   const titleAlign = props?.titleAlign || "center";
@@ -259,7 +259,7 @@ export const HeroVideoBackground: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Hero Block 5: Fullscreen Hero with Sticky CTA
-export const HeroFullscreenStickyCta: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroFullscreenStickyCta: React.FC<any> = (props) => {
   const title = props?.title || "Make Your Mark";
   const titleVariant = props?.titleVariant || "heading1";
   const titleAlign = props?.titleAlign || "center";
@@ -316,7 +316,7 @@ export const HeroFullscreenStickyCta: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Hero Block 6: Carousel Hero with Multiple Slides
-export const HeroCarouselSlides: React.FC<{ props?: any }> = ({ props }) => {
+export const HeroCarouselSlides: React.FC<any> = (props) => {
   const title = props?.title || "Featured Solutions";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";

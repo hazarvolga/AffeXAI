@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Element Block 1: Spacer Element
-export const ElementSpacer: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementSpacer: React.FC<any> = (props) => {
   const height = props?.height || "py-12";
 
   return (
@@ -25,7 +25,7 @@ export const ElementSpacer: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 2: Divider Element
-export const ElementDivider: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementDivider: React.FC<any> = (props) => {
   return (
     <ContainerComponent 
       id="element-divider-container"
@@ -38,7 +38,7 @@ export const ElementDivider: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 3: Title with Subtitle
-export const ElementTitleSubtitle: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementTitleSubtitle: React.FC<any> = (props) => {
   const title = props?.title || "Section Title";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -81,7 +81,7 @@ export const ElementTitleSubtitle: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 4: Title with Button
-export const ElementTitleButton: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementTitleButton: React.FC<any> = (props) => {
   const title = props?.title || "Featured Section";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -121,7 +121,7 @@ export const ElementTitleButton: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 5: Quote Block
-export const ElementQuoteBlock: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementQuoteBlock: React.FC<any> = (props) => {
   const quote = props?.quote || "\"The only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle.\"";
   const quoteVariant = props?.quoteVariant || "heading2";
   const quoteAlign = props?.quoteAlign || "center";
@@ -164,7 +164,7 @@ export const ElementQuoteBlock: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 6: Media Element (Image)
-export const ElementMediaImage: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementMediaImage: React.FC<any> = (props) => {
   const imageUrl = props?.imageUrl || "/placeholder-image.jpg";
   const caption = props?.caption || "Image caption or description";
   const captionVariant = props?.captionVariant || "body";
@@ -199,7 +199,7 @@ export const ElementMediaImage: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 7: Button Group (1–3 Buttons)
-export const ElementButtonGroup: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementButtonGroup: React.FC<any> = (props) => {
   const buttons = props?.buttons || [
     {
       id: '1',
@@ -245,7 +245,7 @@ export const ElementButtonGroup: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Element Block 8: Table / Link List Element
-export const ElementTableList: React.FC<{ props?: any }> = ({ props }) => {
+export const ElementTableList: React.FC<any> = (props) => {
   const title = props?.title || "Resource Links";
   const titleVariant = props?.titleVariant || "heading3";
   const titleAlign = props?.titleAlign || "left";

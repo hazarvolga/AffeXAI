@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Blog/RSS Block 1: Extended Blog Feature
-export const BlogExtendedFeature: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogExtendedFeature: React.FC<any> = (props) => {
   const category = props?.category || "Technology";
   const categoryVariant = props?.categoryVariant || "body";
   const categoryAlign = props?.categoryAlign || "left";
@@ -127,7 +127,7 @@ export const BlogExtendedFeature: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Blog/RSS Block 2: Basic Blog List
-export const BlogBasicList: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogBasicList: React.FC<any> = (props) => {
   const title = props?.title || "Latest Articles";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -222,7 +222,7 @@ export const BlogBasicList: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Blog/RSS Block 3: Double Post Highlight
-export const BlogDoublePostHighlight: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogDoublePostHighlight: React.FC<any> = (props) => {
   const title = props?.title || "Featured Stories";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -309,7 +309,7 @@ export const BlogDoublePostHighlight: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Blog/RSS Block 4: Mini Blog Highlight
-export const BlogMiniHighlight: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogMiniHighlight: React.FC<any> = (props) => {
   const title = props?.title || "Latest from the Blog";
   const titleVariant = props?.titleVariant || "heading3";
   const titleAlign = props?.titleAlign || "left";
@@ -393,7 +393,7 @@ export const BlogMiniHighlight: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Blog/RSS Block 5: Author Bio Variant 1 (Profile Left)
-export const BlogAuthorBioLeft: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogAuthorBioLeft: React.FC<any> = (props) => {
   const authorName = props?.authorName || "Jane Doe";
   const authorNameVariant = props?.authorNameVariant || "heading2";
   const authorNameAlign = props?.authorNameAlign || "left";
@@ -500,7 +500,7 @@ export const BlogAuthorBioLeft: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Blog/RSS Block 6: Author Bio Variant 2 (Centered)
-export const BlogAuthorBioCentered: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogAuthorBioCentered: React.FC<any> = (props) => {
   const authorName = props?.authorName || "Jane Doe";
   const authorNameVariant = props?.authorNameVariant || "heading2";
   const authorNameAlign = props?.authorNameAlign || "center";
@@ -599,7 +599,7 @@ export const BlogAuthorBioCentered: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Blog/RSS Block 7: RSS Featured Article
-export const BlogRssFeaturedArticle: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogRssFeaturedArticle: React.FC<any> = (props) => {
   const source = props?.source || "RSS FEED";
   const sourceVariant = props?.sourceVariant || "body";
   const sourceAlign = props?.sourceAlign || "left";
@@ -705,7 +705,7 @@ export const BlogRssFeaturedArticle: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Blog/RSS Block 8: RSS List
-export const BlogRssList: React.FC<{ props?: any }> = ({ props }) => {
+export const BlogRssList: React.FC<any> = (props) => {
   const source = props?.source || "RSS FEED";
   const sourceVariant = props?.sourceVariant || "body";
   const sourceAlign = props?.sourceAlign || "left";

@@ -305,6 +305,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
           if (page.layoutOptions) {
             setShowHeader(page.layoutOptions.showHeader !== false); // default true
             setShowFooter(page.layoutOptions.showFooter !== false); // default true
+            setIsFullWidth(page.layoutOptions.isFullWidth === true); // default false (boxed)
           }
 
           // Load category if exists
@@ -693,6 +694,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
           layoutOptions: {
             showHeader,
             showFooter,
+            isFullWidth,
           },
           categoryId: selectedCategoryId || undefined,
         } as any);
@@ -733,6 +735,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
           layoutOptions: {
             showHeader,
             showFooter,
+            isFullWidth,
           },
           categoryId: selectedCategoryId || undefined,
         } as any);

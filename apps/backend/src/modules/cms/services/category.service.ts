@@ -8,6 +8,7 @@ import {
   CmsCategoryTree,
   ReorderCmsCategoriesDto,
 } from '@affexai/shared-types';
+import { slugify } from '../../../common/utils/slugify.util';
 
 @Injectable()
 export class CategoryService {
@@ -18,14 +19,10 @@ export class CategoryService {
 
   /**
    * Generate slug from category name
+   * Uses centralized slugify utility with Turkish character support
    */
   private generateSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+    return slugify(name);
   }
 
   /**
@@ -320,5 +317,31 @@ export class CategoryService {
       ...category,
       pageCount,
     };
+  }
+
+  /**
+   * Batch update categories (for drag & drop operations)
+   * Similar to menu batch update - professional UX with draft state
+   */
+  async batchUpdateCategories(
+    updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ): Promise<void> {
+    // Validate all categories exist
+    const categoryIds = updates.map((u) => u.id);
+    const existingCategories = await this.categoryRepository.findByIds(categoryIds);
+
+    if (existingCategories.length !== categoryIds.length) {
+      throw new BadRequestException('Some categories not found');
+    }
+
+    // Perform batch update in transaction
+    await this.categoryRepository.manager.transaction(async (manager) => {
+      for (const update of updates) {
+        await manager.update(Category, update.id, {
+          parentId: update.parentId,
+          orderIndex: update.orderIndex,
+        });
+      }
+    });
   }
 }

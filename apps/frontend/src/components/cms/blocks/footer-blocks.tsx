@@ -8,7 +8,7 @@ import { GridComponent } from '@/components/cms/grid-component';
 import { CardComponent } from '@/components/cms/card-component';
 
 // Footer Block 1: Basic Footer
-export const FooterBasic: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterBasic: React.FC<any> = (props) => {
   const companyName = props?.companyName || "Company Name";
   const companyDescription = props?.companyDescription || "Building amazing products for amazing people.";
   const links = Array.isArray(props?.links) ? props.links : [
@@ -143,7 +143,7 @@ export const FooterBasic: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Footer Block 2: Multi-Column Footer
-export const FooterMultiColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterMultiColumn: React.FC<any> = (props) => {
   const companyName = props?.companyName || "Company Name";
   const companyNameVariant = props?.companyNameVariant || "heading3";
   const companyNameAlign = props?.companyNameAlign || "left";
@@ -318,7 +318,7 @@ export const FooterMultiColumn: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Footer Block 3: Newsletter Signup Footer
-export const FooterNewsletterSignup: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterNewsletterSignup: React.FC<any> = (props) => {
   const newsletterTitle = props?.newsletterTitle || "Subscribe to our newsletter";
   const newsletterTitleVariant = props?.newsletterTitleVariant || "heading3";
   const newsletterTitleAlign = props?.newsletterTitleAlign || "left";
@@ -452,7 +452,7 @@ export const FooterNewsletterSignup: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Footer Block 4: Social-Heavy Footer
-export const FooterSocialHeavy: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterSocialHeavy: React.FC<any> = (props) => {
   const companyName = props?.companyName || "Company Name";
   const companyNameVariant = props?.companyNameVariant || "heading3";
   const companyNameAlign = props?.companyNameAlign || "left";
@@ -593,7 +593,7 @@ export const FooterSocialHeavy: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Footer Block 5: Compact Centered Footer
-export const FooterCompactCentered: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterCompactCentered: React.FC<any> = (props) => {
   const companyName = props?.companyName || "Company Name";
   const companyNameVariant = props?.companyNameVariant || "heading3";
   const companyNameAlign = props?.companyNameAlign || "center";
@@ -662,7 +662,7 @@ export const FooterCompactCentered: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Footer Block 6: Extended Footer with CTA
-export const FooterExtendedCta: React.FC<{ props?: any }> = ({ props }) => {
+export const FooterExtendedCta: React.FC<any> = (props) => {
   const ctaTitle = props?.ctaTitle || "Ready to get started?";
   const ctaTitleVariant = props?.ctaTitleVariant || "heading2";
   const ctaTitleAlign = props?.ctaTitleAlign || "center";

@@ -1075,19 +1075,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       );
     }
 
-    // If this is a reusable component (has blockId in props), style properties
-    // are also handled by DynamicFormGenerator in Content tab
-    if (componentProps.blockId) {
-      return (
-        <div className="text-center text-muted-foreground py-8">
-          <p>Style properties are handled in the Content tab</p>
-          <p className="text-sm mt-2">Use the Content tab to edit all properties</p>
-        </div>
-      );
-    }
-
-    // Filter style properties from block configuration (not just from localProps)
-    const stylePropertyKeys = Object.keys(blockConfig).filter(key => 
+    // Filter style properties from block configuration
+    // For reusable components (blockId exists), we still show style properties here
+    // instead of relegating them to Content tab for better UX
+    const stylePropertyKeys = Object.keys(blockConfig).filter(key =>
       isStyleProperty(key) && key !== 'className'
     );
 

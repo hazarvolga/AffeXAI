@@ -82,4 +82,13 @@ export class CategoryController {
     await this.categoryService.reorder(dto);
     return { message: 'Categories reordered successfully' };
   }
+
+  @Post('batch-update')
+  @HttpCode(HttpStatus.OK)
+  async batchUpdate(
+    @Body() updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ) {
+    await this.categoryService.batchUpdateCategories(updates);
+    return { message: 'Categories updated successfully' };
+  }
 }

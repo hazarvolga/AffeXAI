@@ -46,7 +46,7 @@ const LogoComponent: React.FC<{ props: any; idPrefix: string }> = ({ props, idPr
 };
 
 // Navigation Block 1: Minimal Navigation with Logo Left
-export const NavigationMinimalLogoLeft: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationMinimalLogoLeft: React.FC<any> = (props) => {
   const navItems = props?.navItems || [
     {
       id: '1',
@@ -100,7 +100,7 @@ export const NavigationMinimalLogoLeft: React.FC<{ props?: any }> = ({ props }) 
 };
 
 // Navigation Block 2: Centered Navigation with Logo in Middle
-export const NavigationCenteredLogo: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationCenteredLogo: React.FC<any> = (props) => {
   const leftNavItems = props?.leftNavItems || [
     {
       id: '1',
@@ -175,7 +175,7 @@ export const NavigationCenteredLogo: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Navigation Block 3: Navigation with Logo + CTA Button
-export const NavigationLogoCta: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationLogoCta: React.FC<any> = (props) => {
   const navItems = props?.navItems || [
     {
       id: '1',
@@ -226,7 +226,7 @@ export const NavigationLogoCta: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Navigation Block 4: Navigation with Social Links
-export const NavigationSocialLinks: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationSocialLinks: React.FC<any> = (props) => {
   
   const navItems = props?.navItems || [
     {
@@ -316,7 +316,7 @@ export const NavigationSocialLinks: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Navigation Block 5: Sticky Navigation with Transparent Background
-export const NavigationStickyTransparent: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationStickyTransparent: React.FC<any> = (props) => {
   
   const navItems = props?.navItems || [
     {
@@ -372,7 +372,7 @@ export const NavigationStickyTransparent: React.FC<{ props?: any }> = ({ props }
 };
 
 // Navigation Block 6: Split Navigation (Logo Center, Nav Left & Right)
-export const NavigationSplit: React.FC<{ props?: any }> = ({ props }) => {
+export const NavigationSplit: React.FC<any> = (props) => {
   
   const leftNavItems = props?.leftNavItems || [
     {

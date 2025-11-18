@@ -23,8 +23,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { SortableTreeWrapper } from '@/components/common/sortable-tree';
 import { cmsCategoryService } from '@/lib/cms/category-service';
-import { Edit, Plus, Trash2, ChevronRight, ChevronDown, Folder, FolderOpen, GripVertical, FolderTree } from 'lucide-react';
+import { Edit, Plus, Trash2, Folder, FolderOpen, GripVertical, FolderTree, Save, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { CmsCategory, CmsCategoryTree, CreateCmsCategoryDto, UpdateCmsCategoryDto } from '@affexai/shared-types';
 
@@ -36,21 +37,30 @@ interface CategoryFormData {
   isActive: boolean;
 }
 
+// Extended tree node for dnd-kit
+interface CategoryTreeNode extends CmsCategoryTree {
+  children: CategoryTreeNode[];
+}
+
 const CmsCategoriesPage = () => {
+  // Original backend data
   const [categoryTree, setCategoryTree] = useState<CmsCategoryTree[]>([]);
   const [allCategories, setAllCategories] = useState<CmsCategory[]>([]);
+
+  // Draft/Published system state
+  const [draftCategories, setDraftCategories] = useState<CategoryTreeNode[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // UI state
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CmsCategory | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [draggedCategoryId, setDraggedCategoryId] = useState<string | null>(null);
-  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
-  
+  const [isFormSaving, setIsFormSaving] = useState(false);
+
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     slug: '',
@@ -65,6 +75,15 @@ const CmsCategoriesPage = () => {
     fetchCategories();
   }, []);
 
+  // Initialize draft when categories load
+  useEffect(() => {
+    if (categoryTree.length > 0) {
+      // Backend already returns tree structure with children, just cast to CategoryTreeNode
+      setDraftCategories(categoryTree as CategoryTreeNode[]);
+      setHasUnsavedChanges(false);
+    }
+  }, [categoryTree]);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -74,19 +93,6 @@ const CmsCategoriesPage = () => {
       ]);
       setCategoryTree(tree);
       setAllCategories(flat);
-      
-      // Auto-expand all categories on initial load
-      const allIds = new Set<string>();
-      const collectIds = (items: CmsCategoryTree[]) => {
-        items.forEach((item) => {
-          allIds.add(item.id);
-          if (item.children?.length > 0) {
-            collectIds(item.children);
-          }
-        });
-      };
-      collectIds(tree);
-      setExpandedCategories(allIds);
     } catch (error: any) {
       console.error('Error fetching categories:', error);
       toast({
@@ -97,6 +103,74 @@ const CmsCategoriesPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Note: convertToNestedTree removed - backend already returns tree structure
+
+  // Convert tree to flat updates for batch API
+  const convertToFlatUpdates = (tree: CategoryTreeNode[]): Array<{ id: string; parentId: string | null; orderIndex: number }> => {
+    const result: Array<{ id: string; parentId: string | null; orderIndex: number }> = [];
+
+    const traverse = (nodes: CategoryTreeNode[], parentId: string | null) => {
+      nodes.forEach((node, index) => {
+        result.push({
+          id: node.id,
+          parentId: parentId,
+          orderIndex: index,
+        });
+
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, node.id);
+        }
+      });
+    };
+
+    traverse(tree, null);
+    return result;
+  };
+
+  // Handle tree changes (drag & drop)
+  const handleTreeChange = (newTreeNodes: CategoryTreeNode[]) => {
+    setDraftCategories(newTreeNodes);
+    setHasUnsavedChanges(true);
+  };
+
+  // Save changes (batch update)
+  const handleSaveChanges = async () => {
+    try {
+      setIsSaving(true);
+
+      const updates = convertToFlatUpdates(draftCategories);
+
+      await cmsCategoryService.batchUpdateCategories(updates);
+
+      toast({
+        title: 'Başarılı',
+        description: 'Kategori sıralaması güncellendi',
+      });
+
+      await fetchCategories();
+      setHasUnsavedChanges(false);
+    } catch (error: any) {
+      console.error('Error saving changes:', error);
+      toast({
+        title: 'Hata',
+        description: error.response?.data?.error?.message || 'Değişiklikler kaydedilirken bir hata oluştu',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Cancel changes (revert to original)
+  const handleCancelChanges = () => {
+    setDraftCategories(categoryTree as CategoryTreeNode[]);
+    setHasUnsavedChanges(false);
+    toast({
+      title: 'İptal Edildi',
+      description: 'Değişiklikler geri alındı',
+    });
   };
 
   const handleCreateCategory = () => {
@@ -142,11 +216,22 @@ const CmsCategoriesPage = () => {
       setCategoryToDelete(null);
     } catch (error: any) {
       console.error('Error deleting category:', error);
-      toast({
-        title: 'Hata',
-        description: error.response?.data?.error?.message || 'Kategori silinirken bir hata oluştu',
-        variant: 'destructive',
-      });
+
+      const errorMessage = error?.response?.data?.message || error?.message || 'Kategori silinirken bir hata oluştu';
+
+      if (errorMessage.includes('child categories')) {
+        toast({
+          title: 'Silinemez',
+          description: 'Bu kategorinin alt kategorileri var. Önce alt kategorileri silin veya başka bir üst kategoriye taşıyın.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Hata',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -156,7 +241,7 @@ const CmsCategoriesPage = () => {
     e.preventDefault();
 
     try {
-      setIsSaving(true);
+      setIsFormSaving(true);
 
       const payload = {
         name: formData.name,
@@ -190,26 +275,14 @@ const CmsCategoriesPage = () => {
         variant: 'destructive',
       });
     } finally {
-      setIsSaving(false);
+      setIsFormSaving(false);
     }
   };
 
-  const toggleExpand = (categoryId: string) => {
-    setExpandedCategories((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(categoryId)) {
-        newSet.delete(categoryId);
-      } else {
-        newSet.add(categoryId);
-      }
-      return newSet;
-    });
-  };
-
   // Count total categories in tree (including children)
-  const countCategoriesInTree = (categories: CmsCategoryTree[]): number => {
+  const countCategoriesInTree = (categories: CategoryTreeNode[]): number => {
     let count = 0;
-    const traverse = (items: CmsCategoryTree[]) => {
+    const traverse = (items: CategoryTreeNode[]) => {
       items.forEach((item) => {
         count++;
         if (item.children && item.children.length > 0) {
@@ -221,246 +294,13 @@ const CmsCategoriesPage = () => {
     return count;
   };
 
-  // Check if dropping would create circular reference
-  const checkCircularReference = (nodeId: string, targetId: string): boolean => {
-    if (nodeId === targetId) return true;
-
-    const findNode = (categories: CmsCategoryTree[], id: string): CmsCategoryTree | null => {
-      for (const cat of categories) {
-        if (cat.id === id) return cat;
-        if (cat.children) {
-          const found = findNode(cat.children, id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const isDescendant = (parent: CmsCategoryTree, childId: string): boolean => {
-      if (!parent.children) return false;
-      for (const child of parent.children) {
-        if (child.id === childId) return true;
-        if (isDescendant(child, childId)) return true;
-      }
-      return false;
-    };
-
-    const targetNode = findNode(categoryTree, targetId);
-    if (!targetNode) return false;
-
-    return isDescendant(targetNode, nodeId);
-  };
-
-  // Handle drag and drop
-  const handleDragStart = (e: React.DragEvent, categoryId: string) => {
-    setDraggedCategoryId(categoryId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent, targetCategoryId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!draggedCategoryId || draggedCategoryId === targetCategoryId) return;
-    if (checkCircularReference(draggedCategoryId, targetCategoryId)) return;
-
-    setDropTargetId(targetCategoryId);
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDropTargetId(null);
-  };
-
-  const handleDrop = async (e: React.DragEvent, targetCategoryId: string | null) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!draggedCategoryId) return;
-    if (draggedCategoryId === targetCategoryId) return;
-    if (targetCategoryId && checkCircularReference(draggedCategoryId, targetCategoryId)) return;
-
-    try {
-      // Update the category's parent
-      const draggedCategory = allCategories.find((c) => c.id === draggedCategoryId);
-      if (!draggedCategory) return;
-
-      await cmsCategoryService.updateCategory(draggedCategoryId, {
-        ...draggedCategory,
-        parentId: targetCategoryId,
-      });
-
-      // Reload categories
-      await fetchCategories();
-      
-      toast({
-        title: 'Başarılı',
-        description: 'Kategori taşındı',
-      });
-    } catch (error) {
-      console.error('Error reordering category:', error);
-      toast({
-        title: 'Hata',
-        description: 'Kategori sıralaması güncellenirken bir hata oluştu',
-        variant: 'destructive',
-      });
-    } finally {
-      setDraggedCategoryId(null);
-      setDropTargetId(null);
-    }
-  };
-
-  const handleDropOnRoot = async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!draggedCategoryId) return;
-
-    try {
-      const draggedCategory = allCategories.find((c) => c.id === draggedCategoryId);
-      if (!draggedCategory) return;
-
-      await cmsCategoryService.updateCategory(draggedCategoryId, {
-        ...draggedCategory,
-        parentId: null,
-      });
-
-      await fetchCategories();
-      
-      toast({
-        title: 'Başarılı',
-        description: 'Kategori ana kategoriye taşındı',
-      });
-    } catch (error) {
-      console.error('Error moving to root:', error);
-      toast({
-        title: 'Hata',
-        description: 'Kategori taşınırken bir hata oluştu',
-        variant: 'destructive',
-      });
-    } finally {
-      setDraggedCategoryId(null);
-      setDropTargetId(null);
-    }
-  };
-
-  const renderCategoryTree = (items: CmsCategoryTree[], level: number = 0) => {
-    return items.map((item) => {
-      const hasChildren = item.children && item.children.length > 0;
-      const isExpanded = expandedCategories.has(item.id);
-      const paddingLeft = level * 24;
-      const isDragging = draggedCategoryId === item.id;
-      const isDropTarget = dropTargetId === item.id;
-      const canDrop = draggedCategoryId && !checkCircularReference(draggedCategoryId, item.id);
-
-      return (
-        <div key={item.id}>
-          <div
-            className={`flex items-center justify-between p-3 hover:bg-gray-50 border-b group transition-all ${
-              isDragging ? 'opacity-50' : ''
-            } ${isDropTarget && canDrop ? 'ring-2 ring-primary ring-dashed bg-blue-50' : ''}`}
-            style={{ paddingLeft: `${paddingLeft + 12}px` }}
-            draggable
-            onDragStart={(e) => handleDragStart(e, item.id)}
-            onDragOver={(e) => {
-              if (canDrop) {
-                handleDragOver(e, item.id);
-              }
-            }}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => {
-              if (canDrop) {
-                handleDrop(e, item.id);
-              }
-            }}
-          >
-            <div className="flex items-center gap-2 flex-1">
-              <div
-                className={`${isDragging ? 'cursor-grabbing' : 'cursor-grab'} p-1 hover:bg-gray-200 rounded`}
-              >
-                <GripVertical className="h-4 w-4 text-gray-400" />
-              </div>
-
-              {hasChildren ? (
-                <button
-                  onClick={() => toggleExpand(item.id)}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-              ) : (
-                <div className="w-6" />
-              )}
-              
-              {isExpanded && hasChildren ? (
-                <FolderOpen className="h-5 w-5 text-blue-600" />
-              ) : (
-                <Folder className="h-5 w-5 text-gray-600" />
-              )}
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{item.name}</span>
-                  {!item.isActive && (
-                    <Badge variant="secondary" className="text-xs">
-                      Pasif
-                    </Badge>
-                  )}
-                  {hasChildren && (
-                    <Badge variant="outline" className="text-xs">
-                      {countCategoriesInTree([item])} öğe
-                    </Badge>
-                  )}
-                  <span className="text-xs text-gray-500">({item.slug})</span>
-                </div>
-                {item.description && (
-                  <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const category = allCategories.find((c) => c.id === item.id);
-                  if (category) handleEditCategory(category);
-                }}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const category = allCategories.find((c) => c.id === item.id);
-                  if (category) handleDeleteClick(category);
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          </div>
-
-          {hasChildren && isExpanded && renderCategoryTree(item.children, level + 1)}
-        </div>
-      );
-    });
-  };
-
   // Get available parent categories (excluding the current category and its children)
   const getAvailableParentCategories = (): CmsCategory[] => {
     if (!editingCategory) return allCategories;
 
     // Exclude self and all descendants
     const excludeIds = new Set<string>([editingCategory.id]);
-    
+
     const collectDescendants = (parentId: string) => {
       allCategories.forEach((cat) => {
         if (cat.parentId === parentId) {
@@ -469,10 +309,73 @@ const CmsCategoriesPage = () => {
         }
       });
     };
-    
+
     collectDescendants(editingCategory.id);
-    
+
     return allCategories.filter((cat) => !excludeIds.has(cat.id));
+  };
+
+  // Render category node for dnd-kit
+  const renderCategoryNode = (node: CategoryTreeNode) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const category = allCategories.find((c) => c.id === node.id);
+
+    return (
+      <div className="flex items-center justify-between p-3 bg-white hover:bg-gray-50 rounded-md group transition-all">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded">
+            <GripVertical className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          </div>
+
+          {hasChildren ? (
+            <FolderOpen className="h-5 w-5 text-blue-600 flex-shrink-0" />
+          ) : (
+            <Folder className="h-5 w-5 text-gray-600 flex-shrink-0" />
+          )}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium truncate">{node.name}</span>
+              {!node.isActive && (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                  Pasif
+                </Badge>
+              )}
+              {hasChildren && (
+                <Badge variant="outline" className="text-xs flex-shrink-0">
+                  {countCategoriesInTree([node])} öğe
+                </Badge>
+              )}
+              <span className="text-xs text-gray-500 truncate">({node.slug})</span>
+            </div>
+            {node.description && (
+              <p className="text-sm text-gray-600 mt-1 truncate">{node.description}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (category) handleEditCategory(category);
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (category) handleDeleteClick(category);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -483,109 +386,74 @@ const CmsCategoriesPage = () => {
     );
   }
 
-  // Get all root categories for the category list
-  const rootCategories = categoryTree;
-  const totalCategories = countCategoriesInTree(categoryTree);
-
-  // Find selected category in the tree
-  const findCategoryInTree = (id: string, categories: CmsCategoryTree[]): CmsCategoryTree | null => {
-    for (const cat of categories) {
-      if (cat.id === id) return cat;
-      if (cat.children) {
-        const found = findCategoryInTree(id, cat.children);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  const selectedCategory = selectedCategoryId ? findCategoryInTree(selectedCategoryId, categoryTree) : null;
+  const totalCategories = countCategoriesInTree(draftCategories);
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left Card - Category List */}
-        <div className="col-span-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <FolderTree className="h-5 w-5" />
-                  Kategoriler
-                </CardTitle>
-                <Button size="sm" onClick={handleCreateCategory}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-2">
-              {categoryTree.length === 0 ? (
-                <div className="text-center py-12 text-gray-500 text-sm">
-                  Henüz kategori yok
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {rootCategories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant={selectedCategoryId === category.id ? 'secondary' : 'ghost'}
-                      className="w-full justify-start text-left"
-                      onClick={() => {
-                        setSelectedCategoryId(category.id);
-                        if (!expandedCategories.has(category.id)) {
-                          toggleExpand(category.id);
-                        }
-                      }}
-                      onDoubleClick={() => {
-                        const cat = allCategories.find((c) => c.id === category.id);
-                        if (cat) handleEditCategory(cat);
-                      }}
-                    >
-                      <div className="flex items-center gap-2 flex-1">
-                        <Folder className="h-4 w-4" />
-                        <span className="flex-1">{category.name}</span>
-                        <div className="flex items-center gap-1">
-                          <Badge variant={category.isActive ? 'default' : 'secondary'} className="text-xs">
-                            {countCategoriesInTree([category])}
-                          </Badge>
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Card - Category Tree Editor */}
-        <div className="col-span-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {selectedCategory ? selectedCategory.name : 'Kategori Ağacı'}
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Header Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <FolderTree className="h-5 w-5" />
+                Kategori Yönetimi
               </CardTitle>
-            </CardHeader>
-            <CardContent
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDropTargetId(null);
-              }}
-              onDrop={handleDropOnRoot}
-            >
-              {categoryTree.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  Henüz kategori oluşturulmamış. Başlamak için sol taraftaki + butonuna tıklayın.
-                </div>
-              ) : (
-                <div className="border rounded-lg overflow-hidden">
-                  {renderCategoryTree(categoryTree)}
-                </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Toplam {totalCategories} kategori
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {hasUnsavedChanges && (
+                <>
+                  <Badge variant="outline" className="text-amber-600 border-amber-600">
+                    Kaydedilmemiş Değişiklikler
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={handleCancelChanges} disabled={isSaving}>
+                    <X className="h-4 w-4 mr-1" />
+                    İptal
+                  </Button>
+                  <Button size="sm" onClick={handleSaveChanges} disabled={isSaving}>
+                    <Save className="h-4 w-4 mr-1" />
+                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                  </Button>
+                </>
               )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              <Button size="sm" onClick={handleCreateCategory}>
+                <Plus className="h-4 w-4 mr-1" />
+                Yeni Kategori
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Category Tree Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Kategori Ağacı</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Kategorileri sürükleyip bırakarak yeniden düzenleyin
+          </p>
+        </CardHeader>
+        <CardContent>
+          {draftCategories.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              Henüz kategori oluşturulmamış. Başlamak için üstteki "Yeni Kategori" butonuna tıklayın.
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <SortableTreeWrapper
+                items={draftCategories}
+                onItemsChange={handleTreeChange}
+                renderItem={renderCategoryNode}
+                collapsible
+                indentationWidth={24}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -634,7 +502,7 @@ const CmsCategoriesPage = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Kategori açıklaması"
-                  rows={3}
+                  className="min-h-[80px]"
                 />
               </div>
 
@@ -677,12 +545,12 @@ const CmsCategoriesPage = () => {
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
-                disabled={isSaving}
+                disabled={isFormSaving}
               >
                 İptal
               </Button>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? 'Kaydediliyor...' : editingCategory ? 'Güncelle' : 'Oluştur'}
+              <Button type="submit" disabled={isFormSaving}>
+                {isFormSaving ? 'Kaydediliyor...' : editingCategory ? 'Güncelle' : 'Oluştur'}
               </Button>
             </DialogFooter>
           </form>

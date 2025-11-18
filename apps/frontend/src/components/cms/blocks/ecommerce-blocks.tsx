@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // E-commerce Block 1: Single Product Layout
-export const EcommerceSingleProduct: React.FC<{ props?: any }> = ({ props }) => {
+export const EcommerceSingleProduct: React.FC<any> = (props) => {
   const category = props?.category || "Electronics";
   const categoryVariant = props?.categoryVariant || "body";
   const categoryAlign = props?.categoryAlign || "left";
@@ -133,7 +133,7 @@ export const EcommerceSingleProduct: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // E-commerce Block 2: Aligned Product Layout
-export const EcommerceAlignedProduct: React.FC<{ props?: any }> = ({ props }) => {
+export const EcommerceAlignedProduct: React.FC<any> = (props) => {
   const title = props?.title || "Smart Watch Series 5";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -236,7 +236,7 @@ export const EcommerceAlignedProduct: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // E-commerce Block 3: Two-Product Grid
-export const EcommerceTwoProductGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const EcommerceTwoProductGrid: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const title = props?.title || "Featured Products";
   const items = props?.items || [
@@ -320,7 +320,7 @@ export const EcommerceTwoProductGrid: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // E-commerce Block 4: Three-Product Grid
-export const EcommerceThreeProductGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const EcommerceThreeProductGrid: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const title = props?.title || "Featured Products";
   const items = props?.items || [

@@ -9,7 +9,7 @@ import { ButtonComponent } from '@/components/cms/button-component';
 import { Check, X } from 'lucide-react';
 
 // Pricing Block 1: Three Column Pricing Table
-export const PricingTableThreeColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const PricingTableThreeColumn: React.FC<any> = (props) => {
   const title = props?.title || "Choose Your Plan";
   const subtitle = props?.subtitle || "Select the perfect plan for your needs";
   const plans = props?.plans || [
@@ -177,7 +177,7 @@ export const PricingTableThreeColumn: React.FC<{ props?: any }> = ({ props }) =>
 };
 
 // Pricing Block 2: Comparison Table (Detailed)
-export const PricingComparisonDetailed: React.FC<{ props?: any }> = ({ props }) => {
+export const PricingComparisonDetailed: React.FC<any> = (props) => {
   const title = props?.title || "Compare Plans";
   const plans = props?.plans || [
     { name: "Starter", price: "$19" },
@@ -299,7 +299,7 @@ export const PricingComparisonDetailed: React.FC<{ props?: any }> = ({ props }) 
 };
 
 // Pricing Block 3: Toggle Switch (Monthly/Yearly)
-export const PricingToggleSwitch: React.FC<{ props?: any }> = ({ props }) => {
+export const PricingToggleSwitch: React.FC<any> = (props) => {
   const [isYearly, setIsYearly] = useState(false);
   
   const title = props?.title || "Simple, Transparent Pricing";

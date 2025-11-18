@@ -8,7 +8,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { Users, TrendingUp, Award, Target } from 'lucide-react';
 
 // Stats Block 1: Four Column Stats
-export const StatsFourColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const StatsFourColumn: React.FC<any> = (props) => {
   const title = props?.title || "Our Impact in Numbers";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -91,7 +91,7 @@ export const StatsFourColumn: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Stats Block 2: Counter Animated (Simple version)
-export const StatsCounterAnimated: React.FC<{ props?: any }> = ({ props }) => {
+export const StatsCounterAnimated: React.FC<any> = (props) => {
   const stats = props?.stats || [
     { value: "250+", label: "Projects Completed", suffix: "" },
     { value: "98%", label: "Client Satisfaction", suffix: "" },
@@ -143,7 +143,7 @@ export const StatsCounterAnimated: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Stats Block 3: Circular Progress (Visual representation)
-export const StatsCircularProgress: React.FC<{ props?: any }> = ({ props }) => {
+export const StatsCircularProgress: React.FC<any> = (props) => {
   const title = props?.title || "Our Performance";
   const stats = props?.stats || [
     { value: 95, label: "Customer Satisfaction", color: "primary" },
@@ -234,7 +234,7 @@ export const StatsCircularProgress: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Stats Block 4: Minimal Stats
-export const StatsMinimal: React.FC<{ props?: any }> = ({ props }) => {
+export const StatsMinimal: React.FC<any> = (props) => {
   const stats = props?.stats || [
     { value: "500+", label: "Companies Trust Us" },
     { value: "1M+", label: "Users Worldwide" },
@@ -285,7 +285,7 @@ export const StatsMinimal: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Stats Block 5: Stats with Background
-export const StatsWithBackground: React.FC<{ props?: any }> = ({ props }) => {
+export const StatsWithBackground: React.FC<any> = (props) => {
   const title = props?.title || "Trusted by Industry Leaders";
   const description = props?.description || "Join thousands of companies already using our platform";
   const stats = props?.stats || [

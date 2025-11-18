@@ -8,7 +8,7 @@ import { GridComponent } from '@/components/cms/grid-component';
 import { CardComponent } from '@/components/cms/card-component';
 
 // Social/Sharing Block 1: Social Links Row
-export const SocialLinksRow: React.FC<{ props?: any }> = ({ props }) => {
+export const SocialLinksRow: React.FC<any> = (props) => {
   const socialLinks = props?.socialLinks || [
     { id: '1', text: "f", url: "#" },
     { id: '2', text: "t", url: "#" },
@@ -45,7 +45,7 @@ export const SocialLinksRow: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Social/Sharing Block 2: Social Share Buttons
-export const SocialShareButtons: React.FC<{ props?: any }> = ({ props }) => {
+export const SocialShareButtons: React.FC<any> = (props) => {
   const title = props?.title || "Share this page:";
   const titleVariant = props?.titleVariant || "body";
   const titleAlign = props?.titleAlign || "left";
@@ -95,7 +95,7 @@ export const SocialShareButtons: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Social/Sharing Block 3: Facebook Post Embed
-export const SocialFacebookEmbed: React.FC<{ props?: any }> = ({ props }) => {
+export const SocialFacebookEmbed: React.FC<any> = (props) => {
   const companyName = props?.companyName || "Company Name";
   const companyNameVariant = props?.companyNameVariant || "body";
   const companyNameAlign = props?.companyNameAlign || "left";
@@ -187,7 +187,7 @@ export const SocialFacebookEmbed: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Social/Sharing Block 4: Instagram Grid Embed
-export const SocialInstagramGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const SocialInstagramGrid: React.FC<any> = (props) => {
   const title = props?.title || "Follow us on Instagram";
   const titleVariant = props?.titleVariant || "heading3";
   const titleAlign = props?.titleAlign || "center";
@@ -245,7 +245,7 @@ export const SocialInstagramGrid: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Social/Sharing Block 5: TikTok / YouTube Embed Block
-export const SocialTiktokYoutubeEmbed: React.FC<{ props?: any }> = ({ props }) => {
+export const SocialTiktokYoutubeEmbed: React.FC<any> = (props) => {
   const title = props?.title || "Featured Video";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";

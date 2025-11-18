@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CmsPageService } from '@/services/cms-page.service';
 import { PageRenderer } from '@/components/cms/page-renderer';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 
 interface PageProps {
   params: Promise<{
@@ -44,27 +46,34 @@ export default async function CmsPage({ params }: PageProps) {
       notFound();
     }
 
-    return (
-      <div className="min-h-screen">
-        {/* Page Header */}
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 py-16">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              {page.title}
-            </h1>
-          </div>
-        </div>
+    // Get layout options with defaults
+    const layoutOptions = page.layoutOptions || {};
+    const showHeader = layoutOptions.showHeader !== false; // default true
+    const showFooter = layoutOptions.showFooter !== false; // default true
+    const isFullWidth = layoutOptions.isFullWidth === true; // default false (boxed)
 
-        {/* Page Content - Render CMS blocks */}
-        <div className="container mx-auto px-4 py-12">
-          {page.components || (page.content && page.content.components) ? (
-            <PageRenderer components={page.components || page.content.components} />
+    return (
+      <div className="min-h-screen flex flex-col">
+        {showHeader && <Header />}
+
+        <main className="flex-1">
+          {page.components && page.components.length > 0 ? (
+            // Render CMS content with layout wrapper
+            <div className={isFullWidth ? 'w-full' : 'container mx-auto max-w-screen-xl px-4'}>
+              <PageRenderer components={page.components} />
+            </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>No content available for this page.</p>
+            // Fallback: No CMS content available
+            <div className="container mx-auto px-4 py-20">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
+                <p className="text-muted-foreground">No content available for this page.</p>
+              </div>
             </div>
           )}
-        </div>
+        </main>
+
+        {showFooter && <Footer />}
       </div>
     );
   } catch (error) {

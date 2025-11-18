@@ -35,7 +35,7 @@ const iconMap: Record<string, any> = {
 };
 
 // Feature Block 1: Single Feature Centered
-export const FeatureSingleCentered: React.FC<{ props?: any }> = ({ props }) => {
+export const FeatureSingleCentered: React.FC<any> = (props) => {
   const icon = props?.icon || "rocket";
   const title = props?.title || "Fast & Reliable";
   const titleVariant = props?.titleVariant || "heading3";
@@ -96,7 +96,7 @@ export const FeatureSingleCentered: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Feature Block 2: Feature Box Centered (with CTA)
-export const FeatureBoxCentered: React.FC<{ props?: any }> = ({ props }) => {
+export const FeatureBoxCentered: React.FC<any> = (props) => {
   const icon = props?.icon || "shield";
   const title = props?.title || "Secure & Protected";
   const titleVariant = props?.titleVariant || "heading3";
@@ -173,7 +173,7 @@ export const FeatureBoxCentered: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Feature Block 3: Feature Box Left Aligned
-export const FeatureBoxLeft: React.FC<{ props?: any }> = ({ props }) => {
+export const FeatureBoxLeft: React.FC<any> = (props) => {
   const icon = props?.icon || "users";
   const title = props?.title || "Team Collaboration";
   const titleVariant = props?.titleVariant || "heading3";
@@ -237,7 +237,7 @@ export const FeatureBoxLeft: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Feature Block 4: Features Grid (3 columns with icons)
-export const FeaturesIconGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const FeaturesIconGrid: React.FC<any> = (props) => {
   const title = props?.title || "Why Choose Us";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -358,7 +358,7 @@ export const FeaturesIconGrid: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Feature Block 5: Features List with Icon Bullets
-export const FeaturesListWithIcons: React.FC<{ props?: any }> = ({ props }) => {
+export const FeaturesListWithIcons: React.FC<any> = (props) => {
   const title = props?.title || "What You Get";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "left";
@@ -419,7 +419,7 @@ export const FeaturesListWithIcons: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Feature Block 6: Services Box Stacked (2 columns)
-export const FeaturesServicesTwoColumn: React.FC<{ props?: any }> = ({ props }) => {
+export const FeaturesServicesTwoColumn: React.FC<any> = (props) => {
   const title = props?.title || "Our Services";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";

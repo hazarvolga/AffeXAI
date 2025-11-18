@@ -95,6 +95,18 @@ export class CmsCategoryService {
       data,
     );
   }
+
+  /**
+   * Batch update categories (for drag & drop hierarchy changes)
+   */
+  async batchUpdateCategories(
+    updates: Array<{ id: string; parentId: string | null; orderIndex: number }>,
+  ): Promise<void> {
+    await httpClient.postWrapped<{ message: string }, typeof updates>(
+      '/cms/categories/batch-update',
+      updates,
+    );
+  }
 }
 
 // Export singleton instance

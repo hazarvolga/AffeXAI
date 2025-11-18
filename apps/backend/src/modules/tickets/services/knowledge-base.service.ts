@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, In } from 'typeorm';
 import { KnowledgeBaseArticle } from '../entities/knowledge-base-article.entity';
+import { slugify } from '../../../common/utils/slugify.util';
 
 /**
  * Knowledge Base Service
@@ -337,13 +338,10 @@ export class KnowledgeBaseService {
 
   /**
    * Generate URL-friendly slug from title
+   * Uses centralized slugify utility with Turkish character support
    */
   private generateSlug(title: string): string {
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9ğüşıöçĞÜŞİÖÇ]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-
-    return `${slug}-${Date.now()}`;
+    const slug = slugify(title);
+    return `${slug || 'untitled'}-${Date.now()}`;
   }
 }

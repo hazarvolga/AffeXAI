@@ -31,7 +31,7 @@ const RatingStars: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({ 
 };
 
 // Rating Block 1: Inline Stars with Count
-export const RatingStarsInline: React.FC<{ props?: any }> = ({ props }) => {
+export const RatingStarsInline: React.FC<any> = (props) => {
   const rating = props?.rating || 4.5;
   const totalReviews = props?.totalReviews || 1234;
   const showReviewCount = props?.showReviewCount !== false;
@@ -56,7 +56,7 @@ export const RatingStarsInline: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Rating Block 2: Single Review Card
-export const ReviewCardSingle: React.FC<{ props?: any }> = ({ props }) => {
+export const ReviewCardSingle: React.FC<any> = (props) => {
   const review = props?.review || {
     author: "Sarah Johnson",
     avatar: "/api/placeholder/64/64",
@@ -153,7 +153,7 @@ export const ReviewCardSingle: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Rating Block 3: Review Grid (3 Cards)
-export const ReviewGridThree: React.FC<{ props?: any }> = ({ props }) => {
+export const ReviewGridThree: React.FC<any> = (props) => {
   const title = props?.title || "What Our Customers Say";
   const subtitle = props?.subtitle || "Join thousands of satisfied customers";
   const reviews = props?.reviews || [

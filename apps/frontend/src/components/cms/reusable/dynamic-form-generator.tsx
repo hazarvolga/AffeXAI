@@ -36,6 +36,21 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
   const { toast } = useToast();
 
   /**
+   * Helper function to identify style properties
+   * These will be shown in Style tab instead of Content tab
+   */
+  const isStyleProperty = (propName: string): boolean => {
+    const styleKeywords = [
+      'color', 'background', 'padding', 'margin', 'width', 'height',
+      'size', 'variant', 'align', 'weight', 'border', 'shadow',
+      'opacity', 'radius', 'rounded', 'spacing', 'gap', 'font'
+    ];
+
+    const lowerProp = propName.toLowerCase();
+    return styleKeywords.some(keyword => lowerProp.includes(keyword));
+  };
+
+  /**
    * Render a single form field based on property type
    */
   const renderField = (
@@ -476,9 +491,11 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
 
   return (
     <div className="space-y-6">
-      {Object.entries(schema).map(([key, config]) =>
-        renderField(key, config, values[key])
-      )}
+      {Object.entries(schema)
+        .filter(([key]) => !isStyleProperty(key) && key !== 'className')
+        .map(([key, config]) =>
+          renderField(key, config, values[key])
+        )}
     </div>
   );
 };

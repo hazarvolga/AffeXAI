@@ -7,7 +7,7 @@ import { GridComponent } from '@/components/cms/grid-component';
 import { CardComponent } from '@/components/cms/card-component';
 
 // Progress Block 1: Single Progress Bar
-export const ProgressBarSingle: React.FC<{ props?: any }> = ({ props }) => {
+export const ProgressBarSingle: React.FC<any> = (props) => {
   const [progress, setProgress] = useState(0);
   
   const title = props?.title || "Project Completion";
@@ -72,7 +72,7 @@ export const ProgressBarSingle: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Progress Block 2: Stacked Progress Bars (Skills/Stats)
-export const ProgressBarsStacked: React.FC<{ props?: any }> = ({ props }) => {
+export const ProgressBarsStacked: React.FC<any> = (props) => {
   const [isVisible, setIsVisible] = useState(false);
   
   const title = props?.title || "Our Skills";
@@ -160,7 +160,7 @@ export const ProgressBarsStacked: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Progress Block 3: Circular Progress (Stats Grid)
-export const ProgressCircular: React.FC<{ props?: any }> = ({ props }) => {
+export const ProgressCircular: React.FC<any> = (props) => {
   const [isVisible, setIsVisible] = useState(false);
   
   const title = props?.title || "Our Achievements";

@@ -12,6 +12,7 @@ import {
   MenuLocation,
   CmsMenuTree,
 } from '@affexai/shared-types';
+import { slugify } from '../../../common/utils/slugify.util';
 
 @Injectable()
 export class MenuService {
@@ -24,14 +25,10 @@ export class MenuService {
 
   /**
    * Generate slug from menu name
+   * Uses centralized slugify utility with Turkish character support
    */
   private generateSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+    return slugify(name);
   }
 
   // ==========================================================================

@@ -9,7 +9,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Content Block 1: Simple Content Block
-export const ContentSimpleBlock: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentSimpleBlock: React.FC<any> = (props) => {
   const title = props?.title || "Important Information";
   const content = props?.content || "This is a standard content block with a title and paragraph. It's perfect for displaying clean information without additional styling.";
 
@@ -36,7 +36,7 @@ export const ContentSimpleBlock: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 2: Boxed Content Block
-export const ContentBoxedBlock: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentBoxedBlock: React.FC<any> = (props) => {
   const title = props?.title || "Featured Content";
   const content = props?.content || "This boxed content block adds a bordered or shaded background to emphasize important information.";
   const buttonText = props?.buttonText || "Learn More";
@@ -72,7 +72,7 @@ export const ContentBoxedBlock: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 3: Image + Content Side-by-Side
-export const ContentImageSideBySide: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentImageSideBySide: React.FC<any> = (props) => {
   const title = props?.title || "Product Explanation";
   const content = props?.content || "This layout is perfect for product explanations or team introductions where you want to show a visual alongside descriptive text.";
   const buttonText = props?.buttonText || "View Details";
@@ -120,7 +120,7 @@ export const ContentImageSideBySide: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Content Block 4: Double Image and Text Block
-export const ContentDoubleImageText: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentDoubleImageText: React.FC<any> = (props) => {
   const title = props?.title || "Feature Comparison";
   const items = props?.items || [
     {
@@ -189,7 +189,7 @@ export const ContentDoubleImageText: React.FC<{ props?: any }> = ({ props }) => 
 };
 
 // Content Block 5: Triple Content Grid
-export const ContentTripleGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentTripleGrid: React.FC<any> = (props) => {
   const title = props?.title || "Key Benefits";
   const items = props?.items || [
     {
@@ -260,7 +260,7 @@ export const ContentTripleGrid: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 6: CTA Content Box
-export const ContentCtaBox: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentCtaBox: React.FC<any> = (props) => {
   const title = props?.title || "Ready to Get Started?";
   const content = props?.content || "Join thousands of satisfied customers today and experience the difference.";
   const buttonText = props?.buttonText || "Sign Up Free";
@@ -304,7 +304,7 @@ export const ContentCtaBox: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 7: Image + Simple Content (Stacked)
-export const ContentImageStacked: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentImageStacked: React.FC<any> = (props) => {
   const title = props?.title || "Visual Storytelling";
   const content = props?.content || "This visual-first layout places the image above the supporting text, making it perfect for storytelling or showcasing products where the visual is the primary focus.";
   const imageUrl = props?.imageUrl || "/placeholder-image.jpg";
@@ -339,7 +339,7 @@ export const ContentImageStacked: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Content Block 8: Mini Box CTA
-export const ContentMiniBoxCta: React.FC<{ props?: any }> = ({ props }) => {
+export const ContentMiniBoxCta: React.FC<any> = (props) => {
   const title = props?.title || "Special Offer";
   const content = props?.content || "Limited time discount for new customers!";
   const buttonText = props?.buttonText || "Claim Offer";

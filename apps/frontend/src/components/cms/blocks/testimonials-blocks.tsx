@@ -9,7 +9,7 @@ import { ImageComponent } from '@/components/cms/image-component';
 import { Star, Quote } from 'lucide-react';
 
 // Testimonial Block 1: Single Card
-export const TestimonialSingleCard: React.FC<{ props?: any }> = ({ props }) => {
+export const TestimonialSingleCard: React.FC<any> = (props) => {
   const name = props?.name || "Sarah Johnson";
   const nameVariant = props?.nameVariant || "body";
   const nameAlign = props?.nameAlign || "left";
@@ -107,7 +107,7 @@ export const TestimonialSingleCard: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Testimonial Block 2: Grid Three Columns
-export const TestimonialGridThree: React.FC<{ props?: any }> = ({ props }) => {
+export const TestimonialGridThree: React.FC<any> = (props) => {
   const title = props?.title || "What Our Clients Say";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -242,7 +242,7 @@ export const TestimonialGridThree: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Testimonial Block 3: Carousel Style
-export const TestimonialCarousel: React.FC<{ props?: any }> = ({ props }) => {
+export const TestimonialCarousel: React.FC<any> = (props) => {
   const title = props?.title || "Customer Success Stories";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -361,7 +361,7 @@ export const TestimonialCarousel: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Testimonial Block 4: Minimal Style
-export const TestimonialMinimal: React.FC<{ props?: any }> = ({ props }) => {
+export const TestimonialMinimal: React.FC<any> = (props) => {
   const content = props?.content || "This is hands down the best service I've ever used. The results speak for themselves.";
   const contentVariant = props?.contentVariant || "heading3";
   const contentAlign = props?.contentAlign || "left";
@@ -428,7 +428,7 @@ export const TestimonialMinimal: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Testimonial Block 5: Wall/Masonry Style
-export const TestimonialWall: React.FC<{ props?: any }> = ({ props }) => {
+export const TestimonialWall: React.FC<any> = (props) => {
   const title = props?.title || "Loved by Thousands";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";

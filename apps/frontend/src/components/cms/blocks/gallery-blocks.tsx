@@ -8,7 +8,7 @@ import { CardComponent } from '@/components/cms/card-component';
 import { ImageComponent } from '@/components/cms/image-component';
 
 // Gallery Block 1: Single Image Display
-export const GallerySingleImage: React.FC<{ props?: any }> = ({ props }) => {
+export const GallerySingleImage: React.FC<any> = (props) => {
   const title = props?.title || "Featured Project";
   const titleVariant = props?.titleVariant || "heading3";
   const titleAlign = props?.titleAlign || "left";
@@ -68,7 +68,7 @@ export const GallerySingleImage: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Gallery Block 2: Two-Image Split Gallery
-export const GalleryTwoImageSplit: React.FC<{ props?: any }> = ({ props }) => {
+export const GalleryTwoImageSplit: React.FC<any> = (props) => {
   const title = props?.title || "Our Work";
   const titleVariant = props?.titleVariant || "heading2";
   const titleAlign = props?.titleAlign || "center";
@@ -147,7 +147,7 @@ export const GalleryTwoImageSplit: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Gallery Block 3: Three-Image Grid
-export const GalleryThreeImageGrid: React.FC<{ props?: any }> = ({ props }) => {
+export const GalleryThreeImageGrid: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const title = props?.title || "Featured Highlights";
   const items = props?.items || [
@@ -213,7 +213,7 @@ export const GalleryThreeImageGrid: React.FC<{ props?: any }> = ({ props }) => {
 };
 
 // Gallery Block 4: Four-Image Mosaic
-export const GalleryFourImageMosaic: React.FC<{ props?: any }> = ({ props }) => {
+export const GalleryFourImageMosaic: React.FC<any> = (props) => {
   // Use props or fallback to default values
   const title = props?.title || "Our Portfolio";
   const items = props?.items || [

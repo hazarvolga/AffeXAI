@@ -70,6 +70,17 @@ import { ContentTabs } from './blocks/content-tabs';
 import { ImageTextOverlap } from './blocks/image-text-overlap';
 import { SplitFeatureHighlight } from './blocks/split-feature-highlight';
 
+// Import Phase 3 Sprint 3 blocks
+import { ComparisonTable } from './blocks/comparison-table';
+import { FaqGrid } from './blocks/faq-grid';
+import { FeatureComparison } from './blocks/feature-comparison';
+import { IconGrid } from './blocks/icon-grid';
+import { MetricCards } from './blocks/metric-cards';
+import { PartnerShowcase } from './blocks/partner-showcase';
+import { QuoteCallout } from './blocks/quote-callout';
+import { ServiceGrid } from './blocks/service-grid';
+import { TextColumns } from './blocks/text-columns';
+
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
   text: TextComponent,
@@ -135,6 +146,16 @@ export const blockRegistry = {
   'content-tabs': ContentTabs,
   'image-text-overlap': ImageTextOverlap,
   'split-feature-highlight': SplitFeatureHighlight,
+  // Phase 3 Sprint 3 blocks
+  'comparison-table': ComparisonTable,
+  'faq-grid': FaqGrid,
+  'feature-comparison': FeatureComparison,
+  'icon-grid': IconGrid,
+  'metric-cards': MetricCards,
+  'partner-showcase': PartnerShowcase,
+  'quote-callout': QuoteCallout,
+  'service-grid': ServiceGrid,
+  'text-columns': TextColumns,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

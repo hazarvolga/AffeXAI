@@ -38,6 +38,7 @@ import {
   FileText,
   type LucideIcon,
 } from 'lucide-react';
+import { TimelineCarousel } from '@/components/timeline-carousel';
 
 // ============================================================================
 // 1. HERO CAROUSEL (with tabs and autoplay)
@@ -1227,5 +1228,12 @@ export const migrationBlocks = [
     description: 'Newsletter subscription form with privacy checkbox',
     category: 'Migration',
     component: NewsletterSignupForm,
+  },
+  {
+    id: 'cms-timeline-carousel',
+    name: 'Timeline Carousel',
+    description: 'Interactive timeline carousel for case studies',
+    category: 'Migration',
+    component: TimelineCarousel,
   },
 ];

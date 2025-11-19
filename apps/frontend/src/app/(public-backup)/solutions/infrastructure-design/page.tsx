@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Network, Waypoints, Construction } from "lucide-react";
@@ -40,10 +39,7 @@ export default function InfrastructureDesignPage() {
                 title="Altyapı Tasarımı"
                 subtitle="Yol, köprü, demiryolu ve genel altyapı projeleriniz için güçlü, entegre ve özel BIM çözümleri."
             />
-            <Breadcrumb items={[
-                { name: 'Çözümler', href: '/solutions' },
-                { name: 'Altyapı Tasarımı', href: '/solutions/infrastructure-design' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <h2 className="text-3xl font-bold">Geleceğin Bağlantılarını Kurun</h2>

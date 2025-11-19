@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 
 export default function PrivacyPage() {
     return (
@@ -7,7 +6,7 @@ export default function PrivacyPage() {
             <PageHero 
                 title="Gizlilik Politikası"
             />
-            <Breadcrumb items={[{ name: 'Gizlilik Politikası', href: '/privacy' }]} />
+            
             <div className="container mx-auto py-12 px-4 prose lg:prose-xl">
                 <h2>Gizlilik Politikası</h2>
                 <p>

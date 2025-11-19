@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { TimelineCarousel } from "@/components/timeline-carousel";
 import { timelineData } from "@/lib/timeline-data";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -17,7 +16,7 @@ export default function CaseStudiesPage() {
                 title="Başarı Hikayeleri"
                 subtitle="Allplan çözümlerinin, Türkiye ve dünyadan prestijli projelerde nasıl fark yarattığını keşfedin."
             />
-            <Breadcrumb items={[{ name: 'Başarı Hikayeleri', href: '/case-studies' }]} />
+            
             <TimelineCarousel />
 
             <div className="container mx-auto py-16 px-4">

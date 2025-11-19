@@ -19,7 +19,9 @@ export class CmsPageService {
    * Get CMS page by slug (public endpoint - no auth required)
    */
   static async getPageBySlug(slug: string): Promise<CmsPageResponse> {
-    return httpClient.getWrapped<CmsPageResponse>(`/cms/pages/slug/${slug}`);
+    // Encode the slug to handle multi-level paths (e.g., products/allplan/basic → products%2Fallplan%2Fbasic)
+    const encodedSlug = encodeURIComponent(slug);
+    return httpClient.getWrapped<CmsPageResponse>(`/cms/pages/slug/${encodedSlug}`);
   }
 
   /**

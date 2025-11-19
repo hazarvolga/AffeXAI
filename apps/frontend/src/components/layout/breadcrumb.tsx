@@ -76,6 +76,12 @@ const LABEL_MAP: Record<string, string> = {
   'allplan-architecture': 'ALLPLAN Architecture',
   'allplan-engineering': 'ALLPLAN Engineering',
   'allplan-bim': 'ALLPLAN BIM',
+  'basic': 'Basic',
+  'professional': 'Professional',
+  'ultimate': 'Ultimate',
+  'civil': 'Civil',
+  'concept': 'Concept',
+  'precast': 'Precast',
   
   // Services
   'training': 'Eğitim',

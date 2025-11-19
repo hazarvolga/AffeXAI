@@ -22,6 +22,7 @@ import {
   ContentWithImageTwoColumn,
   NewsletterSignupForm,
 } from './blocks/migration-blocks';
+import { TimelineCarousel } from '@/components/timeline-carousel';
 
 // Import special blocks
 import {
@@ -29,7 +30,8 @@ import {
   SpecialFeatureCardSingle,
   SpecialGridContainer,
   SpecialProductGrid,
-  SpecialResourceTabs
+  SpecialResourceTabs,
+  SpecialAccordionFaq
 } from './blocks/special-blocks';
 
 // Block registry pattern - maps component types to their implementations
@@ -55,12 +57,15 @@ export const blockRegistry = {
   'content-with-call-to-action': ContentWithCallToAction,
   'content-with-image-two-column': ContentWithImageTwoColumn,
   'newsletter-signup-form': NewsletterSignupForm,
+  'cms-timeline-carousel': TimelineCarousel,
   // Special blocks
   'special-feature-trio': SpecialFeatureTrio,
   'special-feature-card-single': SpecialFeatureCardSingle,
   'special-grid-container': SpecialGridContainer,
   'special-product-grid': SpecialProductGrid,
   'special-resource-tabs': SpecialResourceTabs,
+  'faq-section-with-accordion': SpecialAccordionFaq,
+  'special-accordion-faq': SpecialAccordionFaq,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

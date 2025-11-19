@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { EducationSupportSection } from "@/components/education-support-section";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { GraduationCap, LifeBuoy, BookOpen } from "lucide-react";
@@ -33,7 +32,7 @@ export default function EducationPage() {
                 title="Eğitim & Destek"
                 subtitle="Bilgi birikiminizi artırın, kaynaklarımıza erişin ve ihtiyacınız olan desteği alın. Aluplan Digital olarak, başarınız için gerekli tüm araçları sağlıyoruz."
             />
-            <Breadcrumb items={[{ name: 'Eğitim & Destek', href: '/education' }]} />
+            
 
             <div className="container mx-auto py-16 px-4">
                  <div className="grid md:grid-cols-3 gap-8 mb-16">

@@ -1,6 +1,5 @@
 
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Cloud, GanttChartSquare } from "lucide-react";
@@ -53,10 +52,7 @@ export default function CollaborationSoftwarePage() {
                 title="İşbirliği Yazılımları"
                 subtitle="Proje paydaşlarınızı tek bir platformda birleştiren, verimliliği artıran ve hataları azaltan bulut tabanlı ve yerel işbirliği çözümleri."
             />
-            <Breadcrumb items={[
-                { name: 'Ürünler', href: '/products' },
-                { name: 'İşbirliği Yazılımları', href: '/products/collaboration' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4">
                  <div className="text-center max-w-3xl mx-auto mb-16">
                     <h2 className="text-3xl font-bold font-headline">Birlikte Daha İyi İnşa Edin</h2>

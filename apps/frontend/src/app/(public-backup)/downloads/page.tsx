@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { ResourcesSection } from "@/components/resources-section";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,7 @@ export default function DownloadsPage() {
                 title="İndirme Merkezi & Destek"
                 subtitle="Gerekli tüm kaynaklara, dokümanlara ve destek kanallarına buradan ulaşın."
             />
-            <Breadcrumb items={[{ name: 'İndirme Merkezi', href: '/downloads' }]} />
+            
             
             <section id="faq" className="py-16 bg-secondary/30">
                 <div className="container mx-auto px-4 max-w-4xl">

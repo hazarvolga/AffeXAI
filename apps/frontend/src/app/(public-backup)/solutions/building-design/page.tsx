@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Building, Construction, HardHat, Check, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -59,10 +58,7 @@ export default function BuildingDesignPage() {
                 backgroundImage="https://picsum.photos/seed/building-design-hero/1920/600"
                 className="text-white"
             />
-            <Breadcrumb items={[
-                { name: 'Çözümler', href: '/solutions' },
-                { name: 'Bina Tasarımı', href: '/solutions/building-design' }
-            ]} />
+            
             
             <div className="container mx-auto py-16 px-4">
                 <section className="text-center max-w-3xl mx-auto mb-16">

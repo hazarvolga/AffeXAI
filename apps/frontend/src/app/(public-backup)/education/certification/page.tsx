@@ -2,7 +2,6 @@
 'use client'
 
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,10 +41,7 @@ export default function CertificationPage() {
                 title="Sertifika Sorgulama"
                 subtitle="Aluplan tarafından verilen sertifikaların geçerliliğini anında doğrulayın."
             />
-            <Breadcrumb items={[
-                { name: 'Eğitim & Destek', href: '/education' },
-                { name: 'Sertifika Sorgulama', href: '/education/certification' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4 flex justify-center">
                 <div className="w-full max-w-3xl space-y-8">
                     <Card>

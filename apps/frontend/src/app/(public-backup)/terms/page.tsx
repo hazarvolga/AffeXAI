@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 
 export default function TermsPage() {
     return (
@@ -7,7 +6,7 @@ export default function TermsPage() {
             <PageHero 
                 title="Kullanım Koşulları"
             />
-            <Breadcrumb items={[{ name: 'Kullanım Koşulları', href: '/terms' }]} />
+            
             <div className="container mx-auto py-12 px-4 prose lg:prose-xl">
                 <h2>Kullanım Koşulları</h2>
                 <p>

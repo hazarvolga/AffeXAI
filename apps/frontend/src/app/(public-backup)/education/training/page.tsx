@@ -1,5 +1,4 @@
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, User, ArrowRight } from "lucide-react";
@@ -48,10 +47,7 @@ export default function TrainingPage() {
                 title="Eğitim & Danışmanlık"
                 subtitle="Allplan yetkinliğinizi en üst düzeye çıkarmak için tasarlanmış eğitim programları ve danışmanlık hizmetleri."
             />
-            <Breadcrumb items={[
-                { name: 'Eğitim & Destek', href: '/education' },
-                { name: 'Eğitim & Danışmanlık', href: '/education/training' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <h2 className="text-3xl font-bold">Size Uygun Programı Seçin</h2>

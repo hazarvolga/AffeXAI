@@ -1,6 +1,5 @@
 
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, GanttChart, Factory, Construction } from "lucide-react";
@@ -41,10 +40,7 @@ export default function ConstructionPlanningPage() {
                 title="İnşaat Planlama Yazılımları"
                 subtitle="İnşaat süreçlerinizi optimize eden, detaylandırma ve imalatı kolaylaştıran özel yazılımlar."
             />
-            <Breadcrumb items={[
-                { name: 'Ürünler', href: '/products' },
-                { name: 'İnşaat Planlama Yazılımları', href: '/products/construction-planning' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4">
                  <div className="text-center max-w-3xl mx-auto mb-12">
                     <h2 className="text-3xl font-bold">Tasarım Ofisinden Şantiyeye Kusursuz Akış</h2>

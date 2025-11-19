@@ -1,6 +1,5 @@
 
 import { PageHero } from "@/components/common/page-hero";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Package } from "lucide-react";
@@ -59,10 +58,7 @@ export default function AllplanPage() {
                 title="Allplan Ürün Ailesi"
                 subtitle="Tasarım, mühendislik ve inşaat için her ihtiyaca yönelik kapsamlı BIM çözümleri."
             />
-            <Breadcrumb items={[
-                { name: 'Ürünler', href: '/products' },
-                { name: 'Allplan', href: '/products/allplan' }
-            ]} />
+            
             <div className="container mx-auto py-16 px-4">
                  <div className="text-center max-w-3xl mx-auto mb-12">
                     <h2 className="text-3xl font-bold">Projeniz İçin Doğru Allplan'ı Seçin</h2>

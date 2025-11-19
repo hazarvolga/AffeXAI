@@ -34,6 +34,18 @@ import {
   SpecialAccordionFaq
 } from './blocks/special-blocks';
 
+// Import new template design blocks (Sprint 1)
+import { HeroSolutions } from './blocks/hero-solutions';
+import { HeroCorporate } from './blocks/hero-corporate';
+import { HeroCaseStudy } from './blocks/hero-case-study';
+import { TimelineHorizontal } from './blocks/timeline-horizontal';
+import { TimelineVertical } from './blocks/timeline-vertical';
+import { TestimonialCarousel } from './blocks/testimonial-carousel';
+import { CarouselGallery } from './blocks/carousel-gallery';
+import { ClientLogoGrid } from './blocks/client-logo-grid';
+import { FeatureTabs } from './blocks/feature-tabs';
+import { CategoryTabs } from './blocks/category-tabs';
+
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
   text: TextComponent,
@@ -66,6 +78,17 @@ export const blockRegistry = {
   'special-resource-tabs': SpecialResourceTabs,
   'faq-section-with-accordion': SpecialAccordionFaq,
   'special-accordion-faq': SpecialAccordionFaq,
+  // New template design blocks (Sprint 1)
+  'hero-solutions': HeroSolutions,
+  'hero-corporate': HeroCorporate,
+  'hero-case-study': HeroCaseStudy,
+  'timeline-horizontal': TimelineHorizontal,
+  'timeline-vertical': TimelineVertical,
+  'testimonial-carousel': TestimonialCarousel,
+  'carousel-gallery': CarouselGallery,
+  'client-logo-grid': ClientLogoGrid,
+  'feature-tabs': FeatureTabs,
+  'category-tabs': CategoryTabs,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

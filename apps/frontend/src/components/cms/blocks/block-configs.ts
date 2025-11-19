@@ -2317,6 +2317,145 @@ Sektör, şirket ve ürün haberleri`,
   },
 };
 
+// ==================== NEW TEMPLATE DESIGN BLOCKS (Sprint 1) ====================
+const templateDesignBlocksConfig: Record<string, BlockPropertySchema> = {
+  // Hero Blocks
+  'hero-solutions': {
+    eyebrow: { type: 'text', label: 'Eyebrow Text', defaultValue: 'Çözümlerimiz' },
+    title: { type: 'text', label: 'Title', defaultValue: 'İşinizi Dijital Dönüşümle Güçlendirin' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Kurumsal Düzeyde İş Çözümleri' },
+    description: { type: 'textarea', label: 'Description', defaultValue: 'Modern teknoloji ve uzman ekibimizle işinizi bir sonraki seviyeye taşıyın.' },
+    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/hero-solutions/800/600' },
+    imageAlt: { type: 'text', label: 'Image Alt Text', defaultValue: 'Çözüm Görseli' },
+    videoUrl: { type: 'text', label: 'Video URL (optional)', defaultValue: '' },
+    primaryButtonText: { type: 'text', label: 'Primary Button Text', defaultValue: 'Demo Talep Et' },
+    primaryButtonUrl: { type: 'text', label: 'Primary Button URL', defaultValue: '/demo' },
+    secondaryButtonText: { type: 'text', label: 'Secondary Button Text', defaultValue: 'Daha Fazla Bilgi' },
+    secondaryButtonUrl: { type: 'text', label: 'Secondary Button URL', defaultValue: '#features' },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '6rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '6rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'hero-corporate': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Güvenilir İş Ortağınız' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Kurumsal Mükemmellik' },
+    description: { type: 'textarea', label: 'Description', defaultValue: '25 yılı aşkın deneyimimizle, işletmenizin dijital dönüşüm yolculuğunda yanınızdayız.' },
+    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/hero-corporate/800/600' },
+    imageAlt: { type: 'text', label: 'Image Alt Text', defaultValue: 'Kurumsal Görsel' },
+    imagePosition: { type: 'select', label: 'Image Position', defaultValue: 'right', options: ['left', 'right'] },
+    videoUrl: { type: 'text', label: 'Video URL (optional)', defaultValue: '' },
+    showVideoButton: { type: 'checkbox', label: 'Show Video Play Button', defaultValue: false },
+    primaryButtonText: { type: 'text', label: 'Primary Button Text', defaultValue: 'Bizimle İletişime Geçin' },
+    primaryButtonUrl: { type: 'text', label: 'Primary Button URL', defaultValue: '/contact' },
+    secondaryButtonText: { type: 'text', label: 'Secondary Button Text', defaultValue: 'Hakkımızda' },
+    secondaryButtonUrl: { type: 'text', label: 'Secondary Button URL', defaultValue: '/about' },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '8rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '8rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'hero-case-study': {
+    projectTitle: { type: 'text', label: 'Project Title', defaultValue: 'Dijital Dönüşüm Başarı Hikayesi' },
+    clientName: { type: 'text', label: 'Client Name', defaultValue: 'Müşteri Adı' },
+    clientLogo: { type: 'image', label: 'Client Logo', defaultValue: '' },
+    industry: { type: 'text', label: 'Industry', defaultValue: 'Teknoloji' },
+    projectDate: { type: 'text', label: 'Project Date', defaultValue: '2024' },
+    summary: { type: 'textarea', label: 'Summary', defaultValue: 'İşletmenin operasyonel verimliliğini %45 artıran kapsamlı dijital dönüşüm projesi.' },
+    featuredImage: { type: 'image', label: 'Featured Image', defaultValue: 'https://picsum.photos/seed/case-study/1200/600' },
+    featuredImageAlt: { type: 'text', label: 'Image Alt Text', defaultValue: 'Proje Görseli' },
+    downloadPdfUrl: { type: 'text', label: 'PDF Download URL', defaultValue: '/case-study.pdf' },
+    contactUrl: { type: 'text', label: 'Contact URL', defaultValue: '/contact' },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '6rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // Timeline Blocks
+  'timeline-horizontal': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Kurumsal Tarihçemiz' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Yıllara Göre Gelişimimiz' },
+    showConnectors: { type: 'checkbox', label: 'Show Connector Lines', defaultValue: true },
+    compactMode: { type: 'checkbox', label: 'Compact Mode', defaultValue: false },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'timeline-vertical': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Timeline' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: '' },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // Carousel Blocks
+  'testimonial-carousel': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Müşterilerimiz Ne Diyor' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Başarı Hikayeleri' },
+    autoPlay: { type: 'checkbox', label: 'Auto-Play', defaultValue: false },
+    autoPlayInterval: { type: 'number', label: 'Auto-Play Interval (ms)', defaultValue: 5000 },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'carousel-gallery': {
+    title: { type: 'text', label: 'Title', defaultValue: '' },
+    aspectRatio: { type: 'select', label: 'Aspect Ratio', defaultValue: 'video', options: ['video', 'square', 'portrait'] },
+    showThumbnails: { type: 'checkbox', label: 'Show Thumbnails', defaultValue: true },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // Organization Blocks
+  'client-logo-grid': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Güvenilen Markalar' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Dünya çapında lider şirketlerle çalışıyoruz' },
+    columns: { type: 'select', label: 'Columns', defaultValue: 5, options: [3, 4, 5, 6] },
+    grayscaleDefault: { type: 'checkbox', label: 'Grayscale by Default', defaultValue: true },
+    hoverEffect: { type: 'checkbox', label: 'Hover Effect', defaultValue: true },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+
+  // Tab Blocks
+  'feature-tabs': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Özellikler' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Güçlü Araçlar, Tek Platformda' },
+    defaultTab: { type: 'text', label: 'Default Tab ID', defaultValue: '' },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'category-tabs': {
+    title: { type: 'text', label: 'Title', defaultValue: 'Blog' },
+    subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Son Yazılar ve Haberler' },
+    defaultCategory: { type: 'text', label: 'Default Category ID', defaultValue: '' },
+    showAllTab: { type: 'checkbox', label: 'Show All Tab', defaultValue: true },
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+};
+
 // All block configurations
 export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...navigationBlocksConfig,
@@ -2337,4 +2476,5 @@ export const allBlockConfigs: Record<string, BlockPropertySchema> = {
   ...progressBlocksConfig,
   ...homepageSectionsConfig,
   ...migrationBlocksConfig, // ADD MIGRATION BLOCKS
+  ...templateDesignBlocksConfig, // NEW TEMPLATE DESIGN BLOCKS (Sprint 1)
 };

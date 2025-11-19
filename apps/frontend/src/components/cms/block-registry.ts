@@ -46,6 +46,18 @@ import { ClientLogoGrid } from './blocks/client-logo-grid';
 import { FeatureTabs } from './blocks/feature-tabs';
 import { CategoryTabs } from './blocks/category-tabs';
 
+// Import Phase 3 Sprint 1 blocks
+import { HeroMinimal } from './blocks/hero-minimal';
+import { HeroCampaign } from './blocks/hero-campaign';
+import { HeroSplitContent } from './blocks/hero-split-content';
+import { StatsMetricsGrid } from './blocks/stats-metrics-grid';
+import { ContentTextImageSplit } from './blocks/content-text-image-split';
+import { PricingComparisonTable } from './blocks/pricing-comparison-table';
+import { FeatureShowcaseGrid } from './blocks/feature-showcase-grid';
+import { BlogPostGrid } from './blocks/blog-post-grid';
+import { TeamMemberGrid } from './blocks/team-member-grid';
+import { ContactFormSection } from './blocks/contact-form-section';
+
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
   text: TextComponent,
@@ -89,6 +101,17 @@ export const blockRegistry = {
   'client-logo-grid': ClientLogoGrid,
   'feature-tabs': FeatureTabs,
   'category-tabs': CategoryTabs,
+  // Phase 3 Sprint 1 blocks
+  'hero-minimal': HeroMinimal,
+  'hero-campaign': HeroCampaign,
+  'hero-split-content': HeroSplitContent,
+  'stats-metrics-grid': StatsMetricsGrid,
+  'content-text-image-split': ContentTextImageSplit,
+  'pricing-comparison-table': PricingComparisonTable,
+  'feature-showcase-grid': FeatureShowcaseGrid,
+  'blog-post-grid': BlogPostGrid,
+  'team-member-grid': TeamMemberGrid,
+  'contact-form-section': ContactFormSection,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

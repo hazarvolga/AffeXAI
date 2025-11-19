@@ -532,14 +532,15 @@ export default function ThemeSettingsPage() {
             <CardHeader>
               <CardTitle>Giriş & Kayıt</CardTitle>
               <CardDescription>
-                Authentication linkleri
+                Authentication linkleri ve URL yönlendirmeleri
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-6">
+                {/* Login Section */}
+                <div className="space-y-4 p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
-                    <Label>Giriş Butonu</Label>
+                    <Label className="font-semibold">Giriş Butonu</Label>
                     <Switch
                       checked={currentAuthLinks.showLogin ?? true}
                       onCheckedChange={(checked) => {
@@ -553,23 +554,44 @@ export default function ThemeSettingsPage() {
                       }}
                     />
                   </div>
-                  <Input
-                    value={currentAuthLinks.loginText || 'Giriş Yap'}
-                    onChange={(e) => {
-                      setEditedTheme({
-                        ...editedTheme,
-                        headerConfig: {
-                          ...editedTheme.headerConfig,
-                          authLinks: { ...currentAuthLinks, loginText: e.target.value },
-                        },
-                      });
-                    }}
-                    placeholder="Giriş Yap"
-                  />
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Buton Metni</Label>
+                    <Input
+                      value={currentAuthLinks.loginText || 'Giriş Yap'}
+                      onChange={(e) => {
+                        setEditedTheme({
+                          ...editedTheme,
+                          headerConfig: {
+                            ...editedTheme.headerConfig,
+                            authLinks: { ...currentAuthLinks, loginText: e.target.value },
+                          },
+                        });
+                      }}
+                      placeholder="Giriş Yap"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Giriş URL</Label>
+                    <Input
+                      value={currentAuthLinks.loginUrl || '/login'}
+                      onChange={(e) => {
+                        setEditedTheme({
+                          ...editedTheme,
+                          headerConfig: {
+                            ...editedTheme.headerConfig,
+                            authLinks: { ...currentAuthLinks, loginUrl: e.target.value },
+                          },
+                        });
+                      }}
+                      placeholder="/login"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
+
+                {/* Signup Section */}
+                <div className="space-y-4 p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
-                    <Label>Kayıt Butonu</Label>
+                    <Label className="font-semibold">Kayıt Butonu</Label>
                     <Switch
                       checked={currentAuthLinks.showSignup ?? true}
                       onCheckedChange={(checked) => {
@@ -583,19 +605,38 @@ export default function ThemeSettingsPage() {
                       }}
                     />
                   </div>
-                  <Input
-                    value={currentAuthLinks.signupText || 'Kayıt Ol'}
-                    onChange={(e) => {
-                      setEditedTheme({
-                        ...editedTheme,
-                        headerConfig: {
-                          ...editedTheme.headerConfig,
-                          authLinks: { ...currentAuthLinks, signupText: e.target.value },
-                        },
-                      });
-                    }}
-                    placeholder="Kayıt Ol"
-                  />
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Buton Metni</Label>
+                    <Input
+                      value={currentAuthLinks.signupText || 'Kayıt Ol'}
+                      onChange={(e) => {
+                        setEditedTheme({
+                          ...editedTheme,
+                          headerConfig: {
+                            ...editedTheme.headerConfig,
+                            authLinks: { ...currentAuthLinks, signupText: e.target.value },
+                          },
+                        });
+                      }}
+                      placeholder="Kayıt Ol"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Kayıt URL</Label>
+                    <Input
+                      value={currentAuthLinks.signupUrl || '/signup'}
+                      onChange={(e) => {
+                        setEditedTheme({
+                          ...editedTheme,
+                          headerConfig: {
+                            ...editedTheme.headerConfig,
+                            authLinks: { ...currentAuthLinks, signupUrl: e.target.value },
+                          },
+                        });
+                      }}
+                      placeholder="/signup"
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>

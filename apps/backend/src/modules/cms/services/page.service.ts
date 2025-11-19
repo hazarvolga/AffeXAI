@@ -104,10 +104,46 @@ export class PageService {
     if (!page) {
       throw new Error('Page not found');
     }
-    
+
     page.status = PageStatus.DRAFT;
     page.publishedAt = null;
-    
+
     return this.pageRepository.save(page);
+  }
+
+  async clone(id: string): Promise<Page> {
+    const originalPage = await this.findOne(id);
+    if (!originalPage) {
+      throw new NotFoundException(`Page with ID ${id} not found`);
+    }
+
+    // Create a clone with modified title and slug
+    const clonedPage = this.pageRepository.create({
+      title: `${originalPage.title} (Kopya)`,
+      slug: `${originalPage.slug}-copy-${Date.now()}`,
+      description: originalPage.description,
+      metaTitle: originalPage.metaTitle,
+      metaDescription: originalPage.metaDescription,
+      status: PageStatus.DRAFT, // Always start as draft
+      categoryId: originalPage.categoryId,
+      templateId: originalPage.templateId,
+    });
+
+    const savedPage = await this.pageRepository.save(clonedPage);
+
+    // Clone components if any exist
+    if (originalPage.components && originalPage.components.length > 0) {
+      const clonedComponents = originalPage.components.map(component => {
+        const { id, createdAt, updatedAt, ...componentData } = component as any;
+        return this.pageRepository.manager.create(Component, {
+          ...componentData,
+          pageId: savedPage.id,
+        });
+      });
+
+      await this.pageRepository.manager.save(Component, clonedComponents);
+    }
+
+    return this.findOne(savedPage.id) as Promise<Page>;
   }
 }

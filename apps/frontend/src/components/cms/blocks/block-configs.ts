@@ -2275,6 +2275,11 @@ Sektör, şirket ve ürün haberleri`,
   'content-section-with-title': {
     title: { type: 'text', label: 'Title', defaultValue: 'Section Title' },
     content: { type: 'textarea', label: 'Content (HTML)', defaultValue: 'Section content goes here.' },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
   'content-with-call-to-action': {
@@ -2289,11 +2294,25 @@ Sektör, şirket ve ürün haberleri`,
     content: { type: 'textarea', label: 'Content (HTML)', defaultValue: 'Learn about our journey and what makes us unique.' },
     imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/two-col/800/600' },
     imagePosition: { type: 'select', label: 'Image Position', options: ['left', 'right'], defaultValue: 'right' },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '4rem' },
+    gap: { type: 'text', label: 'Gap Between Columns', defaultValue: '3rem' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
   'newsletter-signup-form': {
     title: { type: 'text', label: 'Title', defaultValue: 'Subscribe to Our Newsletter' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Get the latest updates delivered to your inbox.' },
+    cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
+  },
+  'cms-timeline-carousel': {
+    // Note: This component uses hardcoded timelineData and takes no props
+    // Style properties only for visual editor compatibility
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
+    paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '6rem' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 };

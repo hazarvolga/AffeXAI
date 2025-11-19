@@ -988,16 +988,36 @@ export const HeroWithBackgroundImage: React.FC<HeroWithBackgroundImageProps> = (
 interface ContentSectionWithTitleProps {
   title?: string;
   content?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
   cssClasses?: string;
 }
 
 export const ContentSectionWithTitle: React.FC<ContentSectionWithTitleProps> = ({
   title = 'Section Title',
   content = 'Section content goes here. This is a simple content section with a title.',
+  backgroundColor = 'transparent',
+  textColor = 'inherit',
+  paddingTop = '4rem',
+  paddingBottom = '4rem',
   cssClasses = '',
 }) => {
   return (
-    <section className={cn('py-16 bg-background', cssClasses)}>
+    <section
+      className={cn(
+        // Only apply bg-background if no custom backgroundColor is provided
+        backgroundColor === 'transparent' && 'bg-background',
+        cssClasses
+      )}
+      style={{
+        backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
+        color: textColor !== 'inherit' ? textColor : undefined,
+        paddingTop,
+        paddingBottom,
+      }}
+    >
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-6">{title}</h2>
         <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
@@ -1043,6 +1063,11 @@ interface ContentWithImageTwoColumnProps {
   content?: string;
   imageUrl?: string;
   imagePosition?: 'left' | 'right';
+  backgroundColor?: string;
+  textColor?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
+  gap?: string;
   cssClasses?: string;
 }
 
@@ -1051,6 +1076,11 @@ export const ContentWithImageTwoColumn: React.FC<ContentWithImageTwoColumnProps>
   content = 'Learn about our journey and what makes us unique.',
   imageUrl = 'https://picsum.photos/seed/two-col/800/600',
   imagePosition = 'right',
+  backgroundColor = 'transparent',
+  textColor = 'inherit',
+  paddingTop = '4rem',
+  paddingBottom = '4rem',
+  gap = '3rem',
   cssClasses = '',
 }) => {
   const imageCol = (
@@ -1067,9 +1097,24 @@ export const ContentWithImageTwoColumn: React.FC<ContentWithImageTwoColumnProps>
   );
 
   return (
-    <section className={cn('py-16 bg-background', cssClasses)}>
+    <section
+      className={cn(
+        // Only apply bg-background if no custom backgroundColor is provided
+        backgroundColor === 'transparent' && 'bg-background',
+        cssClasses
+      )}
+      style={{
+        backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
+        color: textColor !== 'inherit' ? textColor : undefined,
+        paddingTop,
+        paddingBottom,
+      }}
+    >
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div
+          className="grid grid-cols-1 lg:grid-cols-2 items-center"
+          style={{ gap }}
+        >
           {imagePosition === 'left' ? (
             <>
               {imageCol}

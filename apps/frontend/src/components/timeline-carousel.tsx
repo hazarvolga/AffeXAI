@@ -18,7 +18,19 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ArrowRight, Calendar, User } from 'lucide-react';
 import { Badge } from './ui/badge';
 
-export function TimelineCarousel() {
+interface TimelineCarouselProps {
+  backgroundColor?: string;
+  paddingTop?: string;
+  paddingBottom?: string;
+  cssClasses?: string;
+}
+
+export function TimelineCarousel({
+  backgroundColor = 'transparent',
+  paddingTop = '4rem',
+  paddingBottom = '6rem',
+  cssClasses = '',
+}: TimelineCarouselProps = {}) {
   const [mainApi, setMainApi] = useState<CarouselApi>();
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -46,7 +58,19 @@ export function TimelineCarousel() {
   }, [mainApi, onSelect]);
 
   return (
-    <section className="w-full py-16 md:py-24 bg-secondary/20">
+    <section
+      className={cn(
+        'w-full',
+        // Only apply bg-secondary/20 if no custom backgroundColor is provided
+        backgroundColor === 'transparent' && 'bg-secondary/20',
+        cssClasses
+      )}
+      style={{
+        backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
+        paddingTop,
+        paddingBottom,
+      }}
+    >
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">

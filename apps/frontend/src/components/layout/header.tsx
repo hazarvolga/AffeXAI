@@ -377,7 +377,7 @@ export function Header() {
             )}
             {authLinks.showLogin && (
               <Link
-                href="/admin"
+                href={authLinks.loginUrl || '/login'}
                 className="px-4 py-2 text-gray-700 hover:text-primary transition-colors"
               >
                 {authLinks.loginText}
@@ -385,7 +385,7 @@ export function Header() {
             )}
             {authLinks.showSignup && (
               <Link
-                href="/admin/signup"
+                href={authLinks.signupUrl || '/signup'}
                 className="px-6 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
               >
                 {authLinks.signupText}
@@ -490,7 +490,7 @@ export function Header() {
               )}
               {authLinks.showLogin && (
                 <Link
-                  href="/admin"
+                  href={authLinks.loginUrl || '/login'}
                   className="block w-full px-4 py-2 text-center text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -499,7 +499,7 @@ export function Header() {
               )}
               {authLinks.showSignup && (
                 <Link
-                  href="/admin/signup"
+                  href={authLinks.signupUrl || '/signup'}
                   className="block w-full px-4 py-2 text-center border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

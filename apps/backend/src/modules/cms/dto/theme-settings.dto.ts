@@ -50,6 +50,14 @@ export class AuthLinksDto {
 
   @IsString()
   signupText: string;
+
+  @IsString()
+  @IsOptional()
+  loginUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  signupUrl?: string;
 }
 
 // Layout DTO

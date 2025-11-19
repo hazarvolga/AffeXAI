@@ -140,11 +140,11 @@ const DeleteConfirmDialog = ({
 };
 
 // Menu Dialog Component
-const MenuDialog = ({ 
-  menu, 
-  onSave, 
-  onOpenChange 
-}: { 
+const MenuDialog = ({
+  menu,
+  onSave,
+  onOpenChange
+}: {
   menu?: CmsMenu;
   onSave: (data: { name: string; slug: string; location: MenuLocation; isActive: boolean }) => void;
   onOpenChange: (open: boolean) => void;
@@ -203,13 +203,13 @@ const MenuDialog = ({
 };
 
 // Menu Item Dialog Component
-const MenuItemDialog = ({ 
-  item, 
+const MenuItemDialog = ({
+  item,
   menuId,
-  menuItems, 
-  onSave, 
-  onOpenChange 
-}: { 
+  menuItems,
+  onSave,
+  onOpenChange
+}: {
   item?: CmsMenuItem;
   menuId: string;
   menuItems: CmsMenuItem[];
@@ -302,7 +302,7 @@ const MenuItemDialog = ({
 
   const getValidParentOptions = (items: CmsMenuItem[], currentItemId?: string): CmsMenuItem[] => {
     if (!currentItemId) return items;
-    
+
     let childIds = new Set<string>();
 
     const findChildrenRecursive = (parentId: string) => {
@@ -316,7 +316,7 @@ const MenuItemDialog = ({
     findChildrenRecursive(currentItemId);
     return items.filter(i => i.id !== currentItemId && !childIds.has(i.id));
   };
-  
+
   // Flatten nested menu items to flat list (needed for buildHierarchicalParentList)
   const flattenMenuItems = (items: CmsMenuItem[]): CmsMenuItem[] => {
     const result: CmsMenuItem[] = [];
@@ -385,18 +385,18 @@ const MenuItemDialog = ({
   };
 
   return (
-    <DialogContent className="max-w-2xl">
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{item ? 'Menü Öğesini Düzenle' : 'Yeni Menü Öğesi Ekle'}</DialogTitle>
       </DialogHeader>
       <div className="space-y-4 py-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="item-label">Etiket</Label>
-            <Input 
-              id="item-label" 
-              value={label} 
-              onChange={(e) => setLabel(e.target.value)} 
+            <Input
+              id="item-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
               placeholder="Ana Sayfa"
             />
           </div>
@@ -463,10 +463,10 @@ const MenuItemDialog = ({
         {type === MenuItemType.CUSTOM && (
           <div className="space-y-2">
             <Label htmlFor="item-url">URL</Label>
-            <Input 
-              id="item-url" 
-              value={url} 
-              onChange={(e) => setUrl(e.target.value)} 
+            <Input
+              id="item-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="/hakkimizda"
             />
           </div>
@@ -516,7 +516,7 @@ const MenuItemDialog = ({
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="item-parent">Üst Öğe</Label>
             <Select value={parentId || 'none'} onValueChange={(val) => setParentId(val === 'none' ? null : val)}>
@@ -552,19 +552,19 @@ const MenuItemDialog = ({
 
         <div className="space-y-2">
           <Label htmlFor="item-icon">İkon (isteğe bağlı)</Label>
-          <Input 
-            id="item-icon" 
-            value={icon} 
-            onChange={(e) => setIcon(e.target.value)} 
+          <Input
+            id="item-icon"
+            value={icon}
+            onChange={(e) => setIcon(e.target.value)}
             placeholder="home"
           />
         </div>
 
         <div className="flex items-center justify-between">
           <Label htmlFor="item-active">Aktif</Label>
-          <Switch 
-            id="item-active" 
-            checked={isActive} 
+          <Switch
+            id="item-active"
+            checked={isActive}
             onCheckedChange={setIsActive}
           />
         </div>
@@ -579,7 +579,7 @@ const MenuItemDialog = ({
   );
 };
 
-// Render menu item for SortableTreeWrapper
+// Render menu item for SortableTreeWrapper - IMPROVED VERSION
 const renderMenuItem = (
   node: MenuTreeNode,
   onEdit: (node: MenuTreeNode) => void,
@@ -587,29 +587,52 @@ const renderMenuItem = (
 ) => {
   const getTypeBadge = (type: MenuItemType) => {
     switch (type) {
-      case MenuItemType.PAGE: return <Badge variant="default">Sayfa</Badge>;
-      case MenuItemType.CATEGORY: return <Badge variant="secondary">Kategori</Badge>;
-      default: return <Badge variant="outline">Link</Badge>;
+      case MenuItemType.PAGE:
+        return <Badge variant="default" className="bg-blue-500 hover:bg-blue-600 text-white">Sayfa</Badge>;
+      case MenuItemType.CATEGORY:
+        return <Badge variant="secondary" className="bg-purple-500 hover:bg-purple-600 text-white">Kategori</Badge>;
+      default:
+        return <Badge variant="outline" className="border-gray-400 text-gray-700 dark:text-gray-300">Link</Badge>;
     }
   };
 
   return (
-    <div className="flex items-center gap-2 bg-background p-3 rounded-lg group hover:bg-accent/50 transition-colors">
-      <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab active:cursor-grabbing flex-shrink-0" />
+    <div className="flex items-center gap-3 bg-card p-3 rounded-lg shadow-sm hover:shadow-md border border-border/50 hover:border-primary/30 transition-all group">
+      <GripVertical className="h-5 w-5 text-muted-foreground/60 hover:text-primary cursor-grab active:cursor-grabbing flex-shrink-0" />
+
       <div className="flex-grow min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium truncate">{node.label}</p>
-          {node.icon && <span className="text-xs text-muted-foreground">({node.icon})</span>}
+        <div className="flex items-center gap-2 mb-1">
+          <p className="font-semibold text-foreground text-sm truncate">{node.label}</p>
+          {node.icon && (
+            <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
+              {node.icon}
+            </span>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground truncate">{node.url || node.type}</p>
+        <p className="text-xs text-muted-foreground/80 truncate">{node.url || 'Bağlantı yok'}</p>
       </div>
-      <div className="flex items-center gap-1 flex-shrink-0">
+
+      <div className="flex items-center gap-2 flex-shrink-0">
         {getTypeBadge(node.type)}
-        {!node.isActive && <Badge variant="destructive" className="text-xs">Pasif</Badge>}
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(node)}>
+        {!node.isActive && (
+          <Badge variant="destructive" className="text-xs bg-red-500 hover:bg-red-600 text-white">
+            Pasif
+          </Badge>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+          onClick={() => onEdit(node)}
+        >
           <Edit className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(node.id)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={() => onDelete(node.id)}
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -688,7 +711,7 @@ export default function MenuManagementPage() {
 
   const handleUpdateMenu = async (data: { name: string; slug: string; location: MenuLocation; isActive: boolean }) => {
     if (!editingMenu) return;
-    
+
     try {
       const updatedMenu = await cmsMenuService.updateMenu(editingMenu.id, data);
       setMenus(menus.map(m => m.id === updatedMenu.id ? updatedMenu : m));
@@ -892,17 +915,17 @@ export default function MenuManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto py-6 px-4 md:px-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Menü Yönetimi</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Menü Yönetimi</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Web sitenizin navigasyonunu ve menülerini buradan yönetin.
           </p>
         </div>
         <Dialog open={menuDialogOpen} onOpenChange={setMenuDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingMenu(undefined)}>
+            <Button onClick={() => setEditingMenu(undefined)} className="w-full md:w-auto">
               <MenuIcon className="mr-2 h-4 w-4"/>
               Yeni Menü Oluştur
             </Button>
@@ -915,15 +938,15 @@ export default function MenuManagementPage() {
         </Dialog>
       </div>
 
-      {/* Two-Card Layout: Menu List (Left) + Menu Editor (Right) */}
-      <div className="grid grid-cols-12 gap-6 mt-6">
-        {/* Left Card - Menu List (4 columns) */}
-        <Card className="col-span-4">
+      {/* Two-Card Layout: Menu List (Left) + Menu Editor (Right) - RESPONSIVE */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        {/* Left Card - Menu List (Full width on mobile, 4 columns on desktop) */}
+        <Card className="lg:col-span-4">
           <CardHeader>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Menüler</h3>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={() => {
                   setEditingMenu(undefined);
@@ -939,8 +962,8 @@ export default function MenuManagementPage() {
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <MenuIcon className="h-10 w-10 text-muted-foreground mb-3" />
                 <p className="text-sm text-muted-foreground mb-4">Henüz menü yok</p>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => setMenuDialogOpen(true)}
                 >
@@ -964,9 +987,9 @@ export default function MenuManagementPage() {
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
                         <MenuIcon className="h-4 w-4" />
-                        <span className="font-medium">{menu.name}</span>
+                        <span className="font-medium truncate">{menu.name}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <Badge variant="secondary" className="text-xs">
                           {menu.items?.length || 0}
                         </Badge>
@@ -984,32 +1007,34 @@ export default function MenuManagementPage() {
           </CardContent>
         </Card>
 
-        {/* Right Card - Menu Editor (8 columns) */}
-        <Card className="col-span-8">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        {/* Right Card - Menu Editor (Full width on mobile, 8 columns on desktop) */}
+        <Card className="lg:col-span-8">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-4">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-semibold">
                 {activeMenu ? `${activeMenu.name} - Menü Öğeleri` : 'Menü Öğeleri'}
               </h3>
               {hasUnsavedChanges && (
-                <Badge variant="outline" className="text-amber-600 border-amber-600">
+                <Badge variant="outline" className="text-amber-600 border-amber-600 dark:text-amber-400 dark:border-amber-400">
                   Kaydedilmemiş Değişiklikler
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {hasUnsavedChanges && (
                 <>
                   <Button
                     variant="outline"
                     onClick={handleCancelChanges}
                     disabled={isSaving}
+                    size="sm"
                   >
                     İptal
                   </Button>
                   <Button
                     onClick={handleSaveChanges}
                     disabled={isSaving}
+                    size="sm"
                   >
                     {isSaving ? (
                       <>
@@ -1030,6 +1055,8 @@ export default function MenuManagementPage() {
                   <Button
                     onClick={() => setEditingItem(undefined)}
                     disabled={!activeMenuId}
+                    size="sm"
+                    className="w-full sm:w-auto"
                   >
                     <PlusCircle className="mr-2 h-4 w-4"/>
                     Yeni Öğe Ekle

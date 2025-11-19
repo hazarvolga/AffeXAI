@@ -19,6 +19,8 @@ export interface AuthLinks {
   showSignup: boolean;
   loginText: string;
   signupText: string;
+  loginUrl?: string;
+  signupUrl?: string;
 }
 
 export interface Layout {

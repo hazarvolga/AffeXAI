@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import NextImage from 'next/image';
 import MediaPicker from '@/components/media/MediaPicker';
@@ -118,16 +118,43 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     return componentType;
   })();
 
+  // ✅ FIXED: Only sync when component selection changes, not on every prop update
+  // This prevents race condition where parent updates overwrite user's rapid edits
   useEffect(() => {
     setLocalProps(componentProps);
-  }, [componentProps]);
+  }, [componentType]); // Use componentType instead of selectedComponentId
+
+  // ✅ FIXED: Debounced callback to parent (prevents history flooding)
+  // Batches rapid changes into single history entry after 500ms of inactivity
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedPropsChange = useCallback((props: any) => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer (500ms debounce)
+    debounceTimerRef.current = setTimeout(() => {
+      onPropsChange(props);
+    }, 500);
+  }, [onPropsChange]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   const updateProp = (key: string, value: any) => {
     // Don't allow changes to locked components
     if (isLocked) return;
-    
+
     let newProps = { ...localProps };
-    
+
     // Handle nested properties (for list items)
     if (key.includes('.')) {
       const parts = key.split('.');
@@ -135,10 +162,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         // Format: "items.0.question" - updating a specific item in a list
         const [listKey, indexStr, itemKey] = parts;
         const index = parseInt(indexStr, 10);
-        
+
         // Create a copy of the list
         const list = [...(newProps[listKey] || [])];
-        
+
         // Update the specific item
         if (list[index]) {
           list[index] = { ...list[index], [itemKey]: value };
@@ -146,16 +173,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           // Create the item if it doesn't exist
           list[index] = { [itemKey]: value };
         }
-        
+
         newProps = { ...newProps, [listKey]: list };
       }
     } else {
       // Regular property update
       newProps = { ...newProps, [key]: value };
     }
-    
+
+    // ✅ Instant local UI feedback
     setLocalProps(newProps);
-    onPropsChange(newProps);
+
+    // ✅ Debounced parent notification (prevents history spam)
+    debouncedPropsChange(newProps);
   };
 
   // ============================================================================
@@ -633,24 +663,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   // Fetch and update corresponding URL field
                   try {
                     const response = await fetch(`/api/media/${mediaId}`);
-                    
+
                     if (!response.ok) {
                       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    
+
                     const data = await response.json();
-                    
-                    if (data.url) {
-                      updateProp(urlFieldName, data.url);
+
+                    // ✅ FIXED: Backend returns Media entity with url field
+                    // Support both direct response and nested data
+                    const mediaUrl = data?.url || data?.data?.url;
+
+                    if (mediaUrl) {
+                      updateProp(urlFieldName, mediaUrl);
                     } else {
+                      // Log full response for debugging
+                      console.warn('Media response missing URL:', data);
                       throw new Error('Media URL not found in response');
                     }
                   } catch (err) {
                     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
                     console.error('Error fetching media URL:', errorMessage, err);
                     toast({
-                      title: 'Error',
-                      description: `Failed to load media URL: ${errorMessage}`,
+                      title: 'Medya Yükleme Hatası',
+                      description: `URL alınamadı: ${errorMessage}`,
                       variant: 'destructive',
                     });
                   }

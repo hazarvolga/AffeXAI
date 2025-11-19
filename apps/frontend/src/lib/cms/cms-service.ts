@@ -122,6 +122,13 @@ export class CmsService {
     return httpClient.postWrapped<Page>(`/cms/pages/${id}/unpublish`);
   }
 
+  /**
+   * Clone page
+   */
+  async clonePage(id: string): Promise<Page> {
+    return httpClient.postWrapped<Page>(`/cms/pages/${id}/clone`);
+  }
+
   // ==========================================================================
   // Component Methods
   // ==========================================================================

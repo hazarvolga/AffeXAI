@@ -315,22 +315,24 @@ export function CollapsibleDashboardSidebar() {
                             {/* CMS Management - Permission: CMS_VIEW */}
                             {hasPermission(Permission.CMS_VIEW) && (
                             <AccordionItem value="cms-management" className="border-none">
-                                <AccordionTrigger className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
-                                    pathname.startsWith('/admin/cms') && !pathname.startsWith('/admin/cms/analytics') && "bg-muted text-primary"
-                                )}>
-                                    <div className="flex items-center gap-3">
-                                        <FileText className="h-4 w-4" />
-                                        CMS Yönetimi
-                                    </div>
-                                </AccordionTrigger>
+                                <Link href="/admin/cms">
+                                    <AccordionTrigger className={cn(
+                                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
+                                        pathname.startsWith('/admin/cms') && !pathname.startsWith('/admin/cms/analytics') && "bg-muted text-primary"
+                                    )}>
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="h-4 w-4" />
+                                            CMS Yönetimi
+                                        </div>
+                                    </AccordionTrigger>
+                                </Link>
                                 <AccordionContent className="pl-8 pt-1">
                                     <nav className="grid gap-1">
                                         <Link
-                                            href="/admin/cms"
+                                            href="/admin/cms/pages"
                                             className={cn(
                                                 "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                                                pathname === "/admin/cms" && "bg-muted text-primary"
+                                                pathname === "/admin/cms/pages" && "bg-muted text-primary"
                                             )}
                                         >
                                             Sayfalar

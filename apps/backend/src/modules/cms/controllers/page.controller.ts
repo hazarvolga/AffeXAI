@@ -59,4 +59,9 @@ export class PageController {
   async unpublish(@Param('id') id: string) {
     return this.pageService.unpublish(id);
   }
+
+  @Post(':id/clone')
+  async clone(@Param('id') id: string) {
+    return this.pageService.clone(id);
+  }
 }

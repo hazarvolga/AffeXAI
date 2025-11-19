@@ -171,9 +171,18 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
     structuredData: '',
   });
 
-  // Save state to history
+  // ✅ FIXED: History with 50-entry limit (prevents memory bloat)
+  // Limits undo/redo to last 50 actions, removes oldest entries when exceeded
+  const MAX_HISTORY_ENTRIES = 50;
+
   const saveToHistory = useCallback((newComponents: EditorComponent[]) => {
-    const newHistory = [...history.slice(0, historyIndex + 1), { components: newComponents, timestamp: Date.now() }];
+    // Trim history if we're at the limit
+    const trimmedHistory = history.length >= MAX_HISTORY_ENTRIES
+      ? history.slice(history.length - MAX_HISTORY_ENTRIES + 1)
+      : history.slice(0, historyIndex + 1);
+
+    // Add new entry
+    const newHistory = [...trimmedHistory, { components: newComponents, timestamp: Date.now() }];
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   }, [history, historyIndex]);

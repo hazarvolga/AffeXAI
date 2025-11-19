@@ -58,6 +58,18 @@ import { BlogPostGrid } from './blocks/blog-post-grid';
 import { TeamMemberGrid } from './blocks/team-member-grid';
 import { ContactFormSection } from './blocks/contact-form-section';
 
+// Import Phase 3 Sprint 2 blocks
+import { AccordionFaq } from './blocks/accordion-faq';
+import { VideoEmbedSection } from './blocks/video-embed-section';
+import { CtaBanner } from './blocks/cta-banner';
+import { ProcessSteps } from './blocks/process-steps';
+import { LogoCloud } from './blocks/logo-cloud';
+import { NewsletterSignup } from './blocks/newsletter-signup';
+import { SocialProofStats } from './blocks/social-proof-stats';
+import { ContentTabs } from './blocks/content-tabs';
+import { ImageTextOverlap } from './blocks/image-text-overlap';
+import { SplitFeatureHighlight } from './blocks/split-feature-highlight';
+
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
   text: TextComponent,
@@ -112,6 +124,17 @@ export const blockRegistry = {
   'blog-post-grid': BlogPostGrid,
   'team-member-grid': TeamMemberGrid,
   'contact-form-section': ContactFormSection,
+  // Phase 3 Sprint 2 blocks
+  'accordion-faq': AccordionFaq,
+  'video-embed-section': VideoEmbedSection,
+  'cta-banner': CtaBanner,
+  'process-steps': ProcessSteps,
+  'logo-cloud': LogoCloud,
+  'newsletter-signup': NewsletterSignup,
+  'social-proof-stats': SocialProofStats,
+  'content-tabs': ContentTabs,
+  'image-text-overlap': ImageTextOverlap,
+  'split-feature-highlight': SplitFeatureHighlight,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

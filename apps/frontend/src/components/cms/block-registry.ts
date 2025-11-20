@@ -80,6 +80,7 @@ import { PartnerShowcase } from './blocks/partner-showcase';
 import { QuoteCallout } from './blocks/quote-callout';
 import { ServiceGrid } from './blocks/service-grid';
 import { TextColumns } from './blocks/text-columns';
+import { WorkflowTabs } from './blocks/workflow-tabs';
 
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
@@ -156,6 +157,7 @@ export const blockRegistry = {
   'quote-callout': QuoteCallout,
   'service-grid': ServiceGrid,
   'text-columns': TextColumns,
+  'workflow-tabs': WorkflowTabs,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

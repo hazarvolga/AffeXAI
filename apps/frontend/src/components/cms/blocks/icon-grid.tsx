@@ -39,6 +39,10 @@ export interface IconGridProps {
   columns?: 2 | 3 | 4 | 6;
   iconSize?: 'sm' | 'md' | 'lg';
   variant?: 'simple' | 'card' | 'bordered';
+  showNumbers?: boolean;
+  numberStyle?: 'circle' | 'square' | 'plain';
+  numberColor?: string;
+  startNumber?: number;
   backgroundColor?: string;
   textColor?: string;
   paddingTop?: string;
@@ -61,6 +65,10 @@ export const IconGrid: React.FC<IconGridProps> = ({
   columns = 3,
   iconSize = 'md',
   variant = 'simple',
+  showNumbers = false,
+  numberStyle = 'circle',
+  numberColor = '#ff7f1e',
+  startNumber = 1,
   backgroundColor = 'transparent',
   textColor = 'inherit',
   paddingTop = '5rem',
@@ -116,6 +124,37 @@ export const IconGrid: React.FC<IconGridProps> = ({
     }
   };
 
+  const renderNumber = (index: number) => {
+    const number = String(startNumber + index).padStart(2, '0');
+
+    const baseClasses = 'font-bold';
+    const styleClasses = {
+      circle: 'w-12 h-12 rounded-full flex items-center justify-center text-white',
+      square: 'w-12 h-12 rounded-lg flex items-center justify-center text-white',
+      plain: 'text-4xl',
+    }[numberStyle];
+
+    if (numberStyle === 'plain') {
+      return (
+        <span
+          className={cn(baseClasses, styleClasses, 'opacity-30')}
+          style={{ color: numberColor }}
+        >
+          {number}
+        </span>
+      );
+    }
+
+    return (
+      <div
+        className={cn(baseClasses, styleClasses)}
+        style={{ backgroundColor: numberColor }}
+      >
+        {number}
+      </div>
+    );
+  };
+
   return (
     <section
       className={cn('w-full', backgroundColor === 'transparent' && 'bg-background', cssClasses)}
@@ -146,11 +185,18 @@ export const IconGrid: React.FC<IconGridProps> = ({
             <div
               key={index}
               className={cn(
-                'text-center',
+                'text-center relative',
                 variant === 'card' && 'bg-background border border-border rounded-lg p-6 hover:shadow-md transition-shadow',
                 variant === 'bordered' && 'border border-border rounded-lg p-6'
               )}
             >
+              {/* Number (Optional) */}
+              {showNumbers && (
+                <div className="flex justify-center mb-4">
+                  {renderNumber(index)}
+                </div>
+              )}
+
               {/* Icon */}
               <div className="flex justify-center mb-4">
                 <div

@@ -34,6 +34,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 
+# Copy packages folder for workspace dependencies
+COPY packages ./packages
+
 # Install production dependencies only
 RUN npm ci --omit=dev --legacy-peer-deps
 

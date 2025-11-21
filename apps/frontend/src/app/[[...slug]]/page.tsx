@@ -3,14 +3,17 @@ import { cmsService } from '@/lib/cms/cms-service';
 import { PageRenderer } from '@/components/cms/page-renderer';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug?: string[];
-  };
+  }>;
 }
 
 export default async function DynamicCMSPage({ params }: PageProps) {
+  // Await params (Next.js 15 requirement)
+  const resolvedParams = await params;
+
   // Build slug from params (e.g., ['solutions', 'building-design', 'architecture'] → 'solutions/building-design/architecture')
-  const slug = params.slug ? params.slug.join('/') : 'home';
+  const slug = resolvedParams.slug ? resolvedParams.slug.join('/') : 'home';
 
   // Ignore Next.js internal routes and static files
   if (
@@ -42,9 +45,11 @@ export default async function DynamicCMSPage({ params }: PageProps) {
 // Generate static params for known pages (optional, for build-time optimization)
 export async function generateStaticParams() {
   try {
-    const pages = await cmsService.getPages('published');
+    // Fetch only published pages
+    const pages = await cmsService.getPages();
+    const publishedPages = pages.filter(p => p.status === 'published');
 
-    return pages.map((page) => ({
+    return publishedPages.map((page) => ({
       slug: page.slug.split('/'),
     }));
   } catch (error) {
@@ -55,10 +60,12 @@ export async function generateStaticParams() {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps) {
-  const slug = params.slug ? params.slug.join('/') : 'home';
+  // Await params (Next.js 15 requirement)
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug ? resolvedParams.slug.join('/') : 'home';
 
   try {
-    const page = await cmsService.getPageBySlug(slug, false);
+    const page = await cmsService.getPageBySlug(slug);
 
     if (!page) {
       return {

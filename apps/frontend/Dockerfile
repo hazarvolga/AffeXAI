@@ -14,9 +14,13 @@ COPY packages ./packages
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
+# Build shared-types package
+WORKDIR /app/packages/shared-types
+RUN npm run build
+
 # Copy source code
+WORKDIR /app
 COPY apps/frontend ./apps/frontend
-COPY packages ./packages
 
 # Set build-time environment variables
 ARG NEXT_PUBLIC_API_URL
@@ -56,6 +60,7 @@ COPY --from=builder /app/apps/frontend/.next ./apps/frontend/.next
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 COPY --from=builder /app/apps/frontend/next.config.ts ./apps/frontend/
 COPY --from=builder /app/apps/frontend/package.json ./apps/frontend/
+COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Expose port
 EXPOSE 3000

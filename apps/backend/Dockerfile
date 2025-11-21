@@ -32,7 +32,7 @@ COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 
 # Install production dependencies only
-RUN npm ci --only=production --legacy-peer-deps
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy built application from builder
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist

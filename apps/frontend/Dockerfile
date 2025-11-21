@@ -43,7 +43,7 @@ COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
 
 # Install production dependencies only
-RUN npm ci --only=production --legacy-peer-deps
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy built application from builder
 COPY --from=builder /app/apps/frontend/.next ./apps/frontend/.next

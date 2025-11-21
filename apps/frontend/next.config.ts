@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Experimental features to handle ESM packages in Docker builds
+  experimental: {
+    esmExternals: false, // Disable ESM externals to bundle everything
+  },
+
   // Transpile Tiptap packages from node_modules
   transpilePackages: [
     '@tiptap/core',
@@ -51,6 +56,15 @@ const nextConfig: NextConfig = {
       '@tiptap/pm/model': require.resolve('prosemirror-model'),
       '@tiptap/pm/transform': require.resolve('prosemirror-transform'),
     };
+
+    // Force webpack to fully resolve all Tiptap packages
+    config.resolve.extensions = [
+      ...config.resolve.extensions,
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ];
 
     // External modules for server-side rendering
     if (isServer) {

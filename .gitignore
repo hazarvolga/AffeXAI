@@ -100,3 +100,8 @@ apps/frontend/.turbo/
 
 # Archive folder (old documentation)
 .archive/
+
+# Oracle Server SSH Keys (private)
+AffexAI-Oracle-Servers/
+*.key
+*.pem

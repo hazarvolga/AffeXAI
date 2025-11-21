@@ -44,7 +44,6 @@ RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy built application from builder
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
-COPY --from=builder /app/apps/backend/templates ./apps/backend/templates
 COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Expose port

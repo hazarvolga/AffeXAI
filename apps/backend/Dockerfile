@@ -7,11 +7,19 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
+COPY packages/shared-types/package*.json ./packages/shared-types/
+COPY packages/shared-types/src ./packages/shared-types/src
+COPY packages/shared-types/tsconfig.json ./packages/shared-types/
 
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 
+# Build shared-types package
+WORKDIR /app/packages/shared-types
+RUN npm run build
+
 # Copy source code
+WORKDIR /app
 COPY apps/backend ./apps/backend
 
 # Build backend
@@ -29,6 +37,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
+COPY packages/shared-types/package*.json ./packages/shared-types/
 
 # Install production dependencies only
 RUN npm ci --omit=dev --legacy-peer-deps
@@ -36,6 +45,7 @@ RUN npm ci --omit=dev --legacy-peer-deps
 # Copy built application from builder
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/apps/backend/templates ./apps/backend/templates
+COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Expose port
 EXPOSE 3001

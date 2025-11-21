@@ -97,3 +97,6 @@ apps/frontend/.turbo/
 *.log
 .backend.pid
 .frontend.pid
+
+# Archive folder (old documentation)
+.archive/

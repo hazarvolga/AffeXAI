@@ -2,8 +2,9 @@
 
 > **Enterprise Customer Portal & AI-Powered Support Platform**
 > **Architecture**: NestJS Backend + Next.js 15 Frontend (Monorepo)
-> **Last Updated**: 2025-10-28
-> **Version**: 1.0.1
+> **Last Updated**: 2025-11-21
+> **Version**: 1.0.2
+> **GitHub**: https://github.com/hazarvolga/AffeXAI
 
 ---
 

@@ -540,8 +540,9 @@ export const CMSProductsCarousel: React.FC<CMSProductsCarouselProps> = ({
 // ============================================================================
 
 interface CMSParallaxSpacerProps {
-  imageUrl?: string;
-  imageHint?: string;
+  backgroundMediaType?: string;
+  backgroundMediaUrl?: string;
+  backgroundImageHint?: string;
   title?: string;
   subtitle?: string;
   buttonText?: string;
@@ -550,21 +551,57 @@ interface CMSParallaxSpacerProps {
 }
 
 export const CMSParallaxSpacer: React.FC<CMSParallaxSpacerProps> = ({
-  imageUrl = 'https://picsum.photos/seed/parallax/1920/800',
-  imageHint = 'parallax background',
+  backgroundMediaType = 'image',
+  backgroundMediaUrl = 'https://picsum.photos/seed/parallax/1920/800',
+  backgroundImageHint = 'parallax background',
   title = 'Section Title',
   subtitle = 'Section subtitle',
   buttonText,
   buttonLink,
   cssClasses = '',
 }) => {
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
     <section
-      className={cn('relative py-24 bg-fixed bg-cover bg-center', cssClasses)}
-      style={{ backgroundImage: `url(${imageUrl})` }}
-      data-ai-hint={imageHint}
+      className={cn('relative py-24 overflow-hidden', backgroundMediaType === 'image' && 'bg-fixed', cssClasses)}
+      style={getBackgroundStyle()}
+      data-ai-hint={backgroundImageHint}
     >
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playlist=${backgroundMediaUrl.split('v=')[1]?.split('&')[0]}`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <div className="absolute inset-0 bg-black/50 z-[1]" />
       <div className="container mx-auto px-4 relative text-center text-white z-10">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl font-headline">{title}</h2>
         <p className="mt-4 text-lg max-w-2xl mx-auto">{subtitle}</p>
@@ -742,7 +779,9 @@ export const CMSNewsletterSection: React.FC<CMSNewsletterSectionProps> = ({
 interface CMSWhyAluplanProps {
   title?: string;
   content?: string;
-  imageUrl?: string;
+  imageMediaType?: string;
+  imageMediaUrl?: string;
+  imageImageHint?: string;
   imagePosition?: 'left' | 'right';
   items?: { title: string; description: string }[];
   cssClasses?: string;
@@ -751,14 +790,39 @@ interface CMSWhyAluplanProps {
 export const CMSWhyAluplan: React.FC<CMSWhyAluplanProps> = ({
   title = 'Neden Aluplan Digital?',
   content = 'Sektördeki 20 yılı aşkın tecrübemizle...',
-  imageUrl = 'https://picsum.photos/seed/why-aluplan/800/600',
+  imageMediaType = 'image',
+  imageMediaUrl = 'https://picsum.photos/seed/why-aluplan/800/600',
+  imageImageHint = 'why aluplan image',
   imagePosition = 'left',
   items = [],
   cssClasses = '',
 }) => {
   const imageCol = (
-    <div className="relative aspect-[4/3] lg:aspect-auto min-h-[400px]">
-      <Image src={imageUrl} alt={title} fill className="object-cover rounded-lg" />
+    <div className="relative aspect-[4/3] lg:aspect-auto min-h-[400px] rounded-lg overflow-hidden">
+      {/* Image */}
+      {imageMediaType === 'image' && imageMediaUrl && (
+        <Image src={imageMediaUrl} alt={title} fill className="object-cover" />
+      )}
+
+      {/* Video */}
+      {imageMediaType === 'video' && imageMediaUrl && (
+        <video
+          controls
+          className="w-full h-full object-cover"
+        >
+          <source src={imageMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube */}
+      {imageMediaType === 'youtube' && imageMediaUrl && (
+        <iframe
+          src={`${imageMediaUrl}?controls=1`}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      )}
     </div>
   );
 
@@ -932,22 +996,62 @@ export const CMSWorkflowSection: React.FC<CMSWorkflowSectionProps> = ({
 interface HeroWithImageAndTextOverlayProps {
   title?: string;
   subtitle?: string;
-  backgroundImageUrl?: string;
+  backgroundMediaType?: string;
+  backgroundMediaUrl?: string;
+  backgroundImageHint?: string;
   cssClasses?: string;
 }
 
 export const HeroWithImageAndTextOverlay: React.FC<HeroWithImageAndTextOverlayProps> = ({
   title = 'Welcome',
   subtitle = 'Discover our amazing platform',
-  backgroundImageUrl = 'https://picsum.photos/seed/hero/1920/1080',
+  backgroundMediaType = 'image',
+  backgroundMediaUrl = 'https://picsum.photos/seed/hero/1920/1080',
+  backgroundImageHint = 'hero background',
   cssClasses = '',
 }) => {
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
     <section
-      className={cn('relative h-[500px] bg-cover bg-center', cssClasses)}
-      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+      className={cn('relative h-[500px] overflow-hidden', cssClasses)}
+      style={getBackgroundStyle()}
+      data-ai-hint={backgroundImageHint}
     >
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playlist=${backgroundMediaUrl.split('v=')[1]?.split('&')[0]}`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <div className="absolute inset-0 bg-black/50 z-[1]" />
       <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center text-center relative z-10">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{title}</h1>
         <p className="text-xl text-white/90 max-w-2xl">{subtitle}</p>
@@ -960,22 +1064,62 @@ export const HeroWithImageAndTextOverlay: React.FC<HeroWithImageAndTextOverlayPr
 interface HeroWithBackgroundImageProps {
   title?: string;
   subtitle?: string;
-  backgroundImageUrl?: string;
+  backgroundMediaType?: string;
+  backgroundMediaUrl?: string;
+  backgroundImageHint?: string;
   cssClasses?: string;
 }
 
 export const HeroWithBackgroundImage: React.FC<HeroWithBackgroundImageProps> = ({
   title = 'Welcome',
   subtitle = 'Discover our amazing platform',
-  backgroundImageUrl = 'https://picsum.photos/seed/hero-bg/1920/1080',
+  backgroundMediaType = 'image',
+  backgroundMediaUrl = 'https://picsum.photos/seed/hero-bg/1920/1080',
+  backgroundImageHint = 'hero background',
   cssClasses = '',
 }) => {
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
     <section
-      className={cn('relative py-24 bg-cover bg-center bg-fixed', cssClasses)}
-      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+      className={cn('relative py-24 overflow-hidden', backgroundMediaType === 'image' && 'bg-fixed', cssClasses)}
+      style={getBackgroundStyle()}
+      data-ai-hint={backgroundImageHint}
     >
-      <div className="absolute inset-0 bg-black/60" />
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playlist=${backgroundMediaUrl.split('v=')[1]?.split('&')[0]}`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <div className="absolute inset-0 bg-black/60 z-[1]" />
       <div className="container mx-auto px-4 relative z-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{title}</h1>
         <p className="text-xl text-white/90 max-w-2xl mx-auto">{subtitle}</p>
@@ -1061,7 +1205,9 @@ export const ContentWithCallToAction: React.FC<ContentWithCallToActionProps> = (
 interface ContentWithImageTwoColumnProps {
   title?: string;
   content?: string;
-  imageUrl?: string;
+  imageMediaType?: string;
+  imageMediaUrl?: string;
+  imageImageHint?: string;
   imagePosition?: 'left' | 'right';
   backgroundColor?: string;
   textColor?: string;
@@ -1074,7 +1220,9 @@ interface ContentWithImageTwoColumnProps {
 export const ContentWithImageTwoColumn: React.FC<ContentWithImageTwoColumnProps> = ({
   title = 'Our Story',
   content = 'Learn about our journey and what makes us unique.',
-  imageUrl = 'https://picsum.photos/seed/two-col/800/600',
+  imageMediaType = 'image',
+  imageMediaUrl = 'https://picsum.photos/seed/two-col/800/600',
+  imageImageHint = 'content image',
   imagePosition = 'right',
   backgroundColor = 'transparent',
   textColor = 'inherit',
@@ -1085,7 +1233,30 @@ export const ContentWithImageTwoColumn: React.FC<ContentWithImageTwoColumnProps>
 }) => {
   const imageCol = (
     <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
-      <Image src={imageUrl} alt={title} fill className="object-cover" />
+      {/* Image */}
+      {imageMediaType === 'image' && imageMediaUrl && (
+        <Image src={imageMediaUrl} alt={title} fill className="object-cover" />
+      )}
+
+      {/* Video */}
+      {imageMediaType === 'video' && imageMediaUrl && (
+        <video
+          controls
+          className="w-full h-full object-cover"
+        >
+          <source src={imageMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube */}
+      {imageMediaType === 'youtube' && imageMediaUrl && (
+        <iframe
+          src={`${imageMediaUrl}?controls=1`}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      )}
     </div>
   );
 

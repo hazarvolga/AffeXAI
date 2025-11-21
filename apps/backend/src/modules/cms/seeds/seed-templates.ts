@@ -12,16 +12,26 @@ export async function seedCmsTemplates(dataSource: DataSource): Promise<void> {
 
   console.log('🌱 Seeding CMS templates...');
 
-  // Check if templates already exist
+  // Check existing templates
   const existingCount = await templateRepository.count();
-  if (existingCount > 0) {
-    console.log(`ℹ️  Found ${existingCount} existing templates. Skipping seed.`);
-    console.log('   To re-seed, delete existing templates first.');
+  console.log(`ℹ️  Found ${existingCount} existing templates in database.`);
+
+  // Get existing template names
+  const existingTemplates = await templateRepository.find({ select: ['name'] });
+  const existingNames = new Set(existingTemplates.map(t => t.name));
+
+  // Filter out templates that already exist
+  const newTemplates = templatesData.filter(t => !existingNames.has(t.name));
+
+  if (newTemplates.length === 0) {
+    console.log('✅ All templates already exist. No new templates to seed.');
     return;
   }
 
-  // Create templates
-  const templates = templatesData.map((data) =>
+  console.log(`📝 Adding ${newTemplates.length} new templates...`);
+
+  // Create new templates
+  const templates = newTemplates.map((data) =>
     templateRepository.create({
       ...data,
       isActive: true,
@@ -32,11 +42,14 @@ export async function seedCmsTemplates(dataSource: DataSource): Promise<void> {
 
   await templateRepository.save(templates);
 
-  console.log(`✅ Successfully seeded ${templates.length} CMS templates:`);
+  console.log(`✅ Successfully seeded ${templates.length} new CMS templates:`);
   templates.forEach((t, i) => {
     const icon = t.isFeatured ? '⭐' : '  ';
     console.log(`   ${icon} ${i + 1}. ${t.name} (${t.category})`);
   });
+
+  const finalCount = await templateRepository.count();
+  console.log(`\n📊 Total templates in database: ${finalCount}`);
 }
 
 /**

@@ -20,6 +20,9 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  parentId?: string | null;
+  orderIndex?: number;
+  isActive?: boolean;
 }
 
 export interface Menu {
@@ -220,6 +223,13 @@ export class CmsService {
   }
 
   /**
+   * Get all menu items for a menu (includes nested items)
+   */
+  async getMenuItems(menuId: string): Promise<MenuItem[]> {
+    return httpClient.getWrapped<MenuItem[]>(`/cms/menus/${menuId}/items`);
+  }
+
+  /**
    * Add page to menu with hierarchical placement support
    */
   async addPageToMenu(
@@ -229,11 +239,14 @@ export class CmsService {
     orderIndex?: number,
     parentId?: string
   ): Promise<MenuItem> {
-    return httpClient.postWrapped<MenuItem>(`/cms/menus/${menuId}/items`, {
+    return httpClient.postWrapped<MenuItem>('/cms/menus/items', {
+      menuId,
+      type: 'page',
       pageId,
       label,
       orderIndex,
       parentId: parentId || undefined,
+      isActive: true,
     });
   }
 

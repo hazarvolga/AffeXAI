@@ -22,6 +22,26 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 
+/**
+ * Extract YouTube video ID from various URL formats
+ */
+function getYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+    /youtube\.com\/embed\/([^&\n?#]+)/,
+    /youtube\.com\/v\/([^&\n?#]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
 export interface WorkflowDialogContent {
   title: string;
   content: string;
@@ -33,9 +53,12 @@ export interface WorkflowDialogContent {
 export interface WorkflowSubTab {
   id: string;
   label: string;
-  icon?: string;
+  icon?: string; // Deprecated: use mediaType and mediaUrl instead
   title: string;
   description: string;
+  // Media options (replaces icon)
+  mediaType?: 'image' | 'video' | 'youtube' | 'none';
+  mediaUrl?: string; // Can be upload URL, direct URL, or YouTube link
   dialogContent?: WorkflowDialogContent;
 }
 
@@ -265,57 +288,109 @@ export const WorkflowTabs: React.FC<WorkflowTabsProps> = ({
           <div className="lg:col-span-9">
             {currentSubTabs
               .filter((subTab) => subTab.id === activeSubTab)
-              .map((subTab) => (
-                <div
-                  key={subTab.id}
-                  className="bg-card border border-border rounded-xl p-8 shadow-sm"
-                >
-                  {/* Sub Tab Header */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div>
-                      {subTab.icon && (
-                        <span className="text-4xl mb-4 inline-block">{subTab.icon}</span>
+              .map((subTab) => {
+                const hasMedia = subTab.mediaType && subTab.mediaType !== 'none' && subTab.mediaUrl;
+                const youtubeId = subTab.mediaType === 'youtube' && subTab.mediaUrl
+                  ? getYouTubeVideoId(subTab.mediaUrl)
+                  : null;
+
+                return (
+                  <div
+                    key={subTab.id}
+                    className="bg-card border border-border rounded-xl p-8 shadow-sm"
+                  >
+                    {/* Media Content - TOP (if media is provided) */}
+                    {hasMedia && (
+                      <div className="mb-6">
+                        {/* Image */}
+                        {subTab.mediaType === 'image' && subTab.mediaUrl && (
+                          <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                            <Image
+                              src={subTab.mediaUrl}
+                              alt={subTab.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                            />
+                          </div>
+                        )}
+
+                        {/* Video */}
+                        {subTab.mediaType === 'video' && subTab.mediaUrl && (
+                          <div className="relative w-full rounded-lg overflow-hidden">
+                            <video
+                              src={subTab.mediaUrl}
+                              controls
+                              className="w-full h-auto"
+                              preload="metadata"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        )}
+
+                        {/* YouTube Video */}
+                        {subTab.mediaType === 'youtube' && youtubeId && (
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${youtubeId}`}
+                              title={subTab.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="absolute top-0 left-0 w-full h-full"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Sub Tab Header with Legacy Icon (if no media) */}
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex-1">
+                        {!hasMedia && subTab.icon && (
+                          <span className="text-4xl mb-4 inline-block">{subTab.icon}</span>
+                        )}
+                        <h3 className="text-2xl font-bold mb-2">{subTab.title}</h3>
+                        <p className="text-muted-foreground text-lg leading-relaxed">
+                          {subTab.description}
+                        </p>
+                      </div>
+
+                      {/* Plus Button for Dialog */}
+                      {subTab.dialogContent && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => openDialog(subTab.dialogContent!)}
+                          className={cn(
+                            'rounded-full w-12 h-12 flex-shrink-0 ml-4',
+                            accentClasses.border,
+                            accentClasses.text,
+                            accentClasses.hover
+                          )}
+                        >
+                          <Plus className="w-6 h-6" />
+                        </Button>
                       )}
-                      <h3 className="text-2xl font-bold mb-2">{subTab.title}</h3>
-                      <p className="text-muted-foreground text-lg leading-relaxed">
-                        {subTab.description}
-                      </p>
                     </div>
 
-                    {/* Plus Button for Dialog */}
+                    {/* Read More Link */}
                     {subTab.dialogContent && (
-                      <Button
-                        variant="outline"
-                        size="icon"
+                      <button
                         onClick={() => openDialog(subTab.dialogContent!)}
                         className={cn(
-                          'rounded-full w-12 h-12 flex-shrink-0',
-                          accentClasses.border,
+                          'text-sm font-semibold flex items-center gap-2',
                           accentClasses.text,
-                          accentClasses.hover
+                          'hover:underline'
                         )}
                       >
-                        <Plus className="w-6 h-6" />
-                      </Button>
+                        Devamını Oku
+                        <span className="text-lg">→</span>
+                      </button>
                     )}
                   </div>
-
-                  {/* Read More Link */}
-                  {subTab.dialogContent && (
-                    <button
-                      onClick={() => openDialog(subTab.dialogContent!)}
-                      className={cn(
-                        'text-sm font-semibold flex items-center gap-2',
-                        accentClasses.text,
-                        'hover:underline'
-                      )}
-                    >
-                      Devamını Oku
-                      <span className="text-lg">→</span>
-                    </button>
-                  )}
-                </div>
-              ))}
+                );
+              })}
           </div>
         </div>
       </div>

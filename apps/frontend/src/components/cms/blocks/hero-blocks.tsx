@@ -15,13 +15,13 @@ export const HeroCenteredBgImage: React.FC<any> = (props) => {
   const titleAlign = props?.titleAlign || "center";
   const titleColor = props?.titleColor || "primary";
   const titleWeight = props?.titleWeight || "bold";
-  
+
   const subtitle = props?.subtitle || "Discover amazing features and services that will transform your experience.";
   const subtitleVariant = props?.subtitleVariant || "body";
   const subtitleAlign = props?.subtitleAlign || "center";
   const subtitleColor = props?.subtitleColor || "secondary";
   const subtitleWeight = props?.subtitleWeight || "normal";
-  
+
   const primaryButtonText = props?.primaryButtonText || "Get Started";
   const primaryButtonUrl = props?.primaryButtonUrl || "#";
   const primaryButtonTarget = props?.primaryButtonTarget || "_self";
@@ -29,40 +29,84 @@ export const HeroCenteredBgImage: React.FC<any> = (props) => {
   const secondaryButtonUrl = props?.secondaryButtonUrl || "#";
   const secondaryButtonTarget = props?.secondaryButtonTarget || "_self";
 
+  // Background media support
+  const backgroundMediaType = props?.backgroundMediaType || "image";
+  const backgroundMediaUrl = props?.backgroundMediaUrl || "";
+
+  // Determine background style based on media type
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-centered-container"
-      padding="xl" 
+      padding="xl"
       background="muted"
-      className="text-center py-20 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg"
+      className="text-center py-20 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg relative overflow-hidden"
+      style={getBackgroundStyle()}
     >
-      <TextComponent 
-        id="hero-centered-title"
-        content={title} 
-        variant={titleVariant}
-        align={titleAlign}
-        color={titleColor}
-        weight={titleWeight}
-        className="mb-6" 
-      />
-      <TextComponent 
-        id="hero-centered-subtitle"
-        content={subtitle} 
-        variant={subtitleVariant}
-        align={subtitleAlign}
-        color={subtitleColor}
-        weight={subtitleWeight}
-        className="mb-8 max-w-2xl mx-auto text-primary-foreground/80" 
-      />
-      <GridComponent 
-        id="hero-centered-btn-grid"
-        columns={2} 
-        gap="md" 
-        className="justify-center space-x-4"
-      >
-        <ButtonComponent id="hero-get-started-btn" text={primaryButtonText} href={primaryButtonUrl} target={primaryButtonTarget} variant="default" size="lg" />
-        <ButtonComponent id="hero-learn-more-btn" text={secondaryButtonText} href={secondaryButtonUrl} target={secondaryButtonTarget} variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10" />
-      </GridComponent>
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      {/* Content overlay */}
+      <div className="relative z-10">
+        <TextComponent
+          id="hero-centered-title"
+          content={title}
+          variant={titleVariant}
+          align={titleAlign}
+          color={titleColor}
+          weight={titleWeight}
+          className="mb-6"
+        />
+        <TextComponent
+          id="hero-centered-subtitle"
+          content={subtitle}
+          variant={subtitleVariant}
+          align={subtitleAlign}
+          color={subtitleColor}
+          weight={subtitleWeight}
+          className="mb-8 max-w-2xl mx-auto text-primary-foreground/80"
+        />
+        <GridComponent
+          id="hero-centered-btn-grid"
+          columns={2}
+          gap="md"
+          className="justify-center space-x-4"
+        >
+          <ButtonComponent id="hero-get-started-btn" text={primaryButtonText} href={primaryButtonUrl} target={primaryButtonTarget} variant="default" size="lg" />
+          <ButtonComponent id="hero-learn-more-btn" text={secondaryButtonText} href={secondaryButtonUrl} target={secondaryButtonTarget} variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10" />
+        </GridComponent>
+      </div>
     </ContainerComponent>
   );
 };
@@ -84,55 +128,71 @@ export const HeroSplitImageRight: React.FC<any> = (props) => {
   const buttonText = props?.buttonText || "Start Free Trial";
   const buttonUrl = props?.buttonUrl || "#";
   const buttonTarget = props?.buttonTarget || "_self";
-  const imageUrl = props?.imageUrl || "/placeholder-image.jpg";
+
+  // Media support
+  const imageMediaType = props?.imageMediaType || "image";
+  const imageMediaUrl = props?.imageMediaUrl || "/placeholder-image.jpg";
 
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-split-container"
-      padding="xl" 
+      padding="xl"
       background="none"
       className="py-20"
     >
-      <GridComponent 
+      <GridComponent
         id="hero-split-grid"
-        columns={2} 
-        gap="xl" 
+        columns={2}
+        gap="xl"
         className="items-center"
       >
         <div>
-          <TextComponent 
+          <TextComponent
             id="hero-split-title"
-            content={title} 
+            content={title}
             variant={titleVariant}
             align={titleAlign}
             color={titleColor}
             weight={titleWeight}
-            className="mb-6" 
+            className="mb-6"
           />
-          <TextComponent 
+          <TextComponent
             id="hero-split-subtitle"
-            content={subtitle} 
+            content={subtitle}
             variant={subtitleVariant}
             align={subtitleAlign}
             color={subtitleColor}
             weight={subtitleWeight}
-            className="mb-8 text-muted-foreground" 
+            className="mb-8 text-muted-foreground"
           />
           <ButtonComponent id="hero-split-cta-btn" text={buttonText} href={buttonUrl} target={buttonTarget} variant="default" size="lg" />
         </div>
         <div className="flex justify-center">
-          <CardComponent 
+          <CardComponent
             id="hero-split-card"
-            padding="lg" 
-            rounded="lg" 
+            padding="lg"
+            rounded="lg"
             shadow="md"
           >
-            <ImageComponent 
-              id="hero-split-image"
-              src={imageUrl} 
-              alt="Hero Image" 
-              className="rounded-md" 
-            />
+            {/* Image */}
+            {imageMediaType === "image" && imageMediaUrl && (
+              <ImageComponent
+                id="hero-split-image"
+                src={imageMediaUrl}
+                alt="Hero Image"
+                className="rounded-md"
+              />
+            )}
+
+            {/* Video */}
+            {imageMediaType === "video" && imageMediaUrl && (
+              <video
+                controls
+                className="w-full rounded-md"
+              >
+                <source src={imageMediaUrl} type="video/mp4" />
+              </video>
+            )}
           </CardComponent>
         </div>
       </GridComponent>
@@ -147,53 +207,95 @@ export const HeroGradientFloatingCta: React.FC<any> = (props) => {
   const titleAlign = props?.titleAlign || "center";
   const titleColor = props?.titleColor || "primary";
   const titleWeight = props?.titleWeight || "bold";
-  
+
   const subtitle = props?.subtitle || "Join thousands of satisfied customers who have transformed their workflow.";
   const subtitleVariant = props?.subtitleVariant || "body";
   const subtitleAlign = props?.subtitleAlign || "center";
   const subtitleColor = props?.subtitleColor || "secondary";
   const subtitleWeight = props?.subtitleWeight || "normal";
-  
+
   const buttonText = props?.buttonText || "Get Started";
   const buttonUrl = props?.buttonUrl || "#";
   const buttonTarget = props?.buttonTarget || "_self";
 
+  // Background media support
+  const backgroundMediaType = props?.backgroundMediaType || "image";
+  const backgroundMediaUrl = props?.backgroundMediaUrl || "";
+
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-gradient-container"
-      padding="xl" 
+      padding="xl"
       background="none"
       className="py-32 rounded-lg bg-gradient-to-r from-primary via-accent to-secondary text-primary-foreground relative overflow-hidden"
+      style={getBackgroundStyle()}
     >
-      <div className="absolute top-10 right-10">
-        <ButtonComponent 
-          id="hero-gradient-floating-btn"
-          text={buttonText}
-          href={buttonUrl}
-          target={buttonTarget}
-          variant="default" 
-          size="lg" 
-          className="bg-background text-foreground hover:bg-background/90 shadow-lg"
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <div className="relative z-10">
+        <div className="absolute top-10 right-10">
+          <ButtonComponent
+            id="hero-gradient-floating-btn"
+            text={buttonText}
+            href={buttonUrl}
+            target={buttonTarget}
+            variant="default"
+            size="lg"
+            className="bg-background text-foreground hover:bg-background/90 shadow-lg"
+          />
+        </div>
+        <TextComponent
+          id="hero-gradient-title"
+          content={title}
+          variant={titleVariant}
+          align={titleAlign}
+          color={titleColor}
+          weight={titleWeight}
+          className="mb-6 max-w-2xl"
+        />
+        <TextComponent
+          id="hero-gradient-subtitle"
+          content={subtitle}
+          variant={subtitleVariant}
+          align={subtitleAlign}
+          color={subtitleColor}
+          weight={subtitleWeight}
+          className="mb-10 max-w-2xl text-primary-foreground/80"
         />
       </div>
-      <TextComponent 
-        id="hero-gradient-title"
-        content={title} 
-        variant={titleVariant}
-        align={titleAlign}
-        color={titleColor}
-        weight={titleWeight}
-        className="mb-6 max-w-2xl" 
-      />
-      <TextComponent 
-        id="hero-gradient-subtitle"
-        content={subtitle} 
-        variant={subtitleVariant}
-        align={subtitleAlign}
-        color={subtitleColor}
-        weight={subtitleWeight}
-        className="mb-10 max-w-2xl text-primary-foreground/80" 
-      />
     </ContainerComponent>
   );
 };
@@ -205,52 +307,93 @@ export const HeroVideoBackground: React.FC<any> = (props) => {
   const titleAlign = props?.titleAlign || "center";
   const titleColor = props?.titleColor || "primary";
   const titleWeight = props?.titleWeight || "bold";
-  
+
   const subtitle = props?.subtitle || "Immersive experiences that captivate and engage your audience.";
   const subtitleVariant = props?.subtitleVariant || "body";
   const subtitleAlign = props?.subtitleAlign || "center";
   const subtitleColor = props?.subtitleColor || "secondary";
   const subtitleWeight = props?.subtitleWeight || "normal";
-  
+
   const buttonText = props?.buttonText || "Watch Demo";
   const buttonUrl = props?.buttonUrl || "#";
   const buttonTarget = props?.buttonTarget || "_self";
 
+  // Background media support (defaults to video for this component)
+  const backgroundMediaType = props?.backgroundMediaType || "video";
+  const backgroundMediaUrl = props?.backgroundMediaUrl || "";
+
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-video-container"
-      padding="xl" 
+      padding="xl"
       background="none"
       className="py-40 rounded-lg relative overflow-hidden text-primary-foreground text-center"
+      style={getBackgroundStyle()}
     >
-      {/* Video background would go here in a real implementation */}
-      <div className="absolute inset-0 bg-background/50"></div>
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-background/50 z-[1]"></div>
+
       <div className="relative z-10">
-        <TextComponent 
+        <TextComponent
           id="hero-video-title"
-          content={title} 
+          content={title}
           variant={titleVariant}
           align={titleAlign}
           color={titleColor}
           weight={titleWeight}
-          className="mb-6" 
+          className="mb-6"
         />
-        <TextComponent 
+        <TextComponent
           id="hero-video-subtitle"
-          content={subtitle} 
+          content={subtitle}
           variant={subtitleVariant}
           align={subtitleAlign}
           color={subtitleColor}
           weight={subtitleWeight}
-          className="mb-10 max-w-2xl mx-auto text-primary-foreground/80" 
+          className="mb-10 max-w-2xl mx-auto text-primary-foreground/80"
         />
-        <ButtonComponent 
+        <ButtonComponent
           id="hero-video-cta-btn"
           text={buttonText}
           href={buttonUrl}
           target={buttonTarget}
-          variant="default" 
-          size="lg" 
+          variant="default"
+          size="lg"
           className="bg-background text-foreground hover:bg-background/90"
         />
       </div>
@@ -265,50 +408,92 @@ export const HeroFullscreenStickyCta: React.FC<any> = (props) => {
   const titleAlign = props?.titleAlign || "center";
   const titleColor = props?.titleColor || "primary";
   const titleWeight = props?.titleWeight || "bold";
-  
+
   const subtitle = props?.subtitle || "The ultimate platform for creators and innovators.";
   const subtitleVariant = props?.subtitleVariant || "body";
   const subtitleAlign = props?.subtitleAlign || "center";
   const subtitleColor = props?.subtitleColor || "secondary";
   const subtitleWeight = props?.subtitleWeight || "normal";
-  
+
   const buttonText = props?.buttonText || "Get Started Now";
   const buttonUrl = props?.buttonUrl || "#";
   const buttonTarget = props?.buttonTarget || "_self";
 
+  // Background media support
+  const backgroundMediaType = props?.backgroundMediaType || "image";
+  const backgroundMediaUrl = props?.backgroundMediaUrl || "";
+
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-fullscreen-container"
-      padding="none" 
+      padding="none"
       background="none"
-      className="h-screen flex flex-col justify-center items-center text-center relative"
+      className="h-screen flex flex-col justify-center items-center text-center relative overflow-hidden"
+      style={getBackgroundStyle()}
     >
-      <TextComponent 
-        id="hero-fullscreen-title"
-        content={title} 
-        variant={titleVariant}
-        align={titleAlign}
-        color={titleColor}
-        weight={titleWeight}
-        className="mb-6" 
-      />
-      <TextComponent 
-        id="hero-fullscreen-subtitle"
-        content={subtitle} 
-        variant={subtitleVariant}
-        align={subtitleAlign}
-        color={subtitleColor}
-        weight={subtitleWeight}
-        className="mb-10 max-w-2xl mx-auto text-muted-foreground" 
-      />
-      <div className="fixed bottom-8">
-        <ButtonComponent 
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <div className="relative z-10">
+        <TextComponent
+          id="hero-fullscreen-title"
+          content={title}
+          variant={titleVariant}
+          align={titleAlign}
+          color={titleColor}
+          weight={titleWeight}
+          className="mb-6"
+        />
+        <TextComponent
+          id="hero-fullscreen-subtitle"
+          content={subtitle}
+          variant={subtitleVariant}
+          align={subtitleAlign}
+          color={subtitleColor}
+          weight={subtitleWeight}
+          className="mb-10 max-w-2xl mx-auto text-muted-foreground"
+        />
+      </div>
+      <div className="fixed bottom-8 z-20">
+        <ButtonComponent
           id="hero-fullscreen-cta-btn"
           text={buttonText}
           href={buttonUrl}
           target={buttonTarget}
-          variant="default" 
-          size="lg" 
+          variant="default"
+          size="lg"
         />
       </div>
     </ContainerComponent>
@@ -322,13 +507,17 @@ export const HeroCarouselSlides: React.FC<any> = (props) => {
   const titleAlign = props?.titleAlign || "center";
   const titleColor = props?.titleColor || "primary";
   const titleWeight = props?.titleWeight || "bold";
-  
+
   const subtitle = props?.subtitle || "Discover our most popular offerings";
   const subtitleVariant = props?.subtitleVariant || "body";
   const subtitleAlign = props?.subtitleAlign || "center";
   const subtitleColor = props?.subtitleColor || "secondary";
   const subtitleWeight = props?.subtitleWeight || "normal";
-  
+
+  // Background media support
+  const backgroundMediaType = props?.backgroundMediaType || "none";
+  const backgroundMediaUrl = props?.backgroundMediaUrl || "";
+
   const items = props?.items || [
     {
       id: '1',
@@ -336,6 +525,8 @@ export const HeroCarouselSlides: React.FC<any> = (props) => {
       slideDescription: "Brief description of this amazing solution.",
       buttonText: "Learn More",
       buttonUrl: "#",
+      mediaType: "image",
+      mediaUrl: ""
     },
     {
       id: '2',
@@ -343,6 +534,8 @@ export const HeroCarouselSlides: React.FC<any> = (props) => {
       slideDescription: "Another great solution for your business needs.",
       buttonText: "Learn More",
       buttonUrl: "#",
+      mediaType: "image",
+      mediaUrl: ""
     },
     {
       id: '3',
@@ -350,62 +543,130 @@ export const HeroCarouselSlides: React.FC<any> = (props) => {
       slideDescription: "Our most popular solution with advanced features.",
       buttonText: "Learn More",
       buttonUrl: "#",
+      mediaType: "image",
+      mediaUrl: ""
     }
   ];
 
+  const getBackgroundStyle = () => {
+    if (backgroundMediaType === "image" && backgroundMediaUrl) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${backgroundMediaUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      };
+    }
+    return {};
+  };
+
   return (
-    <ContainerComponent 
+    <ContainerComponent
       id="hero-carousel-container"
-      padding="xl" 
+      padding="xl"
       background="muted"
-      className="py-20 rounded-lg"
+      className="py-20 rounded-lg relative overflow-hidden"
+      style={getBackgroundStyle()}
     >
-      <GridComponent 
+      {/* Video background */}
+      {backgroundMediaType === "video" && backgroundMediaUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* YouTube background */}
+      {backgroundMediaType === "youtube" && backgroundMediaUrl && (
+        <iframe
+          src={`${backgroundMediaUrl}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          allow="autoplay; encrypted-media"
+          style={{ border: 0, transform: 'scale(1.5)' }}
+        />
+      )}
+
+      <GridComponent
         id="hero-carousel-grid"
-        columns={1} 
-        gap="md" 
+        columns={1}
+        gap="md"
+        className="relative z-10"
       >
-        <TextComponent 
+        <TextComponent
           id="hero-carousel-title"
-          content={title} 
-          variant="heading2" 
-          className="text-center mb-4" 
+          content={title}
+          variant="heading2"
+          className="text-center mb-4"
         />
-        <TextComponent 
+        <TextComponent
           id="hero-carousel-subtitle"
-          content={subtitle} 
-          variant="body" 
-          className="text-center mb-8 text-muted-foreground" 
+          content={subtitle}
+          variant="body"
+          className="text-center mb-8 text-muted-foreground"
         />
-        {/* In a real implementation, this would be a carousel component */}
+        {/* Carousel slides with media support */}
         {items.map((item: any, index: number) => (
-          <CardComponent 
+          <CardComponent
             id={`hero-carousel-card-${index + 1}`}
             key={item.id || index}
-            padding="lg" 
-            rounded="lg" 
+            padding="lg"
+            rounded="lg"
             shadow="md"
             className="text-center"
           >
-            <TextComponent 
+            {/* Slide media */}
+            {item.mediaType === "image" && item.mediaUrl && (
+              <ImageComponent
+                id={`hero-carousel-slide-image-${index + 1}`}
+                src={item.mediaUrl}
+                alt={item.slideTitle || "Slide image"}
+                className="w-full h-64 object-cover rounded-md mb-4"
+              />
+            )}
+            {item.mediaType === "video" && item.mediaUrl && (
+              <video
+                controls
+                className="w-full h-64 object-cover rounded-md mb-4"
+              >
+                <source src={item.mediaUrl} type="video/mp4" />
+              </video>
+            )}
+            {item.mediaType === "youtube" && item.mediaUrl && (
+              <div className="relative w-full h-64 mb-4">
+                <iframe
+                  src={`${item.mediaUrl}?controls=1`}
+                  className="w-full h-full rounded-md"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ border: 0 }}
+                />
+              </div>
+            )}
+
+            <TextComponent
               id={`hero-carousel-slide-title-${index + 1}`}
-              content={item.slideTitle} 
-              variant="heading3" 
-              className="mb-3" 
+              content={item.slideTitle}
+              variant="heading3"
+              className="mb-3"
             />
-            <TextComponent 
+            <TextComponent
               id={`hero-carousel-slide-desc-${index + 1}`}
-              content={item.slideDescription} 
-              variant="body" 
-              className="mb-4 text-muted-foreground" 
+              content={item.slideDescription}
+              variant="body"
+              className="mb-4 text-muted-foreground"
             />
-            <ButtonComponent 
+            <ButtonComponent
               id={`hero-carousel-slide-btn-${index + 1}`}
               text={item.buttonText}
               href={item.buttonUrl || "#"}
               target={item.buttonTarget || "_self"}
-              variant="outline" 
-              size="sm" 
+              variant="outline"
+              size="sm"
             />
           </CardComponent>
         ))}

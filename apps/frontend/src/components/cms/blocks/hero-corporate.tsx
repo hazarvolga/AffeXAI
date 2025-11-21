@@ -34,13 +34,12 @@ export interface HeroCorporateProps {
     label: string;
   }>;
 
-  // Media
-  imageUrl?: string;
+  // Media (updated to unified media system)
+  backgroundMediaType?: string;
+  backgroundMediaUrl?: string;
+  backgroundImageHint?: string;
   imageAlt?: string;
   imagePosition?: 'left' | 'right';
-
-  // Video (optional)
-  videoUrl?: string;
   showVideoButton?: boolean;
 
   // CTAs
@@ -66,10 +65,11 @@ export const HeroCorporate: React.FC<HeroCorporateProps> = ({
     { value: '25', label: 'Yıllık Deneyim' },
     { value: '%98', label: 'Müşteri Memnuniyeti' },
   ],
-  imageUrl = 'https://picsum.photos/seed/hero-corporate/800/600',
+  backgroundMediaType = 'image',
+  backgroundMediaUrl = 'https://picsum.photos/seed/hero-corporate/800/600',
+  backgroundImageHint,
   imageAlt = 'Kurumsal Görsel',
   imagePosition = 'right',
-  videoUrl,
   showVideoButton = false,
   primaryButtonText = 'Bizimle İletişime Geçin',
   primaryButtonUrl = '/contact',
@@ -85,17 +85,50 @@ export const HeroCorporate: React.FC<HeroCorporateProps> = ({
 
   const mediaContent = (
     <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
-      {showVideo && videoUrl ? (
+      {/* Show video if play button was clicked or if media type is video/youtube */}
+      {showVideo && backgroundMediaType === 'youtube' && backgroundMediaUrl ? (
         <iframe
-          src={videoUrl}
+          src={`${backgroundMediaUrl}?autoplay=1&controls=1`}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
+      ) : backgroundMediaType === 'video' && backgroundMediaUrl ? (
+        <video
+          controls
+          autoPlay={showVideo}
+          className="w-full h-full object-cover"
+        >
+          <source src={backgroundMediaUrl} type="video/mp4" />
+        </video>
+      ) : backgroundMediaType === 'youtube' && backgroundMediaUrl && !showVideo ? (
+        <>
+          {/* YouTube thumbnail - show image first, then iframe on click */}
+          <Image
+            src={backgroundImageHint || 'https://picsum.photos/800/600'}
+            alt={imageAlt}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+          {showVideoButton && (
+            <button
+              onClick={() => setShowVideo(true)}
+              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors group"
+              aria-label="Play video"
+            >
+              <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Play className="w-8 h-8 text-primary ml-1" fill="currentColor" />
+              </div>
+            </button>
+          )}
+        </>
       ) : (
         <>
+          {/* Image */}
           <Image
-            src={imageUrl}
+            src={backgroundMediaUrl || 'https://picsum.photos/800/600'}
             alt={imageAlt}
             fill
             className="object-cover"
@@ -103,8 +136,8 @@ export const HeroCorporate: React.FC<HeroCorporateProps> = ({
             sizes="(max-width: 768px) 100vw, 50vw"
           />
 
-          {/* Video Play Button Overlay */}
-          {showVideoButton && videoUrl && (
+          {/* Video Play Button Overlay (for video type with showVideoButton) */}
+          {showVideoButton && (backgroundMediaType === 'video' || backgroundMediaType === 'youtube') && backgroundMediaUrl && (
             <button
               onClick={() => setShowVideo(true)}
               className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors group"

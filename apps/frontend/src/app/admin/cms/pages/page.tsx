@@ -20,6 +20,7 @@ import { Edit, Plus, Search, Trash2, Copy, Eye, EyeOff, FileText } from 'lucide-
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import type { Page, PageStatus } from '@affexai/shared-types';
+import { CreatePageDialog } from '@/components/cms/create-page-dialog';
 
 const CmsAdminPage = () => {
   const [pages, setPages] = useState<Page[]>([]);
@@ -30,6 +31,7 @@ const CmsAdminPage = () => {
   const [pageToDelete, setPageToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -67,28 +69,13 @@ const CmsAdminPage = () => {
     );
   }, [pages, searchQuery]);
 
-  const handleCreatePage = async () => {
-    try {
-      const createdPage = await cmsService.createPage({
-        title: 'Yeni Sayfa',
-        slug: 'yeni-sayfa-' + Date.now(),
-        description: '',
-      });
+  const handleCreatePage = () => {
+    setCreateDialogOpen(true);
+  };
 
-      toast({
-        title: 'Sayfa oluşturuldu',
-        description: 'Yeni sayfa başarıyla oluşturuldu.',
-      });
-
-      router.push(`/admin/cms/editor?pageId=${createdPage.id}`);
-    } catch (error) {
-      console.error('Failed to create page:', error);
-      toast({
-        title: 'Hata',
-        description: 'Sayfa oluşturulurken bir hata oluştu.',
-        variant: 'destructive',
-      });
-    }
+  const handleCreateSuccess = (pageId: string) => {
+    fetchPages();
+    router.push(`/admin/cms/editor?pageId=${pageId}`);
   };
 
   const handlePublishPage = async (id: string) => {
@@ -398,6 +385,13 @@ const CmsAdminPage = () => {
         isDeleting={isDeleting}
         confirmText="Evet, Sil"
         cancelText="İptal"
+      />
+
+      {/* Create Page Dialog */}
+      <CreatePageDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSuccess={handleCreateSuccess}
       />
     </div>
   );

@@ -383,14 +383,31 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
           // Transform template blocks to editor components
           const editorComponents: EditorComponent[] = template.blocks
             .sort((a, b) => a.order - b.order)
-            .map((block, index) => ({
-              id: `${block.id}-${Date.now()}-${index}`,
-              type: block.type,
-              props: block.config || {},
-              orderIndex: index,
-              parentId: null,
-              children: []
-            }));
+            .map((block, index) => {
+              const props = block.props || block.config || {};
+
+              // Add blockId to props for proper block rendering
+              const componentProps = {
+                ...props,
+                blockId: block.type
+              };
+
+              console.log(`[Template Load] Block ${block.id} (${block.type}):`, {
+                hasProps: !!block.props,
+                hasConfig: !!block.config,
+                propsKeys: Object.keys(componentProps),
+                mainTabsLength: componentProps.mainTabs?.length
+              });
+
+              return {
+                id: `${block.id}-${Date.now()}-${index}`,
+                type: 'block', // All components are type 'block'
+                props: componentProps,
+                orderIndex: index,
+                parentId: null,
+                children: []
+              };
+            });
 
           // Set components in editor
           setComponents(editorComponents);
@@ -407,7 +424,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
 
           toast({
             title: 'Template Yüklendi',
-            description: `"${template.name}" şablonu editöre yüklendi. Artık düzenleyebilirsiniz.`,
+            description: `"${template.name}" şablonu editöre yüklendi. Kategori ve menü seçimini yapmayı unutmayın.`,
           });
         } catch (error) {
           console.error('Error loading template:', error);
@@ -432,12 +449,25 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
           cmsService.getMenus(),
         ]);
         setCategories(categoriesData);
-        setMenus(menusData);
+
+        // Load full menu items for each menu (to include nested items)
+        const menusWithFullItems = await Promise.all(
+          menusData.map(async (menu) => {
+            try {
+              const fullItems = await cmsService.getMenuItems(menu.id);
+              return { ...menu, items: fullItems };
+            } catch (error) {
+              console.error(`Failed to load items for menu ${menu.id}:`, error);
+              return menu;
+            }
+          })
+        );
+        setMenus(menusWithFullItems);
 
         // If we have a pageId, check which menus contain this page
-        if (pageId && menusData.length > 0) {
+        if (pageId && menusWithFullItems.length > 0) {
           const pageMenuIds: string[] = [];
-          menusData.forEach(menu => {
+          menusWithFullItems.forEach(menu => {
             if (menu.items?.some(item => item.pageId === pageId)) {
               pageMenuIds.push(menu.id);
             }
@@ -451,6 +481,26 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
 
     loadCategoriesAndMenus();
   }, [pageId]);
+
+  // Auto-select default category and menu for template mode
+  useEffect(() => {
+    // Only run in template mode (templateId exists, pageId doesn't)
+    if (templateId && !pageId && categories.length > 0 && menus.length > 0) {
+      // Set default category if not already selected
+      if (!selectedCategoryId && categories.length > 0) {
+        const defaultCategory = categories[0];
+        setSelectedCategoryId(defaultCategory.id);
+        console.log('[Template Mode] Auto-selected default category:', defaultCategory.name);
+      }
+
+      // Set default menu if not already selected
+      if (selectedMenuIds.length === 0 && menus.length > 0) {
+        const defaultMenu = menus[0];
+        setSelectedMenuIds([defaultMenu.id]);
+        console.log('[Template Mode] Auto-selected default menu:', defaultMenu.name);
+      }
+    }
+  }, [templateId, pageId, categories, menus, selectedCategoryId, selectedMenuIds]);
 
   // Handle Tree Sidebar Resize
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -855,6 +905,27 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({ pageId, templateId }
             description: "Page saved but menu assignment failed",
             variant: "destructive",
           });
+        }
+      }
+
+      // Reload menus to reflect new menu item
+      if (selectedMenuIds.length > 0) {
+        try {
+          const menusData = await cmsService.getMenus();
+          const menusWithFullItems = await Promise.all(
+            menusData.map(async (menu) => {
+              try {
+                const fullItems = await cmsService.getMenuItems(menu.id);
+                return { ...menu, items: fullItems };
+              } catch (error) {
+                console.error(`Failed to load items for menu ${menu.id}:`, error);
+                return menu;
+              }
+            })
+          );
+          setMenus(menusWithFullItems);
+        } catch (error) {
+          console.error('Failed to reload menus:', error);
         }
       }
 

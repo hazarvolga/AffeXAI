@@ -13,6 +13,10 @@ export class CreatePageDto {
   description?: string;
 
   @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
   @IsEnum(PageStatus)
   status?: PageStatus;
 

@@ -20,11 +20,12 @@ import type { BlockPropertySchema, TokenReferenceConfig } from '@/components/cms
 interface PropertyFieldRendererProps {
   propertyKey: string;
   propertySchema: {
-    type: 'text' | 'number' | 'boolean' | 'color' | 'select' | 'image' | 'list' | 'textarea' | 'token';
+    type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'list' | 'array' | 'textarea' | 'token';
     label: string;
     options?: string[];
     defaultValue?: any;
     tokenReference?: TokenReferenceConfig;
+    itemSchema?: Record<string, any>; // For array/list item structure
   };
   value: any;
   onChange: (value: any) => void;
@@ -128,6 +129,7 @@ export function PropertyFieldRenderer({
       );
 
     case 'boolean':
+    case 'checkbox':
       return (
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -205,6 +207,25 @@ export function PropertyFieldRenderer({
             disabled={disabled}
             placeholder="Image URL or media ID"
           />
+        </div>
+      );
+
+    case 'array':
+    case 'list':
+      // Complex array/list types should be handled by parent component (PropertiesPanel)
+      // This is a fallback that displays a warning
+      return (
+        <div className="space-y-2 p-3 border border-yellow-500/50 bg-yellow-50 rounded">
+          <Label className="text-yellow-800 font-medium">{label}</Label>
+          <p className="text-xs text-yellow-700">
+            Complex list editing is only available in the Properties Panel.
+            This field requires nested item editing which is not supported in simple property rendering.
+          </p>
+          {value && Array.isArray(value) && (
+            <p className="text-xs text-muted-foreground">
+              Current items: {value.length}
+            </p>
+          )}
         </div>
       );
 

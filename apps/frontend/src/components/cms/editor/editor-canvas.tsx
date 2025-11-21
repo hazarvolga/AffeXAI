@@ -8,8 +8,9 @@ import { Lock } from 'lucide-react';
 import { EditableText } from './editable-text';
 import { EditorProvider } from './editor-context';
 import { PreviewProvider } from '@/components/cms/preview-context';
+import { blockRegistry } from '@/components/cms/block-registry';
 
-// Import all prebuild components
+// Import all prebuild components (for legacy support)
 import { navigationBlocks } from '@/components/cms/blocks/navigation-blocks';
 import { heroBlocks } from '@/components/cms/blocks/hero-blocks';
 import { contentBlocks } from '@/components/cms/blocks/content-blocks';
@@ -56,9 +57,15 @@ interface EditorCanvasProps {
 }
 
 // Component Registry - Maps component types to their React components
+// Priority: blockRegistry (new blocks) > legacy block arrays
 const componentRegistry: Record<string, React.FC<any>> = {};
 
-// Build registry from all block arrays
+// Add all blocks from blockRegistry first
+Object.entries(blockRegistry).forEach(([key, component]) => {
+  componentRegistry[key] = component as React.FC<any>;
+});
+
+// Build registry from all legacy block arrays (fallback)
 const allBlockArrays = [
   navigationBlocks,
   heroBlocks,
@@ -80,9 +87,12 @@ const allBlockArrays = [
   migrationBlocks,
 ];
 
+// Add legacy blocks (only if not already in blockRegistry)
 allBlockArrays.forEach((blockArray) => {
   blockArray.forEach((block: any) => {
-    componentRegistry[block.id] = block.component;
+    if (!componentRegistry[block.id]) {
+      componentRegistry[block.id] = block.component;
+    }
   });
 });
 

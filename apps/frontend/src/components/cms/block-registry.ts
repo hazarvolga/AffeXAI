@@ -82,6 +82,14 @@ import { ServiceGrid } from './blocks/service-grid';
 import { TextColumns } from './blocks/text-columns';
 import { WorkflowTabs } from './blocks/workflow-tabs';
 
+// Import footer blocks
+import {
+  FooterMultiColumn,
+  FooterCompactCentered,
+  FooterExtendedCta,
+  FooterNewsletterSignup,
+} from './blocks/footer-blocks';
+
 // Block registry pattern - maps component types to their implementations
 export const blockRegistry = {
   text: TextComponent,
@@ -158,6 +166,11 @@ export const blockRegistry = {
   'service-grid': ServiceGrid,
   'text-columns': TextColumns,
   'workflow-tabs': WorkflowTabs,
+  // Footer blocks
+  'footer-multi-column': FooterMultiColumn,
+  'footer-compact-centered': FooterCompactCentered,
+  'footer-extended-cta': FooterExtendedCta,
+  'footer-newsletter-signup': FooterNewsletterSignup,
 } as const;
 
 export type BlockType = keyof typeof blockRegistry;

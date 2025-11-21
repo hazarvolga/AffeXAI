@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { blockRegistry, isBlockType } from '@/components/cms/block-registry';
 import { navigationBlocks } from '@/components/cms/blocks/navigation-blocks';
 import { heroBlocks } from '@/components/cms/blocks/hero-blocks';
 import { contentBlocks } from '@/components/cms/blocks/content-blocks';
@@ -28,8 +29,14 @@ interface BlockRendererProps {
 export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, props }) => {
   // Normalize legacy IDs
   const normalizedBlockId = normalizeComponentId(blockId);
-  
-  // Create a map of all blocks by their ID
+
+  // First, try to find in block registry (new blocks)
+  if (isBlockType(normalizedBlockId)) {
+    const BlockComponent = blockRegistry[normalizedBlockId];
+    return <BlockComponent {...props} />;
+  }
+
+  // Fallback: Create a map of all blocks by their ID (legacy blocks)
   const allBlocks = [
     ...navigationBlocks,
     ...heroBlocks,
@@ -56,7 +63,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ blockId, props }) 
   }, {} as Record<string, typeof allBlocks[0]>);
 
   const block = blockMap[normalizedBlockId];
-  
+
   if (!block) {
     return (
       <div className="p-4 text-center text-red-500 border-2 border-red-300 border-dashed rounded bg-red-50">

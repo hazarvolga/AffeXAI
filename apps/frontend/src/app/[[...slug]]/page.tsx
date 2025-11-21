@@ -1,92 +1,83 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { CmsPageService } from '@/services/cms-page.service';
+import { cmsService } from '@/lib/cms/cms-service';
 import { PageRenderer } from '@/components/cms/page-renderer';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { Breadcrumb } from '@/components/layout/breadcrumb';
 
 interface PageProps {
-  params: Promise<{
+  params: {
     slug?: string[];
-  }>;
+  };
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  try {
-    const resolvedParams = await params;
-    const slug = resolvedParams.slug?.join('/') || 'home';
-    const page = await CmsPageService.getPageBySlug(slug);
+export default async function DynamicCMSPage({ params }: PageProps) {
+  // Build slug from params (e.g., ['solutions', 'building-design', 'architecture'] → 'solutions/building-design/architecture')
+  const slug = params.slug ? params.slug.join('/') : 'home';
 
-    if (!page) {
-      return {
-        title: 'Page Not Found',
-        description: 'The requested page could not be found.',
-      };
-    }
-
-    return {
-      title: page.metaTitle || page.title,
-      description: page.metaDescription || `${page.title} - Affexai`,
-    };
-  } catch (error) {
-    return {
-      title: 'Page Not Found',
-      description: 'The requested page could not be found.',
-    };
+  // Ignore Next.js internal routes and static files
+  if (
+    slug.includes('_next') ||
+    slug.includes('.') || // Files with extensions (.js, .map, .css, etc.)
+    slug.startsWith('api/') ||
+    slug.startsWith('admin/') ||
+    slug.startsWith('portal/')
+  ) {
+    notFound();
   }
-}
 
-export default async function CatchAllPage({ params }: PageProps) {
   try {
-    const resolvedParams = await params;
-    const slug = resolvedParams.slug?.join('/') || 'home';
-    const page = await CmsPageService.getPageBySlug(slug);
+    // Fetch page from CMS by slug
+    const page = await cmsService.getPageBySlug(slug);
 
-    // Check if page exists and is published
     if (!page || page.status !== 'published') {
       notFound();
     }
 
-    // Get layout options with defaults
-    const layoutOptions = page.layoutOptions || {};
-    const showHeader = layoutOptions.showHeader !== false; // default true
-    const showFooter = layoutOptions.showFooter !== false; // default true
-    const isFullWidth = layoutOptions.isFullWidth === true; // default false (boxed)
-
-    return (
-      <div className="min-h-screen flex flex-col">
-        {showHeader && <Header />}
-        {/* Auto-generated breadcrumb navigation from URL path */}
-        <Breadcrumb
-          variant="minimal"
-          showHomeIcon={true}
-          hiddenPaths={['/']}
-        />
-
-        <main className="flex-1">
-          {page.components && page.components.length > 0 ? (
-            // Render CMS content with layout wrapper
-            <div className={isFullWidth ? 'w-full' : 'container mx-auto max-w-screen-xl px-4'}>
-              <PageRenderer components={page.components} />
-            </div>
-          ) : (
-            // Fallback: No CMS content available
-            <div className="container mx-auto px-4 py-20">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
-                <p className="text-muted-foreground">No content available for this page.</p>
-              </div>
-            </div>
-          )}
-        </main>
-
-        {showFooter && <Footer />}
-      </div>
-    );
+    // Render page with components
+    return <PageRenderer components={page.components || []} />;
   } catch (error) {
-    console.error('Error loading CMS page:', error);
+    console.error('Error fetching CMS page:', error);
     notFound();
+  }
+}
+
+// Generate static params for known pages (optional, for build-time optimization)
+export async function generateStaticParams() {
+  try {
+    const pages = await cmsService.getPages('published');
+
+    return pages.map((page) => ({
+      slug: page.slug.split('/'),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: PageProps) {
+  const slug = params.slug ? params.slug.join('/') : 'home';
+
+  try {
+    const page = await cmsService.getPageBySlug(slug, false);
+
+    if (!page) {
+      return {
+        title: 'Page Not Found',
+      };
+    }
+
+    return {
+      title: page.title,
+      description: page.description || '',
+      openGraph: {
+        title: page.title,
+        description: page.description || '',
+        type: 'website',
+      },
+    };
+  } catch (error) {
+    return {
+      title: 'Page Not Found',
+    };
   }
 }

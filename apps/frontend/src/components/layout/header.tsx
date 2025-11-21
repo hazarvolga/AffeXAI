@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ThemeSettingsService, type TopBarLink, type ThemeSettings } from '@/services/theme-settings.service';
 import { cmsMenuService } from '@/lib/cms/menu-service';
 import type { CmsMenu } from '@affexai/shared-types';
+import { mediaService } from '@/lib/api/mediaService';
 
 // Main navigation items
 const mainNav = [
@@ -119,26 +120,24 @@ export function Header() {
         if (result.success && result.data) {
           const settings = result.data;
 
-          // Site settings
-          if (settings.site) {
-            if (settings.site.logoUrl) {
-              const fullLogoUrl = settings.site.logoUrl.startsWith('http')
-                ? settings.site.logoUrl
-                : `${process.env.NEXT_PUBLIC_API_URL}${settings.site.logoUrl}`;
-              setLogoUrl(fullLogoUrl);
-            }
-            if (settings.site.companyName) {
-              setCompanyName(settings.site.companyName);
-            }
-            if (settings.site.companyPhone) {
-              setCompanyPhone(settings.site.companyPhone);
-            }
-            if (settings.site.companyEmail) {
-              setCompanyEmail(settings.site.companyEmail);
-            }
-            if (settings.site.companyAddress) {
-              setCompanyAddress(settings.site.companyAddress);
-            }
+          // Convert logo UUID to full URL
+          if (settings.logoUrl) {
+            const fullLogoUrl = await mediaService.getMediaUrl(settings.logoUrl);
+            setLogoUrl(fullLogoUrl);
+          }
+
+          // Set company info
+          if (settings.companyName) {
+            setCompanyName(settings.companyName);
+          }
+          if (settings.contact?.phone) {
+            setCompanyPhone(settings.contact.phone);
+          }
+          if (settings.contact?.email) {
+            setCompanyEmail(settings.contact.email);
+          }
+          if (settings.contact?.address) {
+            setCompanyAddress(settings.contact.address);
           }
         }
       } catch (error) {

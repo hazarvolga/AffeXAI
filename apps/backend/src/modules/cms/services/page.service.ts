@@ -122,11 +122,9 @@ export class PageService {
       title: `${originalPage.title} (Kopya)`,
       slug: `${originalPage.slug}-copy-${Date.now()}`,
       description: originalPage.description,
-      metaTitle: originalPage.metaTitle,
-      metaDescription: originalPage.metaDescription,
       status: PageStatus.DRAFT, // Always start as draft
       categoryId: originalPage.categoryId,
-      templateId: originalPage.templateId,
+      layoutOptions: originalPage.layoutOptions,
     });
 
     const savedPage = await this.pageRepository.save(clonedPage);

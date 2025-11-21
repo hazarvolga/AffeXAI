@@ -7,9 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload } from 'lucide-react';
 import { BlockPropertySchema } from '@/components/cms/blocks/block-configs';
 import { MediaPicker } from '@/components/cms/editor/media-picker';
+import { MediaLibrary } from '@/components/cms/editor/media-library';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Media, MediaType } from '@/lib/media/types';
 import { useToast } from '@/hooks/use-toast';
 import NextImage from 'next/image';
 
@@ -34,6 +38,70 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
   onChange,
 }) => {
   const { toast } = useToast();
+  const [mediaLibraryOpen, setMediaLibraryOpen] = React.useState(false);
+  const [currentMediaField, setCurrentMediaField] = React.useState<{
+    fieldKey: string;
+    onChange: (value: string) => void;
+  } | null>(null);
+
+  /**
+   * Generate slug from text (Turkish character support)
+   * Used for auto-generating IDs from labels
+   */
+  const generateSlug = (text: string): string => {
+    if (!text || typeof text !== 'string') return '';
+
+    const turkishMap: Record<string, string> = {
+      'ç': 'c', 'Ç': 'C',
+      'ğ': 'g', 'Ğ': 'G',
+      'ı': 'i', 'İ': 'I',
+      'ö': 'o', 'Ö': 'O',
+      'ş': 's', 'Ş': 'S',
+      'ü': 'u', 'Ü': 'U',
+    };
+
+    let slug = text;
+
+    // Replace Turkish characters
+    Object.keys(turkishMap).forEach(key => {
+      slug = slug.replace(new RegExp(key, 'g'), turkishMap[key]);
+    });
+
+    // Convert to lowercase, replace spaces with hyphens, remove special characters
+    slug = slug
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+
+    return slug;
+  };
+
+  /**
+   * Open Media Library for a specific field
+   */
+  const openMediaLibrary = (fieldKey: string, onChange: (value: string) => void) => {
+    setCurrentMediaField({ fieldKey, onChange });
+    setMediaLibraryOpen(true);
+  };
+
+  /**
+   * Handle media selection from Media Library
+   */
+  const handleMediaSelect = (media: Media) => {
+    if (currentMediaField) {
+      currentMediaField.onChange(media.url);
+      toast({
+        title: "Media selected",
+        description: `${media.originalName} has been added`,
+      });
+    }
+    setMediaLibraryOpen(false);
+    setCurrentMediaField(null);
+  };
 
   /**
    * Helper function to identify style properties
@@ -197,6 +265,149 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
       );
     }
 
+    // Special handling for *MediaUrl fields that have corresponding *MediaType field
+    // (e.g., backgroundMediaUrl + backgroundMediaType, imageMediaUrl + imageMediaType)
+    if (key.toLowerCase().endsWith('mediaurl')) {
+      // Determine corresponding media type field name
+      const mediaTypeField = key.replace(/MediaUrl$/i, 'MediaType').replace(/mediaurl$/i, 'mediatype');
+
+      // Only show Browse button if there's a corresponding mediaType field
+      if (schema[mediaTypeField]) {
+        // Get current media type to show appropriate preview
+        let currentMediaType = '';
+        if (parentPath.includes('[')) {
+          const match = parentPath.match(/\[(\d+)\]/);
+          if (match) {
+            const index = parseInt(match[1]);
+            const listKey = parentPath.split('[')[0];
+            const items = values[listKey];
+            if (items && items[index]) {
+              currentMediaType = items[index][mediaTypeField] || 'image';
+            }
+          }
+        } else {
+          currentMediaType = values[mediaTypeField] || 'image';
+        }
+
+        return (
+          <div key={fieldKey} className="space-y-2">
+            <Label>{config.label}</Label>
+            <div className="border rounded-lg p-3 bg-gray-50 space-y-3">
+              {/* Browse Button for Media Library */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCurrentMediaField({
+                    key,
+                    onChange: (url: string) => {
+                      if (parentPath.includes('[')) {
+                        const match = parentPath.match(/\[(\d+)\]/);
+                        if (match) {
+                          const index = parseInt(match[1]);
+                          const listKey = parentPath.split('[')[0];
+                          const items = [...(values[listKey] || [])];
+                          if (items[index]) {
+                            items[index] = { ...items[index], [key]: url };
+                            onChange(listKey, items);
+                          }
+                        }
+                      } else {
+                        onChange(key, url);
+                      }
+                    }
+                  });
+                  setMediaLibraryOpen(true);
+                }}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Browse Media Library
+              </Button>
+
+              {/* Direct URL Input */}
+              <Input
+                type="text"
+                value={value}
+                onChange={(e) => onChange(key, e.target.value)}
+                placeholder="Or paste direct URL"
+              />
+            </div>
+
+            {/* Preview based on media type */}
+            {value && currentMediaType === 'image' && (
+              <div className="relative group">
+                <NextImage
+                  src={value}
+                  alt="Preview"
+                  width={300}
+                  height={128}
+                  className="w-full h-32 object-contain rounded border bg-white"
+                />
+                <button
+                  onClick={() => {
+                    if (parentPath.includes('[')) {
+                      const match = parentPath.match(/\[(\d+)\]/);
+                      if (match) {
+                        const index = parseInt(match[1]);
+                        const listKey = parentPath.split('[')[0];
+                        const items = [...(values[listKey] || [])];
+                        if (items[index]) {
+                          items[index] = { ...items[index], [key]: '' };
+                          onChange(listKey, items);
+                        }
+                      }
+                    } else {
+                      onChange(key, '');
+                    }
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {value && currentMediaType === 'video' && (
+              <div className="relative group">
+                <video
+                  src={value}
+                  className="w-full h-32 object-contain rounded border bg-black"
+                  controls
+                />
+                <button
+                  onClick={() => {
+                    if (parentPath.includes('[')) {
+                      const match = parentPath.match(/\[(\d+)\]/);
+                      if (match) {
+                        const index = parseInt(match[1]);
+                        const listKey = parentPath.split('[')[0];
+                        const items = [...(values[listKey] || [])];
+                        if (items[index]) {
+                          items[index] = { ...items[index], [key]: '' };
+                          onChange(listKey, items);
+                        }
+                      }
+                    } else {
+                      onChange(key, '');
+                    }
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {value && currentMediaType === 'youtube' && (
+              <div className="text-sm text-muted-foreground">
+                YouTube URL: {value}
+              </div>
+            )}
+          </div>
+        );
+      }
+    }
+
     switch (config.type) {
       case 'text':
         return (
@@ -251,6 +462,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
         );
 
       case 'boolean':
+      case 'checkbox':
         return (
           <div key={fieldKey} className="flex items-center space-x-2">
             <Checkbox
@@ -348,7 +560,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
                   }
                 }}
                 placeholder={`Select ${config.label || 'image'}`}
-                filterType="image"
+                filterType={MediaType.IMAGE}
               />
             </div>
             {value && (
@@ -389,6 +601,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
         );
 
       case 'list':
+      case 'array':
         return renderListField(key, config, value || [], fieldKey);
 
       default:
@@ -401,6 +614,284 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
           </div>
         );
     }
+  };
+
+  /**
+   * Helper: Render individual field input (without wrapper)
+   */
+  const renderFieldInput = (
+    key: string,
+    config: BlockPropertySchema[string],
+    value: any,
+    fieldKey: string,
+    onChange: (value: any) => void,
+    parentItem?: any
+  ) => {
+    // Special handling for mediaUrl - show Media Library integration for image/video
+    if (key === 'mediaUrl' && parentItem?.mediaType) {
+      const mediaType = parentItem.mediaType;
+
+      if (mediaType === 'image' || mediaType === 'video') {
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                id={fieldKey}
+                type="text"
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={`${mediaType === 'image' ? '🖼️ Image' : '🎬 Video'} URL or upload path`}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => openMediaLibrary(fieldKey, onChange)}
+                className="shrink-0"
+              >
+                {mediaType === 'image' ? <ImageIcon className="h-4 w-4 mr-2" /> : <VideoIcon className="h-4 w-4 mr-2" />}
+                Browse
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {mediaType === 'image' ? '📷' : '🎥'} Paste URL or click Browse to upload from Media Library
+            </p>
+          </div>
+        );
+      }
+
+      if (mediaType === 'youtube') {
+        return (
+          <div className="space-y-2">
+            <Input
+              id={fieldKey}
+              type="text"
+              value={value || ''}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Paste YouTube URL (e.g., https://youtu.be/... or https://youtube.com/watch?v=...)"
+            />
+            <p className="text-xs text-muted-foreground">
+              📺 Paste any YouTube link - we'll extract the video ID automatically
+            </p>
+          </div>
+        );
+      }
+    }
+
+    switch (config.type) {
+      case 'text':
+        return (
+          <Input
+            id={fieldKey}
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={config.defaultValue || ''}
+          />
+        );
+
+      case 'textarea':
+        return (
+          <Textarea
+            id={fieldKey}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={config.defaultValue || ''}
+            rows={3}
+          />
+        );
+
+      case 'number':
+        return (
+          <Input
+            id={fieldKey}
+            type="number"
+            value={value || ''}
+            onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+            placeholder={config.defaultValue?.toString() || '0'}
+          />
+        );
+
+      case 'boolean':
+      case 'checkbox':
+        return (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={fieldKey}
+              checked={value || false}
+              onCheckedChange={onChange}
+            />
+            <Label htmlFor={fieldKey} className="cursor-pointer">
+              {config.label}
+            </Label>
+          </div>
+        );
+
+      case 'select':
+        return (
+          <Select
+            value={value || config.defaultValue || ''}
+            onValueChange={onChange}
+          >
+            <SelectTrigger id={fieldKey}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {config.options?.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      default:
+        return (
+          <Input
+            id={fieldKey}
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={config.defaultValue || ''}
+          />
+        );
+    }
+  };
+
+  /**
+   * Render nested list field (for arrays inside arrays, like subTabs inside mainTabs)
+   */
+  const renderNestedListField = (
+    key: string,
+    config: BlockPropertySchema[string],
+    items: any[],
+    fieldKey: string,
+    onChange: (items: any[]) => void
+  ) => {
+    const addItem = () => {
+      const newItem: any = {};
+      if (config.itemSchema) {
+        Object.keys(config.itemSchema).forEach((subKey) => {
+          newItem[subKey] = config.itemSchema![subKey].defaultValue ?? '';
+        });
+      }
+      onChange([...items, newItem]);
+    };
+
+    const removeItem = (index: number) => {
+      const newItems = items.filter((_, i) => i !== index);
+      onChange(newItems);
+    };
+
+    const updateItem = (index: number, subKey: string, subValue: any) => {
+      const newItems = [...items];
+      newItems[index] = { ...newItems[index], [subKey]: subValue };
+      onChange(newItems);
+    };
+
+    return (
+      <div key={fieldKey} className="space-y-3 ml-4 pl-4 border-l-2 border-blue-200">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-blue-700">{config.label}</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addItem}
+            className="h-7 text-xs"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add {config.label}
+          </Button>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">
+            No {config.label.toLowerCase()} yet.
+          </p>
+        ) : (
+          <Accordion type="single" collapsible className="space-y-2">
+            {items.map((item, index) => {
+              // Get label for accordion trigger
+              const itemLabel = item.label || item.title || `${config.label} #${index + 1}`;
+              const itemIcon = item.icon || '';
+
+              return (
+                <AccordionItem
+                  key={`${fieldKey}-${index}`}
+                  value={`item-${index}`}
+                  className="border border-blue-200 rounded-lg bg-blue-50"
+                >
+                  <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-2">
+                      <span className="text-xs font-medium text-blue-800">
+                        {itemIcon && <span className="mr-2">{itemIcon}</span>}
+                        {itemLabel}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeItem(index);
+                        }}
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-3 pb-3 pt-1">
+                    <div className="space-y-2">
+                      {config.itemSchema &&
+                        Object.entries(config.itemSchema).map(([subKey, subConfig]) => {
+                          // Skip rendering 'id' fields - they will be auto-generated from 'label'
+                          if (subKey === 'id' && config.itemSchema?.label) {
+                            return null;
+                          }
+
+                          return (
+                            <div key={`${fieldKey}[${index}].${subKey}`} className="space-y-1">
+                              <Label htmlFor={`${fieldKey}[${index}].${subKey}`} className="text-xs">
+                                {subConfig.label}
+                              </Label>
+                              {renderFieldInput(
+                                subKey,
+                                subConfig,
+                                item[subKey],
+                                `${fieldKey}[${index}].${subKey}`,
+                                (subValue) => {
+                                  // Auto-generate ID when label changes
+                                  if (subKey === 'label' && config.itemSchema?.id) {
+                                    const autoId = generateSlug(subValue);
+                                    const newItems = [...items];
+                                    newItems[index] = {
+                                      ...newItems[index],
+                                      [subKey]: subValue,
+                                      id: autoId
+                                    };
+                                    onChange(newItems);
+                                  } else {
+                                    updateItem(index, subKey, subValue);
+                                  }
+                                },
+                                item
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        )}
+      </div>
+    );
   };
 
   /**
@@ -453,49 +944,113 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
             No items yet. Click "Add Item" to create one.
           </p>
         ) : (
-          <div className="space-y-4">
-            {items.map((item, index) => (
-              <div
-                key={`${fieldKey}-${index}`}
-                className="p-4 border rounded-lg space-y-3 relative"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Item {index + 1}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeItem(index)}
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+          <Accordion type="single" collapsible className="space-y-3">
+            {items.map((item, index) => {
+              // Get label for accordion trigger
+              const itemLabel = item.label || item.title || `Item ${index + 1}`;
+              const itemIcon = item.icon || '';
 
-                {config.itemSchema &&
-                  Object.entries(config.itemSchema).map(([subKey, subConfig]) =>
-                    renderField(
-                      subKey,
-                      subConfig,
-                      item[subKey],
-                      `${fieldKey}[${index}]`
-                    )
-                  )}
-              </div>
-            ))}
-          </div>
+              return (
+                <AccordionItem
+                  key={`${fieldKey}-${index}`}
+                  value={`item-${index}`}
+                  className="border rounded-lg"
+                >
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-2">
+                      <span className="text-sm font-medium">
+                        {itemIcon && <span className="mr-2">{itemIcon}</span>}
+                        {itemLabel}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeItem(index);
+                        }}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4 pt-2">
+                    <div className="space-y-3">
+                      {config.itemSchema &&
+                        Object.entries(config.itemSchema).map(([subKey, subConfig]) => {
+                          // Skip rendering 'id' fields - they will be auto-generated from 'label'
+                          if (subKey === 'id' && config.itemSchema?.label) {
+                            return null;
+                          }
+
+                          // For nested arrays (like subTabs inside mainTabs), create a custom onChange
+                          const subOnChange = (subValue: any) => {
+                            // Auto-generate ID when label changes
+                            if (subKey === 'label' && config.itemSchema?.id) {
+                              const autoId = generateSlug(subValue);
+                              const newItems = [...items];
+                              newItems[index] = {
+                                ...newItems[index],
+                                [subKey]: subValue,
+                                id: autoId
+                              };
+                              onChange(key, newItems);
+                            } else {
+                              updateItem(index, subKey, subValue);
+                            }
+                          };
+
+                          // If this is a nested array, render it with renderNestedListField
+                          if (subConfig.type === 'array' || subConfig.type === 'list') {
+                            return renderNestedListField(
+                              subKey,
+                              subConfig,
+                              item[subKey] || [],
+                              `${fieldKey}[${index}].${subKey}`,
+                              (nestedItems) => updateItem(index, subKey, nestedItems)
+                            );
+                          }
+
+                          // For other field types, use renderField with custom onChange
+                          return (
+                            <div key={`${fieldKey}[${index}].${subKey}`} className="space-y-2">
+                              <Label htmlFor={`${fieldKey}[${index}].${subKey}`}>{subConfig.label}</Label>
+                              {renderFieldInput(subKey, subConfig, item[subKey], `${fieldKey}[${index}].${subKey}`, subOnChange, item)}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         )}
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
-      {Object.entries(schema)
-        .filter(([key]) => !isStyleProperty(key) && key !== 'className')
-        .map(([key, config]) =>
-          renderField(key, config, values[key])
-        )}
-    </div>
+    <>
+      <div className="space-y-6">
+        {Object.entries(schema)
+          .filter(([key]) => !isStyleProperty(key) && key !== 'className')
+          .map(([key, config]) =>
+            renderField(key, config, values[key])
+          )}
+      </div>
+
+      {/* Media Library Dialog */}
+      <Dialog open={mediaLibraryOpen} onOpenChange={setMediaLibraryOpen}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Media Library</DialogTitle>
+          </DialogHeader>
+          <MediaLibrary onMediaSelect={handleMediaSelect} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

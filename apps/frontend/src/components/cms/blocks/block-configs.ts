@@ -29,7 +29,7 @@ export interface TokenReferenceConfig {
 // Block property configurations
 export interface BlockPropertySchema {
   [key: string]: {
-    type: 'text' | 'number' | 'boolean' | 'color' | 'select' | 'image' | 'list' | 'textarea' | 'token';
+    type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'list' | 'array' | 'textarea' | 'token';
     label: string;
     options?: string[]; // For select type
     defaultValue?: any;
@@ -41,26 +41,26 @@ export interface BlockPropertySchema {
      */
     tokenReference?: TokenReferenceConfig;
 
-    // For list type
+    // For list/array type
     itemSchema?: {
       [subKey: string]: {
-        type: 'text' | 'number' | 'boolean' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'token';
+        type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token';
         label: string;
         options?: string[];
         defaultValue?: any;
         tokenReference?: TokenReferenceConfig;
-        // For nested list type
+        // For nested list/array type
         itemSchema?: {
           [subKey: string]: {
-            type: 'text' | 'number' | 'boolean' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'token';
+            type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token';
             label: string;
             options?: string[];
             defaultValue?: any;
             tokenReference?: TokenReferenceConfig;
-            // For deeply nested list type
+            // For deeply nested list/array type
             itemSchema?: {
               [subKey: string]: {
-                type: 'text' | 'number' | 'boolean' | 'color' | 'select' | 'image' | 'textarea' | 'token';
+                type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'token';
                 label: string;
                 options?: string[];
                 defaultValue?: any;
@@ -343,8 +343,14 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     ...createTextStyleProperties('subtitle', 'body', 'center', 'secondary', 'normal'),
     ...createButtonProperties('primary'),
     ...createButtonProperties('secondary'),
-    backgroundMediaId: { type: 'text', label: 'Background Media ID', defaultValue: null },
-    backgroundImage: { type: 'image', label: 'Background Image URL', defaultValue: '' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
   },
   'hero-split-image-right': {
     title: { type: 'text', label: 'Title', defaultValue: 'Transform Your Business' },
@@ -352,8 +358,14 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Our innovative solutions help you achieve more with less effort.' },
     ...createTextStyleProperties('subtitle', 'body', 'left', 'secondary', 'normal'),
     ...createButtonProperties(),
-    imageMediaId: { type: 'text', label: 'Image Media ID', defaultValue: null },
-    imageUrl: { type: 'image', label: 'Image URL', defaultValue: '' },
+    imageMediaType: {
+      type: 'select',
+      label: 'Image Media Type',
+      options: ['none', 'image', 'video'],
+      defaultValue: 'image'
+    },
+    imageMediaUrl: { type: 'text', label: 'Image URL (Upload/Direct URL)', defaultValue: '' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
   },
   'hero-gradient-floating-cta': {
     title: { type: 'text', label: 'Title', defaultValue: 'Innovation Meets Excellence' },
@@ -361,8 +373,14 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Join thousands of satisfied customers who have transformed their workflow.' },
     ...createTextStyleProperties('subtitle', 'body', 'center', 'secondary', 'normal'),
     ...createButtonProperties(),
-    backgroundMediaId: { type: 'text', label: 'Background Media ID', defaultValue: null },
-    backgroundImage: { type: 'image', label: 'Background Image', defaultValue: '' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
     backgroundPosition: { type: 'select', label: 'Background Position', options: ['center', 'top', 'bottom', 'left', 'right'], defaultValue: 'center' },
     backgroundSize: { type: 'select', label: 'Background Size', options: ['cover', 'contain', 'auto'], defaultValue: 'cover' },
   },
@@ -372,9 +390,14 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Immersive experiences that captivate and engage your audience.' },
     ...createTextStyleProperties('subtitle', 'body', 'center', 'secondary', 'normal'),
     ...createButtonProperties(),
-    backgroundMediaId: { type: 'text', label: 'Background Media ID', defaultValue: null },
-    backgroundImage: { type: 'image', label: 'Background Image', defaultValue: '' },
-    backgroundVideoUrl: { type: 'text', label: 'Background Video URL (optional)', defaultValue: '' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'video'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '' },
+    backgroundImageHint: { type: 'text', label: 'Background Image/Video Hint (AI)', defaultValue: '' },
     backgroundPosition: { type: 'select', label: 'Background Position', options: ['center', 'top', 'bottom', 'left', 'right'], defaultValue: 'center' },
     backgroundSize: { type: 'select', label: 'Background Size', options: ['cover', 'contain', 'auto'], defaultValue: 'cover' },
   },
@@ -384,8 +407,14 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'The ultimate platform for creators and innovators.' },
     ...createTextStyleProperties('subtitle', 'body', 'center', 'secondary', 'normal'),
     ...createButtonProperties(),
-    backgroundMediaId: { type: 'text', label: 'Background Media ID', defaultValue: null },
-    backgroundImage: { type: 'image', label: 'Background Image', defaultValue: '' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
     backgroundPosition: { type: 'select', label: 'Background Position', options: ['center', 'top', 'bottom', 'left', 'right'], defaultValue: 'center' },
     backgroundSize: { type: 'select', label: 'Background Size', options: ['cover', 'contain', 'auto'], defaultValue: 'cover' },
   },
@@ -394,16 +423,28 @@ export const heroBlocksConfig: Record<string, BlockPropertySchema> = {
     ...createTextStyleProperties('title', 'heading2', 'center', 'primary', 'bold'),
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Discover our most popular offerings' },
     ...createTextStyleProperties('subtitle', 'body', 'center', 'secondary', 'normal'),
-    backgroundMediaId: { type: 'text', label: 'Background Media ID', defaultValue: null },
-    backgroundImage: { type: 'image', label: 'Background Image', defaultValue: '' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
     backgroundPosition: { type: 'select', label: 'Background Position', options: ['center', 'top', 'bottom', 'left', 'right'], defaultValue: 'center' },
     backgroundSize: { type: 'select', label: 'Background Size', options: ['cover', 'contain', 'auto'], defaultValue: 'cover' },
     items: {
       type: 'list',
       label: 'Carousel Items',
       itemSchema: {
-        mediaId: { type: 'text', label: 'Slide Media ID', defaultValue: null },
-        slideImage: { type: 'image', label: 'Slide Image', defaultValue: '/placeholder-image.jpg' },
+        slideMediaType: {
+          type: 'select',
+          label: 'Slide Media Type',
+          options: ['none', 'image', 'video'],
+          defaultValue: 'image'
+        },
+        slideMediaUrl: { type: 'text', label: 'Slide Media URL (Upload/Direct URL)', defaultValue: '/placeholder-image.jpg' },
+        slideImageHint: { type: 'text', label: 'Slide Image Hint (AI)', defaultValue: '' },
         slideTitle: { type: 'text', label: 'Slide Title', defaultValue: 'Solution One' },
         slideDescription: { type: 'textarea', label: 'Slide Description', defaultValue: 'Brief description of this amazing solution.' },
         buttonText: { type: 'text', label: 'Button Text', defaultValue: 'Learn More' },
@@ -1807,8 +1848,14 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
         },
         title: { type: 'text', label: 'Slide Title', defaultValue: 'Solution Title' },
         description: { type: 'textarea', label: 'Description', defaultValue: 'Solution description text' },
-        imageUrl: { type: 'image', label: 'Slide Image URL', defaultValue: '/placeholder.jpg' },
-        imageHint: { type: 'text', label: 'Image Alt Text', defaultValue: 'Solution image' },
+        mediaType: {
+          type: 'select',
+          label: 'Slide Media Type',
+          options: ['none', 'image', 'video'],
+          defaultValue: 'image'
+        },
+        mediaUrl: { type: 'text', label: 'Slide Media URL (Upload/Direct URL)', defaultValue: '/placeholder.jpg' },
+        imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: 'Solution image' },
         iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'Building' },
         // Design Token: Icon color
         iconColor: {
@@ -1942,8 +1989,14 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
           type: 'list',
           label: 'Tab Slides',
           itemSchema: {
-            image: { type: 'image', label: 'Background Image URL', defaultValue: '/placeholder.jpg' },
-            imageHint: { type: 'text', label: 'Image Alt Text', defaultValue: 'Hero image' },
+            mediaType: {
+              type: 'select',
+              label: 'Background Media Type',
+              options: ['none', 'image', 'video', 'youtube'],
+              defaultValue: 'image'
+            },
+            mediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: '/placeholder.jpg' },
+            imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: 'Hero image' },
             headline: { type: 'text', label: 'Main Headline', defaultValue: 'Welcome to Our Platform' },
             // Design Token: Headline text size
             headlineFontSize: {
@@ -2054,7 +2107,14 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
                 description: 'CTA button background color'
               }
             },
-            imageUrl: { type: 'image', label: 'Image URL (optional)', defaultValue: '' },
+            mediaType: {
+              type: 'select',
+              label: 'Media Type',
+              options: ['none', 'image', 'video'],
+              defaultValue: 'none'
+            },
+            mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL - optional)', defaultValue: '' },
+            imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
             iconName: { type: 'text', label: 'Lucide Icon Name (optional)', defaultValue: '' },
             // Design Token: Icon color
             iconColor: {
@@ -2105,7 +2165,13 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
           label: 'Slides',
           defaultValue: [],
           itemSchema: {
-            image: { type: 'image', label: 'Slide Image', defaultValue: '' },
+            mediaType: {
+              type: 'select',
+              label: 'Media Type',
+              options: ['none', 'image', 'video'],
+              defaultValue: 'image'
+            },
+            mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL)', defaultValue: '' },
             imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
             headline: { type: 'text', label: 'Headline', defaultValue: '' },
             subheadline: { type: 'textarea', label: 'Subheadline', defaultValue: '' },
@@ -2131,7 +2197,13 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         category: { type: 'text', label: 'Category', defaultValue: 'Category' },
         title: { type: 'text', label: 'Title', defaultValue: '' },
         description: { type: 'textarea', label: 'Description', defaultValue: '' },
-        imageUrl: { type: 'image', label: 'Image URL', defaultValue: '' },
+        mediaType: {
+          type: 'select',
+          label: 'Media Type',
+          options: ['none', 'image', 'video'],
+          defaultValue: 'image'
+        },
+        mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL)', defaultValue: '' },
         imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
         iconName: { type: 'text', label: 'Icon Name (Lucide)', defaultValue: '' },
         items: {
@@ -2209,7 +2281,13 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
 
   // 5. CMS Parallax Spacer - Simple component with optional CTA
   'cms-parallax-spacer': {
-    imageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/parallax/1920/800' },
+    mediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    mediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/parallax/1920/800' },
     imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: 'parallax background' },
     title: { type: 'text', label: 'Title', defaultValue: 'Section Title' },
     subtitle: { type: 'textarea', label: 'Subtitle', defaultValue: 'Section subtitle' },
@@ -2245,7 +2323,14 @@ Sektör, şirket ve ürün haberleri`,
   'cms-why-aluplan': {
     title: { type: 'text', label: 'Title', defaultValue: 'Neden Aluplan Digital?' },
     content: { type: 'textarea', label: 'Content', defaultValue: 'Sektördeki 20 yılı aşkın tecrübemizle...' },
-    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/why-aluplan/800/600' },
+    mediaType: {
+      type: 'select',
+      label: 'Image Media Type',
+      options: ['none', 'image', 'video'],
+      defaultValue: 'image'
+    },
+    mediaUrl: { type: 'text', label: 'Image URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/why-aluplan/800/600' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
     imagePosition: { type: 'select', label: 'Image Position', options: ['left', 'right'], defaultValue: 'left' },
     items: {
       type: 'list',
@@ -2263,13 +2348,27 @@ Sektör, şirket ve ürün haberleri`,
   'hero-with-image-and-text-overlay': {
     title: { type: 'text', label: 'Title', defaultValue: 'Welcome' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Discover our amazing platform' },
-    backgroundImageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/hero/1920/1080' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/hero/1920/1080' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
   'hero-with-background-image': {
     title: { type: 'text', label: 'Title', defaultValue: 'Welcome' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Discover our amazing platform' },
-    backgroundImageUrl: { type: 'image', label: 'Background Image URL', defaultValue: 'https://picsum.photos/seed/hero-bg/1920/1080' },
+    backgroundMediaType: {
+      type: 'select',
+      label: 'Background Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    backgroundMediaUrl: { type: 'text', label: 'Background Media URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/hero-bg/1920/1080' },
+    backgroundImageHint: { type: 'text', label: 'Background Image Hint (AI)', defaultValue: '' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
   'content-section-with-title': {
@@ -2292,7 +2391,14 @@ Sektör, şirket ve ürün haberleri`,
   'content-with-image-two-column': {
     title: { type: 'text', label: 'Title', defaultValue: 'Our Story' },
     content: { type: 'textarea', label: 'Content (HTML)', defaultValue: 'Learn about our journey and what makes us unique.' },
-    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/two-col/800/600' },
+    mediaType: {
+      type: 'select',
+      label: 'Image Media Type',
+      options: ['none', 'image', 'video'],
+      defaultValue: 'image'
+    },
+    mediaUrl: { type: 'text', label: 'Image URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/two-col/800/600' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
     imagePosition: { type: 'select', label: 'Image Position', options: ['left', 'right'], defaultValue: 'right' },
     // Style properties
     backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
@@ -2325,9 +2431,15 @@ const templateDesignBlocksConfig: Record<string, BlockPropertySchema> = {
     title: { type: 'text', label: 'Title', defaultValue: 'İşinizi Dijital Dönüşümle Güçlendirin' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Kurumsal Düzeyde İş Çözümleri' },
     description: { type: 'textarea', label: 'Description', defaultValue: 'Modern teknoloji ve uzman ekibimizle işinizi bir sonraki seviyeye taşıyın.' },
-    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/hero-solutions/800/600' },
+    mediaType: {
+      type: 'select',
+      label: 'Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/hero-solutions/800/600' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
     imageAlt: { type: 'text', label: 'Image Alt Text', defaultValue: 'Çözüm Görseli' },
-    videoUrl: { type: 'text', label: 'Video URL (optional)', defaultValue: '' },
     primaryButtonText: { type: 'text', label: 'Primary Button Text', defaultValue: 'Demo Talep Et' },
     primaryButtonUrl: { type: 'text', label: 'Primary Button URL', defaultValue: '/demo' },
     secondaryButtonText: { type: 'text', label: 'Secondary Button Text', defaultValue: 'Daha Fazla Bilgi' },
@@ -2342,10 +2454,16 @@ const templateDesignBlocksConfig: Record<string, BlockPropertySchema> = {
     title: { type: 'text', label: 'Title', defaultValue: 'Güvenilir İş Ortağınız' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Kurumsal Mükemmellik' },
     description: { type: 'textarea', label: 'Description', defaultValue: '25 yılı aşkın deneyimimizle, işletmenizin dijital dönüşüm yolculuğunda yanınızdayız.' },
-    imageUrl: { type: 'image', label: 'Image URL', defaultValue: 'https://picsum.photos/seed/hero-corporate/800/600' },
+    mediaType: {
+      type: 'select',
+      label: 'Media Type',
+      options: ['none', 'image', 'video', 'youtube'],
+      defaultValue: 'image'
+    },
+    mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL)', defaultValue: 'https://picsum.photos/seed/hero-corporate/800/600' },
+    imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
     imageAlt: { type: 'text', label: 'Image Alt Text', defaultValue: 'Kurumsal Görsel' },
     imagePosition: { type: 'select', label: 'Image Position', defaultValue: 'right', options: ['left', 'right'] },
-    videoUrl: { type: 'text', label: 'Video URL (optional)', defaultValue: '' },
     showVideoButton: { type: 'checkbox', label: 'Show Video Play Button', defaultValue: false },
     primaryButtonText: { type: 'text', label: 'Primary Button Text', defaultValue: 'Bizimle İletişime Geçin' },
     primaryButtonUrl: { type: 'text', label: 'Primary Button URL', defaultValue: '/contact' },
@@ -2573,31 +2691,8 @@ const phase3Sprint1Config: Record<string, BlockPropertySchema> = {
   },
 };
 
-// All block configurations
-export const allBlockConfigs: Record<string, BlockPropertySchema> = {
-  ...navigationBlocksConfig,
-  ...heroBlocksConfig,
-  ...contentBlocksConfig,
-  ...elementBlocksConfig,
-  ...specialBlocksConfig,
-  ...ecommerceBlocksConfig,
-  ...galleryBlocksConfig,
-  ...footerBlocksConfig,
-  ...blogRssBlocksConfig,
-  ...socialSharingBlocksConfig,
-  ...testimonialsBlocksConfig,
-  ...featuresBlocksConfig,
-  ...statsBlocksConfig,
-  ...pricingBlocksConfig,
-  ...ratingBlocksConfig,
-  ...progressBlocksConfig,
-  ...homepageSectionsConfig,
-  ...migrationBlocksConfig, // ADD MIGRATION BLOCKS
-  ...templateDesignBlocksConfig, // NEW TEMPLATE DESIGN BLOCKS (Sprint 1)
-  ...phase3Sprint1Config, // PHASE 3 SPRINT 1 BLOCKS
-  ...phase3Sprint2Config, // PHASE 3 SPRINT 2 BLOCKS
-  ...phase3Sprint3Config, // PHASE 3 SPRINT 3 BLOCKS (FINAL)
-};
+// All block configurations - EXPORT WILL BE ADDED AFTER ALL CONFIG DEFINITIONS
+// Temporary marker - configs will be merged after all definitions
 
 // ===== PHASE 3 SPRINT 2 BLOCK CONFIGURATIONS =====
 
@@ -2879,7 +2974,35 @@ const phase3Sprint3Config: Record<string, BlockPropertySchema> = {
     title: { type: 'text', label: 'Title', defaultValue: 'İş Akışı' },
     subtitle: { type: 'text', label: 'Subtitle', defaultValue: 'Süreç' },
     description: { type: 'textarea', label: 'Description', defaultValue: 'Proje yaşam döngüsünün tüm aşamalarını keşfedin.' },
-    mainTabs: { type: 'array', label: 'Main Tabs', defaultValue: [] },
+    mainTabs: {
+      type: 'array',
+      label: 'Main Tabs',
+      defaultValue: [],
+      itemSchema: {
+        id: { type: 'text', label: 'Tab ID', defaultValue: '' },
+        icon: { type: 'text', label: 'Icon (emoji)', defaultValue: '📋' },
+        label: { type: 'text', label: 'Label', defaultValue: 'Tab Label' },
+        subTabs: {
+          type: 'array',
+          label: 'Sub Tabs',
+          defaultValue: [],
+          itemSchema: {
+            id: { type: 'text', label: 'Sub Tab ID', defaultValue: '' },
+            label: { type: 'text', label: 'Label', defaultValue: 'Sub Tab Label' },
+            title: { type: 'text', label: 'Title', defaultValue: 'Sub Tab Title' },
+            description: { type: 'textarea', label: 'Description', defaultValue: '' },
+            mediaType: {
+              type: 'select',
+              label: 'Media Type',
+              options: ['none', 'image', 'video', 'youtube'],
+              defaultValue: 'none'
+            },
+            mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL/YouTube Link)', defaultValue: '' },
+            icon: { type: 'text', label: 'Icon (emoji) - Legacy', defaultValue: '📄' },
+          }
+        }
+      }
+    },
     enableScroll: { type: 'checkbox', label: 'Enable Horizontal Scroll', defaultValue: true },
     defaultMainTab: { type: 'text', label: 'Default Main Tab ID', defaultValue: '' },
     defaultSubTab: { type: 'text', label: 'Default Sub Tab ID', defaultValue: '' },
@@ -2891,4 +3014,30 @@ const phase3Sprint3Config: Record<string, BlockPropertySchema> = {
     paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '5rem' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
+};
+
+// ===== ALL BLOCK CONFIGURATIONS EXPORT =====
+export const allBlockConfigs: Record<string, BlockPropertySchema> = {
+  ...navigationBlocksConfig,
+  ...heroBlocksConfig,
+  ...contentBlocksConfig,
+  ...elementBlocksConfig,
+  ...specialBlocksConfig,
+  ...ecommerceBlocksConfig,
+  ...galleryBlocksConfig,
+  ...footerBlocksConfig,
+  ...blogRssBlocksConfig,
+  ...socialSharingBlocksConfig,
+  ...testimonialsBlocksConfig,
+  ...featuresBlocksConfig,
+  ...statsBlocksConfig,
+  ...pricingBlocksConfig,
+  ...ratingBlocksConfig,
+  ...progressBlocksConfig,
+  ...homepageSectionsConfig,
+  ...migrationBlocksConfig,
+  ...templateDesignBlocksConfig,
+  ...phase3Sprint1Config,
+  ...phase3Sprint2Config,
+  ...phase3Sprint3Config,
 };

@@ -9,7 +9,9 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { PageService } from '../services/page.service';
 import { CreatePageDto } from '../dto/create-page.dto';
 import { UpdatePageDto } from '../dto/update-page.dto';
@@ -29,14 +31,20 @@ export class PageController {
     return this.pageService.findAll(status);
   }
 
+  @Get('slug/*')
+  async findBySlug(@Req() req: Request) {
+    // Extract slug from URL path after '/cms/pages/slug/' or '/api/cms/pages/slug/'
+    // e.g., /api/cms/pages/slug/solutions/building-design/architecture → slug = "solutions/building-design/architecture"
+    const fullPath = req.path;
+    const slug = fullPath.replace(/^\/?(api\/)?cms\/pages\/slug\//, ''); // Remove prefix (with optional /api/)
+
+    console.log('Finding page by slug:', slug, 'from path:', fullPath);
+    return this.pageService.findBySlug(slug);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.pageService.findOne(id);
-  }
-
-  @Get('slug/:slug')
-  async findBySlug(@Param('slug') slug: string) {
-    return this.pageService.findBySlug(slug);
   }
 
   @Patch(':id')

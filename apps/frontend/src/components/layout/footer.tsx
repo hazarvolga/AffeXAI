@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Globe } from 'lucide-react';
 import { getPlatformIcon } from '@/lib/social-media-data';
 import settingsService, { type SiteSettings } from '@/lib/api/settingsService';
+import { mediaService } from '@/lib/api/mediaService';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeSettingsService, type ThemeSettings } from '@/services/theme-settings.service';
@@ -55,7 +56,18 @@ export function Footer() {
     const fetchSiteSettings = async () => {
       try {
         const settings = await settingsService.getSiteSettings();
-        setSiteSettings(settings);
+
+        // Convert logo UUIDs to full URLs
+        const [logoFullUrl, logoDarkFullUrl] = await Promise.all([
+          mediaService.getMediaUrl(settings.logoUrl),
+          mediaService.getMediaUrl(settings.logoDarkUrl)
+        ]);
+
+        setSiteSettings({
+          ...settings,
+          logoUrl: logoFullUrl,
+          logoDarkUrl: logoDarkFullUrl
+        });
       } catch (error) {
         console.error('Failed to fetch site settings:', error);
         // Fallback to default values

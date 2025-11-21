@@ -514,7 +514,7 @@ describe('FAQ Learning Settings Integration', () => {
       render(<ConfigurationManagementPage />);
 
       await waitFor(() => {
-        expect(screen.queryByText /Yükleniyor/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Yükleniyor/)).not.toBeInTheDocument();
       });
 
       // Make a change

@@ -35,10 +35,11 @@ export interface HeroSolutionsProps {
     icon?: string;
   }>;
 
-  // Media
-  imageUrl?: string;
+  // Media (updated to unified media system)
+  backgroundMediaType?: string;
+  backgroundMediaUrl?: string;
+  backgroundImageHint?: string;
   imageAlt?: string;
-  videoUrl?: string; // Optional video embed
 
   // CTAs
   primaryButtonText?: string;
@@ -70,9 +71,10 @@ export const HeroSolutions: React.FC<HeroSolutionsProps> = ({
     { text: '7/24 Uzman Destek', icon: 'check' },
     { text: 'Güvenli & Uyumlu', icon: 'check' },
   ],
-  imageUrl = 'https://picsum.photos/seed/hero-solutions/800/600',
+  backgroundMediaType = 'image',
+  backgroundMediaUrl = 'https://picsum.photos/seed/hero-solutions/800/600',
+  backgroundImageHint,
   imageAlt = 'Çözüm Görseli',
-  videoUrl,
   primaryButtonText = 'Demo Talep Et',
   primaryButtonUrl = '/demo',
   secondaryButtonText = 'Daha Fazla Bilgi',
@@ -105,18 +107,32 @@ export const HeroSolutions: React.FC<HeroSolutionsProps> = ({
           {/* Media Column (5/12 on desktop) */}
           <div className="lg:col-span-5 order-2 lg:order-1">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-              {videoUrl ? (
+              {/* Video */}
+              {backgroundMediaType === 'video' && backgroundMediaUrl && (
+                <video
+                  controls
+                  className="w-full h-full object-cover"
+                >
+                  <source src={backgroundMediaUrl} type="video/mp4" />
+                </video>
+              )}
+
+              {/* YouTube embed */}
+              {backgroundMediaType === 'youtube' && backgroundMediaUrl && (
                 <div className="w-full h-full">
                   <iframe
-                    src={videoUrl}
+                    src={`${backgroundMediaUrl}?controls=1`}
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
-              ) : (
+              )}
+
+              {/* Image */}
+              {backgroundMediaType === 'image' && backgroundMediaUrl && (
                 <Image
-                  src={imageUrl}
+                  src={backgroundMediaUrl}
                   alt={imageAlt}
                   fill
                   className="object-cover"
@@ -126,7 +142,9 @@ export const HeroSolutions: React.FC<HeroSolutionsProps> = ({
               )}
 
               {/* Optional overlay gradient for better text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+              {backgroundMediaType === 'image' && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+              )}
             </div>
 
             {/* Trust Badge (optional) */}

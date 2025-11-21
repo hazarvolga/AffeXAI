@@ -7,9 +7,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
-
-# Copy packages folder for workspace dependencies
-COPY packages ./packages
+COPY packages/shared-types/package*.json ./packages/shared-types/
+COPY packages/shared-types/src ./packages/shared-types/src
+COPY packages/shared-types/tsconfig.json ./packages/shared-types/
 
 # Install dependencies
 RUN npm ci --legacy-peer-deps
@@ -48,9 +48,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
-
-# Copy packages folder for workspace dependencies
-COPY packages ./packages
+COPY packages/shared-types/package*.json ./packages/shared-types/
 
 # Install production dependencies only
 RUN npm ci --omit=dev --legacy-peer-deps

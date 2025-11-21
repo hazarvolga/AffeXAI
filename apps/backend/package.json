@@ -40,7 +40,7 @@
     "seed:remaining-pages": "tsx src/database/seeds/run-seed-remaining-pages.ts"
   },
   "dependencies": {
-    "@affexai/shared-types": "workspace:*",
+    "@affexai/shared-types": "file:../../packages/shared-types",
     "@anthropic-ai/sdk": "^0.67.0",
     "@aws-sdk/client-s3": "^3.901.0",
     "@aws-sdk/s3-request-presigner": "^3.901.0",

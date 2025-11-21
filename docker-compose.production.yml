@@ -65,19 +65,19 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
 
-      # AI Providers
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
+      # AI Providers (optional)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
 
       # AWS S3
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-dummy}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-dummy}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-affexai-test}
       AWS_REGION: ${AWS_REGION:-us-east-1}
 
-      # Email (Resend)
-      RESEND_API_KEY: ${RESEND_API_KEY}
+      # Email (Resend) (optional)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
 
       # App
       PORT: 3001
@@ -116,7 +116,7 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-      GOOGLE_GENAI_API_KEY: ${GOOGLE_AI_API_KEY}
+      GOOGLE_GENAI_API_KEY: ${GOOGLE_AI_API_KEY:-}
       NODE_ENV: production
     depends_on:
       - backend

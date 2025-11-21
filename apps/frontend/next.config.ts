@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
     '@tiptap/pm',
   ],
 
-  // Webpack configuration to handle Genkit/Handlebars issues
+  // Webpack configuration to handle Genkit/Handlebars issues and Tiptap sub-path exports
   webpack: (config, { isServer }) => {
     // Handle handlebars require.extensions issue
     config.resolve.fallback = {
@@ -42,6 +42,15 @@ const nextConfig: NextConfig = {
         message: /require\.extensions/,
       },
     ];
+
+    // Add alias for Tiptap sub-path exports (fixes @tiptap/pm/state resolution)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@tiptap/pm/state': require.resolve('prosemirror-state'),
+      '@tiptap/pm/view': require.resolve('prosemirror-view'),
+      '@tiptap/pm/model': require.resolve('prosemirror-model'),
+      '@tiptap/pm/transform': require.resolve('prosemirror-transform'),
+    };
 
     // External modules for server-side rendering
     if (isServer) {

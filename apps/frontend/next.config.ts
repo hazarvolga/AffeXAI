@@ -13,7 +13,17 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
+  // Transpile Tiptap packages from node_modules
+  transpilePackages: [
+    '@tiptap/core',
+    '@tiptap/react',
+    '@tiptap/starter-kit',
+    '@tiptap/extension-mention',
+    '@tiptap/suggestion',
+    '@tiptap/pm',
+  ],
+
   // Webpack configuration to handle Genkit/Handlebars issues
   webpack: (config, { isServer }) => {
     // Handle handlebars require.extensions issue

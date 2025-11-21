@@ -4,8 +4,8 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files (including package-lock.json from root)
+COPY package.json package-lock.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages/shared-types/package*.json ./packages/shared-types/
 COPY packages/shared-types/src ./packages/shared-types/src
@@ -45,8 +45,8 @@ RUN apk add --no-cache wget
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files (including package-lock.json from root)
+COPY package.json package-lock.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages/shared-types/package*.json ./packages/shared-types/
 

@@ -8,6 +8,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 
+# Copy packages folder for workspace dependencies
+COPY packages ./packages
+
 # Install dependencies
 RUN npm ci --legacy-peer-deps
 

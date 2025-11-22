@@ -14,11 +14,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // Experimental features to handle ESM packages in Docker builds
-  experimental: {
-    esmExternals: false, // Disable ESM externals to bundle everything
-  },
-
   // Transpile Tiptap packages from node_modules
   transpilePackages: [
     '@tiptap/core',
@@ -38,6 +33,7 @@ const nextConfig: NextConfig = {
       path: false,
       os: false,
     };
+
 
     // Ignore handlebars require.extensions warnings
     config.ignoreWarnings = [

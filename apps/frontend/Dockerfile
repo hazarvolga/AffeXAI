@@ -22,6 +22,9 @@ RUN npm run build
 WORKDIR /app
 COPY apps/frontend ./apps/frontend
 
+# Ensure node_modules are accessible for build (symlink from root)
+RUN ln -s /app/node_modules /app/apps/frontend/node_modules || true
+
 # Build-time args (Coolify will inject ALL env vars as ARGs)
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_SOCKET_URL
@@ -36,7 +39,7 @@ ENV NODE_ENV=${NODE_ENV}
 
 # Build Next.js app
 WORKDIR /app/apps/frontend
-RUN npm run build
+RUN npm run build 2>&1 || (echo "Build failed with exit code $?" && cat .next/trace 2>/dev/null || true && exit 1)
 
 # Production stage
 FROM node:20-alpine AS production

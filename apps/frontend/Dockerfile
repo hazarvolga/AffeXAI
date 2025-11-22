@@ -22,8 +22,9 @@ RUN npm run build
 WORKDIR /app
 COPY apps/frontend ./apps/frontend
 
-# Ensure node_modules are accessible for build (symlink from root)
-RUN ln -s /app/node_modules /app/apps/frontend/node_modules || true
+# Ensure node_modules are accessible for build (copy from root to workspace)
+# Using copy instead of symlink for Docker compatibility
+RUN cp -r /app/node_modules /app/apps/frontend/node_modules
 
 # Build-time args (Coolify will inject ALL env vars as ARGs)
 ARG NEXT_PUBLIC_API_URL
@@ -42,25 +43,18 @@ WORKDIR /app/apps/frontend
 
 # Debug: Check node_modules structure and Tiptap packages
 RUN echo "=====================================" && \
-    echo "DEBUG: Checking build environment" && \
+    echo "DEBUG: Build environment check" && \
     echo "=====================================" && \
+    echo "Directory: $(pwd)" && \
+    echo "node_modules: $(ls -ld node_modules 2>/dev/null || echo 'NOT FOUND')" && \
     echo "" && \
-    echo "1. Current directory:" && \
-    pwd && \
+    echo "Tiptap packages:" && \
+    ls -1 node_modules/@tiptap 2>/dev/null | head -5 || echo "ERROR: @tiptap not found!" && \
     echo "" && \
-    echo "2. node_modules symlink status:" && \
-    ls -la | grep node_modules && \
-    echo "" && \
-    echo "3. Checking @tiptap packages:" && \
-    ls -la node_modules/@tiptap 2>/dev/null || echo "ERROR: @tiptap directory not found!" && \
-    echo "" && \
-    echo "4. Checking specific Tiptap packages:" && \
-    ls node_modules/@tiptap/core 2>/dev/null && echo "✓ @tiptap/core found" || echo "✗ @tiptap/core NOT FOUND" && \
-    ls node_modules/@tiptap/react 2>/dev/null && echo "✓ @tiptap/react found" || echo "✗ @tiptap/react NOT FOUND" && \
-    ls node_modules/@tiptap/starter-kit 2>/dev/null && echo "✓ @tiptap/starter-kit found" || echo "✗ @tiptap/starter-kit NOT FOUND" && \
-    echo "" && \
-    echo "5. Checking if symlink is working:" && \
-    readlink node_modules && \
+    echo "Core packages:" && \
+    (test -d node_modules/@tiptap/core && echo "✓ @tiptap/core OK" || echo "✗ @tiptap/core MISSING") && \
+    (test -d node_modules/@tiptap/react && echo "✓ @tiptap/react OK" || echo "✗ @tiptap/react MISSING") && \
+    (test -d node_modules/@tiptap/starter-kit && echo "✓ @tiptap/starter-kit OK" || echo "✗ @tiptap/starter-kit MISSING") && \
     echo "=====================================" && \
     echo ""
 

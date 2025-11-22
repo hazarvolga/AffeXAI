@@ -40,14 +40,41 @@ ENV NODE_ENV=${NODE_ENV}
 # Build Next.js app
 WORKDIR /app/apps/frontend
 
-# Debug: Check if node_modules symlink exists
-RUN echo "=== Checking node_modules symlink ===" && \
+# Debug: Check node_modules structure and Tiptap packages
+RUN echo "=====================================" && \
+    echo "DEBUG: Checking build environment" && \
+    echo "=====================================" && \
+    echo "" && \
+    echo "1. Current directory:" && \
+    pwd && \
+    echo "" && \
+    echo "2. node_modules symlink status:" && \
     ls -la | grep node_modules && \
-    echo "=== node_modules content sample ===" && \
-    ls -la node_modules/@tiptap 2>/dev/null | head -10 || echo "No @tiptap packages found"
+    echo "" && \
+    echo "3. Checking @tiptap packages:" && \
+    ls -la node_modules/@tiptap 2>/dev/null || echo "ERROR: @tiptap directory not found!" && \
+    echo "" && \
+    echo "4. Checking specific Tiptap packages:" && \
+    ls node_modules/@tiptap/core 2>/dev/null && echo "✓ @tiptap/core found" || echo "✗ @tiptap/core NOT FOUND" && \
+    ls node_modules/@tiptap/react 2>/dev/null && echo "✓ @tiptap/react found" || echo "✗ @tiptap/react NOT FOUND" && \
+    ls node_modules/@tiptap/starter-kit 2>/dev/null && echo "✓ @tiptap/starter-kit found" || echo "✗ @tiptap/starter-kit NOT FOUND" && \
+    echo "" && \
+    echo "5. Checking if symlink is working:" && \
+    readlink node_modules && \
+    echo "=====================================" && \
+    echo ""
 
-# Run build with verbose output
-RUN npm run build 2>&1 || (echo "Build failed" && exit 1)
+# Run build - capture full output even on failure
+RUN npm run build 2>&1 | tee /tmp/build-output.log; \
+    BUILD_EXIT=$?; \
+    if [ $BUILD_EXIT -ne 0 ]; then \
+        echo ""; \
+        echo "=====================================" && \
+        echo "BUILD FAILED - Full output above" && \
+        echo "=====================================" && \
+        echo "Exit code: $BUILD_EXIT" && \
+        exit 1; \
+    fi
 
 # Production stage
 FROM node:20-alpine AS production

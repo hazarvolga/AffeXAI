@@ -1,5 +1,5 @@
 # Multi-stage build for NestJS Backend
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -27,7 +27,7 @@ WORKDIR /app/apps/backend
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Install wget for healthcheck
 RUN apk add --no-cache wget

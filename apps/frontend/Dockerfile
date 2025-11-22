@@ -1,5 +1,5 @@
 # Multi-stage build for Next.js Frontend
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -43,7 +43,7 @@ RUN echo "=== BUILD STARTING ===" && \
     npm run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Install wget for healthcheck
 RUN apk add --no-cache wget

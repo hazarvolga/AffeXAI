@@ -22,28 +22,25 @@ RUN npm run build
 WORKDIR /app
 COPY apps/frontend ./apps/frontend
 
-# Set build-time environment variables (Coolify will inject these as ARGs)
+# Build-time args (Coolify will inject ALL env vars as ARGs)
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_SOCKET_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NODE_ENV=production
 
-# Convert ARGs to ENVs for Next.js build
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV NODE_ENV=$NODE_ENV
-
-# Debug: Show environment variables (remove after troubleshooting)
-RUN echo "Building with:" && \
-    echo "  NEXT_PUBLIC_API_URL: $NEXT_PUBLIC_API_URL" && \
-    echo "  NEXT_PUBLIC_SOCKET_URL: $NEXT_PUBLIC_SOCKET_URL" && \
-    echo "  NEXT_PUBLIC_APP_URL: $NEXT_PUBLIC_APP_URL" && \
-    echo "  NODE_ENV: $NODE_ENV"
-
 # Build Next.js app
 WORKDIR /app/apps/frontend
-RUN npm run build
+RUN echo "=== BUILD STARTING ===" && \
+    echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}" && \
+    echo "NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}" && \
+    echo "NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}" && \
+    echo "NODE_ENV=${NODE_ENV}" && \
+    echo "=== RUNNING NPM RUN BUILD ===" && \
+    NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" \
+    NEXT_PUBLIC_SOCKET_URL="${NEXT_PUBLIC_SOCKET_URL}" \
+    NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL}" \
+    NODE_ENV="${NODE_ENV}" \
+    npm run build
 
 # Production stage
 FROM node:18-alpine AS production

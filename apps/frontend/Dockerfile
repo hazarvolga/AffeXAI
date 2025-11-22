@@ -39,7 +39,15 @@ ENV NODE_ENV=${NODE_ENV}
 
 # Build Next.js app
 WORKDIR /app/apps/frontend
-RUN npm run build 2>&1 || (echo "Build failed with exit code $?" && cat .next/trace 2>/dev/null || true && exit 1)
+
+# Debug: Check if node_modules symlink exists
+RUN echo "=== Checking node_modules symlink ===" && \
+    ls -la | grep node_modules && \
+    echo "=== node_modules content sample ===" && \
+    ls -la node_modules/@tiptap 2>/dev/null | head -10 || echo "No @tiptap packages found"
+
+# Run build with verbose output
+RUN npm run build 2>&1 || (echo "Build failed" && exit 1)
 
 # Production stage
 FROM node:20-alpine AS production

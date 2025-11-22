@@ -83,5 +83,7 @@ AffexAI-Oracle-Servers
 # Misc
 .prettierrc
 .eslintrc*
-tsconfig*.json
 jest.config.js
+
+# Keep tsconfig.json files - they're needed for builds
+# tsconfig*.json

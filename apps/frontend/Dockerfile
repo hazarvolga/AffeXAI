@@ -38,6 +38,9 @@ ENV NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NODE_ENV=${NODE_ENV}
 
+# Disable SSL certificate verification for self-signed certificates during build
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
 # Build Next.js app
 WORKDIR /app/apps/frontend
 

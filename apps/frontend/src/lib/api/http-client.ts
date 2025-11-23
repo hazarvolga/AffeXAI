@@ -154,11 +154,12 @@ export class HttpClient {
   private authToken: string | null = null;
 
   constructor(config?: HttpClientConfig) {
-    // Default configuration - FORCE PORT 9006
-    const apiUrl = 'http://localhost:9006/api';
+    // Default configuration - Use environment variable with fallback
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
+    const fullApiUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
 
     this.config = {
-      baseURL: config?.baseURL || apiUrl,
+      baseURL: config?.baseURL || fullApiUrl,
       timeout: config?.timeout || 30000, // 30 seconds
       headers: config?.headers || {},
       withCredentials: config?.withCredentials ?? true,
@@ -169,7 +170,7 @@ export class HttpClient {
 
     // DEBUG: Log the baseURL being used
     console.log('🔧 HTTP Client initialized with baseURL:', this.config.baseURL);
-    console.log('🔧 FORCED API URL (ignoring env):', apiUrl);
+    console.log('🔧 Environment API URL:', process.env.NEXT_PUBLIC_API_URL);
 
     // Create axios instance
     this.instance = axios.create({

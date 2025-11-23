@@ -1,9 +1,4 @@
 import type {NextConfig} from 'next';
-import withBundleAnalyzer from '@next/bundle-analyzer';
-
-const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -185,4 +180,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default bundleAnalyzer(nextConfig);
+// Conditionally apply bundle analyzer only in development/analysis mode
+// This prevents requiring @next/bundle-analyzer in production
+let exportConfig = nextConfig;
+
+if (process.env.ANALYZE === 'true') {
+  try {
+    const withBundleAnalyzer = require('@next/bundle-analyzer');
+    const bundleAnalyzer = withBundleAnalyzer({
+      enabled: true,
+    });
+    exportConfig = bundleAnalyzer(nextConfig);
+  } catch (error) {
+    console.warn('Bundle analyzer not available, skipping...');
+  }
+}
+
+export default exportConfig;

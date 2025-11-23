@@ -75,7 +75,7 @@
     "@types/pdfkit": "^0.17.3",
     "@types/url-parse": "^1.4.11",
     "axios": "^1.13.2",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "bullmq": "^5.60.0",
     "cache-manager": "^7.2.3",
     "cheerio": "^1.1.2",

@@ -55,7 +55,7 @@ ENV PORT=3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 -O /dev/null http://localhost:3001/health || exit 1
+  CMD wget --no-verbose --tries=1 -O /dev/null http://localhost:3001/api/health || exit 1
 
 # Start application
 CMD ["node", "apps/backend/dist/main.js"]

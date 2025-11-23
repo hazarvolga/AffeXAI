@@ -1,0 +1,662 @@
+# Event Page Builder Prebuilt Components - Comprehensive Prompt Guide
+
+## 1. EVENT HERO SECTIONS
+
+**Component Purpose**: Capture attention and communicate event essence with key details at first glance
+
+**Required Variations**:
+- Full-screen hero with event date countdown
+- Split hero (event visual + key info card)
+- Video background hero with registration CTA
+- Animated gradient hero with floating event badges
+- Parallax hero with layered event elements
+- Minimal hero with large typography focus
+
+**Design Specifications**:
+- Height: 100vh, 85vh, or 700-900px options
+- Date Display: Large, prominent date format (multiple styles: "March 15, 2025", "15 MAR 2025", countdown timer)
+- Typography: Event name (56-84px bold), tagline (24-28px), location/time (18-20px)
+- Countdown Timer: Days, hours, minutes, seconds in separate boxes (48-72px numbers)
+- Quick Info Bar: Floating card with date, location, price, capacity at a glance
+- CTA Buttons: "Register Now", "Get Tickets", "Learn More" - multiple button slots
+- Media Support: High-quality event imagery, venue shots, past event videos
+- Overlay Options: Dark gradient (50-70% opacity) for text readability
+- Badge Elements: "Early Bird", "Limited Spots", "Virtual Available", "Sold Out"
+- Responsive: Stack info vertically on mobile, maintain countdown visibility
+- Animation: Fade-in event details, pulsing register button, countdown ticking
+- Accessibility: High contrast (4.5:1 minimum), alt text for images, timer with ARIA labels
+
+---
+
+## 2. EVENT DETAILS/INFO SECTIONS
+
+**Component Purpose**: Present comprehensive event information in scannable, organized format
+
+**Required Variations**:
+- Icon-based info grid (date, time, location, price, capacity, category)
+- Timeline format with visual progression
+- Tabbed information (overview, schedule, speakers, venue)
+- Expandable accordion with detailed sections
+- Two-column layout (essentials + description)
+- Interactive map with event location
+
+**Design Specifications**:
+- Icon Size: 56-72px, custom icons for each info type
+- Info Cards: 240-320px width, 180-240px height, with shadow/border
+- Typography: Label (14-16px uppercase), value (20-24px bold), description (16-18px)
+- Color Coding: Different accent colors for different info types (date=blue, location=red, price=green)
+- Map Integration: Embedded Google Maps or Mapbox, 400-600px height
+- Visual Hierarchy: Most important info (date/time) larger and more prominent
+- Venue Details: Address, parking info, public transport, accessibility features
+- Capacity Indicator: Progress bar showing seats remaining (e.g., "78/100 spots filled")
+- Price Display: Multiple ticket tiers if applicable, strikethrough for early bird savings
+- Category Tags: Event type badges (Conference, Workshop, Festival, Networking, etc.)
+- What to Bring: Checklist format with checkbox icons
+- Responsive: 3 columns → 2 columns → 1 column, map full-width on mobile
+
+---
+
+## 3. SCHEDULE/AGENDA SECTIONS
+
+**Component Purpose**: Display event timeline and activities in clear, navigable format
+
+**Required Variations**:
+- Vertical timeline with time markers
+- Multi-day tabbed schedule
+- Grid view (time slots × tracks/rooms)
+- List view with collapsible details
+- Calendar-style day view
+- Now-playing live schedule (during event)
+
+**Design Specifications**:
+- Time Display: 24px bold, 12/24-hour format options, timezone indicator
+- Time Markers: Vertical line with circular nodes (16-24px)
+- Session Cards: Title (20-24px), speaker (16px), duration (14px), location (14px)
+- Track/Room Colors: Color-coded sessions by track (up to 8 color variations)
+- Card Spacing: 16-24px between sessions, 40-60px between day sections
+- Hover State: Expand card to show full description, speaker bio preview
+- Interactive Elements: Click to add to personal schedule, export to calendar
+- Break Indicators: Different styling for breaks, lunch, networking (lighter background)
+- Current Time Indicator: Moving line/highlight showing current position (for live events)
+- Duration Bars: Visual bars showing session length proportionally
+- Filter Options: By track, by speaker, by session type, by time
+- Search Function: Real-time search through session titles and speakers
+- Icons: Coffee icon for breaks, presentation icon for talks, discussion icon for panels
+- Responsive: Grid becomes list on mobile, sticky time headers
+
+---
+
+## 4. SPEAKER/GUEST SECTIONS
+
+**Component Purpose**: Showcase speakers, performers, or special guests with bios and credentials
+
+**Required Variations**:
+- Grid of speaker cards (3-4 columns)
+- Featured keynote speakers + supporting speakers
+- Carousel/slider with large speaker images
+- Alphabetical list with filter by expertise
+- Interactive speaker cards with social links
+- Video introduction section for each speaker
+
+**Design Specifications**:
+- Photo Size: 280-360px square or circular, high-quality professional photos
+- Card Design: Photo, name (24-28px bold), title/credentials (16-18px), company/org (16px)
+- Hover Effect: Lift card, show extended bio, social media links overlay
+- Bio Length: 80-150 words preview, "Read More" for full bio
+- Social Icons: LinkedIn, Twitter/X, Instagram, website (32-40px)
+- Tags: Expertise areas as clickable pills (AI, Marketing, Design, etc.)
+- Session Link: "Speaking at:" with linked session titles
+- Keynote Distinction: Larger cards, special badge, prominent placement
+- Grid Layout: 4 columns desktop → 2 tablet → 1 mobile
+- Background: Clean white or subtle color, focus on speaker imagery
+- Modal/Popup: Click card for full speaker profile with all sessions and full bio
+- Accessibility: Alt text with speaker name and role, keyboard navigable
+
+---
+
+## 5. REGISTRATION/TICKET SECTIONS
+
+**Component Purpose**: Facilitate ticket purchase and event registration with clear pricing and process
+
+**Required Variations**:
+- Ticket tier comparison cards (Early Bird, Standard, VIP)
+- Single ticket type with quantity selector
+- Multi-step registration form with progress bar
+- Group booking option with discount calculator
+- Waitlist signup for sold-out events
+- Free event RSVP with required info
+
+**Design Specifications**:
+- Ticket Cards: 320-400px width, elevated with shadow, border on hover
+- Pricing Display: Large price (42-56px), strike-through original price for discounts
+- Feature List: Checkmarks for included perks (15-20 items max)
+- Scarcity Indicators: "Only 12 left", "Early Bird ends in 2 days" with countdown
+- Badge Placement: "Most Popular", "Best Value", "VIP" badges at card top
+- Button Styling: Large CTA buttons (min 48px height), loading state during processing
+- Quantity Selector: +/- buttons with number input, max quantity limit
+- Price Calculator: Real-time total price update based on quantity and tier
+- Form Fields: Name, email, phone, company (optional), special requirements
+- Payment Icons: Visa, Mastercard, PayPal, Apple Pay logos (32px height)
+- Progress Steps: Multi-step indicator (1. Select Ticket → 2. Info → 3. Payment → 4. Confirmation)
+- Discount Code: Collapsible "Have a promo code?" section
+- Terms Checkbox: GDPR compliance, refund policy link
+- Security Badges: SSL secure, money-back guarantee icons
+- Responsive: Stack ticket cards vertically on mobile, sticky CTA button
+- Accessibility: Clear labels, error messages, confirmation screen with ticket details
+
+---
+
+## 6. VENUE/LOCATION SECTIONS
+
+**Component Purpose**: Provide comprehensive venue information and help attendees plan their visit
+
+**Required Variations**:
+- Interactive map with venue highlighted
+- Venue gallery with interior/exterior photos
+- 360° virtual venue tour
+- Directions section with multiple transport options
+- Nearby amenities map (hotels, restaurants, parking)
+- Accessibility information detailed view
+
+**Design Specifications**:
+- Map Height: 400-600px, full-width or container-width
+- Map Interaction: Zoom controls, venue marker with custom icon, info popup
+- Address Display: Large readable text (20-24px), copy-to-clipboard button
+- Gallery: 4-6 high-res venue images, lightbox view on click
+- Image Aspect Ratio: 16:9 or 4:3, consistent across gallery
+- Transport Icons: Car, bus, train, plane, bike with directions for each (48px icons)
+- Distance Info: "15 min from airport", "2 min walk from metro" with travel time
+- Parking Details: On-site parking availability, cost, alternative lots
+- Hotel Recommendations: 3-5 partner hotels with distance and booking links
+- Restaurant Guide: Nearby dining with price range indicators ($, $$, $$$)
+- Accessibility Features: Wheelchair access, elevators, restrooms, parking
+- Weather Widget: Expected weather for event date with temperature
+- Virtual Option Info: If hybrid event, streaming platform details
+- Download Options: Venue map PDF, directions PDF
+- Responsive: Map full-width on mobile, stack info cards vertically
+
+---
+
+## 7. FAQ SECTIONS (EVENT-SPECIFIC)
+
+**Component Purpose**: Address common attendee questions and reduce support inquiries
+
+**Required Variations**:
+- Categorized accordion (Registration, Venue, Schedule, Refunds, etc.)
+- Search-enabled FAQ with instant filtering
+- Two-column layout for quick scanning
+- Video FAQ answers for complex questions
+- Live chat bot integrated with FAQ
+- Expandable categories with nested questions
+
+**Design Specifications**:
+- Category Tabs: 48px height, clear icons, active state highlighting
+- Question Display: 18-20px medium weight, chevron/plus icon (24px)
+- Answer Text: 16px, line-height 1.7, max-width 800px for readability
+- Spacing: 16-20px between questions, 32-40px between categories
+- Search Bar: Sticky at top, 56px height, magnifying glass icon, "Search FAQs..."
+- Animation: 300ms smooth expand/collapse with fade-in content
+- Common Questions: Pre-expanded or highlighted (e.g., "What's included in ticket?")
+- Contact Link: "Still have questions? Contact us" at section bottom
+- Icons: Question type icons (ticket, location, wifi, food, parking)
+- Background: Alternating light gray/white rows or card-style with shadows
+- Character Count: Questions 50-100 chars, answers 100-300 words
+- Related Links: Link to relevant sections (e.g., FAQ about refunds links to refund policy)
+- Responsive: Full-width on mobile, maintain touch-friendly accordion targets
+- Accessibility: Proper heading hierarchy, keyboard navigation, ARIA expanded states
+
+---
+
+## 8. SPONSOR/PARTNER SECTIONS
+
+**Component Purpose**: Recognize sponsors and partners with appropriate visibility based on tier
+
+**Required Variations**:
+- Tiered sponsor logos (Platinum, Gold, Silver, Bronze)
+- Carousel of sponsor logos with auto-rotation
+- Grid with hover-reveal sponsor info
+- Featured sponsor spotlight with description
+- Interactive sponsor booth directory
+- Logo wall with uniform sizing
+
+**Design Specifications**:
+- Tier Sizing: Platinum (240px), Gold (180px), Silver (140px), Bronze (100px)
+- Logo Treatment: Grayscale default, color on hover, or always color
+- Spacing: Proportional to tier (Platinum more space around)
+- Background: Clean white or very light gray to support logo visibility
+- Grid Alignment: Center-aligned logos within their tier section
+- Hover Effect: Slight scale (1.05x), shadow, or glow effect
+- Link Behavior: Click logo to visit sponsor website (new tab)
+- Tier Headers: Clear section headers (22-26px) separating tiers
+- Card Option: Logos in cards with sponsor name below (14-16px)
+- Carousel Controls: Dots and arrows if using slider, 5-second auto-advance
+- Responsive: 6 logos per row → 4 → 3 → 2 based on breakpoints
+- Become a Sponsor CTA: "Interested in sponsoring?" button at section end
+- Accessibility: Alt text with sponsor name, keyboard navigable links
+
+---
+
+## 9. GALLERY/PAST EVENTS SECTIONS
+
+**Component Purpose**: Build excitement and credibility by showing past event success and atmosphere
+
+**Required Variations**:
+- Masonry photo gallery from previous events
+- Video highlights reel with testimonials
+- Before/after comparison (venue setup evolution)
+- Year-over-year stats comparison
+- Attendee-submitted photo stream
+- Instagram feed integration
+
+**Design Specifications**:
+- Photo Grid: 3-5 columns, 12-16px gaps between images
+- Aspect Ratios: Mixed (natural) or uniform (1:1 or 4:3)
+- Hover Overlay: Dark overlay (60% opacity) with event year, location
+- Lightbox: Full-screen view with navigation, photo counter (3/45)
+- Video Player: Embedded with custom play button, 16:9 aspect ratio
+- Stats Display: Attendee count, countries represented, sessions held, NPS score
+- Year Selector: Dropdown or tabs to filter by event year
+- Social Proof: "Join 5,000+ attendees" with animated counter
+- Testimonial Overlays: Pull quotes overlaid on relevant photos
+- Load More: Pagination with "Load 20 more photos" button
+- Download Option: High-res photo pack download for media/attendees
+- Hashtag Display: Event hashtag prominently shown, link to social feed
+- Responsive: 5 columns → 3 → 2 → 1 column transitions
+- Accessibility: Alt text for all images, video captions available
+
+---
+
+## 10. COUNTDOWN/URGENCY SECTIONS
+
+**Component Purpose**: Create urgency and drive immediate action through time-sensitive messaging
+
+**Required Variations**:
+- Large countdown timer with days/hours/mins/secs
+- Progress bar showing registration deadline approaching
+- Floating sticky countdown bar
+- Early bird pricing expiration timer
+- Spots remaining indicator with live updates
+- Milestone countdowns (e.g., "100 days until event!")
+
+**Design Specifications**:
+- Timer Design: Flip-clock style or digital display, 48-96px numbers
+- Box Styling: Separate boxes for D:H:M:S with labels below (12-14px)
+- Color Urgency: Change colors as time decreases (blue → yellow → red)
+- Animation: Flip animation on number change, pulsing effect when < 24 hours
+- Progress Bar: 16-24px height, color-coded (green → red), percentage label
+- Spots Counter: Circular progress or horizontal bar, "23/100 spots left"
+- Update Frequency: Timer updates every second, spots update real-time
+- Expired State: "Event started!" or "Registration closed" messaging
+- Background: High-contrast background (dark with light text or vice versa)
+- Size Options: Large (full-width section), medium (inline), small (header bar)
+- Call-to-Action: Integrated CTA button below timer ("Register Before It's Too Late")
+- Timezone Display: Show countdown in viewer's timezone with indicator
+- Mobile Optimization: Compact timer design, maintain readability at small sizes
+- Accessibility: Time remaining also in text format for screen readers
+
+---
+
+## 11. TESTIMONIAL/SOCIAL PROOF SECTIONS (EVENT-SPECIFIC)
+
+**Component Purpose**: Build trust through attendee feedback and event satisfaction metrics
+
+**Required Variations**:
+- Video testimonials from past attendees
+- Quote cards with star ratings
+- Twitter/social media feed integration
+- Before/after attendee success stories
+- Company logo wall (companies who attended)
+- Net Promoter Score (NPS) showcase with breakdown
+
+**Design Specifications**:
+- Quote Cards: 360-420px width, 280-340px height, with shadows
+- Attendee Photo: 80-100px circular, positioned top-left or center
+- Quote Text: 18-20px, italic, quotation marks, max 150 words
+- Attribution: Name (16-18px bold), title & company (14-16px), event year (14px)
+- Star Rating: 5-star display (24-32px stars), visible before quote
+- Video Thumbnails: 16:9 ratio, play button overlay (72-96px)
+- Carousel: 3 testimonials visible at once, auto-advance every 6 seconds
+- Social Feed: Live Twitter/LinkedIn feed with event hashtag, 4-6 posts visible
+- Stats Display: "4.8/5.0 rating", "94% would attend again", "97% NPS"
+- Company Logos: Companies whose employees attended, 120-150px width
+- Filter Options: By industry, by role, by event year
+- Background: Light testimonials on dark section or vice versa for contrast
+- Responsive: 3 cards → 2 → 1 card, maintain quote readability
+- Accessibility: Video captions, screen-reader friendly rating values
+
+---
+
+## 12. NETWORKING/COMMUNITY SECTIONS
+
+**Component Purpose**: Highlight networking opportunities and community-building aspects of event
+
+**Required Variations**:
+- Attendee directory with filtering (if public)
+- Interest-based matching suggestions
+- Networking session schedule
+- Online community platform preview
+- Meet-up coordinator (coffee chats, dinners)
+- Live attendee map showing who's coming from where
+
+**Design Specifications**:
+- Attendee Cards: 240-300px, photo, name, company, interests/tags
+- Filter Tags: Multiple select tags for industry, role, interests (pill-style)
+- Privacy Controls: Opt-in for public directory, privacy settings visible
+- Matching Algorithm: "You have 5 matches based on interests" with preview cards
+- Session Cards: Dedicated networking slots in schedule with themes
+- Community Preview: Screenshots or iframe of Slack/Discord/platform
+- Map Visualization: World map with pins/clusters showing attendee locations
+- RSVP System: "Who's attending?" section with join/follow options
+- Conversation Starters: Suggested topics or ice-breaker questions
+- Group Formation: Create or join interest groups (max 20 people per group)
+- Icon System: Handshake, coffee cup, chat bubble icons (40-48px)
+- CTA Buttons: "Join Community", "Find Your Matches", "Schedule 1-on-1"
+- Responsive: Grid becomes list on mobile, maintain filter functionality
+- Accessibility: Clear labels for filters, keyboard-navigable cards
+
+---
+
+## 13. COVID-19/HEALTH & SAFETY SECTIONS
+
+**Component Purpose**: Communicate health protocols and safety measures clearly and reassuringly
+
+**Required Variations**:
+- Icon-based safety measures checklist
+- Video walkthrough of safety protocols
+- Accordion with detailed policy sections
+- Certificate/verification requirements display
+- Capacity and distancing information
+- Virtual attendance alternative info
+
+**Design Specifications**:
+- Icon Grid: 6-8 large icons (64-80px) with short labels below
+- Icons: Mask, sanitizer, distance markers, vaccination, ventilation, contactless
+- Checklist Format: Green checkmarks with clear statements (16-18px)
+- Color Scheme: Calming blues/greens, avoid red which can increase anxiety
+- Policy Document: Link to full PDF policy with download option
+- Update Timestamp: "Last updated: March 1, 2025" visible at top
+- Badge System: "Fully Vaccinated Required", "Masks Optional", "Outdoors Only"
+- Visual Diagrams: Venue layout showing capacity limits and flow patterns
+- FAQ Integration: Link to health-specific FAQs
+- Refund Policy: Clear refund terms if health concerns arise
+- Contact Info: Direct health/safety question contact (email/phone)
+- Reassurance Tone: Positive, action-oriented language
+- Responsive: Icons stack to 2 columns on mobile, maintain readability
+- Accessibility: Clear headers, simple language, alt text for diagrams
+
+---
+
+## 14. CALL-TO-ACTION (EVENT-SPECIFIC)
+
+**Component Purpose**: Drive conversions at strategic points throughout the page
+
+**Required Variations**:
+- Sticky header CTA bar (always visible)
+- Full-width banner CTA between sections
+- Floating action button (FAB) bottom-right
+- Exit-intent popup CTA
+- Multi-option CTA (Register, Volunteer, Sponsor)
+- Post-event CTA (Watch Recording, Join Next Year)
+
+**Design Specifications**:
+- Button Sizing: Primary 56-64px height, secondary 48px height
+- Button Text: "Register Now", "Get Your Ticket", "Save My Spot", "Join Waitlist"
+- Color: High-contrast brand color, passes WCAG AA (4.5:1 contrast)
+- Hover State: Darken 10%, lift with shadow, or scale 1.05x
+- Loading State: Spinner animation, disabled state, "Processing..." text
+- Icon Addition: Arrow, ticket, calendar icons inside button (24px)
+- Sticky Bar: 60-70px height, shadow below, register button + spots remaining
+- FAB: 64-72px circle, pulse animation, collapses to icon on scroll
+- Banner Design: Full-width, 300-400px height, left-text + right-CTA layout
+- Urgency Elements: Countdown, spots remaining, "Early Bird ends soon"
+- Multi-CTA Layout: 3 options side-by-side, clear visual hierarchy
+- Mobile Sticky: Fixed bottom bar with CTA, doesn't block content
+- Accessibility: High contrast, min 44x44px touch target, focus indicators
+- Analytics: Track click-through rates by CTA placement
+
+---
+
+## 15. LIVESTREAM/VIRTUAL EVENT SECTIONS
+
+**Component Purpose**: Support virtual/hybrid event attendees with streaming and digital features
+
+**Required Variations**:
+- Embedded livestream player with chat
+- Multi-track stream selector
+- On-demand replay library
+- Virtual networking lounge preview
+- Digital swag bag/downloads section
+- Engagement features (polls, Q&A, reactions)
+
+**Design Specifications**:
+- Video Player: 16:9 aspect ratio, 800-1200px width, custom controls
+- Player Controls: Play/pause, volume, quality selector (720p/1080p), fullscreen
+- Chat Integration: Right sidebar 300-360px, scrollable, emoji support
+- Stream Status: Live indicator (red dot), viewer count, "Live in 10 mins" countdown
+- Track Selector: Tabs or dropdown for multiple simultaneous streams
+- Engagement Bar: Bottom of player with poll, Q&A, raise hand, reactions buttons
+- Reaction Animations: Floating emojis (thumbs up, heart, clap) rising from bottom
+- Replay Library: Grid of past sessions, thumbnail, title, speaker, duration
+- Download Section: PDFs, slides, recordings, resources (list with file size)
+- Networking Rooms: Video chat preview, "Join Lounge" buttons for different topics
+- Schedule Sync: "Next session in 5 minutes" notification bar
+- Quality Indicator: Connection quality indicator (green/yellow/red dot)
+- Captions: Live captions toggle, multiple language options
+- Recording Notice: "This session is being recorded" disclosure
+- Responsive: Player shrinks to 4:3 on mobile, chat becomes expandable panel
+- Accessibility: Keyboard controls, screen reader announcements, caption support
+
+---
+
+## 16. EVENT AGENDA BUILDER (PERSONALIZATION)
+
+**Component Purpose**: Allow attendees to create custom schedules from available sessions
+
+**Required Variations**:
+- Drag-and-drop schedule builder
+- Multi-track selection with conflict detection
+- Calendar export function (iCal, Google Cal)
+- Session recommendation engine
+- Shared schedule feature (share with friends)
+- Print-friendly schedule view
+
+**Design Specifications**:
+- Interface: Two-column layout (available sessions left, your schedule right)
+- Session Cards: Draggable, 280-320px width, show time/speaker/room
+- Time Slots: Hourly/half-hour slots clearly delineated with grid lines
+- Conflict Warning: Red highlight when sessions overlap, warning message
+- Track Colors: Color-coded by track, legend at top
+- Action Buttons: "Add to Schedule", "Remove", "View Details"
+- Counter: "You've selected 8 sessions" progress indicator
+- Export Options: Buttons for Google Cal, Apple Cal, Outlook, PDF
+- Recommendation Tags: "Based on your interests" badges on suggested sessions
+- Filter Panel: By track, by speaker, by time, by room
+- Share Function: Generate unique URL for your schedule, social sharing buttons
+- Print View: Clean, minimal layout optimized for printing
+- Save Function: Auto-save to account, access from mobile app
+- Capacity Warning: "This session is 90% full - register soon"
+- Responsive: On mobile, becomes linear list with add/remove buttons
+- Accessibility: Keyboard shortcuts, screen reader friendly drag-drop alternative
+
+---
+
+## 17. INTERACTIVE FLOOR PLAN/VENUE MAP
+
+**Component Purpose**: Help attendees navigate venue and find rooms, booths, amenities
+
+**Required Variations**:
+- Clickable floor plan with room details
+- 3D venue model (WebGL)
+- Sponsor booth map with filtering
+- Amenities locator (restrooms, food, first aid, exits)
+- Multi-floor venue with level selector
+- Turn-by-turn indoor navigation (for large venues)
+
+**Design Specifications**:
+- Map Style: Clean vector graphics, clearly labeled rooms, color-coded areas
+- Interactive Zones: Clickable rooms that highlight on hover, show details on click
+- Room Details Popup: Room name, capacity, current session, accessibility features
+- Sponsor Booths: Numbered or named booths, clickable to see sponsor info
+- Icon System: Clear icons for amenities (food=fork/knife, restroom=toilet, info=i)
+- Floor Selector: Tabs or buttons for multi-story venues (Ground, Level 1, Level 2)
+- Search Function: "Find a room" search bar, highlights result on map
+- Zoom Controls: +/- buttons, scroll to zoom, pinch on mobile
+- Your Location: Blue dot showing current location (if GPS available)
+- Path Drawing: Animated line showing route from A to B
+- Legend: Color-coded legend explaining room types (sessions, expo, networking, food)
+- Download Option: High-res PDF map download for offline use
+- Accessibility Info: Icons showing wheelchair-accessible routes and features
+- Responsive: Scrollable/zoomable map on mobile, tap interactions
+- 3D Option: Toggle between 2D flat and 3D perspective views
+- Accessibility: Text list alternative of all locations with links
+
+---
+
+## 18. GAMIFICATION/ENGAGEMENT SECTIONS
+
+**Component Purpose**: Increase attendee engagement through game mechanics and challenges
+
+**Required Variations**:
+- Leaderboard for most active attendees
+- Badge collection system (attend X sessions, network with Y people)
+- Scavenger hunt with QR codes
+- Live polling and quiz competitions
+- Social media challenge tracker
+- Points-based rewards program
+
+**Design Specifications**:
+- Leaderboard: Top 10 attendees, avatar, name, points, 320-400px wide cards
+- Rank Display: Large position number (32-48px), progress to next rank
+- Badge Grid: 3-4 columns of badge icons (80-100px), locked/unlocked states
+- Badge Details: Hover/click to see criteria, progress bar to completion
+- QR Scanner: Built-in scanner interface or instructions to use phone camera
+- Challenge Cards: Challenge name, description, points value, "Complete" button
+- Point System: Clear point values (attend session=10pts, network=5pts, tweet=15pts)
+- Progress Bars: Visual progress for multi-step challenges (3/5 sessions attended)
+- Prize Display: Rewards for top performers (swag, discounts, exclusive access)
+- Live Poll: Real-time results visualization (bar chart, pie chart)
+- Quiz Interface: Multiple choice with timer, instant feedback, score display
+- Social Feed: Live feed of attendee posts using event hashtag with points earned
+- Notification System: Toast notifications for badge earned, level up, challenge completed
+- Animation: Confetti/celebration animation on achievement unlock
+- Responsive: Leaderboard becomes scrollable list, badges in 2 columns on mobile
+- Accessibility: Keyboard navigation, screen reader announcements for achievements
+
+---
+
+## 19. MOBILE APP INTEGRATION SECTIONS
+
+**Component Purpose**: Promote and integrate event mobile app features
+
+**Required Variations**:
+- App download section with QR code
+- Feature showcase (notifications, schedule, networking)
+- App-exclusive benefits display
+- Live demo/screenshots of app interface
+- Push notification preview
+- App vs web comparison
+
+**Design Specifications**:
+- App Store Badges: Apple App Store and Google Play (180-200px width)
+- QR Code: Large, scannable QR code (200-240px) linking to app
+- Phone Mockups: iPhone/Android mockups showing app screens, 300-400px height
+- Feature Icons: 6-8 key features with icons (schedule, chat, notifications, map)
+- Screenshot Carousel: 3-5 app screenshots in device frames, swipeable
+- Benefit Cards: "Get instant session updates", "Network on the go", etc.
+- App-Only Badge: Special content or features only in app highlighted
+- Notification Mockup: Example push notification design shown in mockup
+- Comparison Table: Side-by-side web vs app features (checkmarks/X marks)
+- Call-to-Action: "Download now and sync your schedule" prominent button
+- Review Display: App store rating (4.8★), number of downloads (10K+)
+- Platform Icons: iOS and Android logos clearly displayed
+- Animation: Phone mockup with animated screen transitions
+- Responsive: Mockups scale down on mobile, QR code remains prominent
+- Accessibility: Alt text for mockups, text descriptions of features
+
+---
+
+## 20. POST-EVENT CONTENT SECTIONS
+
+**Component Purpose**: Maintain engagement after event with resources and next steps
+
+**Required Variations**:
+- Session recording library with search
+- Presentation slide downloads
+- Resource hub (links, documents, tools mentioned)
+- Photo gallery with download options
+- Certificate of attendance download
+- Survey/feedback form
+
+**Design Specifications**:
+- Recording Grid: 3-4 columns, thumbnail, title, speaker, duration, views
+- Video Player: Embedded player with chapters, speed control, quality selector
+- Download Buttons: Clear "Download Slides" buttons with file size (PDF, PPT)
+- Resource Cards: Link preview cards with favicon, title, description
+- Photo Gallery: Masonry layout, download all button, individual download option
+- Certificate Section: Preview of certificate, "Download PDF" button, personalized name
+- Survey: Embedded form or link to external survey, estimated completion time
+- Thank You Message: Personalized message from organizers with event highlights
+- Statistics: Event by numbers (attendees, sessions, countries, total watch time)
+- Social Sharing: "Share your certificate" buttons for LinkedIn, Twitter
+- Next Event Teaser: "Save the date" for next year, early bird signup
+- Feedback Display: "What attendees are saying" post-event testimonials
+- Contact Info: Stay in touch, join community, follow social media
+- Responsive: Grid becomes list on mobile, video player responsive
+- Accessibility: Video captions, transcript links, accessible forms
+
+---
+
+## UNIVERSAL EVENT PAGE DESIGN PRINCIPLES
+
+**Color Psychology for Events:**
+- Corporate Events: Blues, grays, professional palette
+- Tech Conferences: Vibrant blues, purples, electric accents
+- Music Festivals: Bold, saturated colors, gradients
+- Wellness Events: Greens, earth tones, calming pastels
+- Fundraisers: Warm colors, reds, oranges for urgency
+- Sports Events: Team colors, high energy reds/yellows
+
+**Typography Hierarchy for Events:**
+- Event Name: 56-84px, bold, eye-catching display font
+- Section Headers: 36-48px, medium/bold weight
+- Subheadings: 24-32px, regular/medium weight
+- Body Text: 16-18px, line-height 1.6-1.8
+- Details/Metadata: 14-16px, can be lighter weight
+- Mobile Scale: Reduce by 20-30% for mobile
+
+**Spacing System (8px base):**
+- Tight: 8-16px (within components)
+- Standard: 24-32px (between related elements)
+- Comfortable: 48-64px (between sections)
+- Spacious: 80-120px (between major sections)
+
+**Event-Specific Breakpoints:**
+- Mobile Portrait: < 480px
+- Mobile Landscape: 480-767px
+- Tablet: 768-1024px
+- Desktop: 1025-1440px
+- Large Desktop: > 1440px
+
+**Animation Guidelines:**
+- Page Load: Stagger animations, don't overwhelm
+- Scroll Triggers: Fade-in sections at 20% viewport
+- Hover States: 200-300ms transitions
+- Countdown Timer: Smooth number transitions
+- CTA Pulses: 2-second loop, subtle scale
+
+**Accessibility Musts:**
+- WCAG 2.1 AA minimum compliance
+- 4.5:1 contrast for body text
+- 3:1 contrast for large text (18px+)
+- Focus indicators on all interactive elements
+- Skip navigation links
+- Proper heading hierarchy (H1→H2→H3)
+- Alt text for all images
+- Video captions and transcripts
+- Keyboard-navigable components
+- Screen reader tested
+- Touch targets minimum 44x44px
+
+**Performance Optimization:**
+- Hero images: WebP format, < 500KB
+- Lazy load images

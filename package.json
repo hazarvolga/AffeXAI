@@ -1,0 +1,35 @@
+{
+  "name": "affexai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "./start-dev.sh",
+    "stop": "./stop-dev.sh",
+    "cleanup": "cd apps/backend && npm run cleanup",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "dev:backend:watch": "cd apps/backend && npm run start:dev",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend",
+    "build:shared": "cd packages/shared-types && npm run build",
+    "build:backend": "cd apps/backend && npm run build",
+    "build:frontend": "cd apps/frontend && npm run build",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

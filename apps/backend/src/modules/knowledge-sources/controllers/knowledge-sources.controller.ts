@@ -1,0 +1,263 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
+import { KnowledgeSourcesService } from '../services/knowledge-sources.service';
+import { CreateKnowledgeSourceDto } from '../dto/create-knowledge-source.dto';
+import { UpdateKnowledgeSourceDto } from '../dto/update-knowledge-source.dto';
+import { QueryKnowledgeSourceDto } from '../dto/query-knowledge-source.dto';
+import { SearchKnowledgeSourceDto } from '../dto/search-knowledge-source.dto';
+
+@Controller('knowledge-sources')
+@UseGuards(JwtAuthGuard)
+export class KnowledgeSourcesController {
+  private readonly logger = new Logger(KnowledgeSourcesController.name);
+
+  constructor(
+    private readonly knowledgeSourcesService: KnowledgeSourcesService,
+  ) {}
+
+  /**
+   * Create a new knowledge source
+   * POST /knowledge-sources
+   */
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(
+    @Body() createDto: CreateKnowledgeSourceDto,
+    @CurrentUser() user: any,
+  ) {
+    this.logger.log(`Creating knowledge source: ${createDto.title} by user: ${user?.id}`);
+    // Auto-set uploadedById from authenticated user (JwtAuthGuard sets user.id)
+    createDto.uploadedById = user?.id;
+
+    if (!createDto.uploadedById) {
+      this.logger.error('User ID not found in request', user);
+      throw new Error('Authentication user ID missing');
+    }
+    const source = await this.knowledgeSourcesService.create(createDto);
+    return {
+      success: true,
+      data: source,
+      message: 'Knowledge source created successfully',
+    };
+  }
+
+  /**
+   * Upload a file (PDF, DOC, etc.)
+   * POST /knowledge-sources/upload
+   */
+  @Post('upload')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/knowledge-sources',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = /pdf|doc|docx|txt|md/;
+        const ext = extname(file.originalname).toLowerCase().replace('.', '');
+        const mimeType = file.mimetype;
+
+        if (allowedTypes.test(ext) || mimeType.includes('pdf') || mimeType.includes('document')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Invalid file type. Only PDF, DOC, DOCX, TXT, and MD files are allowed.'), false);
+        }
+      },
+    }),
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: any,
+    @CurrentUser() user: any,
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    this.logger.log(`Uploading file: ${file.originalname} by user: ${user?.id}`);
+
+    // Parse tags if provided as JSON string
+    let tags = [];
+    if (body.tags) {
+      try {
+        tags = JSON.parse(body.tags);
+      } catch {
+        tags = body.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+      }
+    }
+
+    // Create DTO from form data
+    const createDto: CreateKnowledgeSourceDto = {
+      title: body.title || file.originalname,
+      description: body.description,
+      sourceType: 'document' as any,
+      filePath: file.path,
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      fileSize: file.size,
+      tags,
+      enableForFaqLearning: body.enableForFaqLearning === 'true',
+      enableForChat: body.enableForChat === 'true',
+      uploadedById: user?.id,
+    };
+
+    if (!createDto.uploadedById) {
+      this.logger.error('User ID not found in request', user);
+      throw new Error('Authentication user ID missing');
+    }
+
+    const source = await this.knowledgeSourcesService.create(createDto);
+    return {
+      success: true,
+      data: source,
+      message: 'File uploaded successfully',
+    };
+  }
+
+  /**
+   * Get all knowledge sources with filtering
+   * GET /knowledge-sources
+   */
+  @Get()
+  async findAll(@Query() queryDto: QueryKnowledgeSourceDto) {
+    const result = await this.knowledgeSourcesService.findAll(queryDto);
+    return {
+      success: true,
+      data: result.data,
+      total: result.total,
+      page: Math.floor((queryDto.offset || 0) / (queryDto.limit || 20)) + 1,
+      limit: queryDto.limit || 20,
+    };
+  }
+
+  /**
+   * Search knowledge sources with full-text search
+   * POST /knowledge-sources/search
+   */
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  async search(@Body() searchDto: SearchKnowledgeSourceDto) {
+    this.logger.log(`Searching knowledge sources: "${searchDto.query}"`);
+    const results = await this.knowledgeSourcesService.search(searchDto);
+    return {
+      success: true,
+      data: results,
+      total: results.length,
+    };
+  }
+
+  /**
+   * Get knowledge source by ID
+   * GET /knowledge-sources/:id
+   */
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const source = await this.knowledgeSourcesService.findById(id);
+    return {
+      success: true,
+      data: source,
+    };
+  }
+
+  /**
+   * Update knowledge source
+   * PUT /knowledge-sources/:id
+   */
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateKnowledgeSourceDto,
+  ) {
+    this.logger.log(`Updating knowledge source: ${id}`);
+    const source = await this.knowledgeSourcesService.update(id, updateDto);
+    return {
+      success: true,
+      data: source,
+      message: 'Knowledge source updated successfully',
+    };
+  }
+
+  /**
+   * Archive knowledge source (soft delete)
+   * PUT /knowledge-sources/:id/archive
+   */
+  @Put(':id/archive')
+  async archive(@Param('id') id: string, @Body('archivedById') archivedById: string) {
+    this.logger.log(`Archiving knowledge source: ${id}`);
+    const source = await this.knowledgeSourcesService.archive(id, archivedById);
+    return {
+      success: true,
+      data: source,
+      message: 'Knowledge source archived successfully',
+    };
+  }
+
+  /**
+   * Delete knowledge source permanently
+   * DELETE /knowledge-sources/:id
+   */
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id') id: string) {
+    this.logger.log(`Deleting knowledge source: ${id}`);
+    await this.knowledgeSourcesService.delete(id);
+  }
+
+  /**
+   * Update usage statistics
+   * POST /knowledge-sources/:id/usage
+   */
+  @Post(':id/usage')
+  @HttpCode(HttpStatus.OK)
+  async updateUsage(
+    @Param('id') id: string,
+    @Body('wasHelpful') wasHelpful: boolean,
+    @Body('relevanceScore') relevanceScore?: number,
+  ) {
+    await this.knowledgeSourcesService.updateUsageStats(id, wasHelpful, relevanceScore);
+    return {
+      success: true,
+      message: 'Usage statistics updated successfully',
+    };
+  }
+
+  /**
+   * Get statistics
+   * GET /knowledge-sources/stats/overview
+   */
+  @Get('stats/overview')
+  async getStatistics() {
+    const stats = await this.knowledgeSourcesService.getStatistics();
+    return {
+      success: true,
+      data: stats,
+    };
+  }
+}

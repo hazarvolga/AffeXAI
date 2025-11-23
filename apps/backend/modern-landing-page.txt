@@ -1,0 +1,617 @@
+# Modern Landing Page Builder Components - Comprehensive Prompt Guide
+
+## 1. HERO SECTIONS (MODERN LANDING PAGE)
+
+**Component Purpose**: Make an unforgettable first impression with bold visuals and clear value proposition that stops scrolling
+
+**Required Variations**:
+- Full-screen animated gradient hero with 3D floating elements
+- Split-screen hero (interactive product demo + benefit-focused copy)
+- Video background hero with text overlay and glassmorphism card
+- Minimal typography-focused hero with kinetic text animations
+- Bento-grid hero (multi-panel mosaic with micro-interactions)
+- Immersive WebGL/Three.js hero with particle effects
+
+**Design Specifications**:
+- Height: 100vh (full viewport), no compromise on impact
+- Typography: Headline 64-96px (ultra-bold, display font), subhead 24-32px (light/regular)
+- Gradient Trends: Animated mesh gradients, holographic effects, dual-tone splits
+- 3D Elements: Floating product mockups, abstract geometric shapes with depth
+- Glassmorphism: Frosted glass effect cards (backdrop-filter: blur(10px), rgba backgrounds)
+- Animation: Parallax scroll (foreground moves faster than background), fade-in stagger
+- Interactive Elements: Mouse-follow effects, cursor-triggered animations, scroll-velocity reactions
+- CTA Design: Oversized buttons (min 60px height), pill-shaped, with glow/shadow effects
+- Typography Effects: Gradient text fills, animated underlines, typewriter effects, morphing text
+- Color Psychology: Bold, saturated primaries for tech/SaaS, pastels for creative/wellness
+- Micro-interactions: Hover states trigger 3D transforms, buttons breathe/pulse subtly
+- Loading State: Skeleton screens or elegant loading animations (not spinners)
+- Responsive: Maintain drama on mobile, reduce animation complexity for performance
+- Accessibility: Reduced motion alternative, 4.5:1 contrast maintained despite effects
+
+**Modern Trends to Incorporate**:
+- Neumorphism subtle touches (soft shadows, embossed effects)
+- Claymorphism (3D clay-like textures and shadows)
+- Dark mode by default with light mode toggle
+- Asymmetric layouts that break the grid intentionally
+- Oversized typography that bleeds off screen
+
+---
+
+## 2. FEATURE SHOWCASE SECTIONS
+
+**Component Purpose**: Communicate product benefits with visual flair that feels alive and engaging
+
+**Required Variations**:
+- Interactive 3D card grid with tilt-on-hover (à la Stripe)
+- Horizontal scroll-triggered feature reveal (scroll to discover)
+- Animated icon transitions that morph between states
+- Video-in-card features with auto-play on hover
+- Comparison slider (before/after, old way vs new way)
+- Floating feature cards with depth and parallax layers
+
+**Design Specifications**:
+- Card Design: Elevated shadows (0 20px 60px rgba(0,0,0,0.15)), 16-24px border radius
+- Hover Effects: Lift cards 12-20px, rotate slightly (5-10deg tilt), scale 1.03-1.05x
+- Icon Style: Animated SVG icons (60-80px), Lottie animations, gradient fills
+- Icon Background: Soft gradient circles, glassmorphic containers, or floating shadows
+- Typography: Feature title 24-32px (bold), description 18-20px (line-height 1.7)
+- Grid Layout: Asymmetric bento boxes, not uniform grids (mix 1x1, 1x2, 2x1 cells)
+- Color Accents: Each feature gets unique accent color (purple, blue, green, pink, orange)
+- Video Clips: 6-10 second looped demos, no sound, auto-play on hover/scroll
+- Scroll Animations: Features fade-in and slide-up sequentially (100ms stagger)
+- Interactive Elements: Toggle between features, tabs with smooth transitions
+- Comparison UI: Draggable slider handle, clear before/after labels, image overlays
+- Background: Subtle animated gradients, noise textures, or radial gradient spotlights
+- Spacing: 40-60px gaps between cards, 120-160px section padding
+- Responsive: 3-column → 2-column → 1-column, maintain card aspect ratios
+- Accessibility: Keyboard-navigable cards, reduced motion mode removes complex animations
+
+**Modern Design Language**:
+- Brutalist touches: Thick borders, bold type, intentional "raw" elements
+- Maximalist color: Don't shy from vibrant, high-saturation colors
+- Depth through shadows: Multiple shadow layers for realistic depth
+- Organic shapes: Blob shapes, liquid morphs, abstract forms
+
+---
+
+## 3. SOCIAL PROOF / TESTIMONIAL SECTIONS
+
+**Component Purpose**: Build trust through authentic user voices with modern presentation that doesn't feel stock or templated
+
+**Required Variations**:
+- Infinite horizontal scroll testimonial ticker (auto-scrolling)
+- Video testimonial grid with play-on-hover
+- Tweet-style testimonial cards (social media aesthetic)
+- Animated rating showcase with counting numbers
+- Marquee-style logo parade (clients/press)
+- Interactive testimonial carousel with 3D perspective
+
+**Design Specifications**:
+- Card Styling: Modern shadows, 20px+ border radius, white or dark cards with high contrast
+- Profile Photos: 56-72px, perfect circles, subtle border (2px) with brand color
+- Quote Typography: 20-24px, medium weight, quotation marks stylized or removed
+- Attribution: Name 16-18px bold, title/company 14-16px, lighter color (60% opacity)
+- Star Ratings: Large stars (28-32px), animated fill-in on view, gold/yellow (#FFB800)
+- Infinite Scroll: Seamless loop using CSS animations or JS, 20-40s duration
+- Video Thumbnails: 16:9 ratio, play button overlay (64px), thumbnail with slight motion
+- Social Media Style: Twitter/LinkedIn UI mimicry (verified badges, timestamps, interaction icons)
+- Number Counters: Animate from 0 to value on scroll-into-view (4.9/5, 10K+ users)
+- Logo Treatment: Grayscale logos with smooth color transition on hover
+- Marquee Speed: Slow enough to read (30-40px/second), pause on hover
+- 3D Carousel: Cards rotate on Y-axis, perspective depth (1000-2000px)
+- Background: Subtle gradient or solid color different from main page background
+- Grid Variations: Mix card sizes (some 1x, some 2x width for featured testimonials)
+- Responsive: Infinite scroll maintains on mobile, carousel becomes swipeable
+- Accessibility: Pause animations button, keyboard navigation, screen-reader friendly
+
+**Trust Elements to Include**:
+- Real photos (no stock images - users can tell)
+- Specific details (numbers, outcomes, timelines)
+- Video preferred over text when possible
+- Verified badges for authenticity
+- Company logos that are recognizable
+
+---
+
+## 4. CALL-TO-ACTION SECTIONS
+
+**Component Purpose**: Convert visitors with high-impact, impossible-to-miss CTAs that create urgency and excitement
+
+**Required Variations**:
+- Full-bleed gradient CTA with animated elements
+- Floating 3D card CTA with motion graphics
+- Split CTA (two options: primary vs secondary)
+- Sticky bottom-bar CTA that reveals on scroll
+- Exit-intent popup with special offer
+- Gamified CTA (scratch-off, spin-wheel, interactive element)
+
+**Design Specifications**:
+- Button Size: Hero CTAs 64-72px height, secondary 52-60px, min 200px width
+- Button Style: Gradient backgrounds, glow effects, animated gradient shifts
+- Hover States: Lift with shadow, scale 1.05x, glow intensity increase, gradient animation
+- Typography: Button text 18-20px, bold weight, uppercase or sentence case
+- Icons in Buttons: Arrow (→), sparkle (✨), rocket (🚀) 24px, positioned right
+- Background Treatment: Vibrant gradients (purple-to-pink, blue-to-cyan), animated mesh
+- Urgency Elements: Countdown timer (48-60px numbers), "Limited spots" badges
+- Social Proof: "Join 50K+ users" text above button, small logos below
+- Form Integration: Email capture input inline with button, single-line layout
+- Multiple CTAs: Primary button prominent, secondary button ghost/outlined style
+- Sticky Bar: 70-80px height, shadow on top, background blur, Z-index 1000
+- Exit Intent: Centered modal, 600-800px width, attractive offer, easy close (X)
+- Gamification: Wheel 300-400px, bright colors, clear prize labels, spin animation
+- Animation: Pulse effect (2s loop), shimmer across button, gradient rotation
+- Micro-copy: "No credit card required", "14-day free trial", "Cancel anytime"
+- Responsive: Full-width buttons on mobile, maintain button hierarchy
+- Accessibility: High contrast (7:1 for AAA), focus rings, clear disabled states
+
+**Conversion Optimization**:
+- Action-oriented copy: "Start creating" not "Sign up"
+- Remove friction: No multi-field forms on first CTA
+- Visual hierarchy: One clear primary action
+- Trust signals: Security badges, money-back guarantee
+
+---
+
+## 5. PRODUCT DEMO / SHOWCASE SECTIONS
+
+**Component Purpose**: Show product in action with interactive elements that let users explore features
+
+**Required Variations**:
+- Animated screen mockup with auto-playing interface demo
+- Interactive prototype embedded (Figma, Framer)
+- Scroll-triggered feature progression (reveals on scroll)
+- Tabbed interface showcase (switch between features)
+- Device mockups with screen transitions (phone/tablet/desktop)
+- Before/after comparison slider with your solution
+
+**Design Specifications**:
+- Mockup Style: High-fidelity device frames (Macbook, iPhone, browser window)
+- Screen Content: Real UI, not lorem ipsum, actual product screenshots or videos
+- Animation: Smooth transitions between screens, fade/slide effects, cursor animations
+- Interactive Areas: Clickable hotspots that reveal feature details, tooltips on hover
+- Screen Recording: 10-30 second loops, 16:9 or device aspect ratio, 1080p minimum
+- Scroll Progress: Features reveal as user scrolls (scroll-linked animations)
+- Tab Design: Modern pills/buttons, smooth content transitions (300ms fade)
+- Multi-device: Show responsive design across devices simultaneously
+- Background: Soft gradient, mesh gradient, or abstract 3D shapes
+- Feature Callouts: Floating labels pointing to UI elements, animated lines
+- Comparison Slider: Vertical draggable divider, before/after labels, easy grab handle
+- Loading States: Skeleton screens while demo loads, smooth progressive loading
+- Video Controls: Minimal or hidden, auto-loop, muted by default, click-to-unmute
+- Spacing: 80-120px section padding, center-aligned mockups
+- Responsive: Scale mockups proportionally, switch to vertical stack on mobile
+- Accessibility: Alt text for screens, captions for videos, keyboard controls
+
+**Storytelling Elements**:
+- Problem → Solution narrative flow
+- User journey visualization
+- Progressive feature reveal (don't overwhelm)
+- Micro-interactions that feel satisfying
+
+---
+
+## 6. PRICING SECTIONS
+
+**Component Purpose**: Present pricing with modern design that makes decision-making easy and highlights value
+
+**Required Variations**:
+- 3-tier comparison cards with featured tier elevated
+- Toggle between monthly/annual with savings highlight
+- Interactive pricing calculator (sliding scale by usage)
+- Single CTA pricing (one product, multiple add-ons)
+- Comparison table with expandable feature details
+- Enterprise custom pricing with contact form
+
+**Design Specifications**:
+- Card Design: 380-420px width, elevated shadows on hover, 20-24px radius
+- Featured Plan: Scale 1.05x, "Most Popular" badge, different shadow/glow
+- Typography: Plan name 28-32px, price 56-72px (large and bold), /month 18-20px
+- Price Display: Emphasis on number, de-emphasize currency symbol (smaller/lighter)
+- Savings Badge: "Save 20%" pill badge in green, positioned top-right of card
+- Toggle Switch: iOS-style toggle, 60-80px wide, smooth animation (300ms)
+- Feature List: Checkmarks (24px, green), X marks (24px, gray/red), 16-18px text
+- Icon Style: Modern line icons or filled icons, consistent style throughout
+- CTA Button: Different per tier (Primary for featured, secondary for others)
+- Tooltip Icons: Info icons (16px) next to features, hover reveals explanation
+- Border Treatment: Gradient borders for premium tiers, glow effects
+- Background: Each tier gets subtle background tint or pattern
+- Calculator UI: Range slider with live price update, usage visualization
+- Table Layout: Sticky header on scroll, alternating row colors, expandable rows
+- Hover States: Cards lift, shadows intensify, slight tilt effect (3D)
+- Responsive: Stack cards vertically on mobile, maintain feature alignment
+- Accessibility: High contrast prices, clear labels, keyboard-navigable toggles
+
+**Psychological Pricing**:
+- Anchor with highest price first (if beneficial)
+- Show savings prominently with strikethrough
+- Use $99 not $99.00 (remove unnecessary decimals)
+- Annual pricing shows monthly equivalent
+
+---
+
+## 7. FAQ SECTIONS
+
+**Component Purpose**: Address objections and questions with modern accordion that's actually enjoyable to use
+
+**Required Variations**:
+- Two-column accordion with staggered animations
+- Search-powered FAQ (instant filter)
+- Category tabs with nested accordions
+- Video answer options for complex questions
+- AI chatbot integration for dynamic answers
+- Split layout (questions left, answers right with transitions)
+
+**Design Specifications**:
+- Accordion Item: 72-88px height collapsed, smooth expand animation (400ms)
+- Question Typography: 20-24px, medium/semi-bold weight, left-aligned
+- Answer Typography: 16-18px, line-height 1.7, max-width 700px, gray text (70% opacity)
+- Icon Design: Plus/minus (28-32px) or chevron, smooth rotation animation
+- Hover State: Background color change, subtle highlight, cursor pointer
+- Open State: Different background color, shadow inside, expanded padding
+- Spacing: 12-16px between items, 60-80px section padding
+- Search Bar: Sticky at top, 56-64px height, magnifying glass icon, "Ask a question..."
+- Search Results: Highlight matching text, filter accordion in real-time
+- Category Tabs: Pill-style tabs, active state with background fill, smooth transition
+- Video Answers: Thumbnail with play button, modal player or inline expand
+- Chatbot UI: Floating chat bubble, modern chat interface, instant responses
+- Split Layout: 50/50 or 40/60, click question left to show answer right
+- Animation: Smooth height transitions, fade-in content, stagger items on page load
+- Background: Subtle different from main page (light gray or white on colored page)
+- Responsive: Single column on mobile, search remains functional
+- Accessibility: Proper ARIA labels, keyboard navigation (arrow keys), focus management
+
+**Content Strategy**:
+- Front-load most important questions
+- Use natural language (how users actually ask)
+- Keep answers concise (under 100 words)
+- Link to detailed docs for deep dives
+
+---
+
+## 8. STATS / METRICS SECTIONS
+
+**Component Purpose**: Prove credibility and scale with animated numbers that create wow moments
+
+**Required Variations**:
+- Large counter section with animated number increment
+- Icon + number + label grid (3-4 metrics)
+- Circular progress indicators (completion percentages)
+- Timeline with milestone numbers
+- Comparison metrics (before/after, us vs competitors)
+- Live metrics (real-time updates if applicable)
+
+**Design Specifications**:
+- Number Size: 64-96px, extra bold weight, brand accent color
+- Number Animation: Count-up from 0 on scroll into view, 1-2 second duration
+- Suffix Styling: +, %, K, M, B suffixes 40-50% size of number
+- Label Typography: 18-22px, positioned below number, lighter weight
+- Icon Design: 56-72px, positioned above number, gradient or solid fills
+- Grid Layout: 3-4 items per row, equal spacing (60-80px gaps)
+- Background: High-contrast section (dark on light page or vice versa)
+- Dividers: Optional vertical lines between metrics (1px, 30% opacity)
+- Circular Progress: 140-180px diameter, animated stroke, percentage in center
+- Timeline Style: Vertical or horizontal line with nodes, dates and numbers
+- Comparison Bars: Horizontal bars with percentage fill, animated growth
+- Color Coding: Green for positive growth, blue for neutral, red for comparison
+- Real-time Updates: WebSocket connection, smooth number transitions
+- Micro-interactions: Numbers pulse slightly on hover, subtle glow effects
+- Background Elements: Abstract shapes, gradient meshes, particle effects
+- Responsive: 4 metrics → 2 → 1 column, maintain number readability
+- Accessibility: Announce number changes to screen readers, reduced motion alternative
+
+**Impactful Metrics to Show**:
+- Users/customers (scale)
+- Satisfaction rates (quality)
+- Time/money saved (value)
+- Growth percentage (momentum)
+
+---
+
+## 9. INTEGRATION / COMPATIBILITY SECTIONS
+
+**Component Purpose**: Show ecosystem compatibility and integrations with modern visual treatment
+
+**Required Variations**:
+- Animated logo carousel/marquee (infinite scroll)
+- Interactive integration cards with hover details
+- Bento grid of integration logos with hover overlays
+- Category-based integration library (filterable)
+- "Powered by" tech stack showcase
+- API documentation preview with code snippets
+
+**Design Specifications**:
+- Logo Size: 120-160px width, consistent height (60-80px), proper padding
+- Logo Treatment: Grayscale default, full color on hover, smooth transition
+- Card Design: 200-240px square, white/dark background, subtle shadow
+- Hover Effect: Lift card, show integration name and "Learn more" CTA
+- Carousel Speed: 30-50px/second, smooth infinite loop, pause on hover
+- Grid Layout: 5-6 logos per row desktop, responsive down to 2-3 mobile
+- Category Filter: Pill buttons, "All", "Payment", "CRM", "Analytics", etc.
+- Badge System: "New", "Popular", "Coming Soon" badges on integration cards
+- API Preview: Code block with syntax highlighting, copy button, language tabs
+- Background: Subtle grid pattern, light gradient, or solid color
+- Spacing: 32-48px gaps between logos, 80-100px section padding
+- Interactive States: Click logo for detail modal or link to integration page
+- Trust Elements: "Used by 10K+ teams" subtext, verification badges
+- Animation: Logos fade in on scroll, stagger by 50ms each
+- Responsive: Maintain logo aspect ratios, reduce grid columns smoothly
+- Accessibility: Alt text for all logos, keyboard navigable grid
+
+**Visual Hierarchy**:
+- Featured partners larger/prominent
+- Group by category for easier scanning
+- Show most popular/used first
+
+---
+
+## 10. FOOTER (MODERN LANDING)
+
+**Component Purpose**: Comprehensive site navigation and information hub that doesn't feel like an afterthought
+
+**Required Variations**:
+- Multi-column mega footer with newsletter signup
+- Minimal single-row footer with social links
+- Footer with CTA section (last chance conversion)
+- Accordion-style mobile footer (collapsible sections)
+- Footer with featured blog posts or resources
+- Footer with dynamic content (latest tweets, Instagram feed)
+
+**Design Specifications**:
+- Background: Dark theme (common) or light with strong border-top
+- Column Layout: Logo + 4-5 link columns + newsletter/social column
+- Typography: Column headers 16-18px bold, links 14-16px regular
+- Link Hover: Underline, color change, or slight opacity shift
+- Logo/Brand: 140-180px width, positioned top-left or center
+- Social Icons: 40-48px, circular backgrounds, hover with brand colors
+- Newsletter Form: Email input + button inline, 48-56px height, modern styling
+- Legal Links: 12-14px, low contrast, inline or separate row (Privacy, Terms, Cookies)
+- Divider Line: Optional 1px line separating footer sections
+- Copyright: "© 2025 Company Name" centered or left, 12-14px
+- CTA Section: Different background, 200-300px tall, "Ready to start?" message
+- Trust Badges: Security seals, certifications (40-50px height)
+- Featured Content: 2-3 blog post cards with thumbnails (if included)
+- Accordion Mobile: Chevrons to expand link sections, smooth animations
+- Height: 400-600px for rich footer, 150-200px for minimal
+- Responsive: Stack columns to single column, maintain link hierarchy
+- Accessibility: Keyboard navigable, proper heading structure, ARIA labels
+
+**Footer Content Strategy**:
+- Company info, product links, resources, legal
+- Make newsletter signup compelling
+- Social proof elements (awards, press)
+- Multiple contact methods
+
+---
+
+## 11. NAVIGATION / HEADER (MODERN LANDING)
+
+**Component Purpose**: Clean, unobtrusive navigation that gets out of the way but remains accessible
+
+**Required Variations**:
+- Transparent header that becomes solid on scroll
+- Center-logo navigation with split menus
+- Minimal text-only header (no logo)
+- Mega menu with rich content (images, descriptions)
+- Sticky header that shrinks on scroll
+- Hamburger menu with fullscreen overlay (mobile)
+
+**Design Specifications**:
+- Height: 80-100px desktop, 60-70px mobile, shrinks to 60-70px on scroll
+- Logo Size: 140-180px width or 40-50px height, smooth scale on scroll
+- Menu Typography: 15-17px, medium weight, letter-spacing 0.5px
+- Menu Spacing: 32-48px between items, clean and spacious
+- CTA Button: Different styling from menu items (filled, outlined, or gradient)
+- Scroll Behavior: Add background blur, shadow, reduce height, all smooth transitions
+- Transparent Mode: No background initially, white/dark text, full transparency
+- Solid Mode: Background 90-100% opacity or glassmorphism, clear hierarchy
+- Mega Menu: Dropdown 600-900px wide, multi-column, images + descriptions
+- Hover States: Underline animation, color shift, or subtle background
+- Active State: Different color, underline, or background pill
+- Mobile Menu: Full-screen overlay (100vh) or slide-in panel (80% width)
+- Hamburger Icon: Animated to X on open, 32-40px, smooth morphing
+- Mobile Transition: 300-400ms slide/fade animation, backdrop blur
+- Z-index: 100-1000 to overlay all content
+- Responsive: Switch to hamburger at 768-1024px breakpoint
+- Accessibility: Keyboard navigation, focus indicators, escape to close menu
+
+**Modern Header Trends**:
+- Glassmorphism (frosted glass effect)
+- Floating header (not full width, padded from edges)
+- Minimal link count (4-6 max, rest in menu)
+- Prominent CTA button
+
+---
+
+## 12. TRUST SIGNALS / CREDIBILITY SECTIONS
+
+**Component Purpose**: Build immediate trust through recognizable validation and social proof
+
+**Required Variations**:
+- Press mention logos (As seen in...)
+- Award badges and certifications showcase
+- Security and compliance badges (SOC2, GDPR, etc.)
+- Customer logo wall (major clients)
+- Review aggregator scores (G2, Capterra, Trustpilot)
+- Live activity feed (recent signups, purchases)
+
+**Design Specifications**:
+- Badge/Logo Size: 100-140px width, consistent height (50-70px)
+- Layout: Single row or multi-row grid, center-aligned
+- Logo Treatment: Grayscale with 50-70% opacity, or color with subtle opacity
+- Hover Effect: Full color, slight scale (1.05x), or glow effect
+- Section Height: 200-300px, compact but visible
+- Typography: "Trusted by..." or "As seen in" header 20-24px above logos
+- Review Scores: Large rating number 48-56px, stars 28-32px, review count below
+- Badge Styling: Modern iconography, subtle shadows, arranged in grid
+- Activity Feed: Real-time ticker, avatar + action + timestamp, scrolling animation
+- Background: Subtle different from main page (light gray on white)
+- Spacing: 40-60px gaps between elements, not cluttered
+- Animation: Fade in on scroll, optional subtle floating animation
+- Verification: Clickable logos link to press articles or review pages
+- Responsive: 6 logos → 4 → 3 → 2 per row depending on breakpoint
+- Accessibility: Alt text describing each logo/badge, high contrast
+
+**Trust Elements Priority**:
+1. Recognizable brand logos (social proof)
+2. Security certifications (data safety)
+3. Review scores from known platforms
+4. Press mentions from credible sources
+5. Real-time activity (FOMO, social validation)
+
+---
+
+## 13. BLOG / CONTENT PREVIEW SECTIONS
+
+**Component Purpose**: Drive engagement with blog content and establish thought leadership
+
+**Required Variations**:
+- Featured article with large image + smaller article grid
+- Card grid (3 columns) with hover effects
+- Horizontal scroll for mobile-first experience
+- Category-filtered blog feed
+- Author-focused layout with bio cards
+- Newsletter signup integrated with latest posts
+
+**Design Specifications**:
+- Card Size: 360-420px width, 480-540px height, maintain aspect ratio
+- Image Ratio: 16:9 or 2:3 for thumbnails, high-quality, optimized
+- Card Styling: Clean white/dark cards, 16-20px radius, hover lift effect
+- Typography: Title 22-28px (bold), excerpt 16-18px (2-3 lines max), meta 14px
+- Hover Effect: Image zoom, overlay with "Read more", shadow intensify
+- Category Tags: Colored pills, 24-32px height, positioned on image
+- Date Format: "Mar 15, 2025" or "3 days ago", light color
+- Author Info: Small avatar (32-40px), name, optional read time
+- Featured Card: 2x size, different layout (horizontal), prominent placement
+- Grid Layout: 3 columns desktop → 2 tablet → 1 mobile
+- Spacing: 32-40px gaps between cards, 100-120px section padding
+- CTA Button: "View all articles" link or button at section bottom
+- Animation: Cards fade and slide up on scroll, stagger 50ms
+- Background: Neutral (white/light gray) or brand color tint
+- Responsive: Horizontal scroll on mobile with snap points
+- Accessibility: Proper heading hierarchy, alt text for thumbnails, clear links
+
+**Content Strategy**:
+- Show 3-6 most recent or curated posts
+- Mix content types (how-to, case study, news)
+- Strong headlines that promise value
+- High-quality featured images
+
+---
+
+## 14. VIDEO SECTIONS
+
+**Component Purpose**: Engage with motion and tell stories through high-quality video content
+
+**Required Variations**:
+- Hero video background with subtle overlay
+- Explainer video with floating card presentation
+- Product demo video with interactive hotspots
+- Testimonial video grid with thumbnails
+- Modal/lightbox video player (click to play)
+- Autoplay looping background videos
+
+**Design Specifications**:
+- Aspect Ratio: 16:9 standard, 21:9 cinematic, 1:1 for social content
+- Video Container: 800-1200px width for centered videos, full-width for backgrounds
+- Play Button: 80-120px, centered, white with opacity, hover scale effect
+- Thumbnail Quality: High-res, compelling frame, 1080p minimum
+- Overlay: Dark gradient (40-60% opacity) for text readability over video
+- Video Controls: Custom styled or native, mute button prominent for autoplay
+- Modal Design: Full-screen or 90% viewport, dark background (90% opacity)
+- Close Button: Top-right, 40-48px, X icon, clear contrast
+- Autoplay Videos: Muted by default, loop seamlessly, < 20 seconds
+- Loading State: Elegant loading animation, not generic spinner
+- Captions: Available toggle, bottom placement, high contrast
+- Background Videos: Subtle motion, not distracting, 20-40 seconds loop
+- Hotspots: Clickable pins on video that pause and show info
+- Grid Layout: 2-3 videos per row, hover shows play overlay
+- Responsive: Full-width on mobile, maintain aspect ratio
+- Accessibility: Captions/transcripts, keyboard controls (spacebar play/pause)
+
+**Video Best Practices**:
+- Keep under 90 seconds for explainers
+- First 3 seconds are critical (hook immediately)
+- Show product in action, not talking heads
+- Optimize file size (under 5MB for autoplay)
+
+---
+
+## 15. FORM SECTIONS (LEAD CAPTURE)
+
+**Component Purpose**: Capture leads with minimal friction and maximum conversion
+
+**Required Variations**:
+- Inline email-only capture (single field + button)
+- Multi-step form with progress indicator
+- Contact form with smart field validation
+- Calendly/meeting scheduler integration
+- Quiz/assessment as lead magnet
+- Floating sidebar form (sticky during scroll)
+
+**Design Specifications**:
+- Input Height: 56-64px, comfortable touch targets
+- Input Styling: Subtle border (1-2px), rounded corners (8-12px), focus state with glow
+- Typography: Input text 16-18px, labels 14-16px, placeholders lighter (60% opacity)
+- Button Styling: Gradient or solid, 56-64px height, full-width or auto-width
+- Inline Layout: Email input + button in single row, no wrapping
+- Field Spacing: 20-24px vertical space between fields
+- Validation: Inline error messages (red, 14px), success states (green checkmark)
+- Progress Bar: Multi-step forms show steps (1/3, 2/3, 3/3), visual bar fills
+- Icons: Input icons (envelope, user, phone) 20-24px, positioned left inside field
+- Privacy Note: "We respect your privacy" microcopy, link to policy
+- Loading State: Button shows spinner, disabled during submission
+- Success Message: Green checkmark, "Thanks! Check your email" or redirect
+- Required Fields: Asterisk or "Required" label, clear indication
+- Smart Validation: Real-time validation as user types (email format, phone format)
+- Integration Preview: "Book a 30-min call" with Calendly embed
+- Quiz UI: Single question per step, visual answers (cards/buttons), progress bar
+- Floating Form: 320-400px width, fixed position, appears after scroll threshold
+- Responsive: Full-width inputs on mobile, single column layout
+- Accessibility: Proper labels (not just placeholders), error announcements, focus management
+
+**Conversion Optimization**:
+- Ask for minimum info upfront (just email often enough)
+- Use action-oriented button text
+- Remove unnecessary fields (can ask later)
+- Show value proposition near form
+
+---
+
+## UNIVERSAL MODERN LANDING PAGE PRINCIPLES
+
+**Color Systems for Modern Landings:**
+- **Tech/SaaS**: Electric blues (#0066FF), vibrant purples (#7C3AED), neon accents
+- **Finance**: Deep blues (#1E40AF), greens (#059669), trust-building neutrals
+- **Creative/Agency**: Bold gradients, pink (#EC4899) to orange (#F97316)
+- **Wellness**: Soft pastels, sage greens (#10B981), calming blues (#3B82F6)
+- **Dark Mode**: True black (#000000) or near-black (#0A0A0A) with colored accents
+
+**Typography Scale (Modern):**
+- Display/Hero: 64-96px (extra bold, dramatic)
+- H1: 48-64px (bold)
+- H2: 36-48px (semi-bold to bold)
+- H3: 28-36px (medium to semi-bold)
+- H4: 24-28px (medium)
+- Body Large: 18-20px (regular)
+- Body: 16-18px (regular)
+- Small: 14-16px (regular)
+- Tiny: 12-14px (use sparingly)
+
+**Font Pairing Strategies:**
+- Display font for headlines (geometric sans, bold serif)
+- Clean sans-serif for body (Inter, SF Pro, Helvetica Now)
+- Limit to 2 font families maximum
+- Use font weight variations within same family
+
+**Spacing System (8px base with golden ratio):**
+- 8px, 12px, 16px, 24px, 32px, 48px, 64px, 96px, 128px, 192px
+
+**Animation Timing Functions:**
+- Ease Out: Default for most UI (cubic-bezier(0, 0, 0.2, 1))
+- Ease In-Out: For symmetrical animations (cubic-bezier(0.4, 0, 0.2, 1))
+- Spring: For playful interactions (use libraries like Framer Motion)
+- Duration: Fast 150ms, Standard 300ms, Slow 500ms, Extra Slow 800ms
+
+**Shadow System (Depth Layers):**
+```
+Level 1: 0 1px 3px

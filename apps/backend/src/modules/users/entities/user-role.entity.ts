@@ -1,0 +1,54 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import { User } from './user.entity';
+import { Role } from '../../roles/entities/role.entity';
+
+/**
+ * UserRole Entity
+ * Junction table for many-to-many relationship between Users and Roles
+ * Supports multi-role assignment with primary role designation
+ */
+@Entity('user_roles')
+@Index(['userId', 'roleId'], { unique: true })
+@Index(['userId'])
+export class UserRole {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  @Column({ type: 'uuid' })
+  roleId: string;
+
+  @Column({ type: 'boolean', default: false })
+  isPrimary: boolean;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  assignedAt: Date;
+
+  @Column({ type: 'uuid', nullable: true })
+  assignedBy: string | null;
+
+  @ManyToOne(() => User, user => user.userRoles, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Role, role => role.userRoles, { onDelete: 'RESTRICT', eager: true })
+  @JoinColumn({ name: 'roleId' })
+  role: Role;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}

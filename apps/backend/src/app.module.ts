@@ -52,10 +52,10 @@ import { SystemLogsModule } from './modules/system-logs/system-logs.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: process.env.DATABASE_HOST || process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432', 10),
-      username: 'postgres',
-      password: 'postgres',
+      username: process.env.DATABASE_USERNAME || process.env.DB_USERNAME || 'postgres',
+      password: process.env.DATABASE_PASSWORD || process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'affexai_dev',
       autoLoadEntities: true,
       synchronize: true, // Temporary: Will sync schema with entities

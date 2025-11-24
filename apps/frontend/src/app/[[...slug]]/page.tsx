@@ -45,21 +45,8 @@ export default async function DynamicCMSPage({ params }: PageProps) {
   }
 }
 
-// Generate static params for known pages (optional, for build-time optimization)
-export async function generateStaticParams() {
-  try {
-    // Fetch only published pages
-    const pages = await cmsService.getPages();
-    const publishedPages = pages.filter(p => p.status === 'published');
-
-    return publishedPages.map((page) => ({
-      slug: page.slug.split('/'),
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
+// Static params generation disabled for dynamic rendering
+// All pages will be server-side rendered on demand
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps) {

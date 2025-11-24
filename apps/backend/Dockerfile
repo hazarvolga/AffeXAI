@@ -46,6 +46,10 @@ RUN npm ci --omit=dev --legacy-peer-deps
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 
+# Copy deployment script
+COPY apps/backend/.coolify-deploy.sh ./apps/backend/.coolify-deploy.sh
+RUN chmod +x ./apps/backend/.coolify-deploy.sh
+
 # Expose port
 EXPOSE 3001
 

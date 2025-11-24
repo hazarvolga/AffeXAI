@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import { cmsService } from '@/lib/cms/cms-service';
 import { PageRenderer } from '@/components/cms/page-renderer';
 
+// Force dynamic rendering - disable static generation for API-dependent pages
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     slug?: string[];

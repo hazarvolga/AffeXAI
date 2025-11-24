@@ -29,8 +29,8 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine AS production
 
-# Install wget for healthcheck
-RUN apk add --no-cache wget
+# Install wget for healthcheck and postgresql-client for SQL imports
+RUN apk add --no-cache wget postgresql-client
 
 WORKDIR /app
 

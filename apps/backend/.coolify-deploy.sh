@@ -66,39 +66,15 @@ print_info "✅ Application ready to start"
 # ============================================
 print_info "Step 4: CMS Data Seed"
 
-# Check if CMS pages already exist
-CMS_COUNT=$(node -e "
-const { DataSource } = require('typeorm');
-const dataSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
-});
-dataSource.initialize().then(async (ds) => {
-  const result = await ds.query('SELECT COUNT(*) FROM cms_pages');
-  console.log(result[0].count);
-  await ds.destroy();
-}).catch(e => { console.log('0'); process.exit(0); });
-")
+# Check if CMS pages already exist using psql
+CMS_COUNT=$(psql "$DATABASE_URL" -t -c "SELECT COUNT(*) FROM cms_pages;" 2>/dev/null | tr -d ' ')
 
-if [ "$CMS_COUNT" = "0" ]; then
+if [ -z "$CMS_COUNT" ] || [ "$CMS_COUNT" = "0" ]; then
     print_info "Importing CMS seed data..."
     if [ -f "/app/apps/backend/cms-seed-data.sql" ]; then
-        node -e "
-const { DataSource } = require('typeorm');
-const fs = require('fs');
-const dataSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
-});
-dataSource.initialize().then(async (ds) => {
-  const sql = fs.readFileSync('/app/apps/backend/cms-seed-data.sql', 'utf8');
-  await ds.query(sql);
-  console.log('[INFO] ✅ CMS seed data imported successfully');
-  await ds.destroy();
-}).catch(e => { console.error('[ERROR] CMS seed import failed:', e.message); process.exit(1); });
-        "
-        if [ $? -eq 0 ]; then
-            print_info "✅ CMS seed data imported"
+        # Import SQL file directly using psql
+        if psql "$DATABASE_URL" -f "/app/apps/backend/cms-seed-data.sql" > /dev/null 2>&1; then
+            print_info "✅ CMS seed data imported successfully"
         else
             print_warning "⚠️  CMS seed import failed (non-critical)"
         fi

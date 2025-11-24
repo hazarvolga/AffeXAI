@@ -58,7 +58,7 @@ import { SystemLogsModule } from './modules/system-logs/system-logs.module';
       password: process.env.DATABASE_PASSWORD || process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'affexai_dev',
       autoLoadEntities: true,
-      synchronize: true, // Temporary: Will sync schema with entities
+      synchronize: process.env.NODE_ENV === 'development', // ONLY in development, NEVER in production
       logging: ['query', 'error', 'schema'], // Log SQL queries, errors, and schema changes
     }),
     BullBoardModule.forRoot({

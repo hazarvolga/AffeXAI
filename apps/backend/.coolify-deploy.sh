@@ -75,6 +75,39 @@ if [ -z "$CMS_COUNT" ] || [ "$CMS_COUNT" = "0" ]; then
         # Import SQL file directly using psql
         if psql "$DATABASE_URL" -f "/app/apps/backend/cms-seed-data.sql" > /dev/null 2>&1; then
             print_info "✅ CMS seed data imported successfully"
+            
+            # CRITICAL: Verify relational integrity after import
+            print_info "Verifying data integrity..."
+            
+            # Check theme_settings → menu relationship
+            MENU_LINK_CHECK=$(psql "$DATABASE_URL" -t -c "
+              SELECT COUNT(*) 
+              FROM theme_settings 
+              WHERE \"headerMenuId\" IS NOT NULL AND \"headerMenuId\" != ''
+            " 2>/dev/null | tr -d ' ')
+            
+            if [ "$MENU_LINK_CHECK" = "0" ]; then
+                print_warning "⚠️  theme_settings.headerMenuId not set, running fix migration..."
+                
+                # Try to link Main Navigation menu automatically
+                psql "$DATABASE_URL" -c "
+                  UPDATE theme_settings 
+                  SET \"headerMenuId\" = (
+                    SELECT id FROM cms_menus 
+                    WHERE name = 'Main Navigation' AND location = 'header' 
+                    LIMIT 1
+                  ), \"updatedAt\" = NOW()
+                  WHERE \"headerMenuId\" IS NULL OR \"headerMenuId\" = ''
+                " > /dev/null 2>&1
+                
+                if [ $? -eq 0 ]; then
+                    print_info "✅ theme_settings menu relationship fixed"
+                else
+                    print_warning "⚠️  Failed to auto-fix menu relationship"
+                fi
+            else
+                print_info "✅ theme_settings menu relationship OK"
+            fi
         else
             print_warning "⚠️  CMS seed import failed (non-critical)"
         fi
@@ -82,7 +115,21 @@ if [ -z "$CMS_COUNT" ] || [ "$CMS_COUNT" = "0" ]; then
         print_warning "⚠️  CMS seed file not found, skipping"
     fi
 else
-    print_info "CMS data already exists ($CMS_COUNT pages), skipping seed"
+    print_info "CMS data already exists ($CMS_COUNT pages), verifying integrity..."
+    
+    # Even if data exists, verify critical relationships
+    MENU_LINK_CHECK=$(psql "$DATABASE_URL" -t -c "
+      SELECT COUNT(*) 
+      FROM theme_settings 
+      WHERE \"headerMenuId\" IS NOT NULL AND \"headerMenuId\" != ''
+    " 2>/dev/null | tr -d ' ')
+    
+    if [ "$MENU_LINK_CHECK" = "0" ]; then
+        print_warning "⚠️  Data integrity issue detected: theme_settings not linked to menu"
+        print_info "Run manual fix: UPDATE theme_settings SET headerMenuId = (SELECT id FROM cms_menus WHERE name = 'Main Navigation' LIMIT 1)"
+    else
+        print_info "✅ Data integrity checks passed"
+    fi
 fi
 
 # ============================================

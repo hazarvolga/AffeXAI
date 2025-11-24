@@ -104,3 +104,32 @@ apps/frontend/.turbo/
 AffexAI-Oracle-Servers/
 *.key
 *.pem
+
+# Security & Credentials
+*.pfx
+*.p12
+*.jks
+*.keystore
+*-credentials.json
+*-service-account.json
+secrets.json
+config.production.json
+
+# Database dumps & backups
+*.sql
+*.dump
+*.tar.gz.gpg
+*-dump-*.sql
+*-backup-*.sql
+cms-seed-data.sql
+
+# Playwright screenshots & videos
+.playwright-mcp/
+test-results/
+playwright-report/
+playwright/.auth/
+
+# Local development files
+.local/
+*.local.sh
+deploy.local.sh

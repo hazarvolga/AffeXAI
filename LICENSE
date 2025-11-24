@@ -1,70 +1,126 @@
-PROPRIETARY SOFTWARE LICENSE AGREEMENT
+# PROPRIETARY SOFTWARE LICENSE AGREEMENT
 
-Copyright (c) 2024-2025 Affexai. All Rights Reserved.
-
-This software and associated documentation files (the "Software") are proprietary
-and confidential information of Affexai.
-
-NOTICE: All information contained herein is, and remains the property of Affexai
-and its suppliers, if any. The intellectual and technical concepts contained
-herein are proprietary to Affexai and its suppliers and may be covered by patents,
-patents in process, and are protected by trade secret or copyright law.
-
-Dissemination of this information or reproduction of this material is strictly
-forbidden unless prior written permission is obtained from Affexai.
-
-RESTRICTIONS:
-
-1. NO DISTRIBUTION: You may not distribute, sublicense, lease, rent, loan, or
-   otherwise transfer the Software to any third party.
-
-2. NO MODIFICATION: You may not modify, adapt, translate, reverse engineer,
-   decompile, disassemble, or create derivative works based on the Software.
-
-3. NO COMMERCIAL USE: You may not use the Software for commercial purposes
-   without a separate commercial license agreement.
-
-4. NO REMOVAL OF NOTICES: You may not remove or alter any copyright notices,
-   trademarks, or other proprietary rights notices contained in the Software.
-
-5. CONFIDENTIALITY: You agree to maintain the confidentiality of the Software
-   and not to disclose it to any third party without prior written consent.
-
-OWNERSHIP:
-
-The Software is licensed, not sold. Affexai retains all right, title, and
-interest in and to the Software, including all intellectual property rights
-therein. No ownership rights are transferred to you under this License.
-
-TERMINATION:
-
-This License is effective until terminated. Affexai may terminate this License
-at any time if you fail to comply with any term of this License. Upon termination,
-you must destroy all copies of the Software in your possession.
-
-WARRANTY DISCLAIMER:
-
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT.
-
-LIMITATION OF LIABILITY:
-
-IN NO EVENT SHALL AFFEXAI BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-GOVERNING LAW:
-
-This License shall be governed by and construed in accordance with the laws of
-Turkey, without regard to its conflict of law provisions.
-
-CONTACT:
-
-For licensing inquiries or permissions, please contact:
-Email: hazarvolga@gmail.com
+**Copyright © 2024-2025 Hazarekiz - AffexAI Platform. All Rights Reserved.**
 
 ---
 
-UNAUTHORIZED ACCESS, USE, REPRODUCTION, OR DISTRIBUTION IS PROHIBITED AND MAY
-RESULT IN SEVERE CIVIL AND CRIMINAL PENALTIES.
+## IMPORTANT NOTICE
+
+This software and associated documentation files (the "Software") are proprietary and confidential. This repository is PUBLIC for demonstration and portfolio purposes ONLY.
+
+**NO USAGE, COPYING, MODIFICATION, OR DISTRIBUTION IS PERMITTED WITHOUT EXPLICIT WRITTEN PERMISSION.**
+
+---
+
+## TERMS AND CONDITIONS
+
+### 1. OWNERSHIP
+
+The Software and all intellectual property rights therein are and shall remain the exclusive property of Hazarekiz. This includes, but is not limited to:
+
+- Source code and object code
+- Database schemas and data structures
+- UI/UX designs and layouts
+- Algorithms and business logic
+- Documentation and specifications
+- API designs and implementations
+- All associated assets and resources
+
+### 2. PROHIBITED ACTIONS
+
+WITHOUT PRIOR WRITTEN AUTHORIZATION, YOU MAY NOT:
+
+❌ **Copy** - Reproduce, duplicate, or clone any part of the Software
+❌ **Modify** - Alter, adapt, or create derivative works
+❌ **Distribute** - Share, publish, or transmit the Software
+❌ **Use** - Deploy, execute, or utilize for any purpose
+❌ **Fork** - Create repository forks for use
+❌ **Reverse Engineer** - Decompile, disassemble, or reverse engineer
+❌ **Commercial Use** - Use for any commercial purposes
+❌ **Sublicense** - Grant licenses to third parties
+❌ **Extract** - Remove or use individual components
+❌ **Train AI Models** - Use as training data for machine learning
+
+### 3. VIEWING PERMISSIONS
+
+This repository is PUBLIC solely for:
+
+✅ **Portfolio Review** - Viewing by potential employers or clients
+✅ **Code Review** - Educational examination of code structure
+✅ **Reference Only** - Understanding technical implementation approaches
+
+**Viewing does NOT grant any usage rights.**
+
+### 4. ENFORCEMENT
+
+- **Copyright Claims**: Violations will result in immediate DMCA takedown notices
+- **Legal Action**: Unauthorized use may result in civil and criminal prosecution
+- **Damages**: Infringers may be liable for actual damages, statutory damages, and attorney fees
+- **Injunctive Relief**: Court orders may be sought to prevent continued violations
+
+### 5. TECHNOLOGY STACK NOTICE
+
+This Software includes integration with third-party services and libraries, each governed by their respective licenses:
+
+- NestJS, Next.js, React, TypeORM, and other open-source dependencies retain their original licenses
+- The SOFTWARE as a whole (architecture, implementation, business logic) remains proprietary
+- Third-party licenses do NOT grant rights to this Software's proprietary implementation
+
+### 6. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+### 7. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+
+### 8. COMMERCIAL LICENSING
+
+For licensing inquiries, partnerships, or permission requests, please contact:
+
+📧 **Email**: [Your Contact Email]
+🌐 **Website**: [Your Website]
+💼 **LinkedIn**: [Your LinkedIn Profile]
+
+### 9. ATTRIBUTION
+
+If you wish to reference this project in publications, presentations, or other works, you MUST:
+
+1. Provide clear attribution to the original author
+2. Include a link to this repository
+3. State that the Software is proprietary and not available for use
+4. Obtain written permission for detailed technical descriptions
+
+### 10. TRADEMARK NOTICE
+
+"AffexAI", "Affex", and all related logos and branding are trademarks of Hazarekiz. Unauthorized use of these marks is prohibited.
+
+---
+
+## CONTACT FOR LICENSING
+
+**Interested in using this technology?**
+
+Commercial licensing, white-label solutions, and custom implementations are available. Contact us to discuss:
+
+- Enterprise Licensing
+- Custom Development
+- Technology Partnership
+- Consulting Services
+
+---
+
+## LEGAL JURISDICTION
+
+This license shall be governed by and construed in accordance with the laws of [Your Country/State], without regard to its conflict of law provisions.
+
+---
+
+**BY ACCESSING THIS REPOSITORY, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE.**
+
+**UNAUTHORIZED USE IS STRICTLY PROHIBITED AND WILL BE PROSECUTED TO THE FULLEST EXTENT OF THE LAW.**
+
+---
+
+*Last Updated: November 24, 2025*
+*Version: 2.0*

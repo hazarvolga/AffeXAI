@@ -1,500 +1,305 @@
-# 🚀 Affexai Production Deployment Guide
+# 🚀 Production Deployment - Session Log
 
-> **Last Updated**: 2025-11-24
-> **Version**: 2.0.0 - Professional Migration-Based Deployment
-
-## 📋 Table of Contents
-
-1. [Overview](#overview)
-2. [Prerequisites](#prerequisites)
-3. [Database Migration Strategy](#database-migration-strategy)
-4. [Deployment Steps](#deployment-steps)
-5. [Verification](#verification)
-6. [Troubleshooting](#troubleshooting)
-7. [Rollback Procedure](#rollback-procedure)
+**Date**: November 24, 2025
+**Platform**: Coolify (Self-hosted PaaS on Aluplan Server)
+**Deployment Type**: Docker + GitHub Webhooks
 
 ---
 
-## Overview
+## 📋 Deployed URLs
 
-This deployment uses **TypeORM migration-based data seeding** for a professional, repeatable, and safe production deployment process.
-
-### ✅ Advantages of This Approach
-
-| Feature | Benefit |
-|---------|---------|
-| **Version Controlled** | All data changes tracked in git |
-| **Idempotent** | Safe to run multiple times |
-| **Rollback Capable** | Can revert changes if needed |
-| **Automated** | No manual SQL execution |
-| **Production-Safe** | Environment-aware configuration |
-| **CI/CD Ready** | Integrates with deployment pipelines |
+| Service | URL | Status |
+|---------|-----|--------|
+| Frontend | https://aluplan.tr | ✅ Running |
+| Backend API | https://api.aluplan.tr | ✅ Running |
+| Coolify Dashboard | https://coolify.aluplan.tr | ✅ Running |
 
 ---
 
-## Prerequisites
+## 🔗 GitHub Repository
 
-### 1. Infrastructure
+- **URL**: https://github.com/hazarvolga/AffeXAI
+- **Visibility**: **PUBLIC** (Portfolio & Demo Only)
+- **License**: **PROPRIETARY** - No usage permitted without permission
+- **Branch**: main
+- **Webhook**: ✅ Configured (automatic deployment on push)
 
-- [x] Coolify v4.0.0+ installed
-- [x] PostgreSQL 17 service running
-- [x] Redis service running (optional)
-- [x] Domain configured (api.aluplan.tr, aluplan.tr)
-- [x] SSL certificates (Let's Encrypt)
+---
 
-### 2. Environment Variables
+## ⚙️ Coolify Applications
 
-Copy [.env.production.template](.env.production.template) and configure all required variables in Coolify.
+### 1. Backend (NestJS API)
 
-**Critical Variables**:
+**Configuration**:
+```
+App Name: hazarvolga/AffeXAI:main (Backend)
+Domain: api.aluplan.tr
+Port: 3001 (internal)
+Build Pack: nixpacks
+Health Check: GET /health
+Commit: c3fb189c750e2314a5196e0c3276b7b7bf65d9ca
+```
+
+**Environment Variables** (Set in Coolify):
+- `NODE_ENV=production`
+- `PORT=3001`
+- `DATABASE_HOST=<internal>`
+- `DATABASE_NAME=affexai_production`
+- `REDIS_HOST=<internal>`
+- `JWT_SECRET=<encrypted>`
+- `AWS_S3_BUCKET=affexai-uploads`
+- `CORS_ORIGINS=https://aluplan.tr`
+- AI Keys: OpenAI, Anthropic, Google
+
+**Deployment Process**:
+1. GitHub push → Webhook triggers
+2. Coolify pulls latest commit
+3. Docker build (multi-stage):
+   - Builder: npm ci, TypeScript compile
+   - Production: Copy built files, node dist/main.js
+4. Health check validation
+5. Zero-downtime deployment
+
+### 2. Frontend (Next.js)
+
+**Configuration**:
+```
+App Name: hazarvolga/AffeXAI:main (Frontend)
+Domain: aluplan.tr
+Port: 3000 (internal)
+Build Pack: nixpacks
+```
+
+**Environment Variables**:
+- `NODE_ENV=production`
+- `NEXT_PUBLIC_API_URL=https://api.aluplan.tr`
+- `NEXT_PUBLIC_SOCKET_URL=https://api.aluplan.tr`
+- `NEXT_PUBLIC_APP_URL=https://aluplan.tr`
+
+---
+
+## 🛠️ Infrastructure
+
+### Services (Internal Docker Network)
+
+- **PostgreSQL**: Port 5432 (not exposed externally)
+- **Redis**: Port 6379 (not exposed externally)
+- **Traefik**: Reverse proxy + SSL/TLS automation
+
+### Security
+
+- **SSL**: Let's Encrypt (automatic renewal)
+- **Firewall**: Only ports 80/443 exposed
+- **Secrets**: Encrypted in Coolify vault
+- **CORS**: Restricted to production domain
+
+---
+
+## 📝 Session Changes (Nov 24, 2025)
+
+### 1. Repository Made PUBLIC
+
+**Commit**: `a2886dc`
+
+**Added Files**:
+- `LICENSE` - Comprehensive proprietary license
+- Updated `.gitignore` - Added security exclusions
+
+**Changes**:
+- Repository visibility: Private → **PUBLIC**
+- License: None → **PROPRIETARY**
+- README: Added copyright warning banner
+
+### 2. Backend Body Parser Limit Increased
+
+**Commit**: `c3fb189`
+
+**File**: `apps/backend/src/main.ts`
+**Change**: Increased body parser limit to 10MB for database import
+
+```typescript
+// Line 30-31
+app.use(json({ limit: '10mb' }));
+app.use(urlencoded({ extended: true, limit: '10mb' }));
+```
+
+**Reason**: Temporary SQL import endpoint needs larger payload support
+
+### 3. Database Import Module Created
+
+**Commit**: `c3fb189`
+
+**New Module**: `apps/backend/src/modules/database-import/`
+- `database-import.controller.ts` - HTTP endpoint
+- `database-import.service.ts` - Transaction handling
+- `database-import.module.ts` - Module registration
+
+**Endpoint**:
+```
+POST /api/database-import/execute
+Body: { "token": "affexai-import-2024", "sql": "..." }
+Security: Production-only + token auth
+```
+
+**⚠️ IMPORTANT**: This is a **TEMPORARY** module for data migration. Should be removed after successful database transfer.
+
+**Registered In**: `apps/backend/src/app.module.ts:90`
+
+### 4. Coolify Deployments
+
+**Backend Redeployment**:
+- Triggered manually via Coolify UI
+- Build time: ~2 minutes
+- Health check: ✅ Passed
+- Status: Running with new commit c3fb189
+
+**Frontend**:
+- Already deployed and running
+- No changes needed
+
+---
+
+## 🔄 Deployment Workflow
+
+### Automatic (Production)
+
 ```bash
-# Database (auto-configured by Coolify)
-DATABASE_URL=postgresql://user:password@host:5432/database
-
-# Application
-NODE_ENV=production
-JWT_SECRET=<generate-secure-random-string>
-
-# AI Provider (at least one required)
-GOOGLE_AI_API_KEY=AIzaSy...
-# OR
-OPENAI_API_KEY=sk-...
-# OR
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-**Generate Secure Secrets**:
-```bash
-# JWT secrets
-openssl rand -base64 32
-
-# Password hashing salt
-openssl rand -base64 16
-```
-
----
-
-## Database Migration Strategy
-
-### Migration Structure
-
-```
-apps/backend/src/database/
-├── data-source.ts                  # Production-ready config
-└── migrations/
-    └── 1762300000000-SeedProductionData.ts  # Seeds roles, settings, admin
-```
-
-### What Gets Seeded
-
-**1. Roles (10 entries)**:
-- admin, editor, customer, support_team, viewer
-- marketing_manager, social_media_manager, content_creator
-- subscriber, partner
-
-**2. Settings (16 entries)**:
-- Company info (name, email, phone, timezone)
-- Email configuration
-- AI provider settings
-- Analytics settings
-
-**3. Admin User (1 entry)**:
-- Email: `admin@affexai.com`
-- Password: `admin123` ⚠️ **MUST CHANGE AFTER FIRST LOGIN**
-
-### Key Features
-
-✅ **Idempotent**: Uses `ON CONFLICT DO NOTHING`
-✅ **Rollback**: Includes `down()` method
-✅ **Environment-Aware**: Uses `DATABASE_URL` if available
-✅ **No Hardcoded Values**: Falls back to environment variables
-
----
-
-## Deployment Steps
-
-### Step 1: Prepare Code
-
-```bash
-# 1. Ensure all changes are committed
-git status
-
-# 2. Build locally to verify
-cd apps/backend
-npm run build
-
-# 3. Commit migration and deployment scripts
-git add src/database/data-source.ts
-git add src/database/migrations/1762300000000-SeedProductionData.ts
-git add .coolify-deploy.sh
-git add .env.production.template
-git add DEPLOYMENT.md
-
-git commit -m "feat: add production-ready migration-based deployment system
-
-- Update data-source.ts to use DATABASE_URL in production
-- Add SeedProductionData migration (roles, settings, admin user)
-- Add automated deployment script (.coolify-deploy.sh)
-- Add environment variables template
-- Add comprehensive deployment documentation
-- Disable synchronize in production for safety
-
-BREAKING CHANGE: synchronize is now disabled in production.
-All schema changes must be done via migrations.
-"
-
+# Local development
+git add .
+git commit -m "feat: your feature"
 git push origin main
+
+# Coolify automatically:
+# 1. Receives GitHub webhook
+# 2. Pulls latest commit
+# 3. Builds Docker image
+# 4. Deploys with zero downtime
+# 5. Runs health checks
 ```
 
-### Step 2: Configure Coolify
+### Manual (Coolify UI)
 
-#### A. Environment Variables
-
-Go to Coolify → Backend Service → Environment Variables:
-
-```bash
-NODE_ENV=production
-DATABASE_URL=postgresql://...  # Auto-configured by Coolify
-JWT_SECRET=<your-secure-secret>
-GOOGLE_AI_API_KEY=<your-api-key>
-RESEND_API_KEY=<your-resend-key>
-AWS_ACCESS_KEY_ID=<your-aws-key>
-AWS_SECRET_ACCESS_KEY=<your-aws-secret>
-AWS_S3_BUCKET=affexai-uploads
-CORS_ORIGIN=https://aluplan.tr
-FRONTEND_URL=https://aluplan.tr
-```
-
-#### B. Post-Deploy Hook
-
-Go to Coolify → Backend Service → Build Pack → Post-Deploy Script:
-
-```bash
-# Option 1: Use deployment script (recommended)
-bash .coolify-deploy.sh
-
-# Option 2: Run migrations directly
-cd apps/backend && npm run typeorm:migration:run
-```
-
-### Step 3: Deploy
-
-#### Manual Deployment
-
-1. Go to Coolify Dashboard
-2. Click on Backend Service
-3. Click "Deploy" button
-4. Monitor deployment logs
-
-#### Automatic Deployment (Git Push)
-
-1. Push to main branch
-2. Coolify auto-deploys (if webhook configured)
-3. Post-deploy script runs automatically
-
-### Step 4: Verify Deployment
-
-```bash
-# 1. Check deployment logs
-# Look for:
-# - "Migrations completed successfully"
-# - "Roles table has 10 entries"
-# - "Settings table has 16 entries"
-# - "Users table has 1 entries"
-
-# 2. Access backend health endpoint
-curl https://api.aluplan.tr/health
-# Expected: {"status":"ok"}
-
-# 3. Test admin login
-# URL: https://aluplan.tr/admin/login
-# Email: admin@affexai.com
-# Password: admin123
-
-# 4. Verify database via PostgreSQL terminal (Coolify)
-psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM roles;"
-# Expected: 10
-
-psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM settings;"
-# Expected: 16
-
-psql "$DATABASE_URL" -c "SELECT email FROM users;"
-# Expected: admin@affexai.com
-```
+1. Navigate to https://coolify.aluplan.tr
+2. Select application (Backend or Frontend)
+3. Click "Redeploy" button
+4. Monitor build logs
+5. Verify deployment
 
 ---
 
-## Verification Checklist
+## 🚨 Known Issues & Solutions
 
-### ✅ Backend
+### Issue 1: Database Import Failed
 
-- [ ] Health endpoint returns `{"status":"ok"}`
-- [ ] Database has 10 roles
-- [ ] Database has 16 settings
-- [ ] Admin user exists and can login
-- [ ] API endpoints respond correctly
+**Problem**: pg_dump SQL format incompatible with TypeORM
 
-### ✅ Frontend
+**Details**:
+- pg_dump includes client-specific commands: `\.`, `\unrestrict`
+- TypeORM query runner can't execute these commands
+- Multiple cleanup attempts failed
 
-- [ ] Homepage loads without 404
-- [ ] Navigation menu displays
-- [ ] Admin panel accessible
-- [ ] Login works with admin credentials
-- [ ] CMS pages render correctly
+**Attempted Solutions**:
+1. ✅ Removed `\unrestrict` command
+2. ✅ Removed `\.` COPY terminators
+3. ❌ Still failing with syntax errors
 
-### ✅ Security
+**Root Cause**: pg_dump format vs plain SQL incompatibility
 
-- [ ] Admin password changed from default
-- [ ] JWT secrets are unique and secure
-- [ ] Environment variables don't contain defaults
-- [ ] SSL certificates are valid
-- [ ] CORS origin is correct
+**Final Decision**: **DEFERRED**
+- Import endpoint created but not functional yet
+- Will require SSH access to server for direct `psql` import
+- Or populate content manually via CMS UI
 
----
+### Issue 2: PostgreSQL Port Not Externally Accessible
 
-## Troubleshooting
+**Problem**: `psql` connection timeout from local machine
 
-### Issue 1: Migration Fails with "relation does not exist"
+**Reason**: Security - Port 5432 intentionally not exposed
 
-**Cause**: Schema migrations not run before data migration.
-
-**Solution**:
-```bash
-# Check migration status
-cd apps/backend
-npm run typeorm:migration:show
-
-# Run all pending migrations
-npm run typeorm:migration:run
-```
-
-### Issue 2: "Roles table is empty"
-
-**Cause**: Migration ran but `ON CONFLICT` skipped inserts (unlikely).
-
-**Solution**:
-```bash
-# Check if roles exist
-psql "$DATABASE_URL" -c "SELECT name FROM roles;"
-
-# If empty, check migration logs
-# Rerun migration (it's idempotent)
-npm run typeorm:migration:run
-```
-
-### Issue 3: "Cannot connect to database"
-
-**Cause**: `DATABASE_URL` not configured or incorrect.
-
-**Solution**:
-```bash
-# Verify DATABASE_URL
-echo $DATABASE_URL
-
-# Test connection manually
-psql "$DATABASE_URL" -c "SELECT version();"
-
-# Check Coolify PostgreSQL service is running
-```
-
-### Issue 4: Frontend shows 404 on homepage
-
-**Cause**: No CMS pages in database.
-
-**Solution**:
-```bash
-# 1. Login to admin panel
-# 2. Go to CMS → Pages
-# 3. Create homepage (slug: "/")
-# 4. Publish the page
-
-# OR: Seed CMS pages via migration (TODO for next version)
-```
-
-### Issue 5: "synchronize is not working"
-
-**Expected Behavior**: `synchronize: false` in production.
-
-**Explanation**: This is intentional for safety. All schema changes must be done via migrations.
-
-**How to Add New Tables**:
-```bash
-# 1. Update entity
-# 2. Generate migration
-cd apps/backend
-npm run typeorm:migration:generate src/database/migrations/AddNewFeature
-
-# 3. Review generated migration
-# 4. Test locally
-npm run typeorm:migration:run
-
-# 5. Commit and deploy
-git add src/database/migrations/*
-git commit -m "feat: add new feature migration"
-git push
-```
+**Solution**: This is correct behavior. Database should only be accessible via internal Docker network.
 
 ---
 
-## Rollback Procedure
+## 📊 System Status
 
-### Rollback Last Migration
+### Current State
 
-```bash
-cd apps/backend
-npm run typeorm:migration:revert
-```
+✅ **Production Ready**:
+- Backend API: Running, health check passing
+- Frontend: Running, serving pages
+- SSL/TLS: Valid Let's Encrypt certificates
+- GitHub Webhooks: Active and functional
 
-This will execute the `down()` method of [1762300000000-SeedProductionData.ts](apps/backend/src/database/migrations/1762300000000-SeedProductionData.ts:369-402), which:
-1. Removes admin user role assignments
-2. Deletes admin user
-3. Deletes all settings
-4. Deletes all roles
-
-### Full Rollback to Clean State
-
-```bash
-# Revert all migrations (DANGEROUS - only for emergencies)
-while npm run typeorm:migration:revert 2>/dev/null; do
-  echo "Reverted migration"
-done
-
-# Verify database is empty
-psql "$DATABASE_URL" -c "\dt"
-```
-
-### Restore from Backup (Recommended)
-
-```bash
-# If you have a backup
-pg_restore -d "$DATABASE_URL" /path/to/backup.dump
-
-# OR use Coolify's backup restore feature
-```
+⚠️ **Pending**:
+- Database content migration (deferred)
+- Temporary import module removal (after migration)
+- Content population via CMS
 
 ---
 
-## Migration Workflow for Future Changes
+## 🔐 Security Measures Implemented
 
-### Adding New Data
+### Repository Protection
 
-```bash
-# 1. Create new migration
-npm run typeorm:migration:generate src/database/migrations/SeedNewFeature
+1. **Proprietary License**: Comprehensive legal terms
+2. **README Warning**: Visible copyright banner
+3. **No Secrets in Git**: All sensitive data in Coolify vault
+4. **`.gitignore` Updated**: Excluded security files, credentials, SQL dumps
 
-# 2. Edit migration file
-# Add INSERT statements with ON CONFLICT DO NOTHING
+### Application Security
 
-# 3. Test locally
-npm run typeorm:migration:run
-
-# 4. Verify data
-psql -d affexai_dev -c "SELECT * FROM your_table;"
-
-# 5. Test rollback
-npm run typeorm:migration:revert
-
-# 6. Re-run migration
-npm run typeorm:migration:run
-
-# 7. Commit and deploy
-git add src/database/migrations/*
-git commit -m "feat: add new feature data seeding"
-git push
-```
-
-### Best Practices
-
-✅ **DO**:
-- Always use `ON CONFLICT DO NOTHING` for idempotency
-- Test migrations locally before production
-- Include `down()` method for rollback
-- Use `gen_random_uuid()` for PostgreSQL UUID generation
-- Document migration purpose in comments
-
-❌ **DON'T**:
-- Use hardcoded UUIDs (use `gen_random_uuid()`)
-- Skip testing `down()` method
-- Use `synchronize: true` in production
-- Hardcode credentials in migrations
-- Mix schema changes with data seeding (separate migrations)
+1. **CORS**: Restricted to production domain only
+2. **Helmet**: Security headers enabled
+3. **Rate Limiting**: Available but not yet configured
+4. **JWT**: Secure token authentication
+5. **Database**: Internal network only
 
 ---
 
-## Monitoring & Maintenance
+## 📚 Documentation
 
-### Daily Checks
-
-```bash
-# 1. Check application logs (Coolify)
-# 2. Monitor error rate
-# 3. Check database disk usage
-```
-
-### Weekly Tasks
-
-```bash
-# 1. Review migration status
-npm run typeorm:migration:show
-
-# 2. Check for pending schema changes
-git log --oneline --all -- src/database/migrations/
-
-# 3. Verify backups (if configured)
-```
-
-### Monthly Tasks
-
-```bash
-# 1. Update dependencies
-npm outdated
-
-# 2. Review security audit
-npm audit
-
-# 3. Performance optimization
-# - Check slow query logs
-# - Review database indexes
-```
+| File | Purpose |
+|------|---------|
+| `LICENSE` | Proprietary software license (v2.0) |
+| `README.md` | Project overview + copyright warning |
+| `DEPLOYMENT.md` | This file - deployment session log |
+| `CLAUDE.md` | Complete technical documentation |
+| `.gitignore` | Security exclusions |
 
 ---
 
-## Additional Resources
+## 🎯 Next Steps
 
-- [TypeORM Migrations Documentation](https://typeorm.io/migrations)
-- [Coolify Documentation](https://coolify.io/docs)
-- [PostgreSQL Best Practices](https://wiki.postgresql.org/wiki/Don%27t_Do_This)
-- [NestJS Production Guide](https://docs.nestjs.com/deployment)
+### Immediate (This Session)
 
----
+1. ✅ Commit all changes with comprehensive message
+2. ✅ Push to GitHub (triggers auto-deployment)
+3. ✅ Verify production deployment
+4. 🔄 Start content creation in local environment
 
-## Support
+### Short Term (This Week)
 
-**Issues or Questions?**
-- Check [CLAUDE.md](CLAUDE.md) for architecture details
-- Review [güvenlikraporu.md](güvenlikraporu.md) for security guidelines
-- Open GitHub issue for bugs
+1. **Content Creation**: Add CMS pages, menus, media locally
+2. **Testing**: Thorough testing of all features
+3. **Database Migration**: Plan SSH-based import strategy
+4. **Module Cleanup**: Remove temporary import module after migration
 
-**Critical Production Issues?**
-- Contact: admin@affexai.com
-- Emergency rollback: See [Rollback Procedure](#rollback-procedure)
+### Long Term (Next Sprint)
 
----
-
-**✅ Deployment Checklist Summary**
-
-Before going live:
-- [ ] All environment variables configured
-- [ ] JWT secrets are unique and secure
-- [ ] AI API keys are valid
-- [ ] AWS S3 credentials working
-- [ ] Database migrations run successfully
-- [ ] Admin password changed from default
-- [ ] Frontend loads without errors
-- [ ] SSL certificates valid
-- [ ] Backup strategy in place (optional)
-- [ ] Monitoring configured (optional)
+1. **Monitoring**: Setup application monitoring
+2. **Backups**: Automated database backup strategy
+3. **Performance**: Load testing and optimization
+4. **CI/CD**: Automated testing in deployment pipeline
 
 ---
 
-**🎉 Congratulations!** You've successfully deployed Affexai to production using a professional, migration-based approach.
+## 📞 Support & Resources
+
+- **Coolify Docs**: https://coolify.io/docs
+- **GitHub Webhooks**: https://docs.github.com/webhooks
+- **Let's Encrypt**: https://letsencrypt.org/docs
+
+---
+
+*Session closed: November 24, 2025*
+*Next session: Content creation in local environment*

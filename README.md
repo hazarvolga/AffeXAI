@@ -1,5 +1,16 @@
 # Affexai - Enterprise Business Management Platform
 
+> **⚠️ PROPRIETARY SOFTWARE - ALL RIGHTS RESERVED**
+>
+> This repository is PUBLIC for **portfolio and demonstration purposes ONLY**.
+> **NO usage, copying, modification, or distribution is permitted without explicit written permission.**
+>
+> See [LICENSE](./LICENSE) for complete terms and conditions.
+>
+> 🔒 **Copyright © 2024-2025 Hazarekiz. Unauthorized use is strictly prohibited.**
+
+---
+
 Modern, scalable business management platform built with NestJS, Next.js, and PostgreSQL.
 
 ## 🏗️ Architecture

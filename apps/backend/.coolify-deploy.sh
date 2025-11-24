@@ -62,9 +62,57 @@ print_info "✅ Migrations completed successfully"
 print_info "✅ Application ready to start"
 
 # ============================================
-# 4. POST-DEPLOYMENT TASKS
+# 4. CMS DATA SEED (ONE-TIME)
 # ============================================
-print_info "Step 4: Post-Deployment Tasks"
+print_info "Step 4: CMS Data Seed"
+
+# Check if CMS pages already exist
+CMS_COUNT=$(node -e "
+const { DataSource } = require('typeorm');
+const dataSource = new DataSource({
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+});
+dataSource.initialize().then(async (ds) => {
+  const result = await ds.query('SELECT COUNT(*) FROM cms_pages');
+  console.log(result[0].count);
+  await ds.destroy();
+}).catch(e => { console.log('0'); process.exit(0); });
+")
+
+if [ "$CMS_COUNT" = "0" ]; then
+    print_info "Importing CMS seed data..."
+    if [ -f "/app/apps/backend/cms-seed-data.sql" ]; then
+        node -e "
+const { DataSource } = require('typeorm');
+const fs = require('fs');
+const dataSource = new DataSource({
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+});
+dataSource.initialize().then(async (ds) => {
+  const sql = fs.readFileSync('/app/apps/backend/cms-seed-data.sql', 'utf8');
+  await ds.query(sql);
+  console.log('[INFO] ✅ CMS seed data imported successfully');
+  await ds.destroy();
+}).catch(e => { console.error('[ERROR] CMS seed import failed:', e.message); process.exit(1); });
+        "
+        if [ $? -eq 0 ]; then
+            print_info "✅ CMS seed data imported"
+        else
+            print_warning "⚠️  CMS seed import failed (non-critical)"
+        fi
+    else
+        print_warning "⚠️  CMS seed file not found, skipping"
+    fi
+else
+    print_info "CMS data already exists ($CMS_COUNT pages), skipping seed"
+fi
+
+# ============================================
+# 5. POST-DEPLOYMENT TASKS
+# ============================================
+print_info "Step 5: Post-Deployment Tasks"
 
 # Clear application cache (if using Redis)
 if [ -n "$REDIS_HOST" ]; then

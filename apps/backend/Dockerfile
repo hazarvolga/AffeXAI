@@ -49,6 +49,7 @@ COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 # Copy deployment scripts and SQL files
 COPY apps/backend/.coolify-deploy.sh ./apps/backend/.coolify-deploy.sh
 COPY apps/backend/mark-migrations-executed.sql ./apps/backend/mark-migrations-executed.sql
+COPY apps/backend/cms-seed-data.sql ./apps/backend/cms-seed-data.sql
 COPY apps/backend/scripts/sync-migrations.sh ./apps/backend/scripts/sync-migrations.sh
 RUN chmod +x ./apps/backend/.coolify-deploy.sh ./apps/backend/scripts/sync-migrations.sh
 

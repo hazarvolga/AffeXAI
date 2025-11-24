@@ -43,9 +43,9 @@ print_info "Step 2: Running Database Migrations"
 
 cd /app/apps/backend || exit 1
 
-# Run pending migrations
-print_info "Executing: npm run typeorm:migration:run"
-npm run typeorm:migration:run
+# Run pending migrations using compiled JavaScript files
+print_info "Executing: npm run typeorm:migration:run:prod"
+npm run typeorm:migration:run:prod
 
 if [ $? -eq 0 ]; then
     print_info "✅ Migrations completed successfully"

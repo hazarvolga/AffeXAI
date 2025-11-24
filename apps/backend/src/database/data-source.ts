@@ -189,7 +189,10 @@ export const AppDataSource = new DataSource({
     // Mail
     EmailSuppression,
   ],
-  migrations: ['src/database/migrations/**/*.ts'],
+  // Use compiled migration files in production, source files in development
+  migrations: process.env.NODE_ENV === 'production'
+    ? ['dist/database/migrations/**/*.js']
+    : ['src/database/migrations/**/*.ts'],
   subscribers: [],
 });
 

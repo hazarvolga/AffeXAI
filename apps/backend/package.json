@@ -24,6 +24,7 @@
     "typeorm": "typeorm-ts-node-commonjs",
     "typeorm:migration:generate": "npm run typeorm -- -d ./src/database/data-source.ts migration:generate",
     "typeorm:migration:run": "npm run typeorm -- -d ./src/database/data-source.ts migration:run",
+    "typeorm:migration:run:prod": "node dist/database/cli.js",
     "typeorm:migration:revert": "npm run typeorm -- -d ./src/database/data-source.ts migration:revert",
     "seed:certificates": "ts-node src/modules/certificates/seeds/seed-templates.ts",
     "seed:users": "ts-node src/database/seeds/seed-users-roles.ts",

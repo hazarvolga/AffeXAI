@@ -44,6 +44,9 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 # Build Next.js app
 WORKDIR /app/apps/frontend
 
+# Increase Node.js memory limit for build (4GB)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Debug: Check node_modules structure and Tiptap packages
 RUN echo "=====================================" && \
     echo "DEBUG: Build environment check" && \
@@ -61,7 +64,7 @@ RUN echo "=====================================" && \
     echo "=====================================" && \
     echo ""
 
-# Run build - capture full output even on failure
+# Run build with increased memory limit - capture full output even on failure
 RUN npm run build 2>&1 | tee /tmp/build-output.log; \
     BUILD_EXIT=$?; \
     if [ $BUILD_EXIT -ne 0 ]; then \

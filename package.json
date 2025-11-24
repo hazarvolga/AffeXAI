@@ -20,12 +20,16 @@
     "build:frontend": "cd apps/frontend && npm run build",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
-    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f"
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "ssl:generate": "tsx scripts/generate-ssl-certificates.ts",
+    "ssl:simple": "tsx scripts/generate-ssl-simplified.ts",
+    "ssl:manual": "tsx scripts/manual-ssl-guide.ts"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "concurrently": "^8.2.2",
+    "playwright": "^1.56.1",
     "typescript": "^5.3.3"
   },
   "engines": {

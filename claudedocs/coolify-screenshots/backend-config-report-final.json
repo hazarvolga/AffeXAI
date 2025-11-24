@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-11-24T08:36:52.016Z",
+  "findings": [
+    "Successfully logged into Coolify",
+    "Opened AffexAI Aluplan project",
+    "Backend application found (keyword: backend)"
+  ],
+  "screenshots": [
+    "03-project-page.png",
+    "04-current-page.png",
+    "99-final.png"
+  ],
+  "issues": [
+    "❌ CRITICAL ISSUE: Domain api.aluplan.tr is NOT configured"
+  ],
+  "recommendations": [
+    "🎯 ROOT CAUSE: The \"no available server\" error is because:",
+    "   Traefik/Coolify does not have api.aluplan.tr in routing config",
+    "   Without domain routing, external requests cannot reach backend",
+    "",
+    "📝 FIX STEPS:",
+    "   1. In Coolify, navigate to backend application",
+    "   2. Go to \"Domains\" or \"Configuration\" tab",
+    "   3. Add domain: api.aluplan.tr",
+    "   4. Set container port: 9006 (backend app port)",
+    "   5. Enable HTTPS/SSL (Let's Encrypt)",
+    "   6. Save configuration",
+    "   7. Restart/redeploy application",
+    "   8. Wait 2-3 minutes for Traefik to update routing"
+  ],
+  "domainConfig": null,
+  "portConfig": null,
+  "networkConfig": null
+}

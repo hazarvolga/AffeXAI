@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-11-24T08:34:35.089Z",
+  "findings": [
+    "Successfully logged into Coolify"
+  ],
+  "screenshots": [],
+  "issues": [
+    "Error: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('text=AffexAI Aluplan')\n    - locator resolved to <div class=\"box-title\">AffexAI Aluplan</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <a class=\"absolute inset-0\" href=\"https://coolify.aluplan.tr/project/mgccww0k04gkg0s0g8w4cw08/environment/ic4g4kc880ocwscg800g440w\"></a> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <a class=\"absolute inset-0\" href=\"https://coolify.aluplan.tr/project/mgccww0k04gkg0s0g8w4cw08/environment/ic4g4kc880ocwscg800g440w\"></a> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <a class=\"absolute inset-0\" href=\"https://coolify.aluplan.tr/project/mgccww0k04gkg0s0g8w4cw08/environment/ic4g4kc880ocwscg800g440w\"></a> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+  ],
+  "recommendations": [],
+  "domainConfig": null,
+  "portConfig": null,
+  "networkConfig": null
+}

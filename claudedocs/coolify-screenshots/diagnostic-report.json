@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-11-24T08:39:12.020Z",
+  "findings": [
+    "Successfully opened backend application",
+    "Domain api.aluplan.tr is configured",
+    "HTTPS/SSL is configured",
+    "Traefik labels present",
+    "HTTPS/SSL is configured",
+    "Traefik labels present",
+    "HTTPS/SSL is configured",
+    "Traefik labels present",
+    "HTTPS/SSL is configured",
+    "Traefik labels present",
+    "HTTPS/SSL is configured",
+    "Traefik labels present",
+    "HTTPS/SSL is configured",
+    "Traefik labels present"
+  ],
+  "screenshots": [
+    "tab-configuration.png",
+    "tab-domains.png",
+    "tab-general.png",
+    "tab-environment-variables.png",
+    "tab-resource-limits.png",
+    "tab-logs.png"
+  ],
+  "issues": [],
+  "recommendations": [
+    "✅ Domain configuration appears correct",
+    "",
+    "If still getting errors, check:",
+    "   • DNS: api.aluplan.tr resolves to server IP",
+    "   • Firewall: Ports 80/443 are open",
+    "   • Container: Backend is healthy and listening on 9006",
+    "   • Traefik logs: Check for routing errors"
+  ],
+  "domainConfig": "api.aluplan.tr",
+  "portConfig": "80, 443",
+  "networkConfig": null
+}

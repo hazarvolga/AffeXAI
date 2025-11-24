@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-11-24T07:45:23.379Z",
+  "deploymentStatus": null,
+  "buildLogs": [],
+  "errors": [],
+  "successIndicators": [],
+  "screenshots": [
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-01-initial.png",
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-03.png",
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-06.png",
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-09.png",
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-12.png",
+    "/Users/hazarekiz/Projects/v06/Affexai/deployment-screenshots/logs-final.png"
+  ]
+}

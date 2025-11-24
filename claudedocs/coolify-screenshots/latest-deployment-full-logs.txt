@@ -1,0 +1,2073 @@
+
+    
+    
+
+    
+        // Global HTML sanitization function using DOMPurify
+        window.sanitizeHTML = function (html) {
+            if (!html) return '';
+            const URL_RE = /^(https?:|mailto:)/i;
+            const config = {
+                ALLOWED_TAGS: ['a', 'b', 'br', 'code', 'del', 'div', 'em', 'i', 'p', 'pre', 's', 'span', 'strong',
+                    'u'
+                ],
+                ALLOWED_ATTR: ['class', 'href', 'target', 'title', 'rel'],
+                ALLOW_DATA_ATTR: false,
+                FORBID_TAGS: ['script', 'object', 'embed', 'applet', 'iframe', 'form', 'input', 'button', 'select',
+                    'textarea', 'details', 'summary', 'dialog', 'style'
+                ],
+                FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange',
+                    'onsubmit', 'ontoggle', 'style'
+                ],
+                KEEP_CONTENT: true,
+                RETURN_DOM: false,
+                RETURN_DOM_FRAGMENT: false,
+                SANITIZE_DOM: true,
+                SANITIZE_NAMED_PROPS: true,
+                SAFE_FOR_TEMPLATES: true,
+                ALLOWED_URI_REGEXP: URL_RE
+            };
+
+            // One-time hook registration (idempotent pattern)
+            if (!window.__dpLinkHook) {
+                DOMPurify.addHook('afterSanitizeAttributes', node => {
+                    // Remove Alpine.js directives to prevent XSS
+                    if (node.hasAttributes && node.hasAttributes()) {
+                        const attrs = Array.from(node.attributes);
+                        attrs.forEach(attr => {
+                            // Remove x-* attributes (Alpine directives)
+                            if (attr.name.startsWith('x-')) {
+                                node.removeAttribute(attr.name);
+                            }
+                            // Remove @* attributes (Alpine event shorthand)
+                            if (attr.name.startsWith('@')) {
+                                node.removeAttribute(attr.name);
+                            }
+                            // Remove :* attributes (Alpine binding shorthand)
+                            if (attr.name.startsWith(':')) {
+                                node.removeAttribute(attr.name);
+                            }
+                        });
+                    }
+
+                    // Existing link sanitization
+                    if (node.nodeName === 'A' && node.hasAttribute('href')) {
+                        const href = node.getAttribute('href') || '';
+                        if (!URL_RE.test(href)) node.removeAttribute('href');
+                        if (node.getAttribute('target') === '_blank') {
+                            node.setAttribute('rel', 'noopener noreferrer');
+                        }
+                    }
+                });
+                window.__dpLinkHook = true;
+            }
+            return DOMPurify.sanitize(html, config);
+        };
+
+        // Initialize theme if not set
+        if (!('theme' in localStorage)) {
+            localStorage.theme = 'dark';
+        }
+
+        let theme = localStorage.theme
+        let cpuColor = '#1e90ff'
+        let ramColor = '#00ced1'
+        let textColor = '#ffffff'
+        let editorBackground = '#181818'
+        let editorTheme = 'blackboard'
+
+        function checkTheme() {
+            theme = localStorage.theme
+            if (theme == 'system') {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+            }
+            if (theme == 'dark') {
+                cpuColor = '#1e90ff'
+                ramColor = '#00ced1'
+                textColor = '#ffffff'
+                editorBackground = '#181818'
+                editorTheme = 'blackboard'
+            } else {
+                cpuColor = '#1e90ff'
+                ramColor = '#00ced1'
+                textColor = '#000000'
+                editorBackground = '#ffffff'
+                editorTheme = null
+            }
+        }
+                    window.Pusher = Pusher;
+            window.Echo = new Echo({
+                broadcaster: 'pusher',
+                cluster: "" || window.location.hostname,
+                key: "8f0665a7010befee40083b036cfb6b13af665f9ef84bc488d3fabf0da57bf2da" || 'coolify',
+                wsHost: "" || window.location.hostname,
+                wsPort: "",
+                wssPort: "",
+                forceTLS: false,
+                encrypted: true,
+                enableStats: false,
+                enableLogging: true,
+                enabledTransports: ['ws', 'wss'],
+                disableStats: true,
+                // Add auto reconnection settings
+                enabledTransports: ['ws', 'wss'],
+                disabledTransports: ['sockjs', 'xhr_streaming', 'xhr_polling'],
+                // Attempt to reconnect on connection lost
+                autoReconnect: true,
+                // Wait 1 second before first reconnect attempt
+                reconnectionDelay: 1000,
+                // Maximum delay between reconnection attempts
+                maxReconnectionDelay: 1000,
+                // Multiply delay by this number for each reconnection attempt
+                reconnectionDelayGrowth: 1,
+                // Maximum number of reconnection attempts
+                maxAttempts: 15
+            });
+                let checkHealthInterval = null;
+        let checkIfIamDeadInterval = null;
+
+        function changePasswordFieldType(event) {
+            let element = event.target
+            for (let i = 0; i < 10; i++) {
+                if (element.className === "relative") {
+                    break;
+                }
+                element = element.parentElement;
+            }
+            element = element.children[1];
+            if (element.nodeName === 'INPUT' || element.nodeName === 'TEXTAREA') {
+                if (element.type === 'password') {
+                    element.type = 'text';
+                    if (element.disabled) return;
+                    element.classList.add('truncate');
+                    this.type = 'text';
+                } else {
+                    element.type = 'password';
+                    if (element.disabled) return;
+                    element.classList.remove('truncate');
+                    this.type = 'password';
+                }
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator?.clipboard?.writeText(text) && window.Livewire.dispatch('success', 'Copied to clipboard.');
+        }
+        document.addEventListener('livewire:init', () => {
+            window.Livewire.on('reloadWindow', (timeout) => {
+                if (timeout) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, timeout);
+                    return;
+                } else {
+                    window.location.reload();
+                }
+            })
+            window.Livewire.on('info', (message) => {
+                if (typeof message === 'string') {
+                    window.toast('Info', {
+                        type: 'info',
+                        description: message,
+                    })
+                    return;
+                }
+                if (message.length == 1) {
+                    window.toast('Info', {
+                        type: 'info',
+                        description: message[0],
+                    })
+                } else if (message.length == 2) {
+                    window.toast(message[0], {
+                        type: 'info',
+                        description: message[1],
+                    })
+                }
+            })
+            window.Livewire.on('error', (message) => {
+                if (typeof message === 'string') {
+                    window.toast('Error', {
+                        type: 'danger',
+                        description: message,
+                    })
+                    return;
+                }
+                if (message.length == 1) {
+                    window.toast('Error', {
+                        type: 'danger',
+                        description: message[0],
+                    })
+                } else if (message.length == 2) {
+                    window.toast(message[0], {
+                        type: 'danger',
+                        description: message[1],
+                    })
+                }
+            })
+            window.Livewire.on('warning', (message) => {
+                if (typeof message === 'string') {
+                    window.toast('Warning', {
+                        type: 'warning',
+                        description: message,
+                    })
+                    return;
+                }
+                if (message.length == 1) {
+                    window.toast('Warning', {
+                        type: 'warning',
+                        description: message[0],
+                    })
+                } else if (message.length == 2) {
+                    window.toast(message[0], {
+                        type: 'warning',
+                        description: message[1],
+                    })
+                }
+            })
+            window.Livewire.on('success', (message) => {
+                if (typeof message === 'string') {
+                    window.toast('Success', {
+                        type: 'success',
+                        description: message,
+                    })
+                    return;
+                }
+                if (message.length == 1) {
+                    window.toast('Success', {
+                        type: 'success',
+                        description: message[0],
+                    })
+                } else if (message.length == 2) {
+                    window.toast(message[0], {
+                        type: 'success',
+                        description: message[1],
+                    })
+                }
+            })
+        });
+    
+
+
+            
+            
+                            
+            
+            
+                
+                
+                    
+                        WARNING:  Cannot connect to real-time service
+                    
+                    This will cause unusual problems on the
+                            UI! 
+                            Please ensure that you have opened the
+                            required ports or get
+                            help on Discord.
+                        
+                
+            
+            
+                Acknowledge & Disable This Popup
+            
+        
+    
+
+                    
+                
+            
+            
+                        
+                            
+                        
+                        
+                            Love Coolify? Support our work.
+                            
+                            
+                                We are already profitable thanks to YOU
+                                but...We
+                                would
+                                like to
+                                make
+                                more cool features.
+                            
+                            
+                                For this we need your help to support our work financially.
+                            
+                        
+                        
+                            
+
+    GitHub
+                                    Sponsors
+                
+                            
+
+    Open
+                                    Collective
+                
+                            
+
+    Stripe
+                
+                            
+                                Maybe next time
+                            
+                        
+                    
+    
+
+        
+                    
+        function disableSponsorship() {
+            // Store current timestamp instead of just 'false'
+            localStorage.setItem('popupSponsorship', Date.now().toString());
+        }
+
+        function disableNotification() {
+            // Store current timestamp instead of just 'false'
+            localStorage.setItem('popupNotification', Date.now().toString());
+        }
+
+        function disableRealtime() {
+            localStorage.setItem('popupRealtime', 'disabled');
+        }
+    
+
+        
+    
+
+    
+    
+
+    
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+
+            
+    
+        
+            
+                
+                
+                    
+                        
+                            
+                                Close sidebar
+                                
+                                    
+                                
+                            
+                        
+
+                        
+                            
+    
+        
+            Coolify
+            
+    v4.0.0-beta.444
+
+        
+        
+            
+            
+                
+                    
+                
+                /
+            
+        
+        
+    
+    
+        
+            
+            
+                
+            
+
+            
+                            
+                    9+
+                
+                    
+
+        
+        
+            
+                
+                    
+                                            
+                            
+                                
+                                    
+                                
+                                What's New
+                            
+                            
+                                9+
+                            
+                        
+                    
+                    
+                    
+
+                    
+                    
+                        Appearance
+                    
+                        
+                            
+                        
+                        Dark
+                    
+                    
+                        
+                            
+                        
+                        Light
+                    
+                    
+                        
+                            
+                        
+                        System
+                    
+
+                    
+                    
+                        Width
+                    
+                        
+                            
+                        
+                        Center
+                    
+                    
+                        
+                            
+                        
+                        Full
+                    
+
+                    
+                    
+                        Zoom
+                    
+                        
+                            
+                        
+                        100%
+                    
+                    
+                        
+                            
+                        
+                        90%
+                    
+                
+            
+        
+    
+
+    
+    
+    
+    
+        
+        
+        Switch team
+            Root Team
+    
+    
+    
+    
+        
+            
+                                    
+                        
+                            
+                                
+                            
+                            Dashboard
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                            
+                            Projects
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                                
+                                
+                            
+                            Servers
+                        
+                    
+
+                    
+                        
+                            
+                                
+                            
+                            Sources
+                        
+                    
+                    
+                        
+
+                            
+                                
+                            
+                            Destinations
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                            
+                            S3 Storages
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Shared Variables
+                        
+                    
+                    
+                        
+                            
+                                
+                            
+                            Notifications
+                        
+                    
+                    
+                        
+                            
+                                
+                            
+                            Keys & Tokens
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Tags
+                        
+                    
+                                            
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                                Terminal
+                            
+                        
+                                        
+                        
+                            
+                                
+                                
+                                
+                                
+                            
+                            Profile
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                            
+                            Teams
+                        
+                    
+                                                                
+
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                                Settings
+                            
+                        
+                    
+                                        
+                                            
+                            
+                                
+    
+
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('upgradeModal', () => ({
+            modalOpen: false,
+            showProgress: false,
+            currentStatus: '',
+            confirmed() {
+                this.showProgress = true;
+                this.$wire.$call('upgrade')
+                this.upgrade();
+                window.addEventListener('beforeunload', (event) => {
+                    event.preventDefault();
+                    event.returnValue = '';
+                });
+            },
+            revive() {
+                if (checkHealthInterval) return true;
+                console.log('Checking server\'s health...')
+                checkHealthInterval = setInterval(() => {
+                    fetch('/api/health')
+                        .then(response => {
+                            if (response.ok) {
+                                this.currentStatus =
+                                    'Coolify is back online. Reloading this page (you can manually reload if its not done automatically)...';
+                                if (checkHealthInterval) clearInterval(
+                                    checkHealthInterval);
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 5000)
+                            } else {
+                                this.currentStatus =
+                                    "Waiting for Coolify to come back from the dead..."
+                            }
+                        })
+                }, 2000);
+            },
+            upgrade() {
+                if (checkIfIamDeadInterval || this.$wire.showProgress) return true;
+                this.currentStatus = 'Pulling new images and updating Coolify.';
+                checkIfIamDeadInterval = setInterval(() => {
+                    fetch('/api/health')
+                        .then(response => {
+                            if (response.ok) {
+                                this.currentStatus = "Waiting for the update process..."
+                            } else {
+                                this.currentStatus =
+                                    "Update done, restarting Coolify & waiting until it is revived!"
+                                if (checkIfIamDeadInterval) clearInterval(
+                                    checkIfIamDeadInterval);
+                                this.revive();
+                            }
+                        })
+                }, 2000);
+            }
+
+        }))
+    })
+
+                            
+                        
+                                        
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Sponsor us
+                        
+                    
+                                                
+                    
+            
+            
+                                
+                                    
+                                
+                                Feedback
+                            
+        
+        
+
+                
+                
+                    
+                                                
+                            
+                                
+                            
+                            Logout
+                        
+                    
+                
+            
+        
+    
+
+                        
+                    
+                
+            
+
+            
+                
+                    
+    
+        
+            Coolify
+            
+    v4.0.0-beta.444
+
+        
+        
+            
+            
+                
+                    
+                
+                /
+            
+        
+        
+    
+    
+        
+            
+            
+                
+            
+
+            
+                            
+                    9+
+                
+                    
+
+        
+        
+            
+                
+                    
+                                            
+                            
+                                
+                                    
+                                
+                                What's New
+                            
+                            
+                                9+
+                            
+                        
+                    
+                    
+                    
+
+                    
+                    
+                        Appearance
+                    
+                        
+                            
+                        
+                        Dark
+                    
+                    
+                        
+                            
+                        
+                        Light
+                    
+                    
+                        
+                            
+                        
+                        System
+                    
+
+                    
+                    
+                        Width
+                    
+                        
+                            
+                        
+                        Center
+                    
+                    
+                        
+                            
+                        
+                        Full
+                    
+
+                    
+                    
+                        Zoom
+                    
+                        
+                            
+                        
+                        100%
+                    
+                    
+                        
+                            
+                        
+                        90%
+                    
+                
+            
+        
+    
+
+    
+    
+    
+    
+        
+        
+        Switch team
+            Root Team
+    
+    
+    
+    
+        
+            
+                                    
+                        
+                            
+                                
+                            
+                            Dashboard
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                            
+                            Projects
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                                
+                                
+                            
+                            Servers
+                        
+                    
+
+                    
+                        
+                            
+                                
+                            
+                            Sources
+                        
+                    
+                    
+                        
+
+                            
+                                
+                            
+                            Destinations
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                            
+                            S3 Storages
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Shared Variables
+                        
+                    
+                    
+                        
+                            
+                                
+                            
+                            Notifications
+                        
+                    
+                    
+                        
+                            
+                                
+                            
+                            Keys & Tokens
+                        
+                    
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Tags
+                        
+                    
+                                            
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                                Terminal
+                            
+                        
+                                        
+                        
+                            
+                                
+                                
+                                
+                                
+                            
+                            Profile
+                        
+                    
+                    
+                        
+                            
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                            
+                            Teams
+                        
+                    
+                                                                
+
+                            
+                                
+                                    
+                                    
+                                    
+                                
+                                Settings
+                            
+                        
+                    
+                                        
+                                            
+                            
+                                
+    
+
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('upgradeModal', () => ({
+            modalOpen: false,
+            showProgress: false,
+            currentStatus: '',
+            confirmed() {
+                this.showProgress = true;
+                this.$wire.$call('upgrade')
+                this.upgrade();
+                window.addEventListener('beforeunload', (event) => {
+                    event.preventDefault();
+                    event.returnValue = '';
+                });
+            },
+            revive() {
+                if (checkHealthInterval) return true;
+                console.log('Checking server\'s health...')
+                checkHealthInterval = setInterval(() => {
+                    fetch('/api/health')
+                        .then(response => {
+                            if (response.ok) {
+                                this.currentStatus =
+                                    'Coolify is back online. Reloading this page (you can manually reload if its not done automatically)...';
+                                if (checkHealthInterval) clearInterval(
+                                    checkHealthInterval);
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 5000)
+                            } else {
+                                this.currentStatus =
+                                    "Waiting for Coolify to come back from the dead..."
+                            }
+                        })
+                }, 2000);
+            },
+            upgrade() {
+                if (checkIfIamDeadInterval || this.$wire.showProgress) return true;
+                this.currentStatus = 'Pulling new images and updating Coolify.';
+                checkIfIamDeadInterval = setInterval(() => {
+                    fetch('/api/health')
+                        .then(response => {
+                            if (response.ok) {
+                                this.currentStatus = "Waiting for the update process..."
+                            } else {
+                                this.currentStatus =
+                                    "Update done, restarting Coolify & waiting until it is revived!"
+                                if (checkIfIamDeadInterval) clearInterval(
+                                    checkIfIamDeadInterval);
+                                this.revive();
+                            }
+                        })
+                }, 2000);
+            }
+
+        }))
+    })
+
+                            
+                        
+                                        
+                    
+                        
+                            
+                                
+                                    
+                                    
+                                
+                            
+                            Sponsor us
+                        
+                    
+                                                
+                    
+            
+            
+                                
+                                    
+                                
+                                Feedback
+                            
+        
+        
+
+                
+                
+                    
+                                                
+                            
+                                
+                            
+                            Logout
+                        
+                    
+                
+            
+        
+    
+
+                
+            
+
+            
+                
+                    Coolify
+                    
+        
+        Switch team
+            Root Team
+    
+    
+                
+                
+                    Open sidebar
+                    
+                        
+                    
+                
+            
+
+            
+                
+                    
+         
+    
+            Logs
+        
+    
+    
+        
+            
+                
+                    AffexAI Aluplan
+                
+                    
+                
+            
+        
+        
+            
+                production
+                
+                    
+                
+            
+        
+        
+            
+                Aluplan AffexAI Frontend
+                
+                    
+                
+            
+        
+                    
+            
+        
+        
+        
+        
+    
+
+        
+        
+        Exited
+    
+
+            
+
+    
+        
+            
+                Configuration
+            
+            
+                Deployments
+            
+            
+                
+                    Logs
+                                    
+            
+                                                
+                        Terminal
+                    
+                                        
+    
+        
+            Links
+        
+        
+            
+        
+    
+
+    
+        
+            
+                                                                        
+                        
+    
+
+://aluplan.tr
+                    
+                                                            
+        
+    
+
+        
+        
+                                                
+                        
+    
+        
+            Advanced
+        
+        
+            
+        
+    
+
+    
+        
+            
+            
+                
+                
+                
+                
+                
+            
+            Force deploy (without
+            cache)
+        
+        
+    
+
+                    
+                                
+                                            
+
+    
+                                
+                                
+                            
+                            Deploy
+                        
+        
+        
+        
+        
+    
+
+            
+                                    
+                    
+    
+
+        
+            Logs
+                            The resource is not running.
+                    
+    
+                
+            
+        
+    
+
+
+            
+        
+            
+            
+            
+
+                
+                
+                    
+                        
+                            
+                        
+                        
+                            
+                            
+                            
+                            
+                        
+                    
+                    
+                    
+                        
+                            / or ⌘K to focus
+                        
+                        
+                            ESC
+                        
+                    
+                
+
+                
+                
+                    
+                    
+                        
+                        
+
+                        
+
+                        
+                    
+                
+            
+        
+                
+                
+                    
+                        New Project
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+    
+            Name
+                            *
+                                
+                
+            
+    
+            Description
+                                
+                
+            
+    New project will have a default production
+        environment.
+    
+
+    Continue
+                
+
+                    
+                
+            
+                
+                
+                    
+                        New Server
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+    
+                    
+                
+            
+            
+                            
+                                
+                                    
+                                    
+                                
+                                
+                                    Connect a Hetzner Server
+                                    
+                                        Deploy servers directly from your Hetzner Cloud account
+                                    
+                                
+                            
+                        
+        
+        
+
+            
+
+            
+        
+        
+            Add Server by IP Address
+            
+            
+            
+                
+            Name
+                            *
+                                
+                
+            
+                
+            Description
+                                
+                
+            
+            
+            
+                
+            IP Address/Domain
+                            *
+                                        
+    
+                    
+                
+            
+        
+    
+    
+        
+            An IP Address (127.0.0.1) or domain (example.com).
+        
+    
+
+                    
+                
+            
+                
+            Port
+                            *
+                                
+                
+            
+            
+            
+            User
+                            *
+                                
+                
+            
+            Non-root user is experimental: docs.
+            
+            Private Key
+                                
+        
+        Select a private key
+                                                            localhost's key
+    
+    
+            
+                
+    
+        
+                                                Use it as a build server?
+                                                    
+    
+                    
+                
+            
+        
+    
+    
+        
+            Build servers are used to build your applications, so you cannot deploy applications to it.
+        
+    
+
+                                    
+                    
+            
+
+            
+            
+
+    Continue
+                
+        
+            
+    
+
+                    
+                
+            
+            
+            
+                
+                    Connect a Hetzner Server
+                    
+                        
+                            
+                        
+                    
+                
+                
+                    
+                        
+                
+                
+                        
+
+    Add Hetzner Token
+                
+                
+
+            
+            
+                
+            
+        
+            
+            
+                
+                    Add Hetzner Token
+                    
+                        
+                            
+                        
+                    
+                
+                
+                    
+    
+                    
+                            
+            
+            
+            Token Name
+                            *
+                                
+                
+            
+
+            
+            API Token
+                            *
+                                
+                
+                            
+                    
+                        
+                        
+                        
+                    
+                
+                        
+
+        
+            
+
+                            
+                    Create an API token in the Hetzner Console → choose
+                    Project → Security → API Tokens.
+                                            
+                        Don't have a Hetzner account? Sign up here
+                        
+                        (Coolify's affiliate link, only new accounts - supports us (€10)
+                            and gives you €20)
+                                    
+            
+            
+
+    Validate & Add Token
+                
+            
+
+                
+            
+        
+                
+                
+                    
+                        New Team
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+    
+            Name
+                            *
+                                
+                
+            
+    
+            Description
+                                
+                
+            
+    
+
+    Continue
+                
+
+                    
+                
+            
+                
+                
+                    
+                        New S3 Storage
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+        For more details, please visit the Coolify Docs.
+        
+            
+                
+            Name
+                            *
+                                
+                
+            
+                
+            Description
+                                
+                
+            
+            
+            
+            Endpoint
+                            *
+                                
+                
+            
+            
+                
+            Bucket
+                            *
+                                
+                
+            
+                
+            Region
+                            *
+                                        
+    
+                    
+                
+            
+        
+    
+    
+        
+            Region only required for AWS. Leave it as-is for other providers.
+        
+    
+
+                    
+                
+            
+            
+            
+                
+            Access Key
+                            *
+                                
+                
+                            
+                    
+                        
+                        
+                        
+                    
+                
+                        
+
+        
+            
+                
+            Secret Key
+                            *
+                                
+                
+                            
+                    
+                        
+                        
+                        
+                    
+                
+                        
+
+        
+            
+            
+
+            
+
+    Validate Connection & Continue
+                
+        
+    
+                    
+                
+            
+                
+                
+                    
+                        New Private Key
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+    
+        Private Keys are used to connect to your servers without passwords.
+        You should not use passphrase protected keys.
+    
+    
+        
+
+    Generate new ED25519 SSH
+            Key
+                        
+        
+        
+        
+        
+    
+
+            
+        
+
+    Generate new RSA SSH Key
+                        
+        
+        
+        
+        
+    
+
+            
+    
+    
+        
+            
+            Name
+                            *
+                                
+                
+            
+            
+            Description
+                                
+                
+            
+        
+        
+    function handleKeydown(e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+
+            e.target.setRangeText(
+                '  ',
+                e.target.selectionStart,
+                e.target.selectionStart,
+                'end'
+            );
+        }
+    }
+
+
+
+            Private Key
+                            *
+                                
+                            
+                
+        
+            Public Key
+                                
+                
+            
+        ACTION REQUIRED: Copy the 'Public Key' to your server's
+            ~/.ssh/authorized_keys
+            file
+        
+
+    Continue
+                
+    
+
+                    
+                
+            
+                
+                
+                    
+                        New GitHub App
+                        
+                            
+                                
+                            
+                        
+                    
+                    
+                        
+        This is required, if you would like to get full integration (commit / pull request
+            deployments, etc)
+            with GitHub.
+        
+            
+            Name
+                            *
+                                
+                
+            
+            
+            Organization (on GitHub)
+                                        
+    
+                    
+                
+            
+        
+    
+    
+        
+            If empty, your GitHub user will be used.
+        
+    
+
+                    
+                
+            
+        
+                    
+                
+                    
+    
+        
+                                                System Wide
+                                                    
+    
+                    
+                
+            
+        
+    
+    
+        
+            If checked, this GitHub App will be available for everyone in this Coolify instance.
+        
+    
+
+                                    
+                                    
+                        
+
+                
+                
+                    
+    
+        
+            
+        
+        
+            
+                Not Recommended
+            
+            
+                
+                            System-wide GitHub Apps are shared across all teams on this Coolify instance. This means any team
+                            can use this GitHub App to deploy applications from your repositories. For better security and
+                            isolation, it's recommended to create team-specific GitHub Apps instead.
+                        
+            
+        
+    
+                
+            
+                
+            
+                
+                    Self-hosted / Enterprise GitHub
+                    
+                        
+                    
+                
+                
+                    
+                        
+                            
+            HTML Url
+                            *
+                                
+                
+            
+                            
+            API Url
+                            *
+                                
+                
+            
+                        
+                        
+                            
+            Custom Git User
+                            *
+                                
+                
+            
+                            
+            Custom Git Port
+                            *
+                                
+                
+            
+                        
+                    
+                
+            
+        
+
+
+        
+
+    Continue
+                
+    
+                    
+                
+            
+            
+            
+                
+                    How can we help?
+                    
+                        
+                            
+                        
+                    
+                
+                
+                    
+    Your feedback helps us to improve Coolify. Thank you! 💜
+    
+        
+            Subject
+                            *
+                                
+                
+            
+        
+    function handleKeydown(e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+
+            e.target.setRangeText(
+                '  ',
+                e.target.selectionStart,
+                e.target.selectionStart,
+                'end'
+            );
+        }
+    }
+
+
+
+            Description
+                            *
+                                
+                            
+                
+        
+        
+
+    Send
+                
+    
+
+                
+            
+        
+            
+            
+                
+                    How can we help?
+                    
+                        
+                            
+                        
+                    
+                
+                
+                    
+    Your feedback helps us to improve Coolify. Thank you! 💜
+    
+        
+            Subject
+                            *
+                                
+                
+            
+        
+    function handleKeydown(e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+
+            e.target.setRangeText(
+                '  ',
+                e.target.selectionStart,
+                e.target.selectionStart,
+                'end'
+            );
+        }
+    }
+
+
+
+            Description
+                            *
+                                
+                            
+                
+        
+        
+
+    Send
+                
+    
+
+                
+            
+        

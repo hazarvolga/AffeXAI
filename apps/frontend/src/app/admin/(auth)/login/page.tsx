@@ -104,7 +104,7 @@ export default function LoginPage() {
             {isLoading ? 'Giriş Yapılıyor...' : <><LogIn className="mr-2 h-4 w-4"/> Giriş Yap</>}
           </Button>
            <div className="text-center text-sm text-muted-foreground">
-                Hesabınız yok mu? <Link href="/admin/signup" className="font-medium text-primary hover:underline">Kayıt Olun</Link>
+                Hesabınız yok mu? <Link href="/signup" className="font-medium text-primary hover:underline">Kayıt Olun</Link>
             </div>
         </CardFooter>
       </form>

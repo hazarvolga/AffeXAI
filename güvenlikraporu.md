@@ -1697,7 +1697,7 @@ docker stats                   # Resource usage
 
 
 AFFEXAI PROJESİ - KAPSAMLI ANALİZ RAPORU
-Tarih: 23 Kasım 2025 Analiz Eden: Kiro AI Assistant Proje Versiyonu: 1.0.1 Toplam Analiz Süresi: ~45 dakika
+Tarih: 23 Kasım 2025Analiz Eden: Kiro AI AssistantProje Versiyonu: 1.0.1Toplam Analiz Süresi: ~45 dakika
 
 📑 İÇİNDEKİLER
 	1	Yönetici Özeti
@@ -2154,28 +2154,28 @@ Yüksek Öncelikli Teknik Borç
 typescript: {
   ignoreBuildErrors: true,  // ❌
 }
-Efor: 2-3 gün Etki: Yüksek (production stability)
+Efor: 2-3 günEtki: Yüksek (production stability)
 2. Test Coverage (KRİTİK)
-Mevcut: %5-10 Hedef: %70 Efor: 2-3 ay Etki: Çok yüksek (code quality, bug prevention)
+Mevcut: %5-10Hedef: %70Efor: 2-3 ayEtki: Çok yüksek (code quality, bug prevention)
 3. Console.log Temizliği
-Tespit: 76 dosya Efor: 1-2 gün Etki: Orta (production logs, security)
+Tespit: 76 dosyaEfor: 1-2 günEtki: Orta (production logs, security)
 4. TODO/FIXME Tamamlama
-Tespit: 21 adet Efor: 1-2 hafta Etki: Orta (feature completeness)
+Tespit: 21 adetEfor: 1-2 haftaEtki: Orta (feature completeness)
 Orta Öncelikli Teknik Borç
 5. Database Synchronize
 synchronize: true,  // ❌ Production'da kapalı olmalı
-Efor: 1 gün Etki: Yüksek (data safety)
+Efor: 1 günEtki: Yüksek (data safety)
 6. XSS Sanitization
-Tespit: 14 dosyada dangerouslySetInnerHTML Efor: 2-3 gün Etki: Yüksek (security)
+Tespit: 14 dosyada dangerouslySetInnerHTMLEfor: 2-3 günEtki: Yüksek (security)
 7. Hardcoded Secrets
-Tespit: JWT secret, DB credentials Efor: 1 gün Etki: Orta (security)
+Tespit: JWT secret, DB credentialsEfor: 1 günEtki: Orta (security)
 8. CI/CD Pipeline
-Mevcut: Yok Efor: 1 hafta Etki: Yüksek (deployment automation)
+Mevcut: YokEfor: 1 haftaEtki: Yüksek (deployment automation)
 Düşük Öncelikli Teknik Borç
 9. Component Refactoring
-Tespit: Bazı component'ler 1000+ satır Efor: 1-2 hafta Etki: Orta (maintainability)
+Tespit: Bazı component'ler 1000+ satırEfor: 1-2 haftaEtki: Orta (maintainability)
 10. Service Splitting
-Tespit: Bazı service'ler 40+ method Efor: 1 hafta Etki: Orta (code organization)
+Tespit: Bazı service'ler 40+ methodEfor: 1 haftaEtki: Orta (code organization)
 Teknik Borç Toplam Efor
 Yüksek Öncelikli: 3-4 ay
 Orta Öncelikli: 2-3 hafta
@@ -2315,4 +2315,4 @@ Son Notlar
 Bu proje production'a hazır ancak yukarıdaki öneriler uygulanmadan enterprise-grade değil. Özellikle test coverage ve TypeScript strict mode acil olarak ele alınmalı.
 Başarılar! 🚀
 
-Rapor Sonu Hazırlayan: Kiro AI Assistant Tarih: 23
+Rapor SonuHazırlayan: Kiro AI AssistantTarih: 23

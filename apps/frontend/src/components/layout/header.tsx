@@ -105,7 +105,7 @@ export function Header() {
   useEffect(() => {
     async function fetchSiteSettings() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/site`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/site`, {
           headers: {
             'Content-Type': 'application/json',
           },

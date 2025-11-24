@@ -9,6 +9,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ResponseInterceptor } from './common/interceptors';
 import { GlobalExceptionFilter } from './common/filters';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   try {
@@ -24,6 +25,10 @@ async function bootstrap() {
     
     // Set global API prefix
     app.setGlobalPrefix('api');
+    
+    // Increase body parser limit for large SQL imports (temporary endpoint)
+    app.use(json({ limit: '10mb' }));
+    app.use(urlencoded({ extended: true, limit: '10mb' }));
     
     // Security with Helmet
     app.use(helmet());

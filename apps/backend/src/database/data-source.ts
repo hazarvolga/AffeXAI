@@ -84,15 +84,21 @@ import { Setting } from '../modules/settings/entities/setting.entity';
 // Mail - Missing entities
 import { EmailSuppression } from '../modules/mail/entities/email-suppression.entity';
 
+// Production-ready data source configuration
+// Automatically uses DATABASE_URL environment variable if available
+// Falls back to individual environment variables or development defaults
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: 'postgres',
-  database: 'affexai_dev',
-  synchronize: true, // TEMPORARY: Enable for development to auto-create missing tables
-  logging: true,
+  // Use DATABASE_URL if available (production), otherwise use individual variables
+  url: process.env.DATABASE_URL,
+  host: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_HOST || 'localhost'),
+  port: process.env.DATABASE_URL ? undefined : parseInt(process.env.DATABASE_PORT || '5432'),
+  username: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_USERNAME || 'postgres'),
+  password: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_PASSWORD || 'postgres'),
+  database: process.env.DATABASE_URL ? undefined : (process.env.DATABASE_NAME || 'affexai_dev'),
+  // CRITICAL: Never use synchronize in production
+  synchronize: process.env.NODE_ENV !== 'production',
+  logging: process.env.NODE_ENV === 'development',
   entities: [
     // Users & Roles
     User,

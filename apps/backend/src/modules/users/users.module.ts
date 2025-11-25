@@ -10,12 +10,14 @@ import { SharedModule } from '../../shared/shared.module';
 import { RolesModule } from '../roles/roles.module';
 import { CrmModule } from '../crm/crm.module';
 import { MailModule } from '../mail/mail.module';
+import { SettingsModule } from '../settings/settings.module';
 import { UserEmailService } from './services/user-email.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserRole, Role]),
     SharedModule,
+    SettingsModule,
     forwardRef(() => RolesModule),
     forwardRef(() => CrmModule), // Use forwardRef to avoid circular dependency
     forwardRef(() => MailModule), // Use forwardRef to avoid circular dependency with EmailMarketingModule

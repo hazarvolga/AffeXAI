@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../modules/users/users.service';
 import { MailService } from '../modules/mail/mail.service';
+import { SettingsService } from '../modules/settings/settings.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthUtilsService } from '../shared/auth-utils.service';
 import { randomBytes } from 'crypto';
@@ -14,6 +15,7 @@ export class AuthService {
     private jwtService: JwtService,
     private authUtilsService: AuthUtilsService,
     private mailService: MailService,
+    private settingsService: SettingsService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -227,7 +229,8 @@ export class AuthService {
    */
   async sendVerificationEmail(userId: string, email: string, firstName: string): Promise<void> {
     const token = await this.createEmailVerificationToken(userId);
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:9003';
+    // Use domain from site settings instead of hardcoded env variable
+    const baseUrl = await this.settingsService.getFrontendUrl();
     const verificationLink = `${baseUrl}/verify-email/${token}`;
 
     try {

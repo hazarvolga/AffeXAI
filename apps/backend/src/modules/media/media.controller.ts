@@ -113,18 +113,13 @@ export class MediaController {
       throw new NotFoundException('File not found');
     }
 
-    // Construct the base URL directly
-    const protocol = process.env.APP_PROTOCOL || 'http';
-    const host = process.env.APP_HOST || 'localhost';
-    const port = process.env.PORT || '9005';
-    const baseUrl = `${protocol}://${host}:${port}`;
-
+    // Store relative URL - full URL will be constructed on frontend
     const createMediaDto: CreateMediaDto = {
       filename: file.filename,
       originalName: file.originalname,
       mimeType: file.mimetype,
       size: file.size,
-      url: `${baseUrl}/uploads/${file.filename}`,
+      url: `/uploads/${file.filename}`,
       type: MediaType.IMAGE, // Default to image for now
       storageType: StorageType.LOCAL,
       isActive: true,

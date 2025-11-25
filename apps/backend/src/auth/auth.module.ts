@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../modules/users/users.module';
 import { MailModule } from '../modules/mail/mail.module';
+import { SettingsModule } from '../modules/settings/settings.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from '../shared/shared.module';
@@ -15,6 +16,7 @@ import { Role } from '../modules/roles/entities/role.entity';
   imports: [
     UsersModule,
     MailModule,
+    SettingsModule,
     ConfigModule,
     SharedModule,
     TypeOrmModule.forFeature([Role]),

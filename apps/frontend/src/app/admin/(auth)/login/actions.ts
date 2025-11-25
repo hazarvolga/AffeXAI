@@ -4,6 +4,12 @@ import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
+// Get backend API URL - use env variable for production support
+function getBackendUrl(): string {
+  // NEXT_PUBLIC_API_URL includes /api suffix, so we use it directly
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+}
+
 const LoginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta adresi girin.'),
   password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır.'),
@@ -31,7 +37,8 @@ export async function login(prevState: LoginState, formData: FormData): Promise<
         console.log('Giriş denemesi:', validatedFields.data);
 
         // Call backend API for authentication
-        const response = await fetch('http://localhost:9006/api/auth/login', {
+        const backendUrl = getBackendUrl();
+        const response = await fetch(`${backendUrl}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -22,6 +22,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Get backend API URL - use env variable for production support
+function getBackendUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+}
+
 interface ValidationCheck {
   isValid: boolean;
   details: string;
@@ -72,7 +77,7 @@ export function EmailValidator() {
 
     try {
       const response = await fetch(
-        `http://localhost:9006/api/email-marketing/subscribers/validate-email?email=${encodeURIComponent(email)}`,
+        `${getBackendUrl()}/email-marketing/subscribers/validate-email?email=${encodeURIComponent(email)}`,
         {
           method: 'GET',
           headers: {

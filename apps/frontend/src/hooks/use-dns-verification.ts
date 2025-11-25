@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+// Get backend API URL - use env variable for production support
+function getBackendUrl(): string {
+  // NEXT_PUBLIC_API_URL includes /api suffix
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  // Remove /api suffix for settings endpoint which uses /settings not /api/settings
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 export interface DNSVerificationResult {
   recordType: 'SPF' | 'DKIM' | 'DMARC' | 'MX' | 'CNAME';
   verified: boolean;
@@ -33,7 +41,7 @@ export function useDNSVerification() {
 
     try {
       const response = await axios.get<DomainVerificationResult>(
-        `http://localhost:9006/settings/email/verify-dns`,
+        `${getBackendUrl()}/settings/email/verify-dns`,
         {
           params: { domain, provider }
         }
@@ -53,7 +61,7 @@ export function useDNSVerification() {
   const quickCheck = async (domain: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:9006/settings/email/quick-check-dns`,
+        `${getBackendUrl()}/settings/email/quick-check-dns`,
         {
           params: { domain }
         }

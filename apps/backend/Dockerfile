@@ -53,6 +53,9 @@ COPY apps/backend/cms-seed-data.sql ./apps/backend/cms-seed-data.sql
 COPY apps/backend/scripts/sync-migrations.sh ./apps/backend/scripts/sync-migrations.sh
 RUN chmod +x ./apps/backend/.coolify-deploy.sh ./apps/backend/scripts/sync-migrations.sh
 
+# Create uploads directory for persistent storage
+RUN mkdir -p ./apps/backend/uploads && chmod 755 ./apps/backend/uploads
+
 # Expose port
 EXPOSE 3001
 

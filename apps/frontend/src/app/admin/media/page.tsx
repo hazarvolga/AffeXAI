@@ -33,6 +33,13 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
+// Get base URL for media files - use env variable for production support
+function getMediaBaseUrl(): string {
+  // NEXT_PUBLIC_API_URL ends with /api, we need to remove it for media URLs
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 export default function MediaManagementPage() {
   const [mediaItems, setMediaItems] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
@@ -396,7 +403,7 @@ export default function MediaManagementPage() {
                       {media.type === 'image' ? (
                         <div className="relative h-16 w-16 rounded-md overflow-hidden">
                           <Image
-                            src={`http://localhost:9006${media.url}`}
+                            src={`${getMediaBaseUrl()}${media.url}`}
                             alt={media.altText || media.originalName}
                             fill
                             className="object-cover"
@@ -462,7 +469,7 @@ export default function MediaManagementPage() {
                 {selectedMedia.type === 'image' ? (
                   <div className="relative h-32 w-32 rounded-md overflow-hidden">
                     <Image
-                      src={`http://localhost:9006${selectedMedia.url}`}
+                      src={`${getMediaBaseUrl()}${selectedMedia.url}`}
                       alt={selectedMedia.altText || selectedMedia.originalName}
                       fill
                       className="object-cover"

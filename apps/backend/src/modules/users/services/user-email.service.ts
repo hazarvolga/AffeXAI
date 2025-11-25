@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailService } from '../../mail/mail.service';
+import { SettingsService } from '../../settings/settings.service';
 import { MailChannel } from '../../mail/interfaces/mail-service.interface';
 import { User } from '../entities/user.entity';
 
@@ -11,13 +12,11 @@ import { User } from '../entities/user.entity';
 @Injectable()
 export class UserEmailService {
   private readonly logger = new Logger(UserEmailService.name);
-  private readonly baseUrl: string;
 
   constructor(
     private readonly mailService: MailService,
-  ) {
-    this.baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
-  }
+    private readonly settingsService: SettingsService,
+  ) {}
 
   /**
    * Send account creation email with password reset link
@@ -31,7 +30,8 @@ export class UserEmailService {
     try {
       this.logger.log(`📧 Sending account creation email to: ${user.email}`);
 
-      const resetUrl = `${this.baseUrl}/reset-password?token=${resetToken}`;
+      const baseUrl = await this.settingsService.getFrontendUrl();
+      const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
       await this.mailService.sendMail({
         to: {
@@ -70,7 +70,8 @@ export class UserEmailService {
     try {
       this.logger.log(`📧 Sending password reset email to: ${user.email}`);
 
-      const resetUrl = `${this.baseUrl}/reset-password?token=${resetToken}`;
+      const baseUrl = await this.settingsService.getFrontendUrl();
+      const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
       await this.mailService.sendMail({
         to: {

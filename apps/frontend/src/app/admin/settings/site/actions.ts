@@ -24,11 +24,18 @@ export type SaveSettingsState = {
   success: boolean;
 };
 
+// Get backend API URL - use env variable for production support
+function getBackendUrl(): string {
+  // NEXT_PUBLIC_API_URL includes /api suffix, so we use it directly
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+}
+
 // Function to update settings in the backend database
 async function updateBackendSettings(settings: any) {
   try {
     console.log('Sending settings to backend:', JSON.stringify(settings, null, 2));
-    const response = await fetch('http://localhost:9006/api/settings/site', {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/settings/site`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

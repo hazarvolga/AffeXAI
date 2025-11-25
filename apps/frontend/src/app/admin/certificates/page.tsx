@@ -17,6 +17,13 @@ import Link from "next/link";
 import certificatesService from "@/lib/api/certificatesService";
 import type { Certificate as BackendCertificate } from "@/lib/api/certificatesService";
 
+// Get base URL for media files - use env variable for production support
+function getMediaBaseUrl(): string {
+  // NEXT_PUBLIC_API_URL ends with /api, we need to remove it for media URLs
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 // Map backend certificate to frontend certificate type
 interface FrontendCertificate {
   id: string;
@@ -81,7 +88,7 @@ const CertificateTable = ({ certificatesToShow, onCertificateUpdate, onCertifica
             // If PDF already exists, download it directly
             if (certificate.pdfUrl) {
                 const link = document.createElement('a');
-                link.href = `http://localhost:9006${certificate.pdfUrl}`;
+                link.href = `${getMediaBaseUrl()}${certificate.pdfUrl}`;
                 link.target = '_blank';
                 link.download = `certificate-${certificate.id}.pdf`;
                 document.body.appendChild(link);
@@ -91,7 +98,7 @@ const CertificateTable = ({ certificatesToShow, onCertificateUpdate, onCertifica
                 // Generate new PDF
                 const result = await certificatesService.generatePdf(certificate.id);
                 const link = document.createElement('a');
-                link.href = `http://localhost:9006${result.pdfUrl}`;
+                link.href = `${getMediaBaseUrl()}${result.pdfUrl}`;
                 link.target = '_blank';
                 link.download = `certificate-${certificate.id}.pdf`;
                 document.body.appendChild(link);

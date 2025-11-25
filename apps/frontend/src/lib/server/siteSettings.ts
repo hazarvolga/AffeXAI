@@ -1,6 +1,13 @@
 import { siteSettingsData } from '@/lib/site-settings-data';
 import mediaService from '@/lib/api/mediaService';
 
+// Get base URL for media files - use env variable for production support
+function getMediaBaseUrl(): string {
+  // NEXT_PUBLIC_API_URL ends with /api, we need to remove it for media URLs
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 /**
  * Get the logo URL for email templates (server-side version)
  * This function can handle both media IDs and direct URLs
@@ -11,12 +18,12 @@ export async function getEmailLogoUrl(isDarkMode: boolean = false): Promise<stri
   try {
     // Check if we have a media ID for the logo
     const logoId = isDarkMode ? siteSettingsData.logoDarkId : siteSettingsData.logoId;
-    
+
     if (logoId) {
       // Try to get the media URL from the media service
       try {
         const media = await mediaService.getMediaById(logoId);
-        return `http://localhost:9006${media.url}`;
+        return `${getMediaBaseUrl()}${media.url}`;
       } catch (mediaError) {
         console.error('Error fetching media:', mediaError);
         // Fall through to direct URL fallback

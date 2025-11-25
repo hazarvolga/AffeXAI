@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MailService } from '../mail.service';
+import { SettingsService } from '../../settings/settings.service';
 import { MailChannel } from '../interfaces/mail-service.interface';
 
 /**
@@ -13,7 +14,10 @@ import { MailChannel } from '../interfaces/mail-service.interface';
 export class EmailEventListener {
   private readonly logger = new Logger(EmailEventListener.name);
 
-  constructor(private readonly mailService: MailService) {}
+  constructor(
+    private readonly mailService: MailService,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   /**
    * Handle USER_CREATED event
@@ -30,7 +34,7 @@ export class EmailEventListener {
     this.logger.log(`📧 Handling user.created event for: ${payload.email}`);
 
     try {
-      const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
+      const baseUrl = await this.settingsService.getFrontendUrl();
       const resetPasswordUrl = `${baseUrl}/reset-password?token=${payload.resetToken}`;
 
       await this.mailService.sendMail({
@@ -108,7 +112,7 @@ export class EmailEventListener {
     customerName?: string;
     supportName?: string;
   }) {
-    const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
+    const baseUrl = await this.settingsService.getFrontendUrl();
     const ticketUrl = `${baseUrl}/portal/support/${payload.ticketId}`;
 
     await this.mailService.sendMail({
@@ -141,7 +145,7 @@ export class EmailEventListener {
     supportEmail?: string;
     supportName?: string;
   }) {
-    const baseUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9003';
+    const baseUrl = await this.settingsService.getFrontendUrl();
     const ticketUrl = `${baseUrl}/admin/support/${payload.ticketId}`;
 
     await this.mailService.sendMail({

@@ -1,5 +1,12 @@
 import { siteSettingsData } from '@/lib/site-settings-data';
 
+// Get base URL for media files - use env variable for production support
+function getMediaBaseUrl(): string {
+  // NEXT_PUBLIC_API_URL ends with /api, we need to remove it for media URLs
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 /**
  * Get the logo URL for the client components
  * This function handles both media IDs and direct URLs
@@ -10,10 +17,10 @@ export function getLogoUrl(isDarkMode: boolean = false): string {
   try {
     // Check if we have a media ID for the logo
     const logoId = isDarkMode ? siteSettingsData.logoDarkId : siteSettingsData.logoId;
-    
+
     if (logoId) {
       // Return the media URL directly
-      return `http://localhost:9006/uploads/${logoId}`;
+      return `${getMediaBaseUrl()}/uploads/${logoId}`;
     }
     
     // Fallback to the direct URL if available

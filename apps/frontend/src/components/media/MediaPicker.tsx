@@ -22,6 +22,13 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
+// Get base URL for media files - use env variable for production support
+function getMediaBaseUrl(): string {
+  // NEXT_PUBLIC_API_URL ends with /api, we need to remove it for media URLs
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+}
+
 interface MediaPickerProps {
   value?: string;
   onChange: (mediaId: string | null) => void;
@@ -179,8 +186,8 @@ export default function MediaPicker({ value, onChange, placeholder = "Medya seç
                   {selectedMedia?.type === 'image' && selectedMedia?.url ? (
                     <div className="relative h-6 w-6 rounded overflow-hidden">
                       <Image
-                        src={selectedMedia.url.startsWith('/uploads/') 
-                          ? `http://localhost:9006${selectedMedia.url}`
+                        src={selectedMedia.url.startsWith('/uploads/')
+                          ? `${getMediaBaseUrl()}${selectedMedia.url}`
                           : selectedMedia.url}
                         alt={selectedMedia.altText || selectedMedia.originalName}
                         width={24}
@@ -285,8 +292,8 @@ export default function MediaPicker({ value, onChange, placeholder = "Medya seç
                       <div className="relative aspect-square">
                         {media.type === 'image' && media.url ? (
                           <Image
-                            src={media.url.startsWith('/uploads/') 
-                              ? `http://localhost:9006${media.url}`
+                            src={media.url.startsWith('/uploads/')
+                              ? `${getMediaBaseUrl()}${media.url}`
                               : media.url}
                             alt={media.altText || media.originalName}
                             width={200}

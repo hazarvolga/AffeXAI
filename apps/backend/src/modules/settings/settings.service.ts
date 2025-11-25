@@ -713,4 +713,18 @@ export class SettingsService {
     const setting = await this.findByKeyAndCategory('domain', SettingCategory.COMPANY);
     return setting?.value || 'affexai.com'; // Fallback to default
   }
+
+  /**
+   * Get frontend URL for email links (verification, password reset, etc.)
+   * Uses domain from site settings with https protocol
+   * @returns Full frontend URL (e.g., 'https://aluplan.tr')
+   */
+  async getFrontendUrl(): Promise<string> {
+    const domain = await this.getDomain();
+    // Always use https in production, fallback to env variable for development
+    if (process.env.NODE_ENV === 'development') {
+      return process.env.FRONTEND_URL || 'http://localhost:9003';
+    }
+    return `https://${domain}`;
+  }
 }

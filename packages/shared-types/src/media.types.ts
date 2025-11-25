@@ -24,6 +24,59 @@ export enum StorageType {
 }
 
 /**
+ * Media module enum - which module uploaded the media
+ */
+export enum MediaModule {
+  SITE_SETTINGS = 'site-settings',
+  CMS = 'cms',
+  CERTIFICATES = 'certificates',
+  EMAIL_MARKETING = 'email-marketing',
+  TICKETS = 'tickets',
+  CHAT = 'chat',
+  EVENTS = 'events',
+  USERS = 'users',
+  GENERAL = 'general',
+}
+
+/**
+ * Media category enum - what type of content
+ */
+export enum MediaCategory {
+  // Site Settings
+  LOGO = 'logo',
+  FAVICON = 'favicon',
+
+  // CMS
+  HERO = 'hero',
+  GALLERY = 'gallery',
+  BANNER = 'banner',
+  THUMBNAIL = 'thumbnail',
+  BACKGROUND = 'background',
+  ICON = 'icon',
+
+  // Certificates
+  SIGNATURE = 'signature',
+  CERTIFICATE_TEMPLATE = 'certificate-template',
+
+  // Email Marketing
+  CAMPAIGN = 'campaign',
+  EMAIL_HEADER = 'email-header',
+
+  // Tickets & Chat
+  ATTACHMENT = 'attachment',
+
+  // Users
+  AVATAR = 'avatar',
+  PROFILE = 'profile',
+
+  // Events
+  EVENT_COVER = 'event-cover',
+
+  // General
+  OTHER = 'other',
+}
+
+/**
  * Media entity
  */
 export interface Media extends BaseEntity {
@@ -35,6 +88,9 @@ export interface Media extends BaseEntity {
   thumbnailUrl: string | null;
   type: MediaType;
   storageType: StorageType;
+  module: MediaModule;
+  category: MediaCategory;
+  tags: string[] | null;
   altText: string | null;
   title: string | null;
   description: string | null;
@@ -53,6 +109,9 @@ export interface CreateMediaDto {
   thumbnailUrl?: string;
   type?: MediaType;
   storageType?: StorageType;
+  module?: MediaModule;
+  category?: MediaCategory;
+  tags?: string[];
   altText?: string;
   title?: string;
   description?: string;
@@ -71,6 +130,9 @@ export interface UpdateMediaDto {
   thumbnailUrl?: string;
   type?: MediaType;
   storageType?: StorageType;
+  module?: MediaModule;
+  category?: MediaCategory;
+  tags?: string[];
   altText?: string;
   title?: string;
   description?: string;
@@ -91,6 +153,9 @@ export interface MediaUploadResponse {
 export interface MediaQueryParams {
   type?: MediaType;
   storageType?: StorageType;
+  module?: MediaModule;
+  category?: MediaCategory;
+  tags?: string[];
   isActive?: boolean;
   page?: number;
   limit?: number;

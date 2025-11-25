@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, Min } from 'class-validator';
-import { MediaType, StorageType } from '@affexai/shared-types';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, Min, IsArray } from 'class-validator';
+import { MediaType, StorageType, MediaModule, MediaCategory } from '@affexai/shared-types';
 
 export class CreateMediaDto {
   @IsString()
@@ -29,6 +29,19 @@ export class CreateMediaDto {
   @IsEnum(StorageType)
   @IsOptional()
   storageType?: StorageType;
+
+  @IsEnum(MediaModule)
+  @IsOptional()
+  module?: MediaModule;
+
+  @IsEnum(MediaCategory)
+  @IsOptional()
+  category?: MediaCategory;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 
   @IsString()
   @IsOptional()

@@ -1,6 +1,6 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { BaseEntity } from '../../../database/entities/base.entity';
-import { MediaType, StorageType } from '@affexai/shared-types';
+import { MediaType, StorageType, MediaModule, MediaCategory } from '@affexai/shared-types';
 
 @Entity('media')
 export class Media extends BaseEntity {
@@ -35,6 +35,23 @@ export class Media extends BaseEntity {
     default: StorageType.LOCAL,
   })
   storageType: StorageType;
+
+  @Column({
+    type: 'enum',
+    enum: MediaModule,
+    default: MediaModule.GENERAL,
+  })
+  module: MediaModule;
+
+  @Column({
+    type: 'enum',
+    enum: MediaCategory,
+    default: MediaCategory.OTHER,
+  })
+  category: MediaCategory;
+
+  @Column({ type: 'simple-array', nullable: true })
+  tags: string[];
 
   @Column({ nullable: true })
   altText: string;

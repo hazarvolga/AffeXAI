@@ -12,11 +12,11 @@ import {
   Query,
   Inject,
 } from '@nestjs/common';
-import { MediaService } from './media.service';
+import { MediaService, MediaQueryOptions } from './media.service';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
 import { Media } from './entities/media.entity';
-import { MediaType, StorageType } from '@affexai/shared-types';
+import { MediaType, StorageType, MediaModule, MediaCategory } from '@affexai/shared-types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
@@ -37,11 +37,51 @@ export class MediaController {
   }
 
   @Get()
-  findAll(@Query('type') type?: string): Promise<Media[]> {
+  findAll(
+    @Query('type') type?: string,
+    @Query('module') module?: MediaModule,
+    @Query('category') category?: MediaCategory,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<Media[] | { data: Media[]; total: number }> {
+    // If any advanced filter is provided, use the filtered query
+    if (module || category || search || page || limit) {
+      return this.mediaService.findWithFilters({
+        type: type as MediaType,
+        module,
+        category,
+        search,
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : 50,
+      });
+    }
+
+    // Legacy support: just type filter
     if (type) {
       return this.mediaService.findByType(type);
     }
     return this.mediaService.findAll();
+  }
+
+  @Get('modules')
+  getModulesWithCount() {
+    return this.mediaService.getModulesWithCount();
+  }
+
+  @Get('categories')
+  getCategoriesWithCount() {
+    return this.mediaService.getCategoriesWithCount();
+  }
+
+  @Get('by-module/:module')
+  findByModule(@Param('module') module: MediaModule): Promise<Media[]> {
+    return this.mediaService.findByModule(module);
+  }
+
+  @Get('by-category/:category')
+  findByCategory(@Param('category') category: MediaCategory): Promise<Media[]> {
+    return this.mediaService.findByCategory(category);
   }
 
   @Get(':id')
@@ -108,7 +148,12 @@ export class MediaController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: any) {
+  async uploadFile(
+    @UploadedFile() file: any,
+    @Query('module') module?: MediaModule,
+    @Query('category') category?: MediaCategory,
+    @Query('tags') tags?: string,
+  ) {
     if (!file) {
       throw new NotFoundException('File not found');
     }
@@ -122,6 +167,9 @@ export class MediaController {
       url: `/uploads/${file.filename}`,
       type: MediaType.IMAGE, // Default to image for now
       storageType: StorageType.LOCAL,
+      module: module || MediaModule.GENERAL,
+      category: category || MediaCategory.OTHER,
+      tags: tags ? tags.split(',').map((t) => t.trim()) : undefined,
       isActive: true,
     };
 

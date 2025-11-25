@@ -21,10 +21,11 @@ export class FixThemeSettingsMenuRelation1732449600000 implements MigrationInter
       const menuId = menuExists[0].id;
 
       // 2. Update theme_settings to link this menu (if not already linked)
+      // Note: headerMenuId is UUID type, so we can only check for NULL (not empty string)
       await queryRunner.query(`
         UPDATE theme_settings
         SET "headerMenuId" = $1, "updatedAt" = NOW()
-        WHERE "headerMenuId" IS NULL OR "headerMenuId" = ''
+        WHERE "headerMenuId" IS NULL
       `, [menuId]);
 
       console.log(`✅ Migration: Linked theme_settings to Main Navigation menu (${menuId})`);

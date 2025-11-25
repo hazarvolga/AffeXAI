@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Phone, Mail, MapPin } from 'lucide-react';
+import { Menu, X, ChevronDown, Phone, Mail, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
@@ -11,47 +11,6 @@ import { ThemeSettingsService, type TopBarLink, type ThemeSettings } from '@/ser
 import { cmsMenuService } from '@/lib/cms/menu-service';
 import type { CmsMenu } from '@affexai/shared-types';
 import { mediaService } from '@/lib/api/mediaService';
-
-// Main navigation items
-const mainNav = [
-  {
-    id: 'nav-solutions',
-    label: 'Çözümler',
-    href: '/solutions',
-    submenu: [
-      { id: 'nav-sol-arch', label: 'Mimarlık', href: '/solutions/architecture' },
-      { id: 'nav-sol-civil', label: 'İnşaat Mühendisliği', href: '/solutions/civil-engineering' },
-      { id: 'nav-sol-physics', label: 'Yapı Fiziği', href: '/solutions/building-physics' },
-    ],
-  },
-  {
-    id: 'nav-products',
-    label: 'Ürünler',
-    href: '/products',
-    submenu: [
-      { id: 'nav-prod-arch', label: 'Allplan Architecture', href: '/products/allplan-architecture' },
-      { id: 'nav-prod-eng', label: 'Allplan Engineering', href: '/products/allplan-engineering' },
-      { id: 'nav-prod-bim', label: 'Allplan Bimplus', href: '/products/allplan-bimplus' },
-    ],
-  },
-  {
-    id: 'nav-education',
-    label: 'Eğitim & Destek',
-    href: '/education',
-    submenu: [
-      { id: 'nav-edu-training', label: 'Eğitim Programları', href: '/education/training' },
-      { id: 'nav-edu-cert', label: 'Sertifika Programları', href: '/education/certification' },
-      { id: 'nav-edu-support', label: 'Teknik Destek', href: '/support' },
-    ],
-  },
-  { id: 'nav-case-studies', label: 'Başarı Hikayeleri', href: '/case-studies' },
-  { id: 'nav-downloads', label: 'İndirme Merkezi', href: '/downloads' },
-  { id: 'nav-contact', label: 'İletişim', href: '/contact' },
-  { id: 'nav-backup-home', label: 'BackupHome', href: '/backup-home' },
-  { id: 'nav-backup-products', label: 'BackupProducts', href: '/backup-products' },
-  { id: 'nav-backup-solutions', label: 'BackupSolutions', href: '/backup-solutions' },
-  { id: 'nav-backup-downloads', label: 'BackupDownloads', href: '/backup-downloads' },
-];
 
 export function Header() {
   const pathname = usePathname();
@@ -74,13 +33,14 @@ export function Header() {
   });
 
   // Fetch header menu if headerMenuId exists
-  const { data: headerMenu } = useQuery<CmsMenu>({
+  const { data: headerMenu, isError: isMenuError, isLoading: isMenuLoading } = useQuery<CmsMenu>({
     queryKey: ['header-menu', themeSettings?.headerMenuId],
     queryFn: () => cmsMenuService.getMenu(themeSettings!.headerMenuId!),
     enabled: !!themeSettings?.headerMenuId,
     staleTime: 30 * 1000, // Cache for 30 seconds (shorter for CMS changes)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchInterval: 60 * 1000, // Refetch every minute
+    retry: 2,
   });
 
   // Extract theme data with defaults
@@ -152,7 +112,7 @@ export function Header() {
     setOpenSubmenu(openSubmenu === label ? null : label);
   };
 
-  // Use header menu if available, otherwise fall back to hardcoded mainNav
+  // Use header menu if available - NO fallback to hardcoded data
   const navigationItems = React.useMemo(() => {
     if (headerMenu?.items && Array.isArray(headerMenu.items) && headerMenu.items.length > 0) {
       return headerMenu.items
@@ -182,8 +142,12 @@ export function Header() {
             : undefined,
         }));
     }
-    return mainNav;
+    // Return empty array - no hardcoded fallback
+    return [];
   }, [headerMenu]);
+
+  // Check if menu is unavailable (error or no data after loading)
+  const isMenuUnavailable = isMenuError || (!isMenuLoading && !isLoadingTheme && navigationItems.length === 0);
 
   return (
     <header className={cn(
@@ -255,6 +219,20 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
+            {/* Show warning if menu is unavailable */}
+            {isMenuUnavailable && (
+              <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                <span>Menü yüklenemedi</span>
+              </div>
+            )}
+            {/* Show loading state */}
+            {(isMenuLoading || isLoadingTheme) && !isMenuUnavailable && (
+              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                <div className="h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                <span>Yükleniyor...</span>
+              </div>
+            )}
             {navigationItems.map((item) => {
               const hasSubmenu = item.submenu && item.submenu.length > 0;
               const hasMegaMenu = hasSubmenu && item.submenu.some(sub => sub.submenu && sub.submenu.length > 0);
@@ -406,6 +384,20 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-200 bg-white max-h-[calc(100vh-180px)] overflow-y-auto">
           <div className="container mx-auto px-4 py-4 space-y-2">
+            {/* Show warning if menu is unavailable */}
+            {isMenuUnavailable && (
+              <div className="flex items-center justify-center space-x-2 text-amber-600 bg-amber-50 px-4 py-3 rounded-lg text-sm mb-4">
+                <AlertTriangle className="h-5 w-5" />
+                <span>Menü yüklenemedi. Lütfen daha sonra tekrar deneyin.</span>
+              </div>
+            )}
+            {/* Show loading state */}
+            {(isMenuLoading || isLoadingTheme) && !isMenuUnavailable && (
+              <div className="flex items-center justify-center space-x-2 text-gray-400 py-4">
+                <div className="h-5 w-5 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                <span>Menü yükleniyor...</span>
+              </div>
+            )}
             {/* Mobile Navigation */}
             {navigationItems.map((item) => (
               <div key={item.id || item.label} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">

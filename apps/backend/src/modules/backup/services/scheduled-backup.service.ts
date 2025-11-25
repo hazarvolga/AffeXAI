@@ -1,6 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Cron, SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron';
+import { Cron, SchedulerRegistry, CronExpression } from '@nestjs/schedule';
 import { BackupService } from './backup.service';
 import { BackupConfigService } from './backup-config.service';
 import { CloudUploadService } from './cloud-upload.service';
@@ -9,7 +8,7 @@ import { BackupType } from '../entities/backup.entity';
 @Injectable()
 export class ScheduledBackupService implements OnModuleInit {
   private readonly logger = new Logger(ScheduledBackupService.name);
-  private automaticBackupJob: CronJob;
+  private automaticBackupJobName = 'automatic-backup';
 
   constructor(
     private backupService: BackupService,
@@ -26,27 +25,34 @@ export class ScheduledBackupService implements OnModuleInit {
     const config = await this.backupConfigService.getConfig();
 
     // Remove existing job if any
-    if (this.automaticBackupJob) {
-      this.automaticBackupJob.stop();
-      try {
-        this.schedulerRegistry.deleteCronJob('automatic-backup');
-      } catch (error) {
-        // Job might not exist
+    try {
+      const existingJob = this.schedulerRegistry.getCronJob(this.automaticBackupJobName);
+      if (existingJob) {
+        existingJob.stop();
+        this.schedulerRegistry.deleteCronJob(this.automaticBackupJobName);
+        this.logger.log('Removed existing automatic backup schedule');
       }
+    } catch (error) {
+      // Job might not exist yet, that's fine
     }
 
     // Create new job if enabled
     if (config.automaticBackupEnabled && config.automaticBackupCron) {
       try {
-        this.automaticBackupJob = new CronJob(
+        // Create CronJob using the cron package that @nestjs/schedule expects
+        const { CronJob } = require('cron');
+        const job = new CronJob(
           config.automaticBackupCron,
           () => this.performAutomaticBackup(),
           null,
-          true,
+          false, // Don't start immediately
           'UTC'
         );
 
-        this.schedulerRegistry.addCronJob('automatic-backup', this.automaticBackupJob);
+        // Add to scheduler registry and start
+        this.schedulerRegistry.addCronJob(this.automaticBackupJobName, job);
+        job.start();
+
         this.logger.log(
           `Automatic backup scheduled: ${config.automaticBackupCron} (UTC)`
         );

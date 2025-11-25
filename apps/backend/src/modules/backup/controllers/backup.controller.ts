@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
+import { UserRole } from '../../users/enums/user-role.enum';
 import { BackupService } from '../services/backup.service';
 import { BackupConfigService } from '../services/backup-config.service';
 import { CloudUploadService } from '../services/cloud-upload.service';
@@ -38,7 +39,7 @@ export class BackupController {
   ) {}
 
   @Post()
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async createBackup(
     @Body() createBackupDto: CreateBackupDto,
     @CurrentUser() user: any
@@ -48,26 +49,26 @@ export class BackupController {
   }
 
   @Get()
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getAllBackups() {
     return await this.backupService.getAllBackups();
   }
 
   @Get(':id')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getBackupById(@Param('id') id: string) {
     return await this.backupService.getBackupById(id);
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async deleteBackup(@Param('id') id: string) {
     await this.backupService.deleteBackup(id);
     return { message: 'Backup deleted successfully' };
   }
 
   @Get(':id/download')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async downloadBackup(
     @Param('id') id: string,
     @Res() res: Response
@@ -82,7 +83,7 @@ export class BackupController {
   }
 
   @Post(':id/upload')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async uploadBackupToCloud(
     @Param('id') id: string,
     @Body('destinations') destinations: string[]
@@ -92,7 +93,7 @@ export class BackupController {
   }
 
   @Delete(':id/cloud/:destination')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async deleteBackupFromCloud(
     @Param('id') id: string,
     @Param('destination') destination: string
@@ -102,13 +103,13 @@ export class BackupController {
   }
 
   @Get('cloud/:destination/list')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async listCloudBackups(@Param('destination') destination: string) {
     return await this.cloudUploadService.listCloudBackups(destination as any);
   }
 
   @Get('cloud/:destination/test')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async testCloudConnection(@Param('destination') destination: string) {
     const isConnected = await this.cloudUploadService.testCloudConnection(destination as any);
     return { connected: isConnected };
@@ -116,19 +117,19 @@ export class BackupController {
 
   // Config endpoints
   @Get('config/settings')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getConfig() {
     return await this.backupConfigService.getConfig();
   }
 
   @Put('config/settings')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async updateConfig(@Body() configDto: BackupConfigDto) {
     return await this.backupConfigService.updateConfig(configDto);
   }
 
   @Delete('config/settings')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async deleteConfig() {
     await this.backupConfigService.deleteConfig();
     return { message: 'Configuration deleted' };
@@ -136,14 +137,14 @@ export class BackupController {
 
   // Schedule management
   @Post('schedule/update')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async updateSchedule() {
     await this.scheduledBackupService.updateAutomaticBackupSchedule();
     return { message: 'Backup schedule updated' };
   }
 
   @Post('schedule/trigger')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async triggerManualBackup(
     @Body() createBackupDto: CreateBackupDto,
     @CurrentUser() user: any
@@ -157,7 +158,7 @@ export class BackupController {
   }
 
   @Post('cleanup/expired')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async cleanupExpired() {
     await this.backupService.cleanupExpiredBackups();
     return { message: 'Expired backups cleaned up' };
@@ -165,7 +166,7 @@ export class BackupController {
 
   // OAuth helpers
   @Get('oauth/google-drive/url')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getGoogleDriveAuthUrl(
     @Query('clientId') clientId: string,
     @Query('clientSecret') clientSecret: string
@@ -175,7 +176,7 @@ export class BackupController {
   }
 
   @Post('oauth/google-drive/token')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getGoogleDriveRefreshToken(
     @Body('clientId') clientId: string,
     @Body('clientSecret') clientSecret: string,
@@ -190,14 +191,14 @@ export class BackupController {
   }
 
   @Get('oauth/onedrive/url')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getOneDriveAuthUrl(@Query('clientId') clientId: string) {
     const authUrl = await this.oneDriveService.getAuthUrl(clientId);
     return { authUrl };
   }
 
   @Post('oauth/onedrive/token')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async getOneDriveRefreshToken(
     @Body('clientId') clientId: string,
     @Body('clientSecret') clientSecret: string,

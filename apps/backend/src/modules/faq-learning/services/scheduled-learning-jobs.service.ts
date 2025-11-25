@@ -6,7 +6,6 @@ import { FaqLearningConfig } from '../entities/faq-learning-config.entity';
 import { FaqLearningService } from './faq-learning.service';
 import { ReviewQueueService } from './review-queue.service';
 import { KnowledgeBaseIntegratorService } from './knowledge-base-integrator.service';
-import { CronJob } from 'cron';
 
 export interface JobSchedule {
   name: string;
@@ -302,15 +301,28 @@ export class ScheduledLearningJobsService {
 
   async updateJobSchedule(jobName: string, cronExpression: string): Promise<boolean> {
     try {
-      const job = this.schedulerRegistry.getCronJob(jobName);
-      
-      // Delete old job
-      this.schedulerRegistry.deleteCronJob(jobName);
+      // Try to get and delete existing job
+      try {
+        const existingJob = this.schedulerRegistry.getCronJob(jobName);
+        if (existingJob) {
+          existingJob.stop();
+          this.schedulerRegistry.deleteCronJob(jobName);
+        }
+      } catch (error) {
+        // Job might not exist yet, that's fine
+      }
 
-      // Create new job with updated schedule
-      const newJob = new CronJob(cronExpression, () => {
-        this.logger.log(`Executing scheduled job: ${jobName}`);
-      });
+      // Create new job with updated schedule using cron package
+      const { CronJob } = require('cron');
+      const newJob = new CronJob(
+        cronExpression,
+        () => {
+          this.logger.log(`Executing scheduled job: ${jobName}`);
+        },
+        null,
+        false, // Don't start immediately
+        'UTC'
+      );
 
       this.schedulerRegistry.addCronJob(jobName, newJob);
       newJob.start();

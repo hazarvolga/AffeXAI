@@ -105,7 +105,7 @@ export function Header() {
   useEffect(() => {
     async function fetchSiteSettings() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/site`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/site`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -275,10 +275,10 @@ export function Header() {
 
                       {/* Mega Menu for 3+ levels - Full Width Below Header */}
                       {hasMegaMenu ? (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-0 w-screen opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                        <div className="fixed left-0 right-0 top-[var(--header-height,140px)] w-full opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                           {/* Full-width backdrop with shadow */}
                           <div className="bg-white border-t border-gray-200 shadow-xl">
-                            <div className="container mx-auto px-4 py-8">
+                            <div className="container mx-auto px-4 py-8 max-w-7xl">
                               {/* Dynamic grid based on number of columns */}
                               <div className={cn(
                                 "grid gap-6",

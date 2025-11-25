@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Cron, SchedulerRegistry, CronExpression } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { BackupService } from './backup.service';
 import { BackupConfigService } from './backup-config.service';
 import { CloudUploadService } from './cloud-upload.service';
@@ -18,7 +18,16 @@ export class ScheduledBackupService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.updateAutomaticBackupSchedule();
+    try {
+      await this.updateAutomaticBackupSchedule();
+    } catch (error) {
+      // Gracefully handle missing backup_config table during startup
+      // This allows the app to start even if backup tables don't exist yet
+      this.logger.warn(
+        `Could not initialize backup schedule: ${error.message}. ` +
+        'Backup tables may not exist yet. Run migrations or restart after tables are created.'
+      );
+    }
   }
 
   async updateAutomaticBackupSchedule() {

@@ -80,7 +80,11 @@ export const CMSHeroCarousel: React.FC<CMSHeroCarouselProps> = ({
   useEffect(() => {
     const activeTabData = tabs.find((tab) => tab.id === activeTab);
     if (activeTabData) {
-      setSlides(activeTabData.slides);
+      // Filter out slides with empty or invalid images
+      const validSlides = activeTabData.slides.filter(
+        (slide) => slide.image && slide.image.trim() !== ''
+      );
+      setSlides(validSlides);
       setCurrent(0);
       api?.scrollTo(0, true);
     }
@@ -109,6 +113,9 @@ export const CMSHeroCarousel: React.FC<CMSHeroCarouselProps> = ({
   const scrollNext = () => api?.scrollNext();
 
   if (tabs.length === 0) return null;
+
+  // Don't render if no valid slides with images
+  if (slides.length === 0) return null;
 
   return (
     <section className={cn('relative w-full bg-secondary overflow-hidden', cssClasses)}>
@@ -268,7 +275,12 @@ export const CMSSolutionsCarousel: React.FC<CMSSolutionsCarouselProps> = ({
     mainApi.on('reInit', onSelect);
   }, [mainApi, onSelect]);
 
-  if (slides.length === 0) return null;
+  // Filter out slides with empty or invalid images
+  const validSlides = slides.filter(
+    (slide) => slide.imageUrl && slide.imageUrl.trim() !== ''
+  );
+
+  if (validSlides.length === 0) return null;
 
   return (
     <section className={cn('w-full py-16 md:py-24 bg-background', cssClasses)}>
@@ -283,7 +295,7 @@ export const CMSSolutionsCarousel: React.FC<CMSSolutionsCarouselProps> = ({
         {/* Main Carousel */}
         <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
           <CarouselContent>
-            {slides.map((slide) => (
+            {validSlides.map((slide) => (
               <CarouselItem key={slide.id}>
                 <Card className="overflow-hidden shadow-lg border-none bg-secondary/20">
                   <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -335,7 +347,7 @@ export const CMSSolutionsCarousel: React.FC<CMSSolutionsCarouselProps> = ({
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-              {slides.map((slide, index) => (
+              {validSlides.map((slide, index) => (
                 <CarouselItem
                   key={slide.id}
                   onClick={() => onThumbClick(index)}
@@ -428,7 +440,12 @@ export const CMSProductsCarousel: React.FC<CMSProductsCarouselProps> = ({
     mainApi.on('reInit', onSelect);
   }, [mainApi, onSelect]);
 
-  if (slides.length === 0) return null;
+  // Filter out slides with empty or invalid images
+  const validSlides = slides.filter(
+    (slide) => slide.imageUrl && slide.imageUrl.trim() !== ''
+  );
+
+  if (validSlides.length === 0) return null;
 
   return (
     <section className={cn('w-full py-16 md:py-24 bg-background', cssClasses)}>
@@ -443,7 +460,7 @@ export const CMSProductsCarousel: React.FC<CMSProductsCarouselProps> = ({
         {/* Main Carousel */}
         <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
           <CarouselContent>
-            {slides.map((slide) => (
+            {validSlides.map((slide) => (
               <CarouselItem key={slide.id}>
                 <Card className="overflow-hidden shadow-lg border-none bg-secondary/20">
                   <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -496,7 +513,7 @@ export const CMSProductsCarousel: React.FC<CMSProductsCarouselProps> = ({
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-              {slides.map((slide, index) => (
+              {validSlides.map((slide, index) => (
                 <CarouselItem
                   key={slide.id}
                   onClick={() => onThumbClick(index)}
@@ -962,19 +979,21 @@ export const CMSWorkflowSection: React.FC<CMSWorkflowSectionProps> = ({
                         value={item.id}
                         className="md:col-span-3 m-0 data-[state=active]:flex flex-col md:flex-row"
                       >
-                        <div className="p-8 md:w-1/2 flex flex-col justify-center">
+                        <div className={`p-8 ${item.image && item.image.trim() !== '' ? 'md:w-1/2' : 'w-full'} flex flex-col justify-center`}>
                           <h3 className="text-2xl font-bold mb-4 font-headline">{item.contentTitle}</h3>
                           <p className="text-muted-foreground">{item.text}</p>
                         </div>
-                        <div className="relative md:w-1/2 min-h-[300px]">
-                          <Image
-                            src={item.image}
-                            alt={item.contentTitle}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={item.imageHint}
-                          />
-                        </div>
+                        {item.image && item.image.trim() !== '' && (
+                          <div className="relative md:w-1/2 min-h-[300px]">
+                            <Image
+                              src={item.image}
+                              alt={item.contentTitle}
+                              fill
+                              className="object-cover"
+                              data-ai-hint={item.imageHint}
+                            />
+                          </div>
+                        )}
                       </TabsContent>
                     ))}
                   </Tabs>

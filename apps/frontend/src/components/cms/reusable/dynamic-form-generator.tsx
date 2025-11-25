@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, X, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload } from 'lucide-react';
+import { Plus, Trash2, X, Image as ImageIcon, Video, Youtube, Ban, File as FileIcon, ChevronDown, Upload } from 'lucide-react';
 import { BlockPropertySchema } from '@/components/cms/blocks/block-configs';
 import { MediaPicker } from '@/components/cms/editor/media-picker';
 import { MediaLibrary } from '@/components/cms/editor/media-library';
@@ -16,6 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Media, MediaType } from '@/lib/media/types';
 import { useToast } from '@/hooks/use-toast';
 import NextImage from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface DynamicFormGeneratorProps {
   schema: BlockPropertySchema;
@@ -505,6 +506,56 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
         );
 
       case 'select':
+        // Enhanced UI for Media Type selectors
+        const isMediaTypeField = config.label?.toLowerCase().includes('media type');
+
+        if (isMediaTypeField && config.options) {
+          return (
+            <div key={fieldKey} className="space-y-2">
+              <Label htmlFor={fieldKey}>{config.label}</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {config.options.map((option) => {
+                  const isSelected = (value || config.defaultValue) === option;
+
+                  // Icon mapping for media types
+                  const getMediaIcon = (type: string) => {
+                    switch (type.toLowerCase()) {
+                      case 'none':
+                        return <Ban className="h-4 w-4" />;
+                      case 'image':
+                        return <ImageIcon className="h-4 w-4" />;
+                      case 'video':
+                        return <Video className="h-4 w-4" />;
+                      case 'youtube':
+                        return <Youtube className="h-4 w-4" />;
+                      default:
+                        return <FileIcon className="h-4 w-4" />;
+                    }
+                  };
+
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => onChange(key, option)}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50 hover:bg-accent"
+                      )}
+                    >
+                      {getMediaIcon(option)}
+                      <span className="text-xs mt-1 font-medium capitalize">{option}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        // Default dropdown for other select fields
         return (
           <div key={fieldKey} className="space-y-2">
             <Label htmlFor={fieldKey}>{config.label}</Label>
@@ -729,6 +780,53 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
         );
 
       case 'select':
+        // Enhanced UI for Media Type selectors
+        const isMediaTypeField = config.label?.toLowerCase().includes('media type');
+
+        if (isMediaTypeField && config.options) {
+          return (
+            <div className="grid grid-cols-3 gap-2">
+              {config.options.map((option) => {
+                const isSelected = (value || config.defaultValue) === option;
+
+                // Icon mapping for media types
+                const getMediaIcon = (type: string) => {
+                  switch (type.toLowerCase()) {
+                    case 'none':
+                      return <Ban className="h-4 w-4" />;
+                    case 'image':
+                      return <ImageIcon className="h-4 w-4" />;
+                    case 'video':
+                      return <Video className="h-4 w-4" />;
+                    case 'youtube':
+                      return <Youtube className="h-4 w-4" />;
+                    default:
+                      return <FileIcon className="h-4 w-4" />;
+                  }
+                };
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => onChange(option)}
+                    className={cn(
+                      "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50 hover:bg-accent"
+                    )}
+                  >
+                    {getMediaIcon(option)}
+                    <span className="text-xs mt-1 font-medium capitalize">{option}</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        }
+
+        // Default dropdown for other select fields
         return (
           <Select
             value={value || config.defaultValue || ''}
@@ -824,26 +922,28 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
                   value={`item-${index}`}
                   className="border border-blue-200 rounded-lg bg-blue-50"
                 >
-                  <AccordionTrigger className="px-3 py-2 hover:no-underline">
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <span className="text-xs font-medium text-blue-800">
-                        {itemIcon && <span className="mr-2">{itemIcon}</span>}
-                        {itemLabel}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeItem(index);
-                        }}
-                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </AccordionTrigger>
+                  <div className="flex items-center">
+                    <AccordionTrigger className="flex-1 px-3 py-2 hover:no-underline">
+                      <div className="flex items-center w-full">
+                        <span className="text-xs font-medium text-blue-800">
+                          {itemIcon && <span className="mr-2">{itemIcon}</span>}
+                          {itemLabel}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeItem(index);
+                      }}
+                      className="mr-3 h-6 w-6 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                   <AccordionContent className="px-3 pb-3 pt-1">
                     <div className="space-y-2">
                       {config.itemSchema &&
@@ -956,26 +1056,28 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
                   value={`item-${index}`}
                   className="border rounded-lg"
                 >
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <span className="text-sm font-medium">
-                        {itemIcon && <span className="mr-2">{itemIcon}</span>}
-                        {itemLabel}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeItem(index);
-                        }}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </AccordionTrigger>
+                  <div className="flex items-center">
+                    <AccordionTrigger className="flex-1 px-4 py-3 hover:no-underline">
+                      <div className="flex items-center w-full">
+                        <span className="text-sm font-medium">
+                          {itemIcon && <span className="mr-2">{itemIcon}</span>}
+                          {itemLabel}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeItem(index);
+                      }}
+                      className="mr-4 h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <AccordionContent className="px-4 pb-4 pt-2">
                     <div className="space-y-3">
                       {config.itemSchema &&

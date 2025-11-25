@@ -2181,6 +2181,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         },
       },
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2217,6 +2225,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         },
       },
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2247,6 +2263,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         },
       },
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2276,6 +2300,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         },
       },
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2293,6 +2325,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
     subtitle: { type: 'textarea', label: 'Subtitle', defaultValue: 'Section subtitle' },
     buttonText: { type: 'text', label: 'Button Text (Optional)', defaultValue: '' },
     buttonLink: { type: 'text', label: 'Button Link (Optional)', defaultValue: '' },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2302,6 +2342,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
     description: { type: 'textarea', label: 'Description', defaultValue: 'Quickly check the validity of your Allplan certificates in real-time.' },
     ctaText: { type: 'text', label: 'CTA Button Text', defaultValue: 'Check Now' },
     ctaLink: { type: 'text', label: 'CTA Button Link', defaultValue: 'https://sertifikasorgulama.aluplan.com.tr/' },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2316,6 +2364,14 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
 Etkinliklere, eğitimlere ve webinarlara özel davetiyeler
 Sektör, şirket ve ürün haberleri`,
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2341,6 +2397,14 @@ Sektör, şirket ve ürün haberleri`,
         description: { type: 'textarea', label: 'Item Description', defaultValue: '' },
       },
     },
+    // Style properties
+    backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },
   },
 
@@ -2417,6 +2481,12 @@ Sektör, şirket ve ürün haberleri`,
     // Note: This component uses hardcoded timelineData and takes no props
     // Style properties only for visual editor compatibility
     backgroundColor: { type: 'color', label: 'Background Color', defaultValue: 'transparent' },
+    textColor: { type: 'color', label: 'Text Color', defaultValue: 'inherit' },
+    headlineColor: { type: 'color', label: 'Headline Color', defaultValue: 'inherit' },
+    fontSize: { type: 'select', label: 'Font Size', options: ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'], defaultValue: 'text-base' },
+    fontWeight: { type: 'select', label: 'Font Weight', options: ['font-normal', 'font-medium', 'font-semibold', 'font-bold'], defaultValue: 'font-normal' },
+    borderRadius: { type: 'select', label: 'Border Radius', options: ['rounded-none', 'rounded-sm', 'rounded', 'rounded-md', 'rounded-lg', 'rounded-xl'], defaultValue: 'rounded' },
+    shadow: { type: 'select', label: 'Shadow', options: ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'], defaultValue: 'shadow-none' },
     paddingTop: { type: 'text', label: 'Padding Top', defaultValue: '4rem' },
     paddingBottom: { type: 'text', label: 'Padding Bottom', defaultValue: '6rem' },
     cssClasses: { type: 'text', label: 'CSS Classes', defaultValue: '' },

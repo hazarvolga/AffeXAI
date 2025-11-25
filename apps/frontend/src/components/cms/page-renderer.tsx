@@ -7,6 +7,7 @@ import { CardComponent } from './card-component';
 import { GridComponent } from './grid-component';
 import { PreviewProvider } from './preview-context';
 import { blockRegistry } from './block-registry';
+import { mergeComponentClasses } from '@/lib/cms/style-utils';
 
 // Define the structure of a CMS component
 interface CmsComponent {
@@ -28,7 +29,26 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ components }) => {
       const BlockComponent = blockRegistry[blockId];
 
       if (BlockComponent) {
-        return <BlockComponent key={component.id} {...component.props} />;
+        // Extract Advanced tab properties
+        const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom,
+                paddingLeft, paddingRight, display, maxWidth, minHeight, shadow, opacity,
+                width, height, ...otherProps } = component.props;
+
+        // Build advancedProps object
+        const advancedProps = {
+          marginTop, marginBottom, marginLeft, marginRight,
+          paddingTop, paddingBottom, paddingLeft, paddingRight,
+          display, maxWidth, minHeight, shadow, opacity, width, height
+        };
+
+        // Merge component classes with Advanced properties
+        const mergedClassName = mergeComponentClasses(
+          component.props.className || '',
+          advancedProps,
+          component.props.cssClasses || ''
+        );
+
+        return <BlockComponent key={component.id} {...otherProps} className={mergedClassName} />;
       }
 
       // Component not found in registry - show detailed error

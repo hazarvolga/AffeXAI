@@ -9,6 +9,7 @@ import { EditableText } from './editable-text';
 import { EditorProvider } from './editor-context';
 import { PreviewProvider } from '@/components/cms/preview-context';
 import { blockRegistry } from '@/components/cms/block-registry';
+import { mergeComponentClasses } from '@/lib/cms/style-utils';
 
 // Import all prebuild components (for legacy support)
 import { navigationBlocks } from '@/components/cms/blocks/navigation-blocks';
@@ -242,9 +243,28 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     const ComponentToRender = componentRegistry[blockId];
 
     if (ComponentToRender) {
+      // Extract Advanced tab properties
+      const { marginTop, marginBottom, marginLeft, marginRight, paddingTop, paddingBottom,
+              paddingLeft, paddingRight, display, maxWidth, minHeight, shadow, opacity,
+              width, height, ...otherProps } = component.props;
+
+      // Build advancedProps object
+      const advancedProps = {
+        marginTop, marginBottom, marginLeft, marginRight,
+        paddingTop, paddingBottom, paddingLeft, paddingRight,
+        display, maxWidth, minHeight, shadow, opacity, width, height
+      };
+
+      // Merge component classes with Advanced properties
+      const mergedClassName = mergeComponentClasses(
+        component.props.className || '',
+        advancedProps,
+        component.props.cssClasses || ''
+      );
+
       return (
         <div key={component.id} className={baseClasses} onClick={handleClick}>
-          <ComponentToRender {...component.props} props={component.props} />
+          <ComponentToRender {...otherProps} className={mergedClassName} props={component.props} />
           {renderActionButtons()}
           {isLocked && (
             <div className="absolute top-2 left-2 bg-primary text-primary-foreground rounded-full p-1">

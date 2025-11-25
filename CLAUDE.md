@@ -2,7 +2,7 @@
 
 > **Enterprise Customer Portal & AI-Powered Support Platform**
 > **Architecture**: NestJS Backend + Next.js 15 Frontend (Monorepo)
-> **Last Updated**: 2025-11-21
+> **Last Updated**: 2025-11-25
 > **Version**: 1.0.2
 > **GitHub**: https://github.com/hazarvolga/AffeXAI
 
@@ -382,7 +382,7 @@ The platform's core strategic goal is to evolve into a **Brand Communication Cen
 
 ### 🏆 Key Highlights
 
-- **12+ Major Modules**: From support tickets to email marketing
+- **13+ Major Modules**: From support tickets to email marketing
 - **AI-Powered Everything**: Multi-provider AI integration (OpenAI, Anthropic, Google)
 - **Self-Learning FAQ System**: Auto-generates knowledge base from interactions
 - **Block-Based CMS**: 17 block categories, 100+ pre-built components
@@ -392,6 +392,7 @@ The platform's core strategic goal is to evolve into a **Brand Communication Cen
 - **Analytics & Tracking**: Event tracking, heatmaps, A/B testing, user sessions
 - **Design Token System**: Centralized design system with Tailwind integration
 - **Role-Based Access**: 6 user roles with granular permissions
+- **📁 Media Management**: Module-based organization with 9 modules & 17 categories
 - **🎯 Event Bus Architecture**: Central data orchestration system (BCC foundation)
 
 ### 🎯 Target Users
@@ -893,6 +894,60 @@ Unsubscribe: https://affexai.com/unsubscribe?token={{unsubscribeToken}}
 
 > **Note**: Social Media Management currently uses mock data and is not fully implemented.
 
+### 13. 📁 Media Management System
+
+**Module**: `media`
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **File Upload** | ✅ Production | Multi-file upload with S3 storage |
+| **Module-Based Organization** | ✅ Production | 9 modules (CMS, Tickets, Email, etc.) |
+| **Category System** | ✅ Production | 17 categories (Logo, Hero, Gallery, etc.) |
+| **Tag Support** | ✅ Production | Custom tags for flexible organization |
+| **Advanced Filtering** | ✅ Production | Filter by module, category, type, tags |
+| **Search** | ✅ Production | Search by filename, title, description |
+| **Statistics** | ✅ Production | Module/category counts |
+| **Docker Persistence** | ✅ Production | Persistent storage with Docker volumes |
+
+**Modules** (9 types):
+- `site-settings` - Logo, favicon, branding assets
+- `cms` - CMS page images, banners, backgrounds
+- `certificates` - Certificate templates, signatures
+- `email-marketing` - Campaign images, email headers
+- `tickets` - Ticket attachments
+- `chat` - Chat uploads
+- `events` - Event covers, promotional images
+- `users` - Avatars, profile images
+- `general` - Uncategorized uploads
+
+**Categories** (17 types):
+- `logo`, `favicon`, `hero`, `gallery`, `banner`
+- `thumbnail`, `background`, `icon`, `signature`
+- `certificate-template`, `campaign`, `email-header`
+- `attachment`, `avatar`, `profile`, `event-cover`, `other`
+
+**API Endpoints**:
+```typescript
+GET    /media                     - List all media with filters
+POST   /media/upload              - Upload file with module/category/tags
+GET    /media/modules             - Get modules with counts
+GET    /media/categories          - Get categories with counts
+GET    /media/by-module/:module   - Get media by module
+GET    /media/by-category/:cat    - Get media by category
+GET    /media/:id                 - Get single media
+PATCH  /media/:id                 - Update media metadata
+DELETE /media/:id                 - Soft delete media
+```
+
+**Docker Storage**:
+```yaml
+# docker-compose.production.yml
+volumes:
+  uploads_data:
+    driver: local
+# Mounted at: /app/apps/backend/uploads
+```
+
 ---
 
 ## 🔧 Backend Modules Deep Dive
@@ -1378,6 +1433,92 @@ Chat/Ticket Data → Extraction → Pattern Recognition → AI Generation
 - OpenAI: GPT-4, GPT-4 Turbo, GPT-4o, GPT-3.5 Turbo
 - Anthropic: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku
 - Google: Gemini Pro, Gemini 1.5 Pro, Gemini 1.5 Flash
+
+---
+
+### Module: Media Management
+
+**Location**: `apps/backend/src/modules/media/`
+
+**Services**:
+- `media.service.ts` - Media CRUD with advanced filtering
+- `s3.service.ts` - AWS S3 file storage operations
+
+**Entity** (`media.entity.ts`):
+```typescript
+{
+  id: string,                    // UUID
+  filename: string,              // Stored filename
+  originalName: string,          // Original upload name
+  mimetype: string,              // File MIME type
+  size: number,                  // File size in bytes
+  path: string,                  // Storage path
+  url: string,                   // Access URL
+  type: MediaType,               // image, video, document, audio, other
+  module: MediaModule,           // site-settings, cms, certificates, etc.
+  category: MediaCategory,       // logo, hero, gallery, banner, etc.
+  tags: string[],                // Custom tags array
+  title?: string,                // Optional title
+  description?: string,          // Optional description
+  isActive: boolean,             // Soft delete flag
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+**Enums** (shared-types):
+```typescript
+// MediaModule - 9 types
+enum MediaModule {
+  SITE_SETTINGS = 'site-settings',
+  CMS = 'cms',
+  CERTIFICATES = 'certificates',
+  EMAIL_MARKETING = 'email-marketing',
+  TICKETS = 'tickets',
+  CHAT = 'chat',
+  EVENTS = 'events',
+  USERS = 'users',
+  GENERAL = 'general'
+}
+
+// MediaCategory - 17 types
+enum MediaCategory {
+  LOGO = 'logo',
+  FAVICON = 'favicon',
+  HERO = 'hero',
+  GALLERY = 'gallery',
+  BANNER = 'banner',
+  THUMBNAIL = 'thumbnail',
+  BACKGROUND = 'background',
+  ICON = 'icon',
+  SIGNATURE = 'signature',
+  CERTIFICATE_TEMPLATE = 'certificate-template',
+  CAMPAIGN = 'campaign',
+  EMAIL_HEADER = 'email-header',
+  ATTACHMENT = 'attachment',
+  AVATAR = 'avatar',
+  PROFILE = 'profile',
+  EVENT_COVER = 'event-cover',
+  OTHER = 'other'
+}
+```
+
+**Features**:
+- Multi-file upload with S3 storage
+- Module-based organization (9 modules)
+- Category classification (17 categories)
+- Custom tagging system
+- Advanced filtering (module, category, type, tags, search)
+- Pagination support
+- Statistics endpoints (counts per module/category)
+- Soft delete (isActive flag)
+- Database indexes for performance
+- Docker volume persistence for production
+
+**Database Migration**: `1762400000000-AddMediaModuleAndCategory.ts`
+- Creates PostgreSQL enum types for module and category
+- Adds indexed columns for fast filtering
+- Composite index on (module, category)
 
 ---
 

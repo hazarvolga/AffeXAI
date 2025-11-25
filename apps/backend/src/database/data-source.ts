@@ -83,6 +83,9 @@ import { Media } from '../modules/media/entities/media.entity';
 import { Setting } from '../modules/settings/entities/setting.entity';
 // Mail - Missing entities
 import { EmailSuppression } from '../modules/mail/entities/email-suppression.entity';
+// Backup - Missing entities
+import { Backup } from '../modules/backup/entities/backup.entity';
+import { BackupConfig } from '../modules/backup/entities/backup-config.entity';
 
 // Production-ready data source configuration
 // Automatically uses DATABASE_URL environment variable if available
@@ -188,6 +191,9 @@ export const AppDataSource = new DataSource({
     Setting,
     // Mail
     EmailSuppression,
+    // Backup
+    Backup,
+    BackupConfig,
   ],
   // Use compiled migration files in production, source files in development
   migrations: process.env.NODE_ENV === 'production'

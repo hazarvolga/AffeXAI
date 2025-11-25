@@ -32,6 +32,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggingModule } from './common/logging/logging.module';
 import { SystemLogsModule } from './modules/system-logs/system-logs.module';
 import { DatabaseImportModule } from './modules/database-import/database-import.module';
+import { BackupModule } from './modules/backup/backup.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { DatabaseImportModule } from './modules/database-import/database-import.
     CrmModule,
     SystemLogsModule, // Add system logs API
     DatabaseImportModule, // Temporary SQL import endpoint (production only)
+    BackupModule, // Backup system with cloud integration
   ],
   controllers: [AppController],
   providers: [AppService],

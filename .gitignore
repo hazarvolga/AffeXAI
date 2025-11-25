@@ -133,3 +133,6 @@ playwright/.auth/
 .local/
 *.local.sh
 deploy.local.sh
+
+# Docker persistent data (excluded from git, included in backups)
+docker/data/

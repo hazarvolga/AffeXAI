@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database, Box, Star } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, ChevronLeft, ChevronRight, BarChart3, Map, FlaskConical, FileStack, Database, Box, Star, HardDrive } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -16,9 +16,6 @@ const navLinks = [
     { href: "/admin/events", label: "Etkinlikler", icon: Calendar, permission: Permission.EVENTS_VIEW },
     { href: "/admin/certificates", label: "Sertifikalar", icon: Award, permission: Permission.CERTIFICATES_VIEW },
     { href: "/admin/social-media", label: "Sosyal Medya", icon: Share2, permission: Permission.SOCIAL_MEDIA_VIEW },
-    { href: "/admin/notifications", label: "Bildirimler", icon: Bell, permission: Permission.NOTIFICATIONS_VIEW },
-    { href: "/admin/ai-settings", label: "AI Ayarları", icon: Bot, permission: Permission.SETTINGS_VIEW },
-    { href: "/admin/logs", label: "Aktivite Kayıtları", icon: LineChart, permission: Permission.LOGS_VIEW },
 ];
 
 const emailMarketingLinks = [
@@ -56,7 +53,12 @@ const userManagementLinks = [
 const settingsLinks = [
     { href: "/admin/settings/site", label: "Site Ayarları", icon: Settings },
     { href: "/admin/settings/theme", label: "Tema Ayarları", icon: Palette },
+    { href: "/admin/design", label: "Design", icon: Palette },
+    { href: "/admin/ai-settings", label: "AI Ayarları", icon: Bot },
+    { href: "/admin/notifications", label: "Bildirimler", icon: Bell },
+    { href: "/admin/logs", label: "Aktivite Kayıtları", icon: LineChart },
     { href: "/admin/settings/automation", label: "Otomasyon Merkezi", icon: Bot },
+    { href: "/admin/settings/backup", label: "Yedekleme", icon: HardDrive },
 ];
 
 export function CollapsibleDashboardSidebar() {
@@ -459,30 +461,14 @@ export function CollapsibleDashboardSidebar() {
                         </Accordion>
                         )}
 
-                        {/* Design System - Permission: DESIGN_VIEW */}
-                        {hasPermission(Permission.DESIGN_VIEW) && (
-                        <Link
-                            href="/admin/design"
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                                pathname.startsWith('/admin/design') && "bg-muted text-primary",
-                                isCollapsed && "justify-center px-2"
-                            )}
-                            title={isCollapsed ? "Design" : undefined}
-                        >
-                            <Palette className="h-4 w-4 flex-shrink-0" />
-                            {!isCollapsed && "Design"}
-                        </Link>
-                        )}
-
                         {/* Settings - Permission: SETTINGS_VIEW */}
                         {hasPermission(Permission.SETTINGS_VIEW) && !isCollapsed && (
-                        <Accordion type="single" collapsible defaultValue={pathname.startsWith('/admin/settings') ? 'settings-management' : undefined}>
+                        <Accordion type="single" collapsible defaultValue={(pathname.startsWith('/admin/settings') || pathname.startsWith('/admin/design') || pathname.startsWith('/admin/ai-settings') || pathname.startsWith('/admin/notifications') || pathname.startsWith('/admin/logs')) ? 'settings-management' : undefined}>
                             <AccordionItem value="settings-management" className="border-none">
                                 <AccordionTrigger
                                     className={cn(
                                         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:no-underline",
-                                        pathname.startsWith('/admin/settings') && "bg-muted text-primary"
+                                        (pathname.startsWith('/admin/settings') || pathname.startsWith('/admin/design') || pathname.startsWith('/admin/ai-settings') || pathname.startsWith('/admin/notifications') || pathname.startsWith('/admin/logs')) && "bg-muted text-primary"
                                     )}
                                 >
                                     <div className="flex items-center gap-3">
@@ -558,31 +544,7 @@ export function CollapsibleDashboardSidebar() {
                             <Globe className="h-4 w-4 flex-shrink-0" />
                             {!isCollapsed && "Siteye Dön"}
                         </Link>
-                         <Link
-                            href="/admin/dev-docs"
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                                pathname.startsWith('/admin/dev-docs') && "bg-muted text-primary",
-                                isCollapsed && "justify-center px-2"
-                            )}
-                            title={isCollapsed ? "Developer Docs" : undefined}
-                        >
-                            <ShieldCheck className="h-4 w-4 flex-shrink-0" />
-                            {!isCollapsed && "Developer Docs"}
-                        </Link>
-                        <Link
-                            href="/admin/blueprint"
-                            className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                                pathname.startsWith('/admin/blueprint') && "bg-muted text-primary",
-                                isCollapsed && "justify-center px-2"
-                            )}
-                            title={isCollapsed ? "Blueprint" : undefined}
-                        >
-                            <Layers className="h-4 w-4 flex-shrink-0" />
-                            {!isCollapsed && "Blueprint"}
-                        </Link>
-                    </nav>
+                     </nav>
                 </div>
             </div>
         </div>

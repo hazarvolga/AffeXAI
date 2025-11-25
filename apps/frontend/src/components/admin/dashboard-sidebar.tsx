@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database, Mail, Box, Star } from "lucide-react";
+import { Package2, Home, Users, LineChart, Bell, Settings, Calendar, LifeBuoy, Bot, Globe, Award, ShieldCheck, FileText, Send, Share2, Layers, Palette, BookOpen, Wand2, Brain, TrendingUp, BarChart3, Map, FlaskConical, Database, Mail, Box, Star, HardDrive } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -59,6 +59,7 @@ const settingsLinks = [
     { href: "/admin/settings/site", label: "Site Ayarları", icon: Settings },
     { href: "/admin/settings/theme", label: "Tema Ayarları", icon: Palette },
     { href: "/admin/settings/automation", label: "Otomasyon Merkezi", icon: Bot },
+    { href: "/admin/settings/backup", label: "Yedekleme", icon: HardDrive },
 ];
 
 export function DashboardSidebar() {

@@ -18,16 +18,7 @@ export class ScheduledBackupService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    try {
-      await this.updateAutomaticBackupSchedule();
-    } catch (error) {
-      // Gracefully handle missing backup_config table during startup
-      // This allows the app to start even if backup tables don't exist yet
-      this.logger.warn(
-        `Could not initialize backup schedule: ${error.message}. ` +
-        'Backup tables may not exist yet. Run migrations or restart after tables are created.'
-      );
-    }
+    await this.updateAutomaticBackupSchedule();
   }
 
   async updateAutomaticBackupSchedule() {

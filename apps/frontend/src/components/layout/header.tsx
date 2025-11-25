@@ -65,7 +65,10 @@ export function Header() {
   useEffect(() => {
     async function fetchSiteSettings() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/site`, {
+        // Ensure API URL has /api suffix
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
+        const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
+        const response = await fetch(`${baseUrl}/settings/site`, {
           headers: {
             'Content-Type': 'application/json',
           },

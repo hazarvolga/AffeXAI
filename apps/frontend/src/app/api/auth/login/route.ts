@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+// Get API URL from environment - server-side route can use internal URL
+const getApiUrl = () => {
+  // For server-side API routes, use BACKEND_URL (internal) or NEXT_PUBLIC_API_URL
+  const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
+  // Ensure URL ends with /api
+  return apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
 
+    const apiUrl = getApiUrl();
     console.log('🔐 Login attempt for:', email);
+    console.log('🔐 Using API URL:', apiUrl);
 
     // Call backend API
-    const response = await fetch('http://localhost:9006/api/auth/login', {
+    const response = await fetch(`${apiUrl}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

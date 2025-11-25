@@ -65,9 +65,9 @@ class MediaService extends BaseApiService<Media, CreateMediaDto, UpdateMediaDto>
 
     // If it looks like a file path with extension, construct upload URL
     if (mediaIdOrUrl.includes('.') && !mediaIdOrUrl.includes('/')) {
-      // Remove /api suffix since /uploads is at root level
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
-      const cleanBaseUrl = baseUrl.replace('/api', '');
+      // Get base URL for uploads - remove /api suffix if present since /uploads is at root level
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
+      const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, '');
       const constructedUrl = `${cleanBaseUrl}/uploads/${mediaIdOrUrl}`;
       console.log('[MediaService] File path detected, constructed URL:', constructedUrl);
       return constructedUrl;
@@ -78,13 +78,12 @@ class MediaService extends BaseApiService<Media, CreateMediaDto, UpdateMediaDto>
       console.log('[MediaService] Fetching media by ID:', mediaIdOrUrl);
       const media = await this.getById(mediaIdOrUrl);
       console.log('[MediaService] Media fetched, URL:', media.url);
-      
+
       // If the URL from backend is relative, make it absolute
       if (media.url && !media.url.startsWith('http://') && !media.url.startsWith('https://')) {
-        // Backend returns /uploads/... but NEXT_PUBLIC_API_URL already has /api
-        // So we need to use base URL without /api suffix
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006/api';
-        const cleanBaseUrl = baseUrl.replace('/api', ''); // Remove /api suffix
+        // Backend returns /uploads/... so we need base URL without /api suffix
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9006';
+        const cleanBaseUrl = baseUrl.replace(/\/api\/?$/, ''); // Remove /api suffix if present
         const absoluteUrl = `${cleanBaseUrl}${media.url.startsWith('/') ? '' : '/'}${media.url}`;
         console.log('[MediaService] Converted relative to absolute URL:', absoluteUrl);
         return absoluteUrl;

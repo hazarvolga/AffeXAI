@@ -35,8 +35,14 @@ export class PageController {
   async findBySlug(@Req() req: Request) {
     // Extract slug from URL path after '/cms/pages/slug/' or '/api/cms/pages/slug/'
     // e.g., /api/cms/pages/slug/solutions/building-design/architecture → slug = "solutions/building-design/architecture"
+    // e.g., /api/cms/pages/slug/home → slug = "" (empty string for homepage)
     const fullPath = req.path;
-    const slug = fullPath.replace(/^\/?(api\/)?cms\/pages\/slug\//, ''); // Remove prefix (with optional /api/)
+    let slug = fullPath.replace(/^\/?(api\/)?cms\/pages\/slug\//, ''); // Remove prefix (with optional /api/)
+
+    // Convert "home" to empty string for homepage lookup
+    if (slug === 'home') {
+      slug = '';
+    }
 
     console.log('Finding page by slug:', slug, 'from path:', fullPath);
     return this.pageService.findBySlug(slug);

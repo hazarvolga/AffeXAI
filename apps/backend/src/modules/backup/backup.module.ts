@@ -13,11 +13,13 @@ import { DropboxService } from './services/dropbox.service';
 import { FtpService } from './services/ftp.service';
 import { AwsS3BackupService } from './services/aws-s3-backup.service';
 import { BackupController } from './controllers/backup.controller';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Backup, BackupConfig]),
     ScheduleModule.forRoot(),
+    UsersModule,
   ],
   controllers: [BackupController],
   providers: [

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, ArrowRight, Users, DollarSign, ShoppingCart, Activity } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface MetricCard {
   title: string;
@@ -17,7 +17,7 @@ export interface MetricCard {
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
   description?: string;
-  icon?: 'users' | 'dollar-sign' | 'shopping-cart' | 'activity';
+  icon?: string; // Lucide icon name (e.g., 'Users', 'DollarSign', 'ShoppingCart')
   color?: string;
   linkText?: string;
   linkUrl?: string;
@@ -105,18 +105,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
     const iconClass = 'w-6 h-6';
     const iconColor = color || '#ff7f1e';
 
-    switch (iconName) {
-      case 'users':
-        return <Users className={iconClass} style={{ color: iconColor }} />;
-      case 'dollar-sign':
-        return <DollarSign className={iconClass} style={{ color: iconColor }} />;
-      case 'shopping-cart':
-        return <ShoppingCart className={iconClass} style={{ color: iconColor }} />;
-      case 'activity':
-        return <Activity className={iconClass} style={{ color: iconColor }} />;
-      default:
-        return <Activity className={iconClass} style={{ color: iconColor }} />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className={iconClass} style={{ color: iconColor }} />;
+      }
     }
+    // Fallback to Activity icon
+    return <LucideIcons.Activity className={iconClass} style={{ color: iconColor }} />;
   };
 
   return (

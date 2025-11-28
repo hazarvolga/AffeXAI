@@ -10,10 +10,10 @@
 import React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Zap, Shield, Target, Award } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface Feature {
-  icon?: 'zap' | 'shield' | 'target' | 'award';
+  icon?: string; // Lucide icon name (e.g., 'Zap', 'Shield', 'Target')
   imageUrl?: string;
   title: string;
   description: string;
@@ -53,13 +53,14 @@ export const FeatureShowcaseGrid: React.FC<FeatureShowcaseGridProps> = ({
 
   const getIcon = (iconName?: string) => {
     const iconClass = 'w-12 h-12';
-    switch (iconName) {
-      case 'zap': return <Zap className={iconClass} />;
-      case 'shield': return <Shield className={iconClass} />;
-      case 'target': return <Target className={iconClass} />;
-      case 'award': return <Award className={iconClass} />;
-      default: return <Zap className={iconClass} />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className={iconClass} />;
+      }
     }
+    // Fallback to Zap icon
+    return <LucideIcons.Zap className={iconClass} />;
   };
 
   return (

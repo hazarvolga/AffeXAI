@@ -12,10 +12,10 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Clock, Zap, TrendingUp } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface CampaignHighlight {
-  icon?: 'clock' | 'zap' | 'trending-up';
+  icon?: string; // Lucide icon name (e.g., 'Clock', 'Zap', 'TrendingUp')
   text: string;
 }
 
@@ -63,16 +63,14 @@ export const HeroCampaign: React.FC<HeroCampaignProps> = ({
   cssClasses = '',
 }) => {
   const getIcon = (iconName?: string) => {
-    switch (iconName) {
-      case 'clock':
-        return <Clock className="w-5 h-5" />;
-      case 'zap':
-        return <Zap className="w-5 h-5" />;
-      case 'trending-up':
-        return <TrendingUp className="w-5 h-5" />;
-      default:
-        return <Zap className="w-5 h-5" />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className="w-5 h-5" />;
+      }
     }
+    // Fallback to Zap icon
+    return <LucideIcons.Zap className="w-5 h-5" />;
   };
 
   return (

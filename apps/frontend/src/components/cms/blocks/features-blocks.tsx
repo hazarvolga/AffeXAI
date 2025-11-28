@@ -6,32 +6,12 @@ import { TextComponent } from '@/components/cms/text-component';
 import { GridComponent } from '@/components/cms/grid-component';
 import { CardComponent } from '@/components/cms/card-component';
 import { ButtonComponent } from '@/components/cms/button-component';
-import { 
-  Zap, Shield, Users, Heart, Star, TrendingUp, 
-  CheckCircle, Award, Target, Rocket, Lock, Globe,
-  Smartphone, Code, Database, Cloud, Settings, Mail
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
-// Icon Map for dynamic icon selection
-const iconMap: Record<string, any> = {
-  zap: Zap,
-  shield: Shield,
-  users: Users,
-  heart: Heart,
-  star: Star,
-  trendingUp: TrendingUp,
-  checkCircle: CheckCircle,
-  award: Award,
-  target: Target,
-  rocket: Rocket,
-  lock: Lock,
-  globe: Globe,
-  smartphone: Smartphone,
-  code: Code,
-  database: Database,
-  cloud: Cloud,
-  settings: Settings,
-  mail: Mail
+// Helper function to get Lucide icon by name
+const getIconComponent = (iconName: string): React.FC<any> => {
+  const IconComponent = (LucideIcons as any)[iconName];
+  return IconComponent || LucideIcons.CheckCircle;
 };
 
 // Feature Block 1: Single Feature Centered
@@ -52,7 +32,7 @@ export const FeatureSingleCentered: React.FC<any> = (props) => {
   const iconColor = props?.iconColor || "primary";
   const iconSize = props?.iconSize || 64;
   
-  const IconComponent = iconMap[icon] || Rocket;
+  const IconComponent = getIconComponent(icon);
 
   return (
     <ContainerComponent 
@@ -114,7 +94,7 @@ export const FeatureBoxCentered: React.FC<any> = (props) => {
   const buttonUrl = props?.buttonUrl || "#";
   const buttonTarget = props?.buttonTarget || "_self";
   
-  const IconComponent = iconMap[icon] || Shield;
+  const IconComponent = getIconComponent(icon);
 
   return (
     <ContainerComponent 
@@ -187,7 +167,7 @@ export const FeatureBoxLeft: React.FC<any> = (props) => {
   const descriptionColor = props?.descriptionColor || "secondary";
   const descriptionWeight = props?.descriptionWeight || "normal";
   
-  const IconComponent = iconMap[icon] || Users;
+  const IconComponent = getIconComponent(icon);
 
   return (
     <ContainerComponent 
@@ -319,7 +299,7 @@ export const FeaturesIconGrid: React.FC<any> = (props) => {
         gap="lg"
       >
         {features.map((feature: any, index: number) => {
-          const IconComponent = iconMap[feature.icon] || Star;
+          const IconComponent = getIconComponent(feature.icon);
           return (
             <div key={index} className="text-center">
               {/* Icon */}
@@ -395,7 +375,7 @@ export const FeaturesListWithIcons: React.FC<any> = (props) => {
         {/* List */}
         <div className="space-y-4">
           {items.map((item: any, index: number) => {
-            const IconComponent = iconMap[item.icon] || CheckCircle;
+            const IconComponent = getIconComponent(item.icon);
             return (
               <div key={index} className="flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">
@@ -474,7 +454,7 @@ export const FeaturesServicesTwoColumn: React.FC<any> = (props) => {
         gap="lg"
       >
         {services.map((service: any, index: number) => {
-          const IconComponent = iconMap[service.icon] || Settings;
+          const IconComponent = getIconComponent(service.icon);
           return (
             <CardComponent 
               key={index}

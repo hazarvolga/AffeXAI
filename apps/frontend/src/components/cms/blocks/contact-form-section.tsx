@@ -12,10 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface ContactInfo {
-  icon: 'mail' | 'phone' | 'map-pin';
+  icon: string; // Lucide icon name (e.g., 'Mail', 'Phone', 'MapPin')
   label: string;
   value: string;
 }
@@ -53,12 +53,14 @@ export const ContactFormSection: React.FC<ContactFormSectionProps> = ({
 
   const getIcon = (iconName: string) => {
     const iconClass = 'w-5 h-5';
-    switch (iconName) {
-      case 'mail': return <Mail className={iconClass} />;
-      case 'phone': return <Phone className={iconClass} />;
-      case 'map-pin': return <MapPin className={iconClass} />;
-      default: return <Mail className={iconClass} />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className={iconClass} />;
+      }
     }
+    // Fallback to Mail icon
+    return <LucideIcons.Mail className={iconClass} />;
   };
 
   return (

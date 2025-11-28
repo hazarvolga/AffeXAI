@@ -9,23 +9,10 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import {
-  Zap,
-  Shield,
-  Users,
-  Award,
-  Heart,
-  TrendingUp,
-  Lock,
-  Globe,
-  Smartphone,
-  Cloud,
-  MessageCircle,
-  Settings,
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface IconGridItem {
-  icon: 'zap' | 'shield' | 'users' | 'award' | 'heart' | 'trending-up' | 'lock' | 'globe' | 'smartphone' | 'cloud' | 'message-circle' | 'settings';
+  icon: string; // Lucide icon name (e.g., 'Zap', 'Shield', 'Users')
   title: string;
   description: string;
   color?: string;
@@ -94,34 +81,13 @@ export const IconGrid: React.FC<IconGridProps> = ({
       style: { color: color || '#ff7f1e' },
     };
 
-    switch (iconName) {
-      case 'zap':
-        return <Zap {...iconProps} />;
-      case 'shield':
-        return <Shield {...iconProps} />;
-      case 'users':
-        return <Users {...iconProps} />;
-      case 'award':
-        return <Award {...iconProps} />;
-      case 'heart':
-        return <Heart {...iconProps} />;
-      case 'trending-up':
-        return <TrendingUp {...iconProps} />;
-      case 'lock':
-        return <Lock {...iconProps} />;
-      case 'globe':
-        return <Globe {...iconProps} />;
-      case 'smartphone':
-        return <Smartphone {...iconProps} />;
-      case 'cloud':
-        return <Cloud {...iconProps} />;
-      case 'message-circle':
-        return <MessageCircle {...iconProps} />;
-      case 'settings':
-        return <Settings {...iconProps} />;
-      default:
-        return <Zap {...iconProps} />;
+    // Dynamic Lucide icon rendering
+    const IconComponent = (LucideIcons as any)[iconName];
+    if (IconComponent) {
+      return <IconComponent {...iconProps} />;
     }
+    // Fallback to Zap icon
+    return <LucideIcons.Zap {...iconProps} />;
   };
 
   const renderNumber = (index: number) => {

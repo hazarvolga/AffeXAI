@@ -15,6 +15,7 @@ interface CmsComponent {
   type: 'text' | 'button' | 'image' | 'container' | 'card' | 'grid' | 'block';
   props: any;
   children?: CmsComponent[];
+  orderIndex?: number;
 }
 
 interface PageRendererProps {

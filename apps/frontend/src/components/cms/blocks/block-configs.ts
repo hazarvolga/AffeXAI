@@ -27,9 +27,10 @@ export interface TokenReferenceConfig {
 }
 
 // Block property configurations
+// 'icon' type uses LucideIconPicker for visual icon selection
 export interface BlockPropertySchema {
   [key: string]: {
-    type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'list' | 'array' | 'textarea' | 'token';
+    type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'list' | 'array' | 'textarea' | 'token' | 'icon';
     label: string;
     options?: string[]; // For select type
     defaultValue?: any;
@@ -44,7 +45,7 @@ export interface BlockPropertySchema {
     // For list/array type
     itemSchema?: {
       [subKey: string]: {
-        type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token';
+        type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token' | 'icon';
         label: string;
         options?: string[];
         defaultValue?: any;
@@ -52,7 +53,7 @@ export interface BlockPropertySchema {
         // For nested list/array type
         itemSchema?: {
           [subKey: string]: {
-            type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token';
+            type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'list' | 'array' | 'token' | 'icon';
             label: string;
             options?: string[];
             defaultValue?: any;
@@ -60,7 +61,7 @@ export interface BlockPropertySchema {
             // For deeply nested list/array type
             itemSchema?: {
               [subKey: string]: {
-                type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'token';
+                type: 'text' | 'number' | 'boolean' | 'checkbox' | 'color' | 'select' | 'image' | 'textarea' | 'token' | 'icon';
                 label: string;
                 options?: string[];
                 defaultValue?: any;
@@ -742,9 +743,7 @@ export const specialBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Feature Items',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon (emoji or text)', defaultValue: '⚡' },
-        iconType: { type: 'select', label: 'Icon Type', options: ['emoji', 'lucide'], defaultValue: 'emoji' },
-        lucideIcon: { type: 'text', label: 'Lucide Icon Name (e.g., Building, Users)', defaultValue: 'Building' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Zap' },
         iconBackground: { type: 'boolean', label: 'Show Icon Background', defaultValue: true },
         title: { type: 'text', label: 'Feature Title', defaultValue: 'Feature Name' },
         content: { type: 'textarea', label: 'Feature Description', defaultValue: 'Description of this feature.' },
@@ -836,9 +835,7 @@ export const specialBlocksConfig: Record<string, BlockPropertySchema> = {
         imageMediaId: { type: 'text', label: 'Product Image Media ID', defaultValue: null },
         imageUrl: { type: 'image', label: 'Product Image URL', defaultValue: '/placeholder-product.jpg' },
         imageAspect: { type: 'select', label: 'Image Aspect Ratio', options: ['video', 'square', 'portrait'], defaultValue: 'video' },
-        iconType: { type: 'select', label: 'Icon Type', options: ['emoji', 'lucide'], defaultValue: 'lucide' },
-        icon: { type: 'text', label: 'Icon (emoji or text)', defaultValue: '📦' },
-        lucideIcon: { type: 'text', label: 'Lucide Icon Name (e.g., Layers, Building)', defaultValue: 'Layers' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Layers' },
         iconBackground: { type: 'boolean', label: 'Show Icon Background', defaultValue: true },
         category: { type: 'text', label: 'Product Category', defaultValue: 'Ürün Ailesi' },
         ...createTextStyleProperties('category', 'small', 'left', 'muted', 'normal'),
@@ -868,9 +865,7 @@ export const specialBlocksConfig: Record<string, BlockPropertySchema> = {
       itemSchema: {
         tabId: { type: 'text', label: 'Tab ID (unique)', defaultValue: 'blog' },
         tabTitle: { type: 'text', label: 'Tab Title', defaultValue: 'Blog & Haberler' },
-        iconType: { type: 'select', label: 'Icon Type', options: ['emoji', 'lucide'], defaultValue: 'lucide' },
-        icon: { type: 'text', label: 'Icon (emoji)', defaultValue: '📰' },
-        lucideIcon: { type: 'text', label: 'Lucide Icon Name (e.g., Rss, Video, BookOpen)', defaultValue: 'Rss' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Rss' },
         resources: {
           type: 'list',
           label: 'Resources in this Tab',
@@ -1509,7 +1504,7 @@ export const testimonialsBlocksConfig: Record<string, BlockPropertySchema> = {
 // Icon Blocks Config
 export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
   'features-single': {
-    icon: { type: 'text', label: 'Icon', defaultValue: 'rocket' },
+    icon: { type: 'icon', label: 'Icon', defaultValue: 'Rocket' },
     title: { type: 'text', label: 'Title', defaultValue: 'Fast & Reliable' },
     ...createTextStyleProperties('title', 'heading3', 'center', 'primary', 'bold'),
     description: { type: 'textarea', label: 'Description', defaultValue: 'Experience lightning-fast performance and rock-solid reliability with our cutting-edge technology.' },
@@ -1518,7 +1513,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
     iconSize: { type: 'number', label: 'Icon Size', defaultValue: 64 },
   },
   'features-box-centered': {
-    icon: { type: 'text', label: 'Icon', defaultValue: 'shield' },
+    icon: { type: 'icon', label: 'Icon', defaultValue: 'Shield' },
     title: { type: 'text', label: 'Title', defaultValue: 'Secure & Protected' },
     ...createTextStyleProperties('title', 'heading3', 'center', 'primary', 'bold'),
     description: { type: 'textarea', label: 'Description', defaultValue: 'Your data is protected with enterprise-grade security and encryption.' },
@@ -1528,7 +1523,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
     buttonTarget: { type: 'select', label: 'Button Target', options: ['_self', '_blank'], defaultValue: '_self' },
   },
   'features-box-left': {
-    icon: { type: 'text', label: 'Icon', defaultValue: 'users' },
+    icon: { type: 'icon', label: 'Icon', defaultValue: 'Users' },
     title: { type: 'text', label: 'Title', defaultValue: 'Team Collaboration' },
     ...createTextStyleProperties('title', 'heading3', 'left', 'primary', 'bold'),
     description: { type: 'textarea', label: 'Description', defaultValue: 'Work together seamlessly with powerful collaboration tools designed for modern teams.' },
@@ -1543,7 +1538,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Features',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'zap' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Zap' },
         title: { type: 'text', label: 'Title', defaultValue: 'Lightning Fast' },
         description: { type: 'textarea', label: 'Description', defaultValue: 'Optimized for speed and performance' },
       },
@@ -1556,7 +1551,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Items',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'checkCircle' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'CheckCircle' },
         text: { type: 'text', label: 'Text', defaultValue: 'Unlimited projects and team members' },
       },
     },
@@ -1568,7 +1563,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Services',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'code' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Code' },
         title: { type: 'text', label: 'Title', defaultValue: 'Web Development' },
         description: { type: 'textarea', label: 'Description', defaultValue: 'Custom websites and web applications built with modern technologies.' },
       },
@@ -1583,7 +1578,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Features',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'zap' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Zap' },
         title: { type: 'text', label: 'Title', defaultValue: 'Lightning Fast' },
         description: { type: 'textarea', label: 'Description', defaultValue: 'Optimized for speed and performance' },
       },
@@ -1596,7 +1591,7 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Items',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'checkCircle' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'CheckCircle' },
         text: { type: 'text', label: 'Text', defaultValue: 'Unlimited projects and team members' },
       },
     },
@@ -1608,14 +1603,14 @@ export const featuresBlocksConfig: Record<string, BlockPropertySchema> = {
       type: 'list',
       label: 'Services',
       itemSchema: {
-        icon: { type: 'text', label: 'Icon', defaultValue: 'code' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Code' },
         title: { type: 'text', label: 'Title', defaultValue: 'Web Development' },
         description: { type: 'textarea', label: 'Description', defaultValue: 'Custom websites and web applications built with modern technologies.' },
       },
     },
   },
   'features-single-centered': {
-    icon: { type: 'text', label: 'Icon', defaultValue: 'rocket' },
+    icon: { type: 'icon', label: 'Icon', defaultValue: 'Rocket' },
     title: { type: 'text', label: 'Title', defaultValue: 'Fast & Reliable' },
     ...createTextStyleProperties('title', 'heading3', 'center', 'primary', 'bold'),
     description: { type: 'textarea', label: 'Description', defaultValue: 'Experience lightning-fast performance and rock-solid reliability with our cutting-edge technology.' },
@@ -1636,7 +1631,7 @@ export const statsBlocksConfig: Record<string, BlockPropertySchema> = {
       itemSchema: {
         value: { type: 'text', label: 'Value', defaultValue: '10K+' },
         label: { type: 'text', label: 'Label', defaultValue: 'Active Users' },
-        icon: { type: 'text', label: 'Icon', defaultValue: 'users' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Users' },
       },
     },
   },
@@ -1857,7 +1852,7 @@ export const progressBlocksConfig: Record<string, BlockPropertySchema> = {
         label: { type: 'text', label: 'Label', defaultValue: 'Client Satisfaction' },
         progress: { type: 'number', label: 'Progress (%)', defaultValue: 98 },
         color: { type: 'select', label: 'Color', options: ['primary', 'success', 'warning', 'danger', 'info'], defaultValue: 'primary' },
-        icon: { type: 'text', label: 'Icon (emoji)', defaultValue: '😊' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'Smile' },
       },
     },
   },
@@ -1928,7 +1923,7 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
         },
         mediaUrl: { type: 'text', label: 'Slide Media URL (Upload/Direct URL)', defaultValue: '/placeholder.jpg' },
         imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: 'Solution image' },
-        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'Building' },
+        iconName: { type: 'icon', label: 'Icon', defaultValue: 'Building' },
         // Design Token: Icon color
         iconColor: {
           type: 'text',
@@ -1999,7 +1994,7 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
       itemSchema: {
         id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
         title: { type: 'text', label: 'Tab Title', defaultValue: 'Tab Name' },
-        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'FileText' },
+        iconName: { type: 'icon', label: 'Icon', defaultValue: 'FileText' },
         items: {
           type: 'list',
           label: 'Tab Items',
@@ -2149,7 +2144,7 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
       itemSchema: {
         id: { type: 'text', label: 'Tab ID', defaultValue: 'tab-1' },
         title: { type: 'text', label: 'Tab Title', defaultValue: 'Training' },
-        iconName: { type: 'text', label: 'Lucide Icon Name', defaultValue: 'BookOpen' },
+        iconName: { type: 'icon', label: 'Icon', defaultValue: 'BookOpen' },
         layoutType: {
           type: 'select',
           label: 'Layout Type',
@@ -2187,7 +2182,7 @@ export const homepageSectionsConfig: Record<string, BlockPropertySchema> = {
             },
             mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL - optional)', defaultValue: '' },
             imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
-            iconName: { type: 'text', label: 'Lucide Icon Name (optional)', defaultValue: '' },
+            iconName: { type: 'icon', label: 'Icon (optional)', defaultValue: '' },
             // Design Token: Icon color
             iconColor: {
               type: 'text',
@@ -2285,7 +2280,7 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         },
         mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL)', defaultValue: '' },
         imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
-        iconName: { type: 'text', label: 'Icon Name (Lucide)', defaultValue: '' },
+        iconName: { type: 'icon', label: 'Icon', defaultValue: '' },
         items: {
           type: 'list',
           label: 'Solution Items',
@@ -2323,7 +2318,7 @@ const migrationBlocksConfig: Record<string, BlockPropertySchema> = {
         description: { type: 'textarea', label: 'Description', defaultValue: '' },
         imageUrl: { type: 'image', label: 'Image URL', defaultValue: '' },
         imageHint: { type: 'text', label: 'Image Hint (AI)', defaultValue: '' },
-        iconName: { type: 'text', label: 'Icon Name (Lucide)', defaultValue: '' },
+        iconName: { type: 'icon', label: 'Icon', defaultValue: '' },
         items: {
           type: 'list',
           label: 'Product Items',
@@ -3328,7 +3323,7 @@ const phase3Sprint3Config: Record<string, BlockPropertySchema> = {
       defaultValue: [],
       itemSchema: {
         id: { type: 'text', label: 'Tab ID', defaultValue: '' },
-        icon: { type: 'text', label: 'Icon (emoji)', defaultValue: '📋' },
+        icon: { type: 'icon', label: 'Icon', defaultValue: 'ClipboardList' },
         label: { type: 'text', label: 'Label', defaultValue: 'Tab Label' },
         subTabs: {
           type: 'array',
@@ -3346,7 +3341,7 @@ const phase3Sprint3Config: Record<string, BlockPropertySchema> = {
               defaultValue: 'none'
             },
             mediaUrl: { type: 'text', label: 'Media URL (Upload/Direct URL/YouTube Link)', defaultValue: '' },
-            icon: { type: 'text', label: 'Icon (emoji) - Legacy', defaultValue: '📄' },
+            icon: { type: 'icon', label: 'Icon', defaultValue: 'FileText' },
           }
         }
       }

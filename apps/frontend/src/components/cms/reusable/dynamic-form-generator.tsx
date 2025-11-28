@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, X, Image as ImageIcon, Video, Youtube, Ban, File as FileIcon, ChevronDown, Upload } from 'lucide-react';
+import { LucideIconPicker } from '@/components/cms/editor/lucide-icon-picker';
 import { BlockPropertySchema } from '@/components/cms/blocks/block-configs';
 import { MediaPicker } from '@/components/cms/editor/media-picker';
 import { MediaLibrary } from '@/components/cms/editor/media-library';
@@ -651,6 +652,17 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
           </div>
         );
 
+      case 'icon':
+        return (
+          <div key={fieldKey} className="space-y-2">
+            <Label htmlFor={fieldKey}>{config.label}</Label>
+            <LucideIconPicker
+              value={value || null}
+              onChange={(iconName) => onChange(key, iconName)}
+            />
+          </div>
+        );
+
       case 'list':
       case 'array':
         return renderListField(key, config, value || [], fieldKey);
@@ -843,6 +855,14 @@ export const DynamicFormGenerator: React.FC<DynamicFormGeneratorProps> = ({
               ))}
             </SelectContent>
           </Select>
+        );
+
+      case 'icon':
+        return (
+          <LucideIconPicker
+            value={value || null}
+            onChange={(iconName) => onChange(iconName)}
+          />
         );
 
       default:

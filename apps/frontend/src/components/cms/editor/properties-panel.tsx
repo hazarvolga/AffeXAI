@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lock, ArrowUp, ArrowDown, X, Image as ImageIcon, Plus, GripVertical, Trash2, Video as VideoIcon, Play, Loader2, Save } from 'lucide-react';
+import { LucideIconPicker } from './lucide-icon-picker';
 import { allBlockConfigs } from '@/components/cms/blocks/block-configs';
 import { DynamicFormGenerator } from '@/components/cms/reusable/dynamic-form-generator';
 import { ReusableComponentsService } from '@/services/reusable-content.service';
@@ -729,6 +730,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       );
     }
 
+    // Debug: Log propConfig.type for troubleshooting
+    console.log('[DEBUG] renderPropertyInput:', { key, type: propConfig.type, propConfig });
+
     switch (propConfig.type) {
       case 'text':
         return (
@@ -808,6 +812,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               ))}
             </SelectContent>
           </Select>
+        );
+      case 'icon':
+        return (
+          <LucideIconPicker
+            value={value || null}
+            onChange={(iconName) => updateProp(key, iconName)}
+            disabled={isLocked}
+          />
         );
       case 'image':
         // Special handling for logo images - use MediaPicker
@@ -936,12 +948,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     ×
                   </Button>
                 </div>
-                {propConfig.itemSchema && Object.entries(propConfig.itemSchema).map(([subKey, subConfig]: [string, any]) => (
-                  <div key={subKey}>
-                    <Label className="text-xs text-gray-500">{subConfig.label}</Label>
-                    {renderPropertyInput(`${key}.${index}.${subKey}`, subConfig, item[subKey])}
-                  </div>
-                ))}
+                {propConfig.itemSchema && Object.entries(propConfig.itemSchema).map(([subKey, subConfig]: [string, any]) => {
+                  // Debug log for icon type issue
+                  if (subConfig.type === 'icon') {
+                    console.log('[DEBUG] Icon field found:', { subKey, subConfig, value: item[subKey] });
+                  }
+                  return (
+                    <div key={subKey}>
+                      <Label className="text-xs text-gray-500">{subConfig.label}</Label>
+                      {renderPropertyInput(`${key}.${index}.${subKey}`, subConfig, item[subKey])}
+                    </div>
+                  );
+                })}
               </div>
             ))}
             <Button

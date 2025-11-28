@@ -9,13 +9,13 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { TrendingUp, Users, Star, Award } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface ProofStat {
   value: string;
   label: string;
   suffix?: string;
-  icon?: 'trending-up' | 'users' | 'star' | 'award';
+  icon?: string; // Lucide icon name (e.g., 'TrendingUp', 'Users', 'Star')
   color?: string;
 }
 
@@ -80,18 +80,14 @@ export const SocialProofStats: React.FC<SocialProofStatsProps> = ({
     const iconClass = 'w-8 h-8';
     const iconColor = color || '#ff7f1e';
 
-    switch (iconName) {
-      case 'users':
-        return <Users className={iconClass} style={{ color: iconColor }} />;
-      case 'star':
-        return <Star className={iconClass} style={{ color: iconColor }} />;
-      case 'award':
-        return <Award className={iconClass} style={{ color: iconColor }} />;
-      case 'trending-up':
-        return <TrendingUp className={iconClass} style={{ color: iconColor }} />;
-      default:
-        return <TrendingUp className={iconClass} style={{ color: iconColor }} />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className={iconClass} style={{ color: iconColor }} />;
+      }
     }
+    // Fallback to TrendingUp icon
+    return <LucideIcons.TrendingUp className={iconClass} style={{ color: iconColor }} />;
   };
 
   const AnimatedNumber = ({ value, suffix = '' }: { value: string; suffix?: string }) => {

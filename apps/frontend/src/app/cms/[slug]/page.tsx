@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { CmsPageRenderer } from '@/components/cms/cms-page-renderer';
+import { PageRenderer } from '@/components/cms/page-renderer';
 import { cmsService } from '@/lib/cms/cms-service';
 
 interface PageParams {
@@ -65,11 +65,7 @@ const CmsPage: React.FC<PageProps> = ({ params }) => {
     );
   }
 
-  return (
-    <div className="container mx-auto py-8">
-      <CmsPageRenderer page={page} />
-    </div>
-  );
+  return <PageRenderer components={page.components || []} />;
 };
 
 export default CmsPage;

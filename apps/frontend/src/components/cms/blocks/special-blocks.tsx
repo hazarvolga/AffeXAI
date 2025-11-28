@@ -498,8 +498,7 @@ export const SpecialFeatureTrio: React.FC<any> = (props) => {
     ? [props] // Wrap single card in array
     : [ // Default fallback
         {
-          icon: "⚡",
-          iconType: "emoji",
+          icon: "Zap",
           iconBackground: true,
           title: "Lightning Fast",
           content: "Our platform is optimized for speed and performance.",
@@ -508,15 +507,17 @@ export const SpecialFeatureTrio: React.FC<any> = (props) => {
         },
       ];
 
-  // Helper to render icon (emoji or Lucide)
+  // Helper to render Lucide icon
   const renderIcon = (item: any) => {
-    if (item.iconType === 'lucide' && item.lucideIcon) {
-      const IconComponent = (LucideIcons as any)[item.lucideIcon];
+    const iconName = item.icon;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
       if (IconComponent) {
         return <IconComponent className="h-6 w-6 text-primary" />;
       }
     }
-    return <span className="text-2xl">{item.icon}</span>;
+    // Fallback to default icon
+    return <LucideIcons.Zap className="h-6 w-6 text-primary" />;
   };
 
   // Build hover classes
@@ -629,23 +630,23 @@ export const SpecialFeatureCardSingle: React.FC<any> = (props) => {
   const buttonText = props?.buttonText || "Daha Fazla Bilgi";
   const buttonVariant = props?.buttonVariant || "outline";
 
-  const icon = props?.icon || "⚡";
-  const iconType = props?.iconType || "emoji";
+  const icon = props?.icon || "Zap";
   const iconBackground = props?.iconBackground ?? true;
   const title = props?.title || "Feature Title";
   const content = props?.content || "Feature description";
   const subItems = props?.subItems || [];
   const buttonHref = props?.buttonHref || "#";
 
-  // Helper to render icon (emoji or Lucide)
+  // Helper to render Lucide icon
   const renderIcon = () => {
-    if (iconType === 'lucide' && props?.lucideIcon) {
-      const IconComponent = (LucideIcons as any)[props.lucideIcon];
+    if (icon) {
+      const IconComponent = (LucideIcons as any)[icon];
       if (IconComponent) {
         return <IconComponent className="h-6 w-6 text-primary" />;
       }
     }
-    return <span className="text-2xl">{icon}</span>;
+    // Fallback to default icon
+    return <LucideIcons.Zap className="h-6 w-6 text-primary" />;
   };
 
   // Build hover classes
@@ -815,15 +816,17 @@ export const SpecialProductGrid: React.FC<any> = (props) => {
 
   const products = props?.products || [];
 
-  // Helper to render icon (emoji or Lucide)
+  // Helper to render Lucide icon
   const renderIcon = (product: any) => {
-    if (product.iconType === 'lucide' && product.lucideIcon) {
-      const IconComponent = (LucideIcons as any)[product.lucideIcon];
+    const iconName = product.icon;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
       if (IconComponent) {
         return <IconComponent className="h-6 w-6 text-primary" />;
       }
     }
-    return <span className="text-2xl">{product.icon || '📦'}</span>;
+    // Fallback to default icon
+    return <LucideIcons.Layers className="h-6 w-6 text-primary" />;
   };
 
   // Build hover classes
@@ -1002,15 +1005,17 @@ export const SpecialResourceTabs: React.FC<any> = (props) => {
   // State for active tab
   const [activeTab, setActiveTab] = useState(tabs[0]?.tabId || 'tab1');
 
-  // Helper to render icon (emoji or Lucide)
+  // Helper to render Lucide icon
   const renderIcon = (tab: any) => {
-    if (tab.iconType === 'lucide' && tab.lucideIcon) {
-      const IconComponent = (LucideIcons as any)[tab.lucideIcon];
+    const iconName = tab.icon;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
       if (IconComponent) {
         return <IconComponent className="h-4 w-4" />;
       }
     }
-    return <span className="text-lg">{tab.icon || '📄'}</span>;
+    // Fallback to default icon
+    return <LucideIcons.FileText className="h-4 w-4" />;
   };
 
   // Build hover classes

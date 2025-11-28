@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Users, Target, Zap, Award } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export interface StatMetric {
   value: string;
@@ -17,7 +17,7 @@ export interface StatMetric {
   change?: string; // e.g., "+45%" or "-12%"
   changeType?: 'positive' | 'negative' | 'neutral';
   description?: string;
-  icon?: 'users' | 'target' | 'zap' | 'award' | 'trending-up' | 'trending-down';
+  icon?: string; // Lucide icon name (e.g., 'Users', 'Target', 'Zap')
 }
 
 export interface StatsMetricsGridProps {
@@ -60,22 +60,14 @@ export const StatsMetricsGrid: React.FC<StatsMetricsGridProps> = ({
 
   const getIcon = (iconName?: string) => {
     const iconClass = 'w-8 h-8';
-    switch (iconName) {
-      case 'users':
-        return <Users className={iconClass} />;
-      case 'target':
-        return <Target className={iconClass} />;
-      case 'zap':
-        return <Zap className={iconClass} />;
-      case 'award':
-        return <Award className={iconClass} />;
-      case 'trending-up':
-        return <TrendingUp className={iconClass} />;
-      case 'trending-down':
-        return <TrendingDown className={iconClass} />;
-      default:
-        return <Target className={iconClass} />;
+    if (iconName) {
+      const IconComponent = (LucideIcons as any)[iconName];
+      if (IconComponent) {
+        return <IconComponent className={iconClass} />;
+      }
     }
+    // Fallback to Target icon
+    return <LucideIcons.Target className={iconClass} />;
   };
 
   return (

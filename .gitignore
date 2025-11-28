@@ -142,3 +142,7 @@ deploy.local.sh
 
 # Docker persistent data (excluded from git, included in backups)
 docker/data/
+
+# Extracted content from WordPress (temporary)
+extracted_pages/
+extracted_templates/

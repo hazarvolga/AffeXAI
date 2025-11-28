@@ -171,24 +171,40 @@ start_backend() {
     npm run start:dev > /tmp/affexai-backend.log 2>&1 &
     BACKEND_PID=$!
 
-    # Wait for backend to be ready
-    local max_attempts=60
+    # Wait for backend to be ready (NestJS compilation can take 2-3 minutes)
+    local max_attempts=180  # 3 minutes
     local attempt=0
 
-    echo -ne "  ${YELLOW}Waiting for backend"
+    echo -ne "  ${YELLOW}Compiling TypeScript & starting backend"
     while [ $attempt -lt $max_attempts ]; do
+        # Check if process is still running
+        if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+            echo -e "${NC}"
+            log_error "Backend process crashed!"
+            log_info "Last 30 lines of log:"
+            tail -30 /tmp/affexai-backend.log
+            return 1
+        fi
+
         if curl -s http://localhost:$BACKEND_PORT/api/health > /dev/null 2>&1; then
             echo -e "${NC}"
-            log_success "Backend is ready! (PID: $BACKEND_PID)"
+            log_success "Backend is ready! (PID: $BACKEND_PID) - took ${attempt}s"
             return 0
         fi
-        echo -n "."
+
+        # Show progress indicator every 10 seconds
+        if [ $((attempt % 10)) -eq 0 ] && [ $attempt -gt 0 ]; then
+            echo -n " ${attempt}s"
+        else
+            echo -n "."
+        fi
+
         sleep 1
         attempt=$((attempt + 1))
     done
 
     echo -e "${NC}"
-    log_error "Backend failed to start within 60 seconds"
+    log_error "Backend failed to start within 3 minutes"
     log_info "Check logs: tail -f /tmp/affexai-backend.log"
     return 1
 }

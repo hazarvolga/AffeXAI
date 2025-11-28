@@ -7,10 +7,11 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "./start-dev.sh",
-    "stop": "./stop-dev.sh",
-    "cleanup": "cd apps/backend && npm run cleanup",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "./dev.sh",
+    "stop": "./scripts/cleanup.sh",
+    "cleanup": "./scripts/cleanup.sh",
+    "dev": "./dev.sh",
+    "dev:parallel": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd apps/backend && npm run dev",
     "dev:backend:watch": "cd apps/backend && npm run start:dev",
     "dev:frontend": "cd apps/frontend && npm run dev",

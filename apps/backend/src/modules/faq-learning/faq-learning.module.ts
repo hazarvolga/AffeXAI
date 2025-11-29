@@ -12,6 +12,7 @@ import { ChatMessage } from '../chat/entities/chat-message.entity';
 import { KnowledgeBaseArticle } from '../tickets/entities/knowledge-base-article.entity';
 import { KnowledgeBaseCategory } from '../tickets/entities/knowledge-base-category.entity';
 import { Ticket } from '../tickets/entities/ticket.entity';
+import { TicketMessage } from '../tickets/entities/ticket-message.entity';
 
 // Services - Data Extraction
 import { ChatDataExtractorService } from './services/chat-data-extractor.service';
@@ -78,6 +79,7 @@ import { forwardRef } from '@nestjs/common';
       KnowledgeBaseArticle,
       KnowledgeBaseCategory,
       Ticket,
+      TicketMessage,
     ]),
     ScheduleModule.forRoot(),
     forwardRef(() => TicketsModule),

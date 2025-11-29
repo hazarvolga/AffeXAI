@@ -144,4 +144,106 @@ export class PageService {
 
     return this.findOne(savedPage.id) as Promise<Page>;
   }
+
+  // ============ BULK OPERATIONS ============
+
+  /**
+   * Bulk publish multiple pages
+   */
+  async bulkPublish(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const id of ids) {
+      try {
+        await this.publish(id);
+        successCount++;
+      } catch (error) {
+        failedCount++;
+      }
+    }
+
+    return { successCount, failedCount };
+  }
+
+  /**
+   * Bulk unpublish (set to draft) multiple pages
+   */
+  async bulkUnpublish(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const id of ids) {
+      try {
+        await this.unpublish(id);
+        successCount++;
+      } catch (error) {
+        failedCount++;
+      }
+    }
+
+    return { successCount, failedCount };
+  }
+
+  /**
+   * Bulk archive multiple pages
+   */
+  async bulkArchive(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const id of ids) {
+      try {
+        const page = await this.findOne(id);
+        if (page) {
+          page.status = PageStatus.ARCHIVED;
+          await this.pageRepository.save(page);
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      } catch (error) {
+        failedCount++;
+      }
+    }
+
+    return { successCount, failedCount };
+  }
+
+  /**
+   * Bulk delete multiple pages
+   */
+  async bulkDelete(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const id of ids) {
+      try {
+        await this.remove(id);
+        successCount++;
+      } catch (error) {
+        failedCount++;
+      }
+    }
+
+    return { successCount, failedCount };
+  }
+
+  /**
+   * Bulk update status for multiple pages
+   */
+  async bulkUpdateStatus(ids: string[], status: PageStatus): Promise<{ successCount: number; failedCount: number }> {
+    const result = await this.pageRepository.update(
+      { id: In(ids) },
+      {
+        status,
+        publishedAt: status === PageStatus.PUBLISHED ? new Date() : null,
+      }
+    );
+
+    return {
+      successCount: result.affected || 0,
+      failedCount: ids.length - (result.affected || 0),
+    };
+  }
 }

@@ -15,8 +15,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cmsService } from '@/lib/cms/cms-service';
-import { Edit, Plus, Search, Trash2, Copy, Eye, EyeOff, FileText } from 'lucide-react';
+import { Edit, Plus, Search, Trash2, Copy, Eye, EyeOff, FileText, Archive, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import type { Page, PageStatus } from '@affexai/shared-types';
@@ -32,6 +33,9 @@ const CmsAdminPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -184,6 +188,141 @@ const CmsAdminPage = () => {
     router.push(`/admin/cms/editor?pageId=${pageId}`);
   };
 
+  // ============ BULK SELECTION HANDLERS ============
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filteredPages.map(p => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectPage = (pageId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds(prev => [...prev, pageId]);
+    } else {
+      setSelectedIds(prev => prev.filter(id => id !== pageId));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const isAllSelected = filteredPages.length > 0 && selectedIds.length === filteredPages.length;
+  const isPartiallySelected = selectedIds.length > 0 && selectedIds.length < filteredPages.length;
+
+  // ============ BULK ACTION HANDLERS ============
+
+  const handleBulkPublish = async () => {
+    if (selectedIds.length === 0) return;
+
+    try {
+      setBulkActionLoading(true);
+      const result = await cmsService.bulkPublish(selectedIds);
+
+      toast({
+        title: 'Toplu Yayınlama',
+        description: `${result.successCount} sayfa yayınlandı${result.failedCount > 0 ? `, ${result.failedCount} başarısız` : ''}.`,
+      });
+
+      setSelectedIds([]);
+      fetchPages();
+    } catch (error) {
+      console.error('Bulk publish failed:', error);
+      toast({
+        title: 'Hata',
+        description: 'Sayfalar yayınlanırken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkUnpublish = async () => {
+    if (selectedIds.length === 0) return;
+
+    try {
+      setBulkActionLoading(true);
+      const result = await cmsService.bulkUnpublish(selectedIds);
+
+      toast({
+        title: 'Toplu Yayından Kaldırma',
+        description: `${result.successCount} sayfa taslağa çekildi${result.failedCount > 0 ? `, ${result.failedCount} başarısız` : ''}.`,
+      });
+
+      setSelectedIds([]);
+      fetchPages();
+    } catch (error) {
+      console.error('Bulk unpublish failed:', error);
+      toast({
+        title: 'Hata',
+        description: 'Sayfalar yayından kaldırılırken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedIds.length === 0) return;
+
+    try {
+      setBulkActionLoading(true);
+      const result = await cmsService.bulkArchive(selectedIds);
+
+      toast({
+        title: 'Toplu Arşivleme',
+        description: `${result.successCount} sayfa arşivlendi${result.failedCount > 0 ? `, ${result.failedCount} başarısız` : ''}.`,
+      });
+
+      setSelectedIds([]);
+      fetchPages();
+    } catch (error) {
+      console.error('Bulk archive failed:', error);
+      toast({
+        title: 'Hata',
+        description: 'Sayfalar arşivlenirken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkDeleteClick = () => {
+    if (selectedIds.length === 0) return;
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    try {
+      setBulkActionLoading(true);
+      const result = await cmsService.bulkDelete(selectedIds);
+
+      toast({
+        title: 'Toplu Silme',
+        description: `${result.successCount} sayfa silindi${result.failedCount > 0 ? `, ${result.failedCount} başarısız` : ''}.`,
+      });
+
+      setSelectedIds([]);
+      fetchPages();
+    } catch (error) {
+      console.error('Bulk delete failed:', error);
+      toast({
+        title: 'Hata',
+        description: 'Sayfalar silinirken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBulkActionLoading(false);
+      setBulkDeleteDialogOpen(false);
+    }
+  };
+
   const getStatusBadge = (status: PageStatus) => {
     const variants: Record<PageStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
@@ -256,6 +395,61 @@ const CmsAdminPage = () => {
         </div>
       </div>
 
+      {/* Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="mb-4 p-4 bg-muted rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{selectedIds.length} sayfa seçildi</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSelection}
+              className="h-8 px-2"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBulkPublish}
+              disabled={bulkActionLoading}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Yayınla
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBulkUnpublish}
+              disabled={bulkActionLoading}
+            >
+              <EyeOff className="h-4 w-4 mr-2" />
+              Taslağa Çek
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBulkArchive}
+              disabled={bulkActionLoading}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Arşivle
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkDeleteClick}
+              disabled={bulkActionLoading}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Sil
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Pages Table */}
       <Card>
         <CardHeader>
@@ -278,6 +472,14 @@ const CmsAdminPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
+                        aria-label="Tümünü seç"
+                        className={isPartiallySelected ? 'data-[state=checked]:bg-primary/50' : ''}
+                      />
+                    </TableHead>
                     <TableHead className="w-[300px]">Başlık</TableHead>
                     <TableHead>Slug</TableHead>
                     <TableHead>Durum</TableHead>
@@ -287,7 +489,14 @@ const CmsAdminPage = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredPages.map((page) => (
-                    <TableRow key={page.id}>
+                    <TableRow key={page.id} className={selectedIds.includes(page.id) ? 'bg-muted/50' : ''}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.includes(page.id)}
+                          onCheckedChange={(checked) => handleSelectPage(page.id, checked as boolean)}
+                          aria-label={`${page.title} sayfasını seç`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
                           <span>{page.title}</span>
@@ -392,6 +601,19 @@ const CmsAdminPage = () => {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         onSuccess={handleCreateSuccess}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+        onConfirm={handleConfirmBulkDelete}
+        title="Seçili Sayfaları Sil"
+        description={`${selectedIds.length} sayfa silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`}
+        itemName={`${selectedIds.length} sayfa`}
+        isDeleting={bulkActionLoading}
+        confirmText="Evet, Sil"
+        cancelText="İptal"
       />
     </div>
   );

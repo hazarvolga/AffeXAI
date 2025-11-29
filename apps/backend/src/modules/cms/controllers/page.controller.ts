@@ -12,14 +12,60 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { IsArray, IsString, IsEnum } from 'class-validator';
 import { PageService } from '../services/page.service';
 import { CreatePageDto } from '../dto/create-page.dto';
 import { UpdatePageDto } from '../dto/update-page.dto';
 import { PageStatus } from '@affexai/shared-types';
 
+// DTO for bulk operations
+class BulkActionDto {
+  @IsArray()
+  @IsString({ each: true })
+  ids: string[];
+}
+
+class BulkStatusDto {
+  @IsArray()
+  @IsString({ each: true })
+  ids: string[];
+
+  @IsEnum(PageStatus)
+  status: PageStatus;
+}
+
 @Controller('cms/pages')
 export class PageController {
   constructor(private readonly pageService: PageService) {}
+
+  // ============ BULK OPERATIONS (must be before :id routes) ============
+
+  @Post('bulk/publish')
+  async bulkPublish(@Body() dto: BulkActionDto) {
+    return this.pageService.bulkPublish(dto.ids);
+  }
+
+  @Post('bulk/unpublish')
+  async bulkUnpublish(@Body() dto: BulkActionDto) {
+    return this.pageService.bulkUnpublish(dto.ids);
+  }
+
+  @Post('bulk/archive')
+  async bulkArchive(@Body() dto: BulkActionDto) {
+    return this.pageService.bulkArchive(dto.ids);
+  }
+
+  @Post('bulk/delete')
+  async bulkDelete(@Body() dto: BulkActionDto) {
+    return this.pageService.bulkDelete(dto.ids);
+  }
+
+  @Post('bulk/status')
+  async bulkUpdateStatus(@Body() dto: BulkStatusDto) {
+    return this.pageService.bulkUpdateStatus(dto.ids, dto.status);
+  }
+
+  // ============ STANDARD CRUD OPERATIONS ============
 
   @Post()
   async create(@Body() createPageDto: CreatePageDto) {

@@ -133,6 +133,38 @@ export class CmsService {
   }
 
   // ==========================================================================
+  // Bulk Operations
+  // ==========================================================================
+
+  /**
+   * Bulk publish multiple pages
+   */
+  async bulkPublish(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    return httpClient.postWrapped<{ successCount: number; failedCount: number }>('/cms/pages/bulk/publish', { ids });
+  }
+
+  /**
+   * Bulk unpublish (set to draft) multiple pages
+   */
+  async bulkUnpublish(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    return httpClient.postWrapped<{ successCount: number; failedCount: number }>('/cms/pages/bulk/unpublish', { ids });
+  }
+
+  /**
+   * Bulk archive multiple pages
+   */
+  async bulkArchive(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    return httpClient.postWrapped<{ successCount: number; failedCount: number }>('/cms/pages/bulk/archive', { ids });
+  }
+
+  /**
+   * Bulk delete multiple pages
+   */
+  async bulkDelete(ids: string[]): Promise<{ successCount: number; failedCount: number }> {
+    return httpClient.postWrapped<{ successCount: number; failedCount: number }>('/cms/pages/bulk/delete', { ids });
+  }
+
+  // ==========================================================================
   // Component Methods
   // ==========================================================================
 
